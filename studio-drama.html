@@ -347,9 +347,9 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     </div>
     <div class="panel-header" id="panel1Header">
       <span class="panel-num" id="panel1Num">03</span>
-      <span class="panel-cat" id="panel1Cat">K-DRAMA / CAST & SCENE SELECT</span>
-      <h1 class="panel-title" id="panel1Title">누구로, 어떤 <span class="accent">씬</span>?</h1>
-      <p class="panel-sub" id="panel1Subtxt">출연 아바타와 씬 분위기를 골라주세요.</p>
+      <span class="panel-cat" id="panel1Cat">K-DRAMA / SCENE SELECT</span>
+      <h1 class="panel-title" id="panel1Title">내가 만들 영상 <span class="accent">씬</span> 선택</h1>
+      <p class="panel-sub" id="panel1Subtxt">씬 분위기를 골라주세요.</p>
     </div>
 
     <!-- 씬 분위기 선택 화면 (Sub-step A) -->
@@ -1203,9 +1203,9 @@ function updateScenePanelHeader(sub) {
   const sub_el = document.getElementById('panel1Subtxt');
   if (sub === 'A') {
     if (numEl) numEl.textContent = '03';
-    if (cat) cat.textContent = 'K-DRAMA / CAST & SCENE SELECT';
-    if (title) title.innerHTML = '누구로, 어떤 <span class="accent">씬</span>?';
-    if (sub_el) sub_el.textContent = '출연 아바타와 씬 분위기를 골라주세요.';
+    if (cat) cat.textContent = 'K-DRAMA / SCENE SELECT';
+    if (title) title.innerHTML = '내가 만들 영상 <span class="accent">씬</span> 선택';
+    if (sub_el) sub_el.textContent = '씬 분위기를 골라주세요.';
   } else {
     const sc = SCENES[S.scene];
     const label = sc?.name || S.scene || '';
@@ -1217,7 +1217,7 @@ function updateScenePanelHeader(sub) {
 }
 
 // 4단계 인디케이터를 모든 panel에 동일하게 렌더
-const STEP_LABELS = ['비율', '아바타', '아바타·씬 선택', '씬 상세', '4컷', '영상'];
+const STEP_LABELS = ['비율', '아바타', '씬 선택', '씬 상세', '4컷', '영상'];
 
 // 영상 비율 옵션
 const ASPECT_RATIOS = [
@@ -1345,11 +1345,11 @@ function validateStep(step) {
     const lib = loadAvatarLib();
     if (!lib.length) missing.push('저장된 아바타 (1명 이상)');
   } else if (step === 2) {
-    // 2: 아바타·씬 선택 — 출연 아바타 + 씬 분위기
-    if (!S.avatars.length) missing.push('등장 아바타');
+    // 2: 씬 선택 — 씬 분위기만
     if (!S.scene)          missing.push('씬 분위기');
   } else if (step === 3) {
-    // 3: 씬 상세 설정 — 계절/시간/날씨/장소/앵글
+    // 3: 씬 상세 설정 — 출연 아바타 + 계절/시간/날씨/장소/앵글
+    if (!S.avatars.length) missing.push('등장 아바타');
     if (!S.season)    missing.push('계절');
     if (!S.timeofday) missing.push('시간대');
     if (!S.weather)   missing.push('날씨');
