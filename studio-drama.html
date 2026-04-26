@@ -580,9 +580,13 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <button class="btn btn-sm" onclick="downloadGrid()" title="원본 4컷 통합 이미지 저장">💾 4컷 그리드 전체 저장</button>
       </div>
 
-      <div style="display:flex;gap:8px;margin-bottom:10px">
-        <button class="btn btn-primary" id="genImgBtn" onclick="generateImage()" style="flex:1">🎨 4컷 이미지 생성</button>
-        <button class="btn" onclick="generateImage()" title="재생성">↺</button>
+      <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-primary" id="genImgBtn" onclick="generateImage()">🎨 4컷 생성</button>
+        <button class="btn btn-sm" onclick="generateImage()" title="재생성">↺</button>
+        <div style="flex:1"></div>
+        <button class="btn btn-sm" onclick="downloadGrid()" title="현재 4컷을 한 장 이미지로 저장">💾 4컷 저장</button>
+        <button class="btn btn-sm" onclick="document.getElementById('quadLoadInput').click()" title="이전에 저장한 4컷 이미지 불러오기">📂 불러오기</button>
+        <input type="file" id="quadLoadInput" accept="image/*" style="display:none" onchange="loadQuadFromFile(event)">
       </div>
 
       <!-- cut approve controls -->
@@ -1073,6 +1077,91 @@ function downloadGrid() {
   } else {
     toast('저장할 이미지가 없습니다');
   }
+}
+
+// 이전에 저장한 4컷 그리드 이미지 불러오기 — 파일 업로드 후 4분할
+function loadQuadFromFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const W = img.naturalWidth;
+      const H = img.naturalHeight;
+      const hw = Math.floor(W / 2);
+      const hh = Math.floor(H / 2);
+
+      // 원본 그리드 dataURL 저장
+      const fullCanvas = document.createElement('canvas');
+      fullCanvas.width = W; fullCanvas.height = H;
+      fullCanvas.getContext('2d').drawImage(img, 0, 0);
+      S.gridDataUrl = fullCanvas.toDataURL('image/jpeg', 0.92);
+      S.gridPubUrl = null;  // CDN 업로드 필요 → goToStep3에서 자동 처리
+
+      // 4분할 → 각 컷 dataURL
+      const positions = [[0,0],[hw,0],[0,hh],[hw,hh]];
+      for (let i = 0; i < 4; i++) {
+        const cc = document.createElement('canvas');
+        cc.width = hw; cc.height = hh;
+        cc.getContext('2d').drawImage(img, positions[i][0], positions[i][1], hw, hh, 0, 0, hw, hh);
+        S.cutDataUrls[i] = cc.toDataURL('image/jpeg', 0.92);
+        S.cutPubUrls[i] = null;
+      }
+      // 승인 상태 초기화 (모두 true)
+      S.cutApproval = [true, true, true, true];
+
+      // UI 업데이트
+      if (typeof renderQuad === 'function') renderQuad();
+      const ctrlWrap = document.getElementById('cutCtrlWrap');
+      if (ctrlWrap) ctrlWrap.style.display = '';
+      if (typeof renderCutControls === 'function') renderCutControls();
+      const dlBar = document.getElementById('quadDownloadBar');
+      if (dlBar) dlBar.style.display = '';
+
+      log('ok', `4컷 불러오기 완료 (${W}×${H} → 4분할)`);
+      toast('📂 4컷 이미지를 불러왔습니다');
+    };
+    img.onerror = () => {
+      log('err', '이미지 로드 실패');
+      toast('❌ 이미지를 로드할 수 없습니다');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  // input 값 리셋 (같은 파일 재업로드 가능하도록)
+  event.target.value = '';
+}
+
+// 개별 컷 영상 불러오기 — 파일 업로드 후 vidPlayer에 재생
+function loadCutVideoFromFile(event, i) {
+  const file = event.target.files[0];
+  if (!file) return;
+  // blob URL 생성 (로컬 재생용)
+  const blobUrl = URL.createObjectURL(file);
+  S.vidUrls[i] = blobUrl;
+
+  const player = document.getElementById(`vidPlayer${i}`);
+  if (player) {
+    player.src = blobUrl;
+    player.style.display = '';
+  }
+  const status = document.getElementById(`vidStatus${i}`);
+  if (status) {
+    status.textContent = '📂 불러온 영상';
+    status.style.color = 'var(--gold)';
+  }
+  // 저장 버튼 표시 + actions 영역 표시
+  const actions = document.getElementById(`vidActions${i}`);
+  if (actions) actions.style.display = '';
+  const saveBtn = document.getElementById(`vidSaveBtn${i}`);
+  if (saveBtn) saveBtn.style.display = '';
+  // merge 버튼 업데이트
+  if (typeof updateMergeBtn === 'function') updateMergeBtn();
+  log('ok', `컷${i+1} 영상 불러오기 완료 (${(file.size/1024/1024).toFixed(2)}MB)`);
+  toast(`📂 컷${i+1} 영상을 불러왔습니다`);
+  // input 리셋
+  event.target.value = '';
 }
 
 function dataURLtoBlob(dataURL) {
@@ -3052,7 +3141,7 @@ async function goToStep3() {
     }
   }
 
-  goStep(3);
+  goStep(5);
   renderVidCards();
 }
 
@@ -3137,8 +3226,11 @@ function renderVidCards() {
         <!-- 상태 / 결과 -->
         <div id="vidStatus${i}" class="cut-vid-status"></div>
         <video id="vidPlayer${i}" class="cut-vid-video" controls loop style="display:none"></video>
-        <div id="vidActions${i}" style="display:none;margin-top:6px">
-          <button class="btn btn-sm btn-full" onclick="downloadVideo(S.vidUrls[${i}],'cut${i+1}_video.mp4')">💾 저장</button>
+        <div id="vidActions${i}" style="display:none;margin-top:6px;display:none"></div>
+        <div style="display:flex;gap:6px;margin-top:6px">
+          <button class="btn btn-sm" id="vidSaveBtn${i}" onclick="downloadVideo(S.vidUrls[${i}],'cut${i+1}_video.mp4')" style="flex:1;display:none">💾 저장</button>
+          <button class="btn btn-sm" onclick="document.getElementById('vidLoadInput${i}').click()" title="이전에 저장한 컷${i+1} 영상 불러오기" style="flex:1">📂 불러오기</button>
+          <input type="file" id="vidLoadInput${i}" accept="video/*" style="display:none" onchange="loadCutVideoFromFile(event, ${i})">
         </div>
       </div>
     </div>
@@ -3155,21 +3247,24 @@ async function generateCutVideo(i) {
   const pickedV = await pickModel('vid');
   if (!pickedV) return;
 
-  // 선택 후 확인 팝업
-  const _dur = parseInt(document.getElementById(`vidDur${i}`)?.value || S.cutDurations[i]);
-  const _cps = (document.getElementById(`vidAudio${i}`)?.checked ? pickedV.cpsOn : pickedV.cpsOff) || pickedV.cpsOff || 0.1;
-  const _estCost = (_cps * _dur).toFixed(2);
+  // 설정값 파싱
+  const dur = parseInt(document.getElementById(`vidDur${i}`)?.value || S.cutDurations[i]);
+  const audio = document.getElementById(`vidAudio${i}`)?.checked ?? false;
+  const cps = audio ? (pickedV.cpsOn || pickedV.cpsOff || 0.1) : (pickedV.cpsOff || 0.1);
+  const estCost = (cps * dur).toFixed(3);
+
+  // 선택 후 확인 팝업 (한 번만)
   const confirmOk = await showConfirm(
     `컷 ${i+1} 영상 생성`,
     `<div style="padding:8px 0">
        <div style="font-size:14px;font-weight:700;color:var(--cream);margin-bottom:6px">${pickedV.label}</div>
        <div style="font-size:12px;color:var(--ink2);margin-bottom:14px">${pickedV.sub}</div>
-       <div style="font-size:13px;color:var(--ink2)">해당 AI로 컷 ${i+1} 영상을 생성하시겠습니까?<br><span style="font-size:11px;color:var(--ink3)">예상 비용 ~$${_estCost} · ${_dur}초</span></div>
+       <div style="font-size:13px;color:var(--ink2)">앵글: <b>${S.angles[i]||'cinematic'}</b> · 길이: <b>${dur}초</b> · 오디오: <b>${audio ? 'ON' : 'OFF'}</b><br>예상 비용 ~${estCost}</div>
      </div>`
   );
   if (!confirmOk) return;
+
   const model = pickedV.value;
-  const audio = document.getElementById(`vidAudio${i}`)?.checked ?? false;
   let prompt = buildVidPrompt(i);
   const extra = document.getElementById(`vidExtra${i}`)?.value.trim();
   if (extra) {
@@ -3177,26 +3272,6 @@ async function generateCutVideo(i) {
   }
   const script = document.getElementById(`vidScript${i}`)?.value.trim() || '';
   const speaker = document.getElementById(`vidSpeaker${i}`)?.value || '';
-
-  // 비용 계산
-  const sel = document.getElementById('vidModel');
-  const opt = sel.options[sel.selectedIndex];
-  const cps = audio
-    ? parseFloat(opt?.dataset?.cpsOn || 0.168)
-    : parseFloat(opt?.dataset?.cpsOff || 0.112);
-  const estCost = (dur * cps).toFixed(3);
-
-  // 확인 팝업
-  const ok = await showConfirm(
-    `컷${i+1} 영상 생성`,
-    `모델: <b>${model.split('/').slice(-2).join('/')}</b><br>
-     앵글: <b>${S.angles[i]||'cinematic'}</b><br>
-     길이: <b>${dur}초</b><br>
-     오디오: <b>${audio ? 'ON' : 'OFF'}</b><br>
-     예상 비용: <b>$${estCost}</b><br><br>
-     생성하시겠습니까?`
-  );
-  if (!ok) return;
 
   // Kling v3 15초 체크
   if (model.includes('v3') && dur > 15) {
@@ -3283,6 +3358,8 @@ async function generateCutVideo(i) {
     player.style.display = '';
 
     document.getElementById(`vidActions${i}`).style.display = '';
+    const saveBtn = document.getElementById(`vidSaveBtn${i}`);
+    if (saveBtn) saveBtn.style.display = '';
     status.textContent = '✅ 생성 완료!';
     status.style.color = 'var(--green)';
 
