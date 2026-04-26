@@ -70,7 +70,7 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 .panel.show{display:block;animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 /* ── ratio cards ── */
-.ratio-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:8px}
+.ratio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px}
 @media (max-width: 900px) { .ratio-grid{grid-template-columns:repeat(2,1fr)} }
 .ratio-card{background:var(--bg2);border:2px solid var(--line);border-radius:12px;padding:24px 16px 18px;cursor:pointer;transition:.2s;text-align:left;position:relative;overflow:hidden}
 .ratio-card:hover{border-color:var(--line2);transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.4)}
@@ -250,14 +250,12 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <span class="brand-text">Korart</span>
     <span class="brand-sub">— Studio</span>
   </div>
-  <div style="margin-left:24px;display:flex;align-items:center;gap:12px">
+  <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
     <input type="password" id="falKey" placeholder="fal.ai API key" style="background:var(--bg3);border:1px solid var(--line);border-radius:8px;padding:7px 12px;color:var(--ink);font-size:12px;width:240px;font-family:inherit">
   </div>
-  <div class="cost-badge">
-    <div class="cost-pill"><span style="color:var(--ink3)">총 비용</span> <strong id="costTotal">$0.000</strong></div>
-    <div class="cost-pill" style="color:var(--ink3)">이미지 <strong id="costImg" style="color:var(--ink2)">$0.000</strong></div>
-    <div class="cost-pill" style="color:var(--ink3)">영상 <strong id="costVid" style="color:var(--ink2)">$0.000</strong></div>
-    <button class="btn btn-sm btn-ghost" onclick="resetCost()" style="font-size:10px">초기화</button>
+  <!-- cost-badge 숨김: 내부 함수(updateCost 등)가 참조하는 ID 때문에 hidden 원소만 유지 -->
+  <div style="display:none">
+    <span id="costTotal">$0.000</span><span id="costImg">$0.000</span><span id="costVid">$0.000</span>
   </div>
 </div>
 
@@ -303,7 +301,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <div class="info-box-icon">📐</div>
       <div class="info-box-content">
         <strong>어떤 비율을 선택할까요?</strong><br>
-        <span style="color:var(--pink);font-weight:700">16:9 (가로)</span>는 유튜브·TV에 적합하고, <span style="color:var(--pink);font-weight:700">9:16 (세로)</span>는 쇼츠·릴스·틱톡에 최적입니다. <span style="color:var(--pink);font-weight:700">1:1 (정사각)</span>은 인스타 피드, <span style="color:var(--pink);font-weight:700">4:3</span>은 레트로 감성에 잘 맞아요.
+        <span style="color:var(--pink);font-weight:700">16:9 (가로)</span>는 유튜브·TV에 적합하고, <span style="color:var(--pink);font-weight:700">9:16 (세로)</span>는 쇼츠·릴스·틱톡에 최적입니다. <span style="color:var(--pink);font-weight:700">1:1 (정사각)</span>은 인스타 피드에 잘 맞아요.
       </div>
     </div>
 
@@ -525,6 +523,25 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <textarea id="extraPrompt" rows="2" placeholder="예: there is a bouquet of red roses on the table, neon signs reflecting on wet pavement"></textarea>
       </div>
 
+      <!-- 이전 컷 이어서 만들기 -->
+      <div class="field" id="continueRefField">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+          <label style="margin:0;display:flex;align-items:center;gap:6px">
+            🔗 이전 컷 이어서 만들기 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span>
+          </label>
+          <button class="btn btn-sm btn-ghost" id="continueRefClearBtn" onclick="clearContinueRef()" style="display:none">✕ 제거</button>
+        </div>
+        <div style="font-size:10px;color:var(--ink3);margin-bottom:6px;line-height:1.5">이전에 만든 컷이나 그리드 이미지를 첨부하면 배경·마감·조명 통일성을 유지하며 이어서 생성합니다.</div>
+        <div style="display:flex;gap:6px;align-items:flex-start">
+          <div id="continueRefPreview" style="width:120px;aspect-ratio:16/9;background:var(--bg3);border:1px dashed var(--line2);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:24px;flex-shrink:0;overflow:hidden">🖼️</div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+            <button class="btn btn-sm" onclick="document.getElementById('continueRefUpload').click()">📁 파일 업로드</button>
+            <div style="font-size:9px;color:var(--ink3);line-height:1.4">이전에 다운로드한 <strong>4컷 그리드</strong> 또는 <strong>단일 컷</strong> 이미지를 올려주세요.</div>
+            <input type="file" id="continueRefUpload" accept="image/*" style="display:none" onchange="uploadContinueRef(event)">
+          </div>
+        </div>
+      </div>
+
 
     </div>
     </div><!-- grid end -->
@@ -537,7 +554,10 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <div class="panel-step-bar">
       <button class="btn" onclick="tryGoStep(3)">← 뒤로</button>
       <div class="step-indicator" id="globalSteps2"></div>
-      <button class="btn btn-primary" onclick="tryGoStep(5)">영상 생성으로 →</button>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm btn-ghost" onclick="resetStep4()" title="4컷 생성 결과만 초기화">↻ 단계 초기화</button>
+        <button class="btn btn-primary" onclick="tryGoStep(5)">영상 생성으로 →</button>
+      </div>
     </div>
     <div class="panel-header">
       <span class="panel-num">05</span>
@@ -581,7 +601,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <div class="panel-step-bar">
       <button class="btn" onclick="tryGoStep(4)">← 뒤로</button>
       <div class="step-indicator" id="globalSteps3"></div>
-      <div></div>
+      <button class="btn btn-sm btn-ghost" onclick="resetStep5()" title="영상 생성 결과만 초기화">↻ 단계 초기화</button>
     </div>
     <div class="panel-header">
       <span class="panel-num">06</span>
@@ -594,7 +614,10 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 
     <!-- 통합 버튼 -->
     <div style="margin-top:20px;padding:14px;background:var(--bg3);border:1px solid var(--line);border-radius:10px" id="mergePanel">
-      <div class="section-head">📽 영상 통합</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="section-head" style="margin:0">📽 영상 통합</div>
+        <button class="btn btn-sm btn-ghost" onclick="resetStep6()" title="통합 결과만 초기화">↻ 단계 초기화</button>
+      </div>
       <div style="font-size:11px;color:var(--ink2);margin-bottom:10px">생성된 영상을 순서대로 이어붙입니다. (실시간 녹화 방식 — 영상 총 길이만큼 시간 소요)</div>
       <div id="mergeStatus" style="font-size:11px;color:var(--ink3);margin-bottom:8px"></div>
       <div id="mergeResult" style="margin-bottom:10px"></div>
@@ -935,7 +958,7 @@ function saveSceneLib(arr) {
 //  STATE
 // ════════════════════════════════════════════════════════════
 const S = {
-  aspectRatio: '',  // 9:16, 3:4, 1:1, 16:9, 4:3
+  aspectRatio: '',  // 16:9, 9:16, 1:1
   avatars: [],
   scene: 'romance',
   season: 'spring',
@@ -959,6 +982,10 @@ const S = {
   cutAudio:    [false,false,false,false],
 
   vidUrls: [null,null,null,null],  // 생성된 영상 URLs
+
+  // 이전 컷 이어서 만들기 — 사용자 업로드 레퍼런스
+  continueRefDataUrl: null,  // 메모리용 dataURL
+  continueRefPubUrl: null,   // fal storage 업로드 후 CDN URL
 
   sessionImgCost: 0,
   sessionVidCost: 0,
@@ -1158,6 +1185,12 @@ function goStep(n) {
   S._currentStep = n;
   renderGlobalSteps(n);
 
+  // 4컷 패널 진입 시 quad CSS aspect-ratio 적용
+  if (n === 4) {
+    const quad = document.getElementById('quad');
+    if (quad) quad.style.aspectRatio = getQuadCssAspect();
+  }
+
   // panel1 안의 sub-step 토글 (step 2 = sceneStepA, step 3 = sceneStepB)
   if (n === 2) {
     document.getElementById('sceneStepA').style.display = 'block';
@@ -1225,10 +1258,6 @@ const ASPECT_RATIOS = [
     klingRatio: '16:9', imgSize: { width: 1792, height: 1024 }, gridSize: { width: 1792, height: 1024 } },
   { value: '9:16', size: '1080×1920', purpose: '유튜브 쇼츠·릴스·틱톡', badge: null,
     klingRatio: '9:16', imgSize: { width: 1024, height: 1792 }, gridSize: { width: 1024, height: 1792 } },
-  { value: '4:3',  size: '1440×1080', purpose: '아카이브·레트로 감성', badge: null,
-    klingRatio: '16:9', imgSize: { width: 1360, height: 1024 }, gridSize: { width: 1360, height: 1024 } },
-  { value: '3:4',  size: '1080×1440', purpose: '인스타 세로 피드', badge: null,
-    klingRatio: '9:16', imgSize: { width: 1024, height: 1360 }, gridSize: { width: 1024, height: 1360 } },
   { value: '1:1',  size: '1080×1080', purpose: '인스타 피드', badge: null,
     klingRatio: '1:1',  imgSize: { width: 1024, height: 1024 }, gridSize: { width: 1024, height: 1024 } },
 ];
@@ -1237,7 +1266,7 @@ function renderRatioGrid() {
   const grid = document.getElementById('ratioGrid');
   if (!grid) return;
   grid.innerHTML = ASPECT_RATIOS.map(r => {
-    const isPortrait = ['9:16','3:4'].includes(r.value);
+    const isPortrait = ['9:16'].includes(r.value);
     const isSquare = r.value === '1:1';
     // 썸네일 사이즈 (110x110 기준)
     let thW, thH;
@@ -1280,6 +1309,12 @@ async function selectAspectRatio(value) {
     btn.disabled = false;
     btn.style.opacity = '1';
     btn.style.cursor = 'pointer';
+  }
+
+  // 4컷 quad CSS aspect-ratio 업데이트
+  const quad = document.getElementById('quad');
+  if (quad) {
+    quad.style.aspectRatio = getQuadCssAspect();
   }
 
   toast(`📐 ${value} 선택됨 — 다음 단계로 이동`, 1200);
@@ -1716,6 +1751,93 @@ function renderAvatars() {
       </div>
     </div>
   `).join('');
+}
+
+// ═══ 이전 컷 이어서 만들기 — 레퍼런스 이미지 관리 ═══
+function uploadContinueRef(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    S.continueRefDataUrl = e.target.result;
+    S.continueRefPubUrl = null;
+    const preview = document.getElementById('continueRefPreview');
+    if (preview) {
+      preview.innerHTML = `<img src="${S.continueRefDataUrl}" style="width:100%;height:100%;object-fit:cover">`;
+      preview.style.border = '1px solid var(--pink)';
+    }
+    const clearBtn = document.getElementById('continueRefClearBtn');
+    if (clearBtn) clearBtn.style.display = '';
+    log('info', '이전 컷 레퍼런스 첨부됨');
+    toast('🔗 이전 컷 레퍼런스가 첨부되었습니다');
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearContinueRef() {
+  S.continueRefDataUrl = null;
+  S.continueRefPubUrl = null;
+  const preview = document.getElementById('continueRefPreview');
+  if (preview) {
+    preview.innerHTML = '🖼️';
+    preview.style.border = '1px dashed var(--line2)';
+  }
+  const clearBtn = document.getElementById('continueRefClearBtn');
+  if (clearBtn) clearBtn.style.display = 'none';
+  const upload = document.getElementById('continueRefUpload');
+  if (upload) upload.value = '';
+  log('info', '이전 컷 레퍼런스 제거됨');
+}
+
+// ═══ 단계별 초기화 ═══
+async function resetStep4() {
+  const ok = await showConfirm('4컷 생성 초기화', '생성한 4컷 이미지와 승인 설정을 모두 지웁니다. 계속할까요?');
+  if (!ok) return;
+  S.gridDataUrl = null;
+  S.gridPubUrl  = null;
+  S.cutDataUrls = [null,null,null,null];
+  S.cutPubUrls  = [null,null,null,null];
+  S.cutApproval = [true,true,true,true];
+  const quad = document.getElementById('quad');
+  if (quad) {
+    quad.innerHTML = `<div class="qcell" style="grid-column:1/-1;grid-row:1/-1;display:flex;align-items:center;justify-content:center;background:#0a0a0c"><div style="text-align:center;color:var(--ink3)"><div style="font-size:32px;margin-bottom:8px">🎬</div><div style="font-size:12px">생성 버튼을 눌러주세요</div></div></div>`;
+  }
+  const dlBar = document.getElementById('quadDownloadBar');
+  if (dlBar) dlBar.style.display = 'none';
+  const ctrlWrap = document.getElementById('cutCtrlWrap');
+  if (ctrlWrap) ctrlWrap.style.display = 'none';
+  log('info', '4컷 단계 초기화 완료');
+  toast('↻ 4컷 생성 결과가 초기화되었습니다');
+}
+
+async function resetStep5() {
+  const ok = await showConfirm('영상 생성 초기화', '생성한 모든 컷 영상과 추가 설정을 지웁니다. 계속할까요?');
+  if (!ok) return;
+  S.vidUrls = [null,null,null,null];
+  for (let i = 0; i < 4; i++) {
+    const inp = document.getElementById(`vidExtra${i}`);
+    if (inp) inp.value = '';
+  }
+  if (typeof renderVidCards === 'function') renderVidCards();
+  const mergeBtn = document.getElementById('mergeBtn');
+  if (mergeBtn) mergeBtn.disabled = true;
+  const mergeResult = document.getElementById('mergeResult');
+  if (mergeResult) mergeResult.innerHTML = '';
+  const mergeStatus = document.getElementById('mergeStatus');
+  if (mergeStatus) mergeStatus.textContent = '';
+  log('info', '영상 단계 초기화 완료');
+  toast('↻ 영상 생성 결과가 초기화되었습니다');
+}
+
+async function resetStep6() {
+  const ok = await showConfirm('통합 초기화', '통합한 영상 결과를 지웁니다. (개별 컷 영상은 유지)');
+  if (!ok) return;
+  const mergeResult = document.getElementById('mergeResult');
+  if (mergeResult) mergeResult.innerHTML = '';
+  const mergeStatus = document.getElementById('mergeStatus');
+  if (mergeStatus) mergeStatus.textContent = '';
+  log('info', '통합 단계 초기화 완료');
+  toast('↻ 통합 결과가 초기화되었습니다');
 }
 
 // 성별별 헤어스타일 옵션
@@ -2754,6 +2876,20 @@ async function generateImage() {
 
   // 아바타 중 이미지 있는 것들만 레퍼런스로
   const refImgs = S.avatars.filter(av => av.imgUrl).map(av => av.imgUrl);
+  // 이전 컷 이어서 만들기 체크 — 있으면 fal storage에 업로드 후 refImgs에 추가
+  if (S.continueRefDataUrl) {
+    try {
+      // 아직 업로드 안 된 경우에만 업로드
+      if (!S.continueRefPubUrl) {
+        const blob = dataURLtoBlob(S.continueRefDataUrl);
+        S.continueRefPubUrl = await uploadToFalStorage(falKey, blob, 'continue_ref.jpg');
+        log('info', '이전 컷 레퍼런스 업로드 완료');
+      }
+      refImgs.push(S.continueRefPubUrl);
+    } catch (e) {
+      log('warn', '이전 컷 레퍼런스 업로드 실패 — 아바타만 사용: ' + e.message);
+    }
+  }
   const useRef = refImgs.length > 0;
 
   document.getElementById('quad').innerHTML = `
@@ -2781,8 +2917,8 @@ async function generateImage() {
 
   try {
     const url = useRef
-      ? await callFalImageWithRef(falKey, model, prompt, '1792x1024', refImgs)
-      : await callFalImage(falKey, model, prompt, '1792x1024');
+      ? await callFalImageWithRef(falKey, model, prompt, getGridSize(), refImgs)
+        : await callFalImage(falKey, model, prompt, getGridSize());
     S.gridPubUrl = url;
 
     // 이미지 로드 & 표시
@@ -3109,7 +3245,7 @@ async function generateCutVideo(i) {
           duration: String(dur),
         }],
         start_image_url: imgUrl,
-        aspect_ratio: '16:9',
+        aspect_ratio: getVideoAspectRatio(),
         generate_audio: audio,
       };
     } else {
@@ -3118,7 +3254,7 @@ async function generateCutVideo(i) {
         prompt: finalPrompt,
         image_url: imgUrl,
         duration: String(dur),
-        aspect_ratio: '16:9',
+        aspect_ratio: getVideoAspectRatio(),
       };
     }
 
@@ -3336,6 +3472,25 @@ async function mergeVideos() {
 // ════════════════════════════════════════════════════════════
 //  FAL API FUNCTIONS
 // ════════════════════════════════════════════════════════════
+// 비율 선택값에서 4컷 그리드 사이즈 (string '1792x1024' 형식) 반환
+function getGridSize() {
+  const ar = ASPECT_RATIOS.find(r => r.value === S.aspectRatio);
+  if (!ar) return '1792x1024';
+  return `${ar.gridSize.width}x${ar.gridSize.height}`;
+}
+// Kling/Veo용 영상 비율
+function getVideoAspectRatio() {
+  const ar = ASPECT_RATIOS.find(r => r.value === S.aspectRatio);
+  return ar ? ar.klingRatio : '16:9';
+}
+// 4컷 quad CSS aspect-ratio (UI 미리보기용)
+function getQuadCssAspect() {
+  const ar = ASPECT_RATIOS.find(r => r.value === S.aspectRatio);
+  if (!ar) return '16/9';
+  // 그리드는 가로 비율의 2배, 세로도 2배 (2x2 grid). 단일 컷 비율과 그리드 비율은 같음.
+  return `${ar.gridSize.width}/${ar.gridSize.height}`;
+}
+
 async function callFalImage(key, model, prompt, size) {
   const [w, h] = size.split('x').map(Number);
   const isGpt = model.includes('gpt-image');
