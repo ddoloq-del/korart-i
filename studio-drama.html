@@ -286,9 +286,9 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   <!-- ══ STEP 0 (NEW): 비율 선택 ══ -->
   <div class="panel show" id="panelRatio">
     <div class="panel-step-bar">
-      <button class="btn" onclick="window.location.href='studio.html'">← 홈으로</button>
+      <button class="btn" onclick="window.location.href='studio.html'">홈으로</button>
       <div class="step-indicator" id="globalStepsR"></div>
-      <button class="btn btn-primary" id="ratioNextBtn" onclick="tryGoStep(1)" disabled style="opacity:.5;cursor:not-allowed">다음 →</button>
+      <button class="btn btn-primary" id="ratioNextBtn" onclick="tryGoStep(1)" disabled style="opacity:.5;cursor:not-allowed">다음</button>
     </div>
     <div class="panel-header">
       <span class="panel-num">01</span>
@@ -314,9 +314,9 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 
 <div class="panel" id="panel0">
     <div class="panel-step-bar">
-      <button class="btn" onclick="tryGoStep(0)">← 뒤로</button>
+      <button class="btn" onclick="tryGoStep(0)">뒤로</button>
       <div class="step-indicator" id="globalSteps0"></div>
-      <button class="btn btn-primary" onclick="tryGoStep(2)">다음 →</button>
+      <button class="btn btn-primary" onclick="tryGoStep(2)">다음</button>
     </div>
     <div class="panel-header">
       <span class="panel-num">02</span>
@@ -339,9 +339,9 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   <!-- ══ STEP 1: 씬 설정 ══ -->
   <div class="panel" id="panel1">
     <div class="panel-step-bar" id="panel1Nav">
-      <button class="btn" onclick="tryGoStep(0)">← 뒤로</button>
+      <button class="btn" onclick="tryGoStep(0)">뒤로</button>
       <div class="step-indicator" id="globalSteps1"></div>
-      <button class="btn btn-primary" id="step1NextBtn" onclick="goSceneStepB()">다음 →</button>
+      <button class="btn btn-primary" id="step1NextBtn" onclick="goSceneStepB()">다음</button>
     </div>
     <div class="panel-header" id="panel1Header">
       <span class="panel-num" id="panel1Num">03</span>
@@ -356,7 +356,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <div class="field">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <label style="margin:0;font-size:14px;font-weight:700">씬 분위기를 선택하세요</label>
-          <button class="btn btn-sm btn-ghost" onclick="saveSceneToLib()">💾 현재 설정 저장</button>
+          <button class="btn btn-sm btn-ghost" onclick="saveSceneToLib()">현재 설정 저장</button>
         </div>
         <div class="scene-grid" id="sceneGrid" style="grid-template-columns:repeat(4,1fr);gap:12px"></div>
       </div>
@@ -368,7 +368,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding:10px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:10px">
       <span style="font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700">선택된 씬</span>
       <span id="selectedSceneLabel" style="font-size:14px;font-weight:700;color:var(--pink)">로맨스</span>
-      <button class="btn btn-sm btn-ghost" style="margin-left:auto" onclick="backToSceneStepA()">← 분위기 다시 고르기</button>
+      <button class="btn btn-sm btn-ghost" style="margin-left:auto" onclick="backToSceneStepA()">분위기 다시 고르기</button>
     </div>
 
     <!-- 등장 아바타 선택하기 (씬 상세에 위치) -->
@@ -499,7 +499,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
             <span onclick="showAngleHelp()" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--bg4);color:var(--ink2);font-size:11px;font-weight:700;cursor:pointer">?</span>
           </label>
           <div style="display:flex;gap:4px">
-            <button class="btn btn-sm" onclick="resetAngles()">↺ 리셋</button>
+            <button class="btn btn-sm" onclick="resetAngles()">리셋</button>
             <button class="btn btn-sm" id="customAngleBtn" onclick="toggleCustomAngle()">개인설정</button>
           </div>
         </div>
@@ -529,13 +529,13 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
           <label style="margin:0;display:flex;align-items:center;gap:6px">
             🔗 이전 컷 이어서 만들기 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span>
           </label>
-          <button class="btn btn-sm btn-ghost" id="continueRefClearBtn" onclick="clearContinueRef()" style="display:none">✕ 제거</button>
+          <button class="btn btn-sm btn-ghost" id="continueRefClearBtn" onclick="clearContinueRef()" style="display:none">제거</button>
         </div>
         <div style="font-size:10px;color:var(--ink3);margin-bottom:6px;line-height:1.5">이전에 만든 컷이나 그리드 이미지를 첨부하면 배경·마감·조명 통일성을 유지하며 이어서 생성합니다.</div>
         <div style="display:flex;gap:6px;align-items:flex-start">
           <div id="continueRefPreview" style="width:120px;aspect-ratio:16/9;background:var(--bg3);border:1px dashed var(--line2);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:24px;flex-shrink:0;overflow:hidden">🖼️</div>
           <div style="flex:1;display:flex;flex-direction:column;gap:6px">
-            <button class="btn btn-sm" onclick="document.getElementById('continueRefUpload').click()">📁 파일 업로드</button>
+            <button class="btn btn-sm" onclick="document.getElementById('continueRefUpload').click()">파일 업로드</button>
             <div style="font-size:9px;color:var(--ink3);line-height:1.4">이전에 다운로드한 <strong>4컷 그리드</strong> 또는 <strong>단일 컷</strong> 이미지를 올려주세요.</div>
             <input type="file" id="continueRefUpload" accept="image/*" style="display:none" onchange="uploadContinueRef(event)">
           </div>
@@ -552,11 +552,11 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   <!-- ══ STEP 2: 4컷 생성 ══ -->
   <div class="panel" id="panel2">
     <div class="panel-step-bar">
-      <button class="btn" onclick="tryGoStep(3)">← 뒤로</button>
+      <button class="btn" onclick="tryGoStep(3)">뒤로</button>
       <div class="step-indicator" id="globalSteps2"></div>
       <div style="display:flex;gap:6px">
-        <button class="btn btn-sm btn-ghost" onclick="resetStep4()" title="4컷 생성 결과만 초기화">↻ 단계 초기화</button>
-        <button class="btn btn-primary" onclick="tryGoStep(5)">영상 생성으로 →</button>
+        <button class="btn btn-sm btn-ghost" onclick="resetStep4()" title="4컷 생성 결과만 초기화">단계 초기화</button>
+        <button class="btn btn-primary" onclick="tryGoStep(5)">영상 생성으로</button>
       </div>
     </div>
     <div class="panel-header">
@@ -577,15 +577,15 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         </div>
       </div>
       <div id="quadDownloadBar" style="display:none;margin-top:10px;text-align:center">
-        <button class="btn btn-sm" onclick="downloadGrid()" title="원본 4컷 통합 이미지 저장">💾 4컷 그리드 전체 저장</button>
+        <button class="btn btn-sm" onclick="downloadGrid()" title="원본 4컷 통합 이미지 저장">4컷 그리드 전체 저장</button>
       </div>
 
       <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
-        <button class="btn btn-primary" id="genImgBtn" onclick="generateImage()">🎨 4컷 생성</button>
-        <button class="btn btn-sm" onclick="generateImage()" title="재생성">↺</button>
+        <button class="btn btn-primary" id="genImgBtn" onclick="generateImage()">4컷 생성</button>
+        <button class="btn btn-sm" onclick="generateImage()" title="재생성">재생성</button>
         <div style="flex:1"></div>
-        <button class="btn btn-sm" onclick="downloadGrid()" title="현재 4컷을 한 장 이미지로 저장">💾 4컷 저장</button>
-        <button class="btn btn-sm" onclick="document.getElementById('quadLoadInput').click()" title="이전에 저장한 4컷 이미지 불러오기">📂 불러오기</button>
+        <button class="btn btn-sm" onclick="downloadGrid()" title="현재 4컷을 한 장 이미지로 저장">4컷 저장</button>
+        <button class="btn btn-sm" onclick="document.getElementById('quadLoadInput').click()" title="이전에 저장한 4컷 이미지 불러오기">불러오기</button>
         <input type="file" id="quadLoadInput" accept="image/*" style="display:none" onchange="loadQuadFromFile(event)">
       </div>
 
@@ -594,7 +594,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <div class="divider"></div>
         <div class="section-head">컷 승인 & 영상 설정</div>
         <div id="cutCtrlGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px"></div>
-        <button class="btn btn-primary btn-full" id="goVidBtn" onclick="goToStep3()" disabled>🎬 영상 생성으로 →</button>
+        <button class="btn btn-primary btn-full" id="goVidBtn" onclick="goToStep3()" disabled>영상 생성으로</button>
       </div>
     </div>
 
@@ -603,9 +603,9 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   <!-- ══ STEP 3: 영상 생성 ══ -->
   <div class="panel" id="panel3">
     <div class="panel-step-bar">
-      <button class="btn" onclick="tryGoStep(4)">← 뒤로</button>
+      <button class="btn" onclick="tryGoStep(4)">뒤로</button>
       <div class="step-indicator" id="globalSteps3"></div>
-      <button class="btn btn-sm btn-ghost" onclick="resetStep5()" title="영상 생성 결과만 초기화">↻ 단계 초기화</button>
+      <button class="btn btn-sm btn-ghost" onclick="resetStep5()" title="영상 생성 결과만 초기화">단계 초기화</button>
     </div>
     <div class="panel-header">
       <span class="panel-num">06</span>
@@ -620,12 +620,12 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <div style="margin-top:20px;padding:14px;background:var(--bg3);border:1px solid var(--line);border-radius:10px" id="mergePanel">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <div class="section-head" style="margin:0">📽 영상 통합</div>
-        <button class="btn btn-sm btn-ghost" onclick="resetStep6()" title="통합 결과만 초기화">↻ 단계 초기화</button>
+        <button class="btn btn-sm btn-ghost" onclick="resetStep6()" title="통합 결과만 초기화">단계 초기화</button>
       </div>
       <div style="font-size:11px;color:var(--ink2);margin-bottom:10px">생성된 영상을 순서대로 이어붙입니다. (실시간 녹화 방식 — 영상 총 길이만큼 시간 소요)</div>
       <div id="mergeStatus" style="font-size:11px;color:var(--ink3);margin-bottom:8px"></div>
       <div id="mergeResult" style="margin-bottom:10px"></div>
-      <button class="btn btn-primary btn-full" id="mergeBtn" onclick="mergeVideos()" disabled>🎞 영상 통합</button>
+      <button class="btn btn-primary btn-full" id="mergeBtn" onclick="mergeVideos()" disabled>영상 통합</button>
     </div>
 
 
@@ -648,7 +648,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <div style="font-size:11px;color:var(--pink);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:4px" id="avModalCat">NEW AVATAR</div>
         <div style="font-size:20px;font-weight:800;color:var(--cream)" id="avModalTitle">아바타 추가</div>
       </div>
-      <button onclick="closeAvatarModal()" style="background:none;border:none;color:var(--ink3);font-size:24px;cursor:pointer;padding:4px 10px;line-height:1">✕</button>
+      <button onclick="closeAvatarModal()" style="background:none;border:none;color:var(--ink3);font-size:24px;cursor:pointer;padding:4px 10px;line-height:1">닫기</button>
     </div>
 
     <!-- 이름 -->
@@ -759,10 +759,10 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <div style="flex:1">
         <div style="font-size:11px;color:var(--ink2);margin-bottom:6px;font-weight:600">📸 아바타 얼굴</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <button class="btn btn-sm btn-primary" id="avGenImgBtn" onclick="generateAvatarImage()">✨ AI 생성</button>
-          <button class="btn btn-sm" onclick="document.getElementById('avImgUpload').click()">📁 업로드</button>
-          <button class="btn btn-sm" onclick="downloadAvatarImage()" id="avDownloadBtn" style="display:none" title="다각도 시트 저장">💾</button>
-          <button class="btn btn-sm" onclick="clearAvatarImage()" id="avClearBtn" style="display:none">✕</button>
+          <button class="btn btn-sm btn-primary" id="avGenImgBtn" onclick="generateAvatarImage()">AI 생성</button>
+          <button class="btn btn-sm" onclick="document.getElementById('avImgUpload').click()">업로드</button>
+          <button class="btn btn-sm" onclick="downloadAvatarImage()" id="avDownloadBtn" style="display:none" title="다각도 시트 저장">저장</button>
+          <button class="btn btn-sm" onclick="clearAvatarImage()" id="avClearBtn" style="display:none">제거</button>
           <input type="file" id="avImgUpload" accept="image/*" style="display:none" onchange="uploadAvatarImage(event)">
         </div>
         <div style="font-size:9px;color:var(--ink3);margin-top:6px">AI 생성은 다각도 시트 (3×2 그리드, 6개 각도) — GPT Image 2 Medium · 1536×1024 · ~$0.10/장</div>
@@ -773,7 +773,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <!-- 저장 버튼 -->
     <div style="display:flex;gap:8px">
       <button class="btn" onclick="closeAvatarModal()" style="flex:1">취소</button>
-      <button class="btn btn-primary" onclick="saveAvatarToLibFromModal()" style="flex:2">💾 저장</button>
+      <button class="btn btn-primary" onclick="saveAvatarToLibFromModal()" style="flex:2">저장</button>
     </div>
   </div>
 </div>
@@ -1303,15 +1303,15 @@ function goStep(n) {
   if (navWrap && (n === 2 || n === 3)) {
     if (n === 2) {
       navWrap.innerHTML = `
-        <button class="btn" onclick="tryGoStep(1)">← 뒤로</button>
+        <button class="btn" onclick="tryGoStep(1)">뒤로</button>
         <div class="step-indicator" id="globalSteps1"></div>
-        <button class="btn btn-primary" onclick="tryGoStep(3)">다음 →</button>
+        <button class="btn btn-primary" onclick="tryGoStep(3)">다음</button>
       `;
     } else {
       navWrap.innerHTML = `
-        <button class="btn" onclick="tryGoStep(2)">← 뒤로</button>
+        <button class="btn" onclick="tryGoStep(2)">뒤로</button>
         <div class="step-indicator" id="globalSteps1"></div>
-        <button class="btn btn-primary" onclick="tryGoStep(4)">4컷 생성으로 →</button>
+        <button class="btn btn-primary" onclick="tryGoStep(4)">4컷 생성으로</button>
       `;
     }
     renderGlobalSteps(n);
@@ -3152,27 +3152,26 @@ function buildVidPrompt(i) {
   const sc = SCENES[S.scene];
   const loc = getCombinedLocation();
 
-  // 캐릭터 정보 - 정확하게 표기
-  let charDesc = 'no human characters';
-  let charCount = 0;
-  if (S.avatars.length) {
-    charCount = S.avatars.length;
-    charDesc = S.avatars.map(av => {
-      const parts = [];
-      if (av.gender) parts.push(av.gender);
-      if (av.age)    parts.push(av.age);
-      if (av.height) parts.push(av.height);
-      const desc = parts.length ? ` (${parts.join(', ')})` : '';
-      return `${av.name}${desc}`;
-    }).join(' and ');
-  }
+  // 캐릭터 정보 - 간결하게 (이름만, 세부은 레퍼런스 이미지에서)
+  let charCount = S.avatars.length;
+  let charNames = S.avatars.map(av => av.name).join(' and ') || 'no one';
 
-  // 강력한 캐릭터 잠금 + 행인/엑스트라 차단
-  const lockClause = charCount > 0
-    ? `EXACTLY ${charCount} character${charCount>1?'s':''} in the scene: ${charDesc}. Same faces and appearance as the reference image. STRICTLY DO NOT add any new people, no extras, no passersby, no background actors, no crowd. Only the ${charCount} character${charCount>1?'s':''} from the reference image must appear.`
-    : `Empty scene with no people. Do not add any human characters.`;
+  // 캡션 압축
+  const charLock = charCount > 0
+    ? `${charCount} character${charCount>1?'s':''} (${charNames}), same faces as reference. No extras, no crowd.`
+    : 'no people in scene.';
 
-  return `Korean drama scene. ${sc.style}. ${S.season}, ${S.timeofday}, ${S.weather}, ${loc}. Camera: ${S.angles[i]||'cinematic shot'}. ${lockClause} Cinematic quality, professional film production.`;
+  // 장면 압축 — SCENES style은 장문이므로 앞 80자만
+  const sceneStyle = (sc.style || '').slice(0, 80);
+  const sceneLoc = (loc || '').slice(0, 80);
+  const cam = S.angles[i] || 'cinematic';
+
+  // 최종 조립 — 타겟 ~340자
+  let p = `Korean drama. ${sceneStyle}. ${S.season}, ${S.timeofday}, ${S.weather}, ${sceneLoc}. Camera: ${cam}. ${charLock} Cinematic.`;
+
+  // 512 커팅 (대사·설명 추가 공간 확보 → 380자)
+  if (p.length > 380) p = p.slice(0, 377) + '...';
+  return p;
 }
 
 function renderVidCards() {
@@ -3222,14 +3221,14 @@ function renderVidCards() {
           <div id="vidCostEst${i}" style="font-size:10px;color:var(--ink3);margin-left:auto"></div>
         </div>
         <!-- 생성 버튼 -->
-        <button class="btn btn-primary btn-full" id="vidGenBtn${i}" onclick="generateCutVideo(${i})">▶ 컷${i+1} 영상 생성</button>
+        <button class="btn btn-primary btn-full" id="vidGenBtn${i}" onclick="generateCutVideo(${i})">컷${i+1} 영상 생성</button>
         <!-- 상태 / 결과 -->
         <div id="vidStatus${i}" class="cut-vid-status"></div>
         <video id="vidPlayer${i}" class="cut-vid-video" controls loop style="display:none"></video>
         <div id="vidActions${i}" style="display:none;margin-top:6px;display:none"></div>
         <div style="display:flex;gap:6px;margin-top:6px">
-          <button class="btn btn-sm" id="vidSaveBtn${i}" onclick="downloadVideo(S.vidUrls[${i}],'cut${i+1}_video.mp4')" style="flex:1;display:none">💾 저장</button>
-          <button class="btn btn-sm" onclick="document.getElementById('vidLoadInput${i}').click()" title="이전에 저장한 컷${i+1} 영상 불러오기" style="flex:1">📂 불러오기</button>
+          <button class="btn btn-sm" id="vidSaveBtn${i}" onclick="downloadVideo(S.vidUrls[${i}],'cut${i+1}_video.mp4')" style="flex:1;display:none">저장</button>
+          <button class="btn btn-sm" onclick="document.getElementById('vidLoadInput${i}').click()" title="이전에 저장한 컷${i+1} 영상 불러오기" style="flex:1">불러오기</button>
           <input type="file" id="vidLoadInput${i}" accept="video/*" style="display:none" onchange="loadCutVideoFromFile(event, ${i})">
         </div>
       </div>
@@ -3266,9 +3265,16 @@ async function generateCutVideo(i) {
 
   const model = pickedV.value;
   let prompt = buildVidPrompt(i);
+  // ADDITIONAL DETAIL 추가 전에 길이 체크 (추가하면 510 넘을 수 있으므로)
   const extra = document.getElementById(`vidExtra${i}`)?.value.trim();
   if (extra) {
-    prompt += `\n\nADDITIONAL DETAIL: ${extra}`;
+    const room = 510 - prompt.length - 22;  // "\n\nADDITIONAL DETAIL: " = 22자
+    if (room > 0) {
+      const trimmed = extra.length > room ? extra.slice(0, room - 3) + '...' : extra;
+      prompt += `\n\nADDITIONAL DETAIL: ${trimmed}`;
+    } else {
+      log('warn', '기본 프롬프트가 길어 ADDITIONAL DETAIL이 추가되지 않습니다');
+    }
   }
   const script = document.getElementById(`vidScript${i}`)?.value.trim() || '';
   const speaker = document.getElementById(`vidSpeaker${i}`)?.value || '';
@@ -3293,22 +3299,27 @@ async function generateCutVideo(i) {
   try {
     let finalPrompt = prompt;
     if (script) {
-      // 화자별로 영어 지시문 + 한국어 대사 따옴표로 분리
-      // 이렇게 하면 모델이 따옴표 안만 발화하고 라벨은 무시
+      // 화자별로 영어 지시문 + 한국어 대사 따옴표로 분리 (압축)
       let speakerLabel = '';
       if (speaker === 'woman') {
-        speakerLabel = 'The woman in the scene speaks the following Korean dialogue with her own lips moving (do not say the word "woman", only speak the text in quotes)';
+        speakerLabel = 'Woman speaks Korean line, lips visible';
       } else if (speaker === 'man') {
-        speakerLabel = 'The man in the scene speaks the following Korean dialogue with his own lips moving (do not say the word "man", only speak the text in quotes)';
+        speakerLabel = 'Man speaks Korean line, lips visible';
       } else if (speaker === 'narrator-woman') {
-        speakerLabel = 'A female narrator voice-over (no visible speaker, no lip movement on screen) reads the following Korean line in a calm storytelling tone (do not say the word "narrator" or "woman", only speak the text in quotes)';
+        speakerLabel = 'Female narrator voice-over (no visible speaker)';
       } else if (speaker === 'narrator-man') {
-        speakerLabel = 'A male narrator voice-over (no visible speaker, no lip movement on screen) reads the following Korean line in a calm storytelling tone (do not say the word "narrator" or "man", only speak the text in quotes)';
+        speakerLabel = 'Male narrator voice-over (no visible speaker)';
       } else {
-        speakerLabel = 'The character speaks the following Korean dialogue (only speak what is in quotes)';
+        speakerLabel = 'Character speaks Korean line';
       }
       finalPrompt += ` ${speakerLabel}: "${script}"`;
       log('info', `대사: [${speaker || 'character'}] "${script}"`);
+    }
+
+    // 최종 안전장치: 512자 커팅
+    if (finalPrompt.length > 510) {
+      log('warn', `프롬프트 ${finalPrompt.length}자 → 510자로 잘라냄`);
+      finalPrompt = finalPrompt.slice(0, 507) + '...';
     }
 
     let body;
