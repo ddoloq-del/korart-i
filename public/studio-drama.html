@@ -1076,10 +1076,13 @@ const S = {
   cutPubUrls:  [null,null,null,null],  // 각 컷 CDN URL
   cutApproval: [true,true,true,true],
   cutDurations:[5,5,5,5],
-  cutAudio:    [false,false,false,false],
+  cutAudio:    [true,true,true,true],
 
   // 각 컷별 사용자 설명 (쯤트/명장/감정 등 자유 입력)
   cutDescriptions: ['','','',''],
+
+  // 각 컷별 감정 (드롭다운 선택: angry/shouting/calm/sad/funny/excited/...)
+  cutEmotions: ['','','',''],
 
   vidUrls: [null,null,null,null],  // 생성된 영상 URLs
 
@@ -3455,10 +3458,10 @@ function renderVidCards() {
           <input id="vidExtra${i}" placeholder="예: 비가 점점 거세진다 / 카메라가 천천히 줌인 / 표정이 점차 굳어진다" style="width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
           <div style="font-size:9px;color:var(--ink3);margin-top:3px">기본 영상 프롬프트는 자동 생성되며, 입력한 내용은 추가 디테일로 합쳐집니다</div>
         </div>
-        <!-- 대사 (화자 + 대사) -->
+        <!-- 대사 (화자 + 감정 + 대사) -->
         <div style="margin-bottom:8px">
           <label style="font-size:10px;color:var(--ink3);display:block;margin-bottom:4px">대사 (선택 · Kling 3.0만)</label>
-          <div style="display:flex;gap:6px">
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
             <select id="vidSpeaker${i}" style="background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px;width:120px" ${!hasCut ? 'disabled' : ''}>
               <option value="">화자 선택</option>
               <option value="woman">여자</option>
@@ -3466,9 +3469,26 @@ function renderVidCards() {
               <option value="narrator-woman">나레이션 (여자)</option>
               <option value="narrator-man">나레이션 (남자)</option>
             </select>
-            <input id="vidScript${i}" placeholder='대사만 입력 (예: 나는 널 잊을 수 없어)' style="flex:1;background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
+            <select id="vidEmotion${i}" onchange="S.cutEmotions[${i}]=this.value" style="background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px;width:120px" ${!hasCut ? 'disabled' : ''}>
+              <option value="">감정 선택</option>
+              <option value="angry" ${S.cutEmotions[i]==='angry'?'selected':''}>화남 😠</option>
+              <option value="shouting" ${S.cutEmotions[i]==='shouting'?'selected':''}>소리침 📢</option>
+              <option value="sad" ${S.cutEmotions[i]==='sad'?'selected':''}>슬픔 😢</option>
+              <option value="crying" ${S.cutEmotions[i]==='crying'?'selected':''}>울음 😭</option>
+              <option value="calm" ${S.cutEmotions[i]==='calm'?'selected':''}>평온 😌</option>
+              <option value="happy" ${S.cutEmotions[i]==='happy'?'selected':''}>행복 😊</option>
+              <option value="excited" ${S.cutEmotions[i]==='excited'?'selected':''}>신남 🤩</option>
+              <option value="funny" ${S.cutEmotions[i]==='funny'?'selected':''}>웃김 😆</option>
+              <option value="surprised" ${S.cutEmotions[i]==='surprised'?'selected':''}>놀람 😲</option>
+              <option value="scared" ${S.cutEmotions[i]==='scared'?'selected':''}>두려움 😨</option>
+              <option value="shy" ${S.cutEmotions[i]==='shy'?'selected':''}>수줌음 😊</option>
+              <option value="longing" ${S.cutEmotions[i]==='longing'?'selected':''}>그리움 🥺</option>
+              <option value="serious" ${S.cutEmotions[i]==='serious'?'selected':''}>진지 😐</option>
+              <option value="romantic" ${S.cutEmotions[i]==='romantic'?'selected':''}>로맨틱 😍</option>
+            </select>
+            <input id="vidScript${i}" placeholder='대사만 입력 (예: 나는 널 잊을 수 없어)' style="flex:1;min-width:160px;background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
           </div>
-          <div style="font-size:9px;color:var(--ink3);margin-top:3px">화자가 선정되면 영상에 자막처럼 보이지 않게 자동 처리됩니다</div>
+          <div style="font-size:9px;color:var(--ink3);margin-top:3px">화자·감정 선택은 설정되면 영상의 대사 논도 자별 입력 창이 자동 프롬프트에 합쳐집니다</div>
         </div>
         <!-- 설정 -->
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
@@ -3539,6 +3559,25 @@ async function generateCutVideo(i) {
   }
   const script = document.getElementById(`vidScript${i}`)?.value.trim() || '';
   const speaker = document.getElementById(`vidSpeaker${i}`)?.value || '';
+  const emotion = document.getElementById(`vidEmotion${i}`)?.value || '';
+
+  // 감정 영어 지시문 매핑
+  const emotionMap = {
+    angry: 'angry expression, furrowed brow, intense gaze',
+    shouting: 'shouting loudly, mouth wide open, intense emotion',
+    sad: 'sad expression, downcast eyes, melancholic mood',
+    crying: 'crying with tears, emotional breakdown',
+    calm: 'calm peaceful expression, serene mood',
+    happy: 'happy smiling expression, joyful mood',
+    excited: 'excited energetic expression, bright eyes, enthusiastic',
+    funny: 'comedic playful expression, light-hearted mood',
+    surprised: 'surprised expression, wide eyes, shocked',
+    scared: 'fearful expression, tense, anxious mood',
+    shy: 'shy bashful expression, blushing, timid',
+    longing: 'longing wistful expression, yearning gaze',
+    serious: 'serious focused expression, contemplative',
+    romantic: 'romantic tender expression, loving gaze',
+  };
 
   // Kling v3 15초 체크
   if (model.includes('v3') && dur > 15) {
@@ -3559,8 +3598,15 @@ async function generateCutVideo(i) {
 
   try {
     let finalPrompt = prompt;
+
+    // 감정 지시문 추가 (대사보다 먼저 추가 — 일반 자세/표정을 명시)
+    if (emotion && emotionMap[emotion]) {
+      finalPrompt += ` ${emotionMap[emotion]}.`;
+      log('info', `감정: ${emotion}`);
+    }
+
     if (script) {
-      // 화자별로 영어 지시문 + 한국어 대사 따옴표로 분리 (압축)
+      // 화자별로 영어 지시문 + 한국어 대사 따올표로 분리 (압축)
       let speakerLabel = '';
       if (speaker === 'woman') {
         speakerLabel = 'Woman speaks Korean line, lips visible';
