@@ -3550,16 +3550,27 @@ ${prompt}`;
 
 async function uploadToFalStorage(key, blob, filename, contentTypeOverride) {
   const ct = contentTypeOverride || blob.type || 'image/jpeg';
-  const r = await fetch('https://fal.run/fal-ai/storage/upload/initiate', {
+  // 워커 프록시 사용 (rest.fal.ai 의 올바른 storage initiate 호출)
+  // base64 인코딩 → 워커 /fal-upload 에 POST → 워커가 initiate + PUT 공서
+  const arrayBuffer = await blob.arrayBuffer();
+  const bytes = new Uint8Array(arrayBuffer);
+  let binary = '';
+  const chunkSize = 8192;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+  }
+  const base64 = btoa(binary);
+  const r = await fetch('/fal-upload', {
     method: 'POST',
     headers: { 'Authorization': 'Key ' + key, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ file_name: filename, content_type: ct }),
+    body: JSON.stringify({ base64, fileName: filename, contentType: ct }),
   });
-  if (!r.ok) throw new Error('storage initiate 실패: ' + r.status);
-  const { upload_url, file_url } = await r.json();
-  const up = await fetch(upload_url, { method: 'PUT', body: blob, headers: { 'Content-Type': ct } });
-  if (!up.ok) throw new Error('storage PUT 실패: ' + up.status);
-  return file_url;
+  if (!r.ok) {
+    const errText = await r.text();
+    throw new Error('fal-upload 실패 ' + r.status + ': ' + errText.slice(0, 200));
+  }
+  const { url } = await r.json();
+  return url;
 }
 
 function downloadVideo(url, filename) {
