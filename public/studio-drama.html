@@ -3394,6 +3394,23 @@ async function goToStep3() {
 // ════════════════════════════════════════════════════════════
 //  STEP 3: 컷별 영상 생성
 // ════════════════════════════════════════════════════════════
+// Kling 영상 생성 시 차단할 요소 (negative_prompt)
+const KLING_NEGATIVE_PROMPT = [
+  // 유명인/실존 인물 차단
+  'celebrity', 'famous person', 'real actor', 'movie star', 'public figure',
+  'recognizable person', 'real-world person', 'identifiable celebrity',
+  // 추가 인물/행인 차단
+  'extra people', 'background extras', 'crowd', 'bystanders', 'passersby',
+  'additional characters', 'random people appearing', 'people walking by',
+  'unexpected character entering frame', 'new person appearing',
+  // 얼굴 변형/왜곡 차단
+  'face morphing', 'changing face', 'distorted face', 'face swap',
+  'different person', 'face replacement', 'multiple faces blending',
+  // 일반적인 품질 문제
+  'blurry', 'low quality', 'distorted', 'deformed', 'extra limbs',
+  'duplicated person', 'cloned faces', 'mismatched features',
+].join(', ');
+
 function buildVidPrompt(i) {
   const sc = SCENES[S.scene];
   const loc = getCombinedLocation();
@@ -3404,8 +3421,8 @@ function buildVidPrompt(i) {
 
   // 캡션 압축
   const charLock = charCount > 0
-    ? `${charCount} character${charCount>1?'s':''} (${charNames}), same faces as reference. No extras, no crowd.`
-    : 'no people in scene.';
+    ? `EXACTLY ${charCount} fictional character${charCount>1?'s':''} (${charNames}), Faces MUST match reference photos exactly. Original characters only, NOT real celebrities or actors. No additional people, no extras, no background characters, no crowd.`
+    : 'Empty scene with no people, no characters, no humans visible.';
 
   // 장면 압축 — SCENES style은 장문이므로 앞 80자만
   const sceneStyle = (sc.style || '').slice(0, 80);
@@ -3425,8 +3442,7 @@ function buildVidPrompt(i) {
     }
   }
 
-  // 512 커팅 (대사·설명 추가 공간 확보 → 380자)
-  if (p.length > 380 && !cutDesc) p = p.slice(0, 377) + '...';
+  // 510자 안전 커팅 (charLock이 길어졌으므로 공간 여유 느스)
   if (p.length > 510) p = p.slice(0, 507) + '...';
   return p;
 }
@@ -3672,10 +3688,12 @@ async function generateCutVideo(i) {
         multi_prompt: [{
           prompt: finalPrompt,
           duration: String(dur),
+          negative_prompt: KLING_NEGATIVE_PROMPT,
         }],
         start_image_url: imgUrl,
         aspect_ratio: getVideoAspectRatio(),
         generate_audio: audio,
+        negative_prompt: KLING_NEGATIVE_PROMPT,
       };
     } else {
       // 기타: prompt 단수 + image_url + duration
@@ -3684,6 +3702,7 @@ async function generateCutVideo(i) {
         image_url: imgUrl,
         duration: String(dur),
         aspect_ratio: getVideoAspectRatio(),
+        negative_prompt: KLING_NEGATIVE_PROMPT,
       };
     }
 
