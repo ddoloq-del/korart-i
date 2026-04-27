@@ -1281,6 +1281,12 @@ function goStep(n) {
     if (quad) quad.style.aspectRatio = getQuadCssAspect();
   }
 
+  // 영상 패널 진입 시 컷 카드 렌더링 (4컷 없이 도달해도 빈 슬롯 표시 + 불러오기 가능)
+  if (n === 5) {
+    if (typeof renderVidCards === 'function') renderVidCards();
+    if (typeof updateMergeBtn === 'function') updateMergeBtn();
+  }
+
   // panel1 안의 sub-step 토글 (step 2 = sceneStepA, step 3 = sceneStepB)
   if (n === 2) {
     document.getElementById('sceneStepA').style.display = 'block';
