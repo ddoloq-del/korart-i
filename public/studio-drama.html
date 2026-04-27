@@ -361,9 +361,8 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <div class="field">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <label style="margin:0;font-size:14px;font-weight:700">씬 분위기를 선택하세요</label>
-          <button class="btn btn-sm btn-ghost" onclick="saveSceneToLib()" title="로컬에 저장">💾 로컬</button>
-          <button class="btn btn-sm" onclick="saveSceneToCloud()" title="클라우드에 저장" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">☁️ 클라우드</button>
-          <button class="btn btn-sm btn-ghost" onclick="openScenePicker()" title="저장한 씀 설정 불러오기">불러오기</button>
+          <button class="btn btn-sm" onclick="saveSceneToCloud()" title="클라우드에 저장" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">☁️ 클라우드 저장</button>
+          <button class="btn btn-sm btn-ghost" onclick="openScenePicker()" title="저장한 씬 설정 불러오기">☁️ 클라우드 불러오기</button>
         </div>
         <div class="scene-grid" id="sceneGrid" style="grid-template-columns:repeat(4,1fr);gap:12px"></div>
       </div>
@@ -3827,11 +3826,11 @@ const KorartAssets = {
     const { data: row, error } = await sb.from('user_assets').insert({
       user_id: currentUser.id,
       asset_type: 'scene',
-      title: title || `씀 ${new Date().toLocaleString('ko-KR')}`,
+      title: title || `씬 ${new Date().toLocaleString('ko-KR')}`,
       metadata,
       file_size: 0,
     }).select().single();
-    if (error) throw new Error('씀 저장 실패: ' + error.message);
+    if (error) throw new Error('씬 저장 실패: ' + error.message);
     return row;
   },
 
@@ -3922,7 +3921,7 @@ async function openAssetPicker(type, onSelect, onLocalAdd) {
     avatar: { cat: 'AVATAR', title: '저장된 아바타' },
     cuts4: { cat: '4-CUT', title: '저장된 4컷' },
     video: { cat: 'VIDEO', title: '저장된 영상' },
-    scene: { cat: 'SCENE', title: '저장된 씀 설정' },
+    scene: { cat: 'SCENE', title: '저장된 씬 설정' },
     merged_video: { cat: 'MERGED', title: '저장된 통합 영상' },
   };
   const t = titles[type] || { cat: 'ASSET', title: '저장된 자산' };
@@ -4122,10 +4121,10 @@ async function saveMergedVideoToCloud() {
 
 async function saveSceneToCloud() {
   if (!currentUser) { toast('❌ 로그인 필요'); return; }
-  const title = prompt('씀 설정 제목:', `씀 ${new Date().toLocaleDateString('ko-KR')}`);
+  const title = prompt('씬 설정 제목:', `씬 ${new Date().toLocaleDateString('ko-KR')}`);
   if (title === null) return;
   try {
-    await KorartAssets.saveSceneSettings(title || '씀 설정', {
+    await KorartAssets.saveSceneSettings(title || '씬 설정', {
       scene: S.scene,
       season: S.season,
       timeofday: S.timeofday,
@@ -4139,7 +4138,7 @@ async function saveSceneToCloud() {
       angles: S.angles,
       extraPrompt: document.getElementById('extraPrompt')?.value || '',
     });
-    toast(`✅ 씀 설정 "${title}" 저장됨`);
+    toast(`✅ 씬 설정 "${title}" 저장됨`);
   } catch (e) {
     toast('❌ ' + e.message);
   }
@@ -4266,7 +4265,7 @@ function openScenePicker() {
   if (!currentUser) { toast('❌ 로그인 필요'); return; }
   openAssetPicker('scene', async (item) => {
     const md = item.metadata || {};
-    // S에 씀 설정 적용
+    // S에 씬 설정 적용
     if (md.scene) S.scene = md.scene;
     if (md.season) S.season = md.season;
     if (md.timeofday) S.timeofday = md.timeofday;
@@ -4284,7 +4283,7 @@ function openScenePicker() {
     if (typeof renderScenes === 'function') renderScenes();
     if (typeof renderAngleSlots === 'function') renderAngleSlots();
     if (typeof updatePromptPreview === 'function') updatePromptPreview();
-    toast(`✅ 씀 설정 "${item.title}" 불러온`);
+    toast(`✅ 씬 설정 "${item.title}" 불러옴`);
   }, null);
 }
 
