@@ -468,11 +468,8 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 
         <input id="locCustomInput" placeholder="수식어 또는 단독 장소 입력: 예) 고급진 / 낡은 / 어두운 (또는 단독으로: rooftop at night)" style="display:none;margin-top:6px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:4px;padding:6px 8px;color:var(--ink);font-size:12px">
       </div>
-    </div>
 
-    <!-- 우측 -->
-    <div>
-      <!-- 인원수 -->
+      <!-- 등장 인원 -->
       <div class="field">
         <label>등장 인원</label>
         <div class="segs" id="personCountSegs">
@@ -497,6 +494,28 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         </div>
       </div>
 
+      <!-- 이전 컷 이어서 만들기 -->
+      <div class="field" id="continueRefField">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+          <label style="margin:0;display:flex;align-items:center;gap:6px">
+            🔗 이전 컷 이어서 만들기 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span>
+          </label>
+          <button class="btn btn-sm btn-ghost" id="continueRefClearBtn" onclick="clearContinueRef()" style="display:none">제거</button>
+        </div>
+        <div style="font-size:10px;color:var(--ink3);margin-bottom:6px;line-height:1.5">이전에 만든 컷이나 그리드 이미지를 첨부하면 배경·마감·조명 통일성을 유지하며 이어서 생성합니다.</div>
+        <div style="display:flex;gap:6px;align-items:flex-start">
+          <div id="continueRefPreview" style="width:120px;aspect-ratio:16/9;background:var(--bg3);border:1px dashed var(--line2);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:24px;flex-shrink:0;overflow:hidden">🖼️</div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+            <button class="btn btn-sm" onclick="document.getElementById('continueRefUpload').click()">파일 업로드</button>
+            <div style="font-size:9px;color:var(--ink3);line-height:1.4">이전에 다운로드한 <strong>4컷 그리드</strong> 또는 <strong>단일 컷</strong> 이미지를 올려주세요.</div>
+            <input type="file" id="continueRefUpload" accept="image/*" style="display:none" onchange="uploadContinueRef(event)">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 우측 -->
+    <div>
       <!-- 앵글 선택 + 컷별 설명 (세로 레이아웃) -->
       <div class="field">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
@@ -529,26 +548,6 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <label>추가 프롬프트 (선택)</label>
         <textarea id="extraPrompt" rows="2" placeholder="예: there is a bouquet of red roses on the table, neon signs reflecting on wet pavement"></textarea>
       </div>
-
-      <!-- 이전 컷 이어서 만들기 -->
-      <div class="field" id="continueRefField">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
-          <label style="margin:0;display:flex;align-items:center;gap:6px">
-            🔗 이전 컷 이어서 만들기 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span>
-          </label>
-          <button class="btn btn-sm btn-ghost" id="continueRefClearBtn" onclick="clearContinueRef()" style="display:none">제거</button>
-        </div>
-        <div style="font-size:10px;color:var(--ink3);margin-bottom:6px;line-height:1.5">이전에 만든 컷이나 그리드 이미지를 첨부하면 배경·마감·조명 통일성을 유지하며 이어서 생성합니다.</div>
-        <div style="display:flex;gap:6px;align-items:flex-start">
-          <div id="continueRefPreview" style="width:120px;aspect-ratio:16/9;background:var(--bg3);border:1px dashed var(--line2);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:24px;flex-shrink:0;overflow:hidden">🖼️</div>
-          <div style="flex:1;display:flex;flex-direction:column;gap:6px">
-            <button class="btn btn-sm" onclick="document.getElementById('continueRefUpload').click()">파일 업로드</button>
-            <div style="font-size:9px;color:var(--ink3);line-height:1.4">이전에 다운로드한 <strong>4컷 그리드</strong> 또는 <strong>단일 컷</strong> 이미지를 올려주세요.</div>
-            <input type="file" id="continueRefUpload" accept="image/*" style="display:none" onchange="uploadContinueRef(event)">
-          </div>
-        </div>
-      </div>
-
 
     </div>
     </div><!-- grid end -->
@@ -2999,35 +2998,45 @@ let _anglePickerCutIdx = -1;
 function openAnglePickerModal(cutIdx) {
   _anglePickerCutIdx = cutIdx;
   const modal = document.getElementById('anglePickerModal');
-  if (!modal) return;
+  if (!modal) {
+    console.error('[AnglePicker] modal not found');
+    return;
+  }
   const colors = ['var(--gold)','var(--blue)','var(--green)','var(--red)'];
+  const rgbs = ['255,184,77','96,165,250','74,222,128','255,85,119'];
   const lbl = document.getElementById('anglePickerCutLabel');
   if (lbl) {
     lbl.textContent = `CUT ${cutIdx + 1}`;
     lbl.style.color = colors[cutIdx];
   }
-  // 카테고리별 앵글 리스트 렌더
+  // ANGLE_CATS 구조: [{cat:'카테고리', items:[{label:'앵글명', tip:'설명'}, ...]}, ...]
   const list = document.getElementById('anglePickerModalList');
-  const cats = (typeof ANGLE_CATS !== 'undefined' && ANGLE_CATS) ? ANGLE_CATS : null;
+  if (!list) { console.error('[AnglePicker] list element not found'); return; }
   let html = '';
-  if (cats) {
-    cats.forEach(cat => {
+  if (typeof ANGLE_CATS !== 'undefined' && Array.isArray(ANGLE_CATS)) {
+    ANGLE_CATS.forEach(cat => {
+      const catName = cat.cat || cat.name || '';
+      const items = cat.items || cat.angles || [];
       html += `<div style="margin-bottom:14px">
-        <div style="font-size:10px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">${escHtml(cat.name)}</div>`;
-      cat.angles.forEach(angle => {
-        const meta = ANGLE_DESCRIPTIONS[angle];
-        const ko = meta ? meta.ko : '';
-        const use = meta ? meta.use : '';
+        <div style="font-size:10px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">${escHtml(catName)}</div>`;
+      items.forEach(item => {
+        // item은 string일수도, {label, tip} 객체일수도 있음
+        const angle = (typeof item === 'string') ? item : (item.label || '');
+        if (!angle) return;
+        const meta = ANGLE_DESCRIPTIONS[angle] || {};
+        const ko = meta.ko || (typeof item === 'object' ? item.tip : '') || '';
+        const use = meta.use || '';
         const isSelected = S.angles[cutIdx] === angle;
+        const safeAngle = angle.replace(/'/g, "\\'").replace(/"/g, '&quot;');
         html += `
-          <div onclick="selectAngleForCut('${angle.replace(/'/g,"\\'")}')"
-               style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-radius:6px;border:1px solid ${isSelected ? colors[cutIdx] : 'var(--line)'};background:${isSelected ? `rgba(${cutIdx===0?'255,184,77':cutIdx===1?'96,165,250':cutIdx===2?'74,222,128':'255,85,119'},0.1)` : 'var(--bg3)'};margin-bottom:5px;cursor:pointer;transition:.12s"
-               onmouseover="this.style.borderColor='${colors[cutIdx]}'"
-               onmouseout="this.style.borderColor='${isSelected ? colors[cutIdx] : 'var(--line)'}'">
+          <div onclick="selectAngleForCut('${safeAngle}')"
+               style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-radius:6px;border:1px solid ${isSelected ? colors[cutIdx] : 'var(--line)'};background:${isSelected ? `rgba(${rgbs[cutIdx]},0.1)` : 'var(--bg3)'};margin-bottom:5px;cursor:pointer;transition:.12s"
+               onmouseover="this.style.background='var(--bg4)'"
+               onmouseout="this.style.background='${isSelected ? `rgba(${rgbs[cutIdx]},0.1)` : 'var(--bg3)'}'">
             <div style="flex:1;min-width:0">
               <div style="font-size:12px;font-weight:700;color:var(--cream)">${escHtml(angle)}</div>
               <div style="font-size:10px;color:var(--ink2);margin-top:2px">${escHtml(ko)}</div>
-              <div style="font-size:9px;color:var(--ink3);margin-top:2px;font-style:italic">${escHtml(use)}</div>
+              ${use ? `<div style="font-size:9px;color:var(--ink3);margin-top:2px;font-style:italic">${escHtml(use)}</div>` : ''}
             </div>
             ${isSelected ? `<div style="flex:0 0 auto;font-size:18px;color:${colors[cutIdx]}">✓</div>` : ''}
           </div>
@@ -3036,12 +3045,13 @@ function openAnglePickerModal(cutIdx) {
       html += '</div>';
     });
   } else {
-    // ANGLE_CATS 없으면 전체 리스트 렌더
+    // 폴백 — ANGLE_DESCRIPTIONS 전체 렌더
     Object.keys(ANGLE_DESCRIPTIONS).forEach(angle => {
       const meta = ANGLE_DESCRIPTIONS[angle];
       const isSelected = S.angles[cutIdx] === angle;
+      const safeAngle = angle.replace(/'/g, "\\'").replace(/"/g, '&quot;');
       html += `
-        <div onclick="selectAngleForCut('${angle.replace(/'/g,"\\'")}')" style="padding:8px 12px;border-radius:6px;border:1px solid ${isSelected ? colors[cutIdx] : 'var(--line)'};background:${isSelected ? 'var(--bg4)' : 'var(--bg3)'};margin-bottom:5px;cursor:pointer">
+        <div onclick="selectAngleForCut('${safeAngle}')" style="padding:8px 12px;border-radius:6px;border:1px solid ${isSelected ? colors[cutIdx] : 'var(--line)'};background:${isSelected ? `rgba(${rgbs[cutIdx]},0.1)` : 'var(--bg3)'};margin-bottom:5px;cursor:pointer">
           <div style="font-size:12px;font-weight:700;color:var(--cream)">${escHtml(angle)}</div>
           <div style="font-size:10px;color:var(--ink2);margin-top:2px">${escHtml(meta.ko)}</div>
           <div style="font-size:9px;color:var(--ink3);margin-top:2px;font-style:italic">${escHtml(meta.use)}</div>
