@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Korart-i — K-드라마부터 K-먹방까지, 한 번에.</title>
+<meta name="description" content="한국 감성 AI 영상 스튜디오. K-드라마 30개 씬, K-아이돌 영상, K-예능 스타일. 편당 2,500원부터, 지금 바로 시작.">
+
+<meta property="og:title" content="Korart-i — Korean Artistic Intelligence">
+<meta property="og:description" content="K-드라마부터 K-먹방까지, 한 번에.">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #0a0908;
+  --bg-2: #141210;
+  --bg-3: #1c1a17;
+  --ink: #f5f1e8;
+  --ink-dim: #8a857d;
+  --ink-dimmer: #5a564f;
+  --accent: #e63946;
+  --accent-hover: #d62f3c;
+  --cream: #ead7b7;
+  --gold: #d4a574;
+  --line: #2a2825;
+  --line-lit: #3d3a35;
+  --success: #7cb87c;
+  --idol-pink: #ff4d88;
+  --variety-yellow: #f5c842;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ============ NAV ============ */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 18px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(10, 9, 8, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--line);
+}
+
+.logo {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  cursor: pointer;
+  letter-spacing: -0.02em;
+}
+
+.logo-main {
+  font-family: 'Gowun Batang', serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--ink);
+}
+
+.logo-i {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 24px;
+  color: var(--accent);
+}
+
+.logo-dash {
+  color: var(--ink-dim);
+  font-weight: 300;
+  margin: 0 1px;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+}
+
+.nav-links a {
+  color: var(--ink-dim);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover {
+  color: var(--cream);
+}
+
+.nav-cta {
+  background: var(--accent);
+  color: var(--ink);
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-cta::after {
+  content: '→';
+  transition: transform 0.2s;
+}
+
+.nav-cta:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.nav-cta:hover::after {
+  transform: translateX(3px);
+}
+
+/* ============ HERO ============ */
+.hero {
+  min-height: 100vh;
+  padding: 160px 40px 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  height: 900px;
+  background: radial-gradient(circle, rgba(230, 57, 70, 0.08), transparent 60%);
+  pointer-events: none;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: 10%;
+  right: -10%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(212, 165, 116, 0.04), transparent 60%);
+  pointer-events: none;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 500;
+  margin-bottom: 32px;
+  z-index: 2;
+  padding: 8px 20px;
+  border: 1px solid rgba(212, 165, 116, 0.3);
+  background: rgba(212, 165, 116, 0.05);
+}
+
+.hero-eyebrow::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--success);
+  border-radius: 50%;
+  animation: blink 2s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--success); }
+  50% { opacity: 0.5; box-shadow: 0 0 2px var(--success); }
+}
+
+.hero-title {
+  font-family: 'Gowun Batang', serif;
+  font-size: clamp(48px, 8vw, 104px);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  margin-bottom: 36px;
+  max-width: 1100px;
+  z-index: 2;
+}
+
+.hero-title em {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+  position: relative;
+}
+
+.hero-title em::after {
+  content: '';
+  position: absolute;
+  bottom: 0.1em;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent);
+  opacity: 0.3;
+}
+
+.hero-sub {
+  font-size: clamp(17px, 1.5vw, 22px);
+  color: var(--ink-dim);
+  max-width: 680px;
+  line-height: 1.6;
+  margin-bottom: 56px;
+  z-index: 2;
+}
+
+.hero-sub strong {
+  color: var(--cream);
+  font-weight: 500;
+}
+
+.hero-ctas {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 72px;
+  flex-wrap: wrap;
+  justify-content: center;
+  z-index: 2;
+}
+
+.cta-primary {
+  background: var(--accent);
+  color: var(--ink);
+  padding: 20px 40px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+.cta-primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(230, 57, 70, 0.4);
+}
+
+.cta-primary::after {
+  content: '→';
+  font-size: 18px;
+  transition: transform 0.2s;
+}
+
+.cta-primary:hover::after {
+  transform: translateX(5px);
+}
+
+.cta-secondary {
+  background: transparent;
+  color: var(--ink);
+  padding: 20px 36px;
+  border: 1px solid var(--line-lit);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cta-secondary:hover {
+  border-color: var(--cream);
+  background: var(--bg-2);
+}
+
+.hero-bonus {
+  font-size: 13px;
+  color: var(--ink-dim);
+  margin-bottom: 48px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-bonus strong {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.hero-bonus::before {
+  content: '🎁';
+  font-size: 16px;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 56px;
+  z-index: 2;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding-top: 40px;
+  border-top: 1px solid var(--line);
+  max-width: 720px;
+  width: 100%;
+}
+
+.hero-stat {
+  text-align: left;
+}
+
+.hero-stat-value {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 36px;
+  color: var(--cream);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.hero-stat-value .unit {
+  font-family: 'Gowun Batang', serif;
+  font-style: normal;
+  font-size: 16px;
+  color: var(--ink-dim);
+  font-weight: 400;
+}
+
+.hero-stat-label {
+  font-size: 11px;
+  color: var(--ink-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ============ SECTIONS ============ */
+.section {
+  padding: 140px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 500;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-eyebrow::before {
+  content: '';
+  width: 30px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.section-title {
+  font-family: 'Gowun Batang', serif;
+  font-size: clamp(36px, 5vw, 60px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+  max-width: 820px;
+}
+
+.section-title em {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+}
+
+.section-sub {
+  font-size: 17px;
+  color: var(--ink-dim);
+  line-height: 1.6;
+  max-width: 640px;
+  margin-bottom: 60px;
+}
+
+/* ============ PROBLEM vs SOLUTION ============ */
+.comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.comparison-col {
+  padding: 40px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  position: relative;
+}
+
+.comparison-col.bad {
+  border-color: rgba(230, 57, 70, 0.2);
+  background: linear-gradient(180deg, rgba(230, 57, 70, 0.04) 0%, transparent 100%), var(--bg-2);
+}
+
+.comparison-col.good {
+  border-color: rgba(124, 184, 124, 0.25);
+  background: linear-gradient(180deg, rgba(124, 184, 124, 0.04) 0%, transparent 100%), var(--bg-2);
+}
+
+.comparison-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.comparison-col.bad .comparison-label { color: var(--accent); }
+.comparison-col.good .comparison-label { color: var(--success); }
+
+.comparison-title {
+  font-family: 'Gowun Batang', serif;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.comparison-list {
+  list-style: none;
+  margin: 0 -8px;
+}
+
+.comparison-list li {
+  padding: 14px 8px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  color: var(--ink-dim);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  line-height: 1.5;
+}
+
+.comparison-list li:last-child { border-bottom: none; }
+
+.comparison-list li::before {
+  flex: 0 0 18px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.comparison-col.bad .comparison-list li::before { content: '✗'; color: var(--accent); }
+.comparison-col.good .comparison-list li::before { content: '✓'; color: var(--success); }
+
+/* ============ PIPELINE ============ */
+.pipeline-section {
+  background: var(--bg-2);
+  padding: 140px 40px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.pipeline-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pipeline-steps {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+  margin-top: 64px;
+  position: relative;
+}
+
+.pipeline-steps::before {
+  content: '';
+  position: absolute;
+  top: 30px;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--line), var(--accent), var(--line));
+  z-index: 0;
+}
+
+.pipeline-step {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  padding: 0 12px;
+}
+
+.pipeline-step-num {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--bg-3);
+  border: 1px solid var(--line-lit);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 24px;
+  color: var(--ink-dim);
+  transition: all 0.3s;
+}
+
+.pipeline-step:hover .pipeline-step-num {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.1);
+  box-shadow: 0 0 24px rgba(230, 57, 70, 0.3);
+}
+
+.pipeline-step-name {
+  font-family: 'Gowun Batang', serif;
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  letter-spacing: -0.02em;
+}
+
+.pipeline-step-desc {
+  font-size: 12px;
+  color: var(--ink-dim);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.pipeline-step-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.pipeline-step-tag.manual { color: var(--accent); }
+
+.pipeline-bottom-cta {
+  text-align: center;
+  margin-top: 72px;
+}
+
+/* ============ CATEGORIES ============ */
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 48px;
+}
+
+.cat-card {
+  padding: 44px 36px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.cat-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--cream);
+}
+
+.cat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--card-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s;
+}
+
+.cat-card:hover::before { transform: scaleX(1); }
+
+.cat-drama { --card-accent: var(--accent); background: radial-gradient(ellipse at 80% 20%, rgba(230, 57, 70, 0.08), transparent 50%), var(--bg-2); }
+.cat-idol { --card-accent: var(--idol-pink); background: radial-gradient(ellipse at 80% 30%, rgba(255, 77, 136, 0.1), transparent 50%), var(--bg-2); }
+.cat-variety { --card-accent: var(--variety-yellow); background: radial-gradient(ellipse at 70% 20%, rgba(245, 200, 66, 0.08), transparent 50%), var(--bg-2); }
+
+.cat-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--card-accent);
+  font-weight: 600;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cat-tag::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--card-accent);
+  border-radius: 50%;
+}
+
+.cat-count {
+  position: absolute;
+  top: 36px;
+  right: 36px;
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 44px;
+  color: var(--line-lit);
+  font-weight: 400;
+}
+
+.cat-title {
+  font-family: 'Gowun Batang', serif;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+
+.cat-title em {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--card-accent);
+}
+
+.cat-desc {
+  font-size: 14px;
+  color: var(--ink-dim);
+  margin-bottom: 24px;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.cat-examples {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.cat-ex {
+  font-size: 11px;
+  padding: 5px 11px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  color: var(--ink-dim);
+  font-family: 'Gowun Batang', serif;
+}
+
+.cat-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--gold);
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cat-score strong {
+  color: var(--cream);
+  font-weight: 600;
+}
+
+.cat-enter {
+  font-size: 12px;
+  color: var(--card-accent);
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.cat-card:hover .cat-enter { opacity: 1; }
+
+/* ============ PRICING ============ */
+.pricing-section {
+  background: var(--bg-2);
+  padding: 140px 40px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.pricing-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 48px;
+}
+
+.pricing-card {
+  padding: 36px 32px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  text-align: left;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.pricing-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--line-lit);
+}
+
+.pricing-card.featured {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, rgba(230, 57, 70, 0.06) 0%, transparent 100%), var(--bg);
+}
+
+.pricing-card.featured::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  height: 3px;
+  background: var(--accent);
+}
+
+.pricing-badge {
+  position: absolute;
+  top: -13px;
+  right: 24px;
+  background: var(--accent);
+  color: var(--ink);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  font-weight: 600;
+}
+
+.pricing-icon {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 28px;
+  color: var(--ink-dim);
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.pricing-card.featured .pricing-icon { color: var(--accent); }
+
+.pricing-name {
+  font-family: 'Gowun Batang', serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.pricing-tagline {
+  font-size: 13px;
+  color: var(--ink-dim);
+  margin-bottom: 28px;
+  line-height: 1.4;
+}
+
+.pricing-amount {
+  font-family: 'Gowun Batang', serif;
+  font-size: 44px;
+  font-weight: 700;
+  color: var(--cream);
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+  line-height: 1;
+}
+
+.pricing-amount .unit {
+  font-size: 16px;
+  color: var(--ink-dim);
+  font-weight: 400;
+}
+
+.pricing-per {
+  font-size: 12px;
+  color: var(--ink-dim);
+  margin-bottom: 28px;
+}
+
+.pricing-features {
+  list-style: none;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  margin-bottom: 28px;
+}
+
+.pricing-features li {
+  padding: 9px 0;
+  font-size: 13px;
+  color: var(--ink-dim);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.5;
+}
+
+.pricing-features li::before {
+  content: '✓';
+  color: var(--success);
+  flex: 0 0 14px;
+  font-weight: 700;
+}
+
+.pricing-cta {
+  display: block;
+  padding: 14px 0;
+  background: var(--bg-2);
+  border: 1px solid var(--line-lit);
+  color: var(--ink);
+  text-align: center;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+  letter-spacing: 0.02em;
+}
+
+.pricing-cta:hover {
+  border-color: var(--cream);
+  background: var(--bg-3);
+}
+
+.pricing-card.featured .pricing-cta {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.pricing-card.featured .pricing-cta:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.pricing-note {
+  text-align: center;
+  margin-top: 40px;
+  font-size: 13px;
+  color: var(--ink-dim);
+  line-height: 1.6;
+}
+
+.pricing-note strong {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* ============ FINAL CTA ============ */
+.final-cta {
+  padding: 160px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.final-cta::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(230, 57, 70, 0.06), transparent 60%);
+  pointer-events: none;
+}
+
+.final-cta-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.final-cta-title {
+  font-family: 'Gowun Batang', serif;
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin-bottom: 28px;
+}
+
+.final-cta-title em {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+}
+
+.final-cta-sub {
+  font-size: 17px;
+  color: var(--ink-dim);
+  margin-bottom: 48px;
+  line-height: 1.6;
+}
+
+/* ============ FAQ ============ */
+.faq-list {
+  max-width: 720px;
+  margin: 48px auto 0;
+}
+
+.faq-item {
+  border-bottom: 1px solid var(--line);
+  padding: 24px 0;
+}
+
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-family: 'Gowun Batang', serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.4;
+  padding: 4px 0;
+  letter-spacing: -0.01em;
+}
+
+.faq-question::after {
+  content: '+';
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 28px;
+  color: var(--accent);
+  font-weight: 400;
+  transition: all 0.3s;
+  flex: 0 0 28px;
+  text-align: center;
+  line-height: 1;
+}
+
+.faq-item.open .faq-question::after {
+  content: '−';
+  transform: rotate(180deg);
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, margin 0.3s;
+  font-size: 14px;
+  color: var(--ink-dim);
+  line-height: 1.7;
+}
+
+.faq-item.open .faq-answer {
+  max-height: 400px;
+  margin-top: 16px;
+}
+
+/* ============ FOOTER ============ */
+footer {
+  padding: 60px 40px 40px;
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-logo {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.footer-logo-main {
+  font-family: 'Gowun Batang', serif;
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.footer-logo-i {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 24px;
+  color: var(--accent);
+}
+
+.footer-tagline {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  color: var(--ink-dim);
+  font-size: 15px;
+  margin-bottom: 32px;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: var(--ink-dim);
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.2s;
+}
+
+.footer-links a:hover { color: var(--cream); }
+
+.footer-copy {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-dimmer);
+  letter-spacing: 0.05em;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  line-height: 1.8;
+}
+
+.footer-copy .tagline {
+  display: block;
+  margin-top: 8px;
+  color: var(--ink-dim);
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 0;
+}
+
+/* ============ MOBILE ============ */
+@media (max-width: 900px) {
+  nav { padding: 14px 20px; }
+  .nav-links { display: none; }
+  .hero { padding: 120px 20px 60px; }
+  .section, .pipeline-section, .pricing-section, .final-cta { padding: 80px 20px; }
+  .comparison { grid-template-columns: 1fr; }
+  .cat-grid { grid-template-columns: 1fr; }
+  .pipeline-steps {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .pipeline-steps::before { display: none; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .hero-ctas { flex-direction: column; align-items: stretch; }
+  .cta-primary, .cta-secondary { justify-content: center; }
+  .hero-stats { gap: 32px; padding-top: 32px; }
+  .hero-stat { flex: 1; min-width: 140px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav>
+  <div class="logo">
+    <span class="logo-main">Korart</span><span class="logo-dash">-</span><span class="logo-i">i</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#how">작동 방식</a></li>
+    <li><a href="#categories">카테고리</a></li>
+    <li><a href="#pricing">가격</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <a href="studio.html" class="nav-cta">
+    지금 시작
+  </a>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-eyebrow">
+    Now Available · 한국 감성 AI 영상 스튜디오
+  </div>
+  <h1 class="hero-title">
+    K-드라마부터<br>
+    K-먹방까지, <em>한 번에.</em>
+  </h1>
+  <p class="hero-sub">
+    AI가 해석한 장면을 먼저 확인하고, 이미지로 미리보고, 영상을 만듭니다.
+    <strong>재생성 낭비 없이, 편당 2,500원부터.</strong>
+  </p>
+  <div class="hero-ctas">
+    <a href="studio.html" class="cta-primary">
+      지금 바로 만들기
+    </a>
+    <a href="#how" class="cta-secondary">
+      작동 방식 보기
+    </a>
+  </div>
+  <div class="hero-bonus">
+    신규 가입 <strong>10,000원 크레딧</strong> 즉시 지급 · 2-4편 무료 체험
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-value">30<span class="unit">+</span></div>
+      <div class="hero-stat-label">K-드라마 씬</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-value">3</div>
+      <div class="hero-stat-label">카테고리</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-value">2<span class="unit">분</span></div>
+      <div class="hero-stat-label">제작 시간</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-value">2,500<span class="unit">원~</span></div>
+      <div class="hero-stat-label">편당 가격</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROBLEM vs SOLUTION ============ -->
+<section class="section">
+  <div class="section-eyebrow">The Difference</div>
+  <h2 class="section-title">AI 영상, <em>재생성 낭비</em>에 지쳤다면.</h2>
+  <p class="section-sub">
+    기존 AI 영상 서비스는 프롬프트 한 줄 넣으면 바로 고가 영상을 돌립니다.
+    마음에 안 들면? 또 돈 내고 재생성. Korart-i는 다릅니다.
+  </p>
+
+  <div class="comparison">
+    <div class="comparison-col bad">
+      <div class="comparison-label">기존 AI 영상 서비스</div>
+      <div class="comparison-title">프롬프트 → 바로 고가 영상</div>
+      <ul class="comparison-list">
+        <li>AI 해석이 빗나가도 결과 나와야 알 수 있음</li>
+        <li>평균 3회 재생성 = 12,000원 낭비</li>
+        <li>K-드라마/K-예능 감성 재현 품질 낮음</li>
+        <li>한국인 외모·한국 음식·문화 오해석</li>
+        <li>구독 강제 (월 29,000원~)</li>
+      </ul>
+    </div>
+
+    <div class="comparison-col good">
+      <div class="comparison-label">Korart-i 방식</div>
+      <div class="comparison-title">해석 확인 → 이미지 → 영상</div>
+      <ul class="comparison-list">
+        <li>AI 해석 3가지 중 선택 (무료)</li>
+        <li>저가 이미지로 먼저 미리보기 (200원)</li>
+        <li>K-드라마 씬 30개 + 촬영감독 프리셋</li>
+        <li>한국 문화 특화 프롬프트 엔지니어링</li>
+        <li>구독 없음. 편당 2,500원부터</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="pipeline-section" id="how">
+  <div class="pipeline-inner">
+    <div class="section-eyebrow">How It Works</div>
+    <h2 class="section-title">이렇게 <em>작동</em>합니다.</h2>
+    <p class="section-sub">
+      복잡한 프롬프트 엔지니어링은 Korart-i가. 당신은 인물과 감정만 적으세요.
+    </p>
+
+    <div class="pipeline-steps">
+      <div class="pipeline-step">
+        <div class="pipeline-step-num">i</div>
+        <div class="pipeline-step-name">시나리오 입력</div>
+        <div class="pipeline-step-desc">인물과 감정을 한국어로</div>
+        <div class="pipeline-step-tag manual">당신의 입력</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-step-num">ii</div>
+        <div class="pipeline-step-name">AI 해석 확인</div>
+        <div class="pipeline-step-desc">3가지 해석 중 선택 · 수정</div>
+        <div class="pipeline-step-tag manual">당신의 선택</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-step-num">iii</div>
+        <div class="pipeline-step-name">이미지 4장 생성</div>
+        <div class="pipeline-step-desc">저가 초안으로 미리보기</div>
+        <div class="pipeline-step-tag">자동 · 15초</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-step-num">iv</div>
+        <div class="pipeline-step-name">이미지 1장 선택</div>
+        <div class="pipeline-step-desc">마음에 드는 컷 선택</div>
+        <div class="pipeline-step-tag manual">당신의 선택</div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-step-num">v</div>
+        <div class="pipeline-step-name">본편 영상 생성</div>
+        <div class="pipeline-step-desc">이미지 + 프롬프트 동시 참조</div>
+        <div class="pipeline-step-tag">자동 · 90초</div>
+      </div>
+    </div>
+
+    <div class="pipeline-bottom-cta">
+      <a href="studio.html" class="cta-primary">
+        2분 안에 만들어보기
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CATEGORIES ============ -->
+<section class="section" id="categories">
+  <div class="section-eyebrow">Categories</div>
+  <h2 class="section-title">3가지 <em>K-컬쳐</em>, 세분화된 템플릿.</h2>
+  <p class="section-sub">
+    각 카테고리마다 한국 문화 특화 프롬프트가 사전 설계되어 있어요.
+    촬영 문법, 조명, 색감, 의상까지 자동 적용.
+  </p>
+
+  <div class="cat-grid">
+    <a href="studio.html#drama" class="cat-card cat-drama">
+      <div class="cat-count">30</div>
+      <div class="cat-tag">K-DRAMA</div>
+      <h3 class="cat-title">드라마 <em>씬</em></h3>
+      <p class="cat-desc">로맨스·청춘·직장·사극·일상 5개 장르, 30개 씬. 첫눈 고백부터 옥상 청춘까지.</p>
+      <div class="cat-examples">
+        <span class="cat-ex">첫눈 고백</span>
+        <span class="cat-ex">포장마차 이별</span>
+        <span class="cat-ex">한강 벤치</span>
+        <span class="cat-ex">옥상 청춘</span>
+      </div>
+      <div class="cat-score">
+        <span>감정 재현도 <strong>7/10</strong></span>
+        <span class="cat-enter">시작하기 →</span>
+      </div>
+    </a>
+
+    <a href="studio.html#idol" class="cat-card cat-idol">
+      <div class="cat-count">36</div>
+      <div class="cat-tag" style="color: var(--idol-pink);">K-IDOL</div>
+      <h3 class="cat-title">아이돌 <em>영상</em></h3>
+      <p class="cat-desc">성별·인원·컨셉 조합. MV, 스테이지, 인터뷰 3종. 멤버 수 정확 유지.</p>
+      <div class="cat-examples">
+        <span class="cat-ex">뮤직비디오</span>
+        <span class="cat-ex">스테이지</span>
+        <span class="cat-ex">인터뷰</span>
+      </div>
+      <div class="cat-score">
+        <span>비주얼 품질 <strong>9/10</strong></span>
+        <span class="cat-enter">시작하기 →</span>
+      </div>
+    </a>
+
+    <a href="studio.html#variety" class="cat-card cat-variety">
+      <div class="cat-count">6</div>
+      <div class="cat-tag" style="color: var(--variety-yellow);">K-VARIETY</div>
+      <h3 class="cat-title">예능 <em>스타일</em></h3>
+      <p class="cat-desc">토크쇼·먹방·여행·게임 등 6종. K-예능 특유의 편집 리듬 반영.</p>
+      <div class="cat-examples">
+        <span class="cat-ex">먹방</span>
+        <span class="cat-ex">토크쇼</span>
+        <span class="cat-ex">여행</span>
+      </div>
+      <div class="cat-score">
+        <span>먹방 재현도 <strong>9/10</strong></span>
+        <span class="cat-enter">시작하기 →</span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- ============ PRICING ============ -->
+<section class="pricing-section" id="pricing">
+  <div class="pricing-inner">
+    <div class="section-eyebrow">Pricing</div>
+    <h2 class="section-title">구독 없음. <em>쓴 만큼만.</em></h2>
+    <p class="section-sub">
+      월 29,000원 구독은 옛날 이야기. 한 편 만들 때 한 편 값만 내세요.
+    </p>
+
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-icon">i</div>
+        <div class="pricing-name">빠른 생성</div>
+        <div class="pricing-tagline">SNS 쇼츠·실험용</div>
+        <div class="pricing-amount">2,500<span class="unit">원</span></div>
+        <div class="pricing-per">영상 1편당</div>
+        <ul class="pricing-features">
+          <li>5초 영상, 720p</li>
+          <li>이미지 4장 초안 포함</li>
+          <li>1분 이내 생성</li>
+          <li>9:16 쇼츠 변환</li>
+        </ul>
+        <a href="studio.html" class="pricing-cta">시작하기</a>
+      </div>
+
+      <div class="pricing-card featured">
+        <div class="pricing-badge">추천</div>
+        <div class="pricing-icon">ii</div>
+        <div class="pricing-name">Korart-i 추천</div>
+        <div class="pricing-tagline">씬 최적화 품질</div>
+        <div class="pricing-amount">4,000<span class="unit">원</span></div>
+        <div class="pricing-per">영상 1편당</div>
+        <ul class="pricing-features">
+          <li>5초 영상, 1080p</li>
+          <li>이미지 4장 초안 포함</li>
+          <li>씬별 최적 모델 자동 선택</li>
+          <li>상업적 이용 가능</li>
+          <li>9:16 쇼츠 · 1:1 릴스 변환</li>
+        </ul>
+        <a href="studio.html" class="pricing-cta">시작하기</a>
+      </div>
+
+      <div class="pricing-card">
+        <div class="pricing-icon">iii</div>
+        <div class="pricing-name">프리미엄</div>
+        <div class="pricing-tagline">광고·브랜드용</div>
+        <div class="pricing-amount">7,500<span class="unit">원</span></div>
+        <div class="pricing-per">영상 1편당</div>
+        <ul class="pricing-features">
+          <li>5초 영상, 1080p + 오디오</li>
+          <li>이미지 4장 초안 포함</li>
+          <li>최고 품질 모델 고정</li>
+          <li>무제한 재생성 (7일)</li>
+          <li>4K 업스케일 옵션</li>
+        </ul>
+        <a href="studio.html" class="pricing-cta">시작하기</a>
+      </div>
+    </div>
+
+    <div class="pricing-note">
+      신규 가입 시 <strong>10,000원 크레딧</strong> 즉시 지급 · 회원가입 없이 체험 가능 · 크레딧 충전은 5,000원부터
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="section" id="faq">
+  <div class="section-eyebrow">FAQ</div>
+  <h2 class="section-title">자주 묻는 <em>질문.</em></h2>
+
+  <div class="faq-list">
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">회원가입 없이도 써볼 수 있나요?</div>
+      <div class="faq-answer">
+        네. 상단 "지금 시작" 버튼으로 로그인 없이 바로 스튜디오에 진입해 전체 UX를 체험할 수 있어요. 실제 영상을 생성하려면 간단한 회원가입이 필요하며, 가입 즉시 10,000원 크레딧이 자동 지급됩니다.
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">상업적으로 사용할 수 있나요?</div>
+      <div class="faq-answer">
+        네, 생성된 영상은 상업적 이용이 가능합니다. 광고, 쇼츠, 브랜드 콘텐츠, 유튜브 수익화까지 모두 허용됩니다. 단, 실존 인물의 외모·목소리를 무단 복제하는 용도는 금지됩니다.
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">왜 2단계(이미지 → 영상) 구조인가요?</div>
+      <div class="faq-answer">
+        영상 AI는 "시작 프레임"에서 인물·의상·배경을 결정합니다. 저가 이미지에서 원하는 구도를 먼저 확정한 뒤 그 이미지를 레퍼런스로 넣으면, 재생성 없이 한 번에 원하는 결과가 나옵니다. 특히 K-pop 걸그룹 인원수처럼 AI가 실수하기 쉬운 요소는 이미지 단계에서 확정할 수 있어 결과적으로 비용이 크게 줄어듭니다.
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">해외 서비스(Higgsfield, Runway)와 뭐가 다른가요?</div>
+      <div class="faq-answer">
+        Higgsfield, Runway 같은 해외 서비스는 범용 AI 영상 도구라 K-드라마 첫눈 고백씬, 포장마차 이별씬, K-pop 걸그룹 군무 같은 한국 특화 씬의 재현도가 낮습니다. Korart-i는 30개 K-드라마 씬, 한국 문화 프롬프트 엔지니어링, K-pop 그룹 인원 제어 등 한국 시장 특화 기능을 제공합니다. 한국어 UI, 원화 결제, 한국 PG 지원은 기본입니다.
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">결제는 어떻게 하나요?</div>
+      <div class="faq-answer">
+        크레딧 충전 방식입니다. 5,000원 / 10,000원 / 30,000원 / 50,000원 단위로 충전하고, 영상 생성 시마다 차감됩니다. 신용카드, 체크카드, 간편결제(토스페이, 카카오페이) 모두 지원. 구독은 없습니다.
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">Korart-i는 어떤 뜻인가요?</div>
+      <div class="faq-answer">
+        Korean Artistic Intelligence의 줄임말입니다. 한국의 예술적 감성을 AI로 구현하는 서비스라는 의미를 담고 있어요. 발음은 "코아트아이" 또는 줄여서 "코아티"로 부르시면 됩니다.
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 64px;">
+    <a href="studio.html" class="cta-primary">
+      지금 시작하기
+    </a>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<section class="final-cta">
+  <div class="final-cta-inner">
+    <h2 class="final-cta-title">
+      첫 영상, <em>2분 뒤에</em> 완성.
+    </h2>
+    <p class="final-cta-sub">
+      10,000원 크레딧으로 2-4편 무료 체험. 카드 등록 없이 바로 시작할 수 있어요.
+    </p>
+    <a href="studio.html" class="cta-primary">
+      Korart-i 시작하기
+    </a>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <span class="footer-logo-main">Korart</span><span class="logo-dash">-</span><span class="footer-logo-i">i</span>
+    </div>
+    <div class="footer-tagline">Korean Artistic Intelligence</div>
+
+    <div class="footer-links">
+      <a href="#how">작동 방식</a>
+      <a href="#categories">카테고리</a>
+      <a href="#pricing">가격</a>
+      <a href="#faq">FAQ</a>
+      <a href="studio.html">스튜디오</a>
+      <a href="mailto:hello@korarti.ai.kr">문의</a>
+    </div>
+
+    <div class="footer-copy">
+      © 2026 Korart-i · All rights reserved · Built in Seoul
+      <span class="tagline">K-드라마부터 K-먹방까지, 한 번에.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// FAQ toggle
+function toggleFaq(el) {
+  el.classList.toggle('open');
+}
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', function(e) {
+    const href = this.getAttribute('href');
+    if (href === '#') return;
+    const target = document.querySelector(href);
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+// Fade-in on scroll
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.section, .pipeline-section, .pricing-section, .final-cta').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+  observer.observe(el);
+});
+</script>
+
+</body>
+</html>

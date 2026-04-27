@@ -21,7 +21,9 @@ desktop.ini
 # 로컬 전용 테스트 파일 (API 키 포함 가능성)
 test.html
 test-*.html
+server.js
 .env
 .env.local
 *.key
 secrets/
+node_modules/

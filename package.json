@@ -1,0 +1,5 @@
+{
+  "devDependencies": {
+    "@fal-ai/client": "^1.10.0"
+  }
+}
