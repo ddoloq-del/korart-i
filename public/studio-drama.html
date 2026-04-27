@@ -329,9 +329,12 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 
     <!-- 저장된 아바타 -->
     <div style="background:var(--bg3);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px;flex-wrap:wrap">
         <div class="section-head" style="margin:0">📂 아바타 리스트</div>
-        <span style="font-size:10px;color:var(--ink3)" id="savedAvCount">0개</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span style="font-size:10px;color:var(--ink3)" id="savedAvCount">0개</span>
+          <button class="btn btn-sm" onclick="openAvatarPicker()" title="클라우드 아바타 불러오기" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">☁️ 클라우드 불러오기</button>
+        </div>
       </div>
       <div id="savedAvGrid" style="display:flex;flex-wrap:wrap;gap:6px;min-height:30px"></div>
     </div>
@@ -358,7 +361,9 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <div class="field">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <label style="margin:0;font-size:14px;font-weight:700">씬 분위기를 선택하세요</label>
-          <button class="btn btn-sm btn-ghost" onclick="saveSceneToLib()">현재 설정 저장</button>
+          <button class="btn btn-sm btn-ghost" onclick="saveSceneToLib()" title="로컬에 저장">💾 로컬</button>
+          <button class="btn btn-sm" onclick="saveSceneToCloud()" title="클라우드에 저장" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">☁️ 클라우드</button>
+          <button class="btn btn-sm btn-ghost" onclick="openScenePicker()" title="저장한 씀 설정 불러오기">불러오기</button>
         </div>
         <div class="scene-grid" id="sceneGrid" style="grid-template-columns:repeat(4,1fr);gap:12px"></div>
       </div>
@@ -586,8 +591,9 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <button class="btn btn-primary" id="genImgBtn" onclick="generateImage()">4컷 생성</button>
         <button class="btn btn-sm" onclick="generateImage()" title="재생성">재생성</button>
         <div style="flex:1"></div>
-        <button class="btn btn-sm" onclick="downloadGrid()" title="현재 4컷을 한 장 이미지로 저장">4컷 저장</button>
-        <button class="btn btn-sm" onclick="document.getElementById('quadLoadInput').click()" title="이전에 저장한 4컷 이미지 불러오기">불러오기</button>
+        <button class="btn btn-sm" onclick="downloadGrid()" title="현재 4컷을 한 장 이미지로 저장">💾 로컬저장</button>
+        <button class="btn btn-sm" onclick="saveCuts4ToCloud()" title="클라우드에 저장" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">☁️ 클라우드</button>
+        <button class="btn btn-sm" onclick="openCuts4Picker()" title="저장한 4컷 불러오기">불러오기</button>
         <input type="file" id="quadLoadInput" accept="image/*" style="display:none" onchange="loadQuadFromFile(event)">
       </div>
 
@@ -624,10 +630,14 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <div class="section-head" style="margin:0">영상 통합</div>
         <button class="btn btn-sm btn-ghost" onclick="resetMerge()" title="통합 결과만 초기화">단계 초기화</button>
       </div>
-      <div style="font-size:11px;color:var(--ink2);margin-bottom:10px">생성한 영상을 순서대로 이어붙입니다. (빠른 concat 방식 — 5~15초 소요)</div>
+      <div style="font-size:11px;color:var(--ink2);margin-bottom:10px">생성한 영상을 순서대로 이어붙입니다. (fal-ai 서버 처리 — 5~10초 소요)</div>
       <div id="mergeStatus" style="font-size:11px;color:var(--ink3);margin-bottom:8px"></div>
       <div id="mergeResult" style="margin-bottom:10px"></div>
-      <button class="btn btn-primary btn-full" id="mergeBtn" onclick="mergeVideos()" disabled>영상 통합</button>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-primary" id="mergeBtn" onclick="mergeVideos()" disabled style="flex:1">영상 통합</button>
+        <button class="btn" onclick="saveMergedVideoToCloud()" title="통합 영상 클라우드 저장" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">☁️ 클라우드 저장</button>
+        <button class="btn btn-sm" onclick="openMergedVideoPicker()" title="저장한 통합 영상 불러오기">불러오기</button>
+      </div>
     </div>
 
   </div>
@@ -774,7 +784,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <!-- 저장 버튼 -->
     <div style="display:flex;gap:8px">
       <button class="btn" onclick="closeAvatarModal()" style="flex:1">취소</button>
-      <button class="btn btn-primary" onclick="saveAvatarToLibFromModal()" style="flex:2">저장</button>
+      <button class="btn btn-primary" onclick="saveAvatarToLibFromModalWithCloud()" style="flex:2">저장 (+ 클라우드)</button>
     </div>
   </div>
 </div>
@@ -2223,6 +2233,38 @@ function saveAvatarToLibFromModal() {
   renderSavedAvatars();
 }
 
+// 로컬 저장 + 클라우드 동시 저장 (저장 버튼 클릭 시 메인)
+async function saveAvatarToLibFromModalWithCloud() {
+  const name = document.getElementById('avName').value.trim();
+  if (!name) { toast('이름을 입력하세요'); return; }
+  // 현재 아바타 정보 캡처
+  const tags = [];
+  document.querySelectorAll('#avExtraSegs .seg.active').forEach(s => tags.push(s.dataset.extra));
+  const customExtra = document.getElementById('avExtraCustom').value.trim();
+  if (customExtra) tags.push(customExtra);
+  document.getElementById('avExtra').value = tags.join(', ');
+
+  const av = {
+    id: S._editingAvId || Date.now(),
+    name,
+    gender: document.getElementById('avGender').value,
+    age: document.getElementById('avAge').value,
+    body: document.getElementById('avBody').value,
+    height: document.getElementById('avHeight').value,
+    look: document.getElementById('avLook').value,
+    hair: document.getElementById('avHair').value.trim(),
+    style: '',
+    extra: document.getElementById('avExtra').value.trim(),
+    imgUrl: document.getElementById('avImgUrl').value || '',
+  };
+  // 1단계: 로컬 저장 (즜시 절대 안 잘롌— 이미 동작 중)
+  saveAvatarToLibFromModal();  // 로컬 localStorage 저장 수행
+  // 2단계: 클라우드 저장 (로그인 있으면)
+  if (currentUser && av.imgUrl) {
+    await saveAvatarToCloud(av);
+  }
+}
+
 function saveAvatarToLib() {
   const name = document.getElementById('avName').value.trim();
   if (!name) { toast('이름을 입력하세요'); return; }
@@ -3284,9 +3326,10 @@ function renderVidCards() {
         <div id="vidStatus${i}" class="cut-vid-status"></div>
         <video id="vidPlayer${i}" class="cut-vid-video" controls loop style="display:none"></video>
         <div id="vidActions${i}" style="display:none;margin-top:6px;display:none"></div>
-        <div style="display:flex;gap:6px;margin-top:6px">
-          <button class="btn btn-sm" id="vidSaveBtn${i}" onclick="downloadVideo(S.vidUrls[${i}],'cut${i+1}_video.mp4')" style="flex:1;display:none">저장</button>
-          <button class="btn btn-sm" onclick="document.getElementById('vidLoadInput${i}').click()" title="이전에 저장한 컷${i+1} 영상 불러오기" style="flex:1">불러오기</button>
+        <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+          <button class="btn btn-sm" id="vidSaveBtn${i}" onclick="downloadVideo(S.vidUrls[${i}],'cut${i+1}_video.mp4')" style="flex:1;display:none">💾 로컬</button>
+          <button class="btn btn-sm" onclick="saveVideoToCloud(${i})" title="클라우드 저장" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">☁️ 클라우드</button>
+          <button class="btn btn-sm" onclick="openVideoPicker(${i})" title="저장한 영상 불러오기" style="flex:1">불러오기</button>
           <input type="file" id="vidLoadInput${i}" accept="video/*" style="display:none" onchange="loadCutVideoFromFile(event, ${i})">
         </div>
       </div>
@@ -4085,6 +4128,162 @@ async function _make4CutGridBlob() {
     ctx.drawImage(im, x, y, w, h);
   }
   return await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.85));
+}
+
+// ============================================================
+//  각 타입별 픽어 함수 — 불러오기 버튼 클릭 시 호출
+// ============================================================
+function openAvatarPicker() {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  openAssetPicker('avatar', async (item) => {
+    // 메타데이터로 로컬 아바타 라이브러리에 추가
+    const md = item.metadata || {};
+    const lib = loadAvatarLib();
+    const av = {
+      id: Date.now(),
+      name: md.name || item.title,
+      gender: md.gender || '',
+      age: md.age || '',
+      body: md.body || '',
+      hair: md.hair || '',
+      style: md.style || '',
+      extra: md.extra || '',
+      imgUrl: item.asset_url || md.imgUrl || '',
+    };
+    // 이름 중복 처리
+    const dup = lib.findIndex(a => a.name === av.name);
+    if (dup !== -1) {
+      if (!confirm(`"${av.name}" 이름이 이미 로컬에 있습니다. 덮어쓸까요?`)) return;
+      av.id = lib[dup].id;
+      lib[dup] = av;
+    } else {
+      lib.push(av);
+    }
+    saveAvatarLib(lib);
+    renderSavedAvatars();
+    toast(`✅ "${av.name}" 로컬로 불러옴`);
+  }, null);  // 아바타는 로컬 추가 버튼 따로 있으므로 null
+}
+
+function openCuts4Picker() {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  openAssetPicker('cuts4', async (item) => {
+    // 클라우드 4컷 로드 → 그리드 이미지를 4개로 쪼개기
+    const url = item.asset_url;
+    if (!url) { toast('❌ 이미지 URL 없음'); return; }
+    try {
+      // 메타에 개별 cuts 배열이 있으면 그걸 우선 사용
+      const md = item.metadata || {};
+      if (Array.isArray(md.cuts) && md.cuts.length === 4) {
+        S.cutDataUrls = md.cuts.slice();
+        S.cutPubUrls = md.cutPubUrls || ['','','',''];
+        S.cutApproval = [true, true, true, true];
+        S.scene = md.scene || S.scene;
+        S.ratio = md.ratio || S.ratio;
+        renderQuad();
+        toast('✅ 4컷 불러온');
+        return;
+      }
+      // 그리드 이미지를 쪼개기
+      const img = await new Promise((res, rej) => {
+        const x = new Image();
+        x.crossOrigin = 'anonymous';
+        x.onload = () => res(x);
+        x.onerror = rej;
+        x.src = url;
+      });
+      const w = img.naturalWidth / 2, h = img.naturalHeight / 2;
+      const dataUrls = [];
+      for (let i = 0; i < 4; i++) {
+        const cv = document.createElement('canvas');
+        cv.width = w; cv.height = h;
+        const ctx = cv.getContext('2d');
+        const sx = (i % 2) * w, sy = Math.floor(i / 2) * h;
+        ctx.drawImage(img, sx, sy, w, h, 0, 0, w, h);
+        dataUrls.push(cv.toDataURL('image/jpeg', 0.9));
+      }
+      S.cutDataUrls = dataUrls;
+      S.cutPubUrls = ['','','',''];
+      S.cutApproval = [true, true, true, true];
+      renderQuad();
+      toast('✅ 4컷 불러온 (그리드 이미지에서 자동 쪼개)');
+    } catch (e) {
+      toast('❌ 불러오기 실패: ' + e.message);
+    }
+  }, () => {
+    // "로컬에서 추가" 버튼
+    document.getElementById('quadLoadInput').click();
+  });
+}
+
+function openScenePicker() {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  openAssetPicker('scene', async (item) => {
+    const md = item.metadata || {};
+    // S에 씀 설정 적용
+    if (md.scene) S.scene = md.scene;
+    if (md.season) S.season = md.season;
+    if (md.timeofday) S.timeofday = md.timeofday;
+    if (md.weather) S.weather = md.weather;
+    if (md.location) S.location = md.location;
+    if (md.locCustom !== undefined) S.locCustom = md.locCustom;
+    if (md.vehicle) S.vehicle = md.vehicle;
+    if (md.personCount !== undefined) S.personCount = md.personCount;
+    if (md.passerby !== undefined) S.passerby = md.passerby;
+    if (md.passerbyDensity) S.passerbyDensity = md.passerbyDensity;
+    if (Array.isArray(md.angles)) S.angles = md.angles;
+    const ep = document.getElementById('extraPrompt');
+    if (ep && md.extraPrompt !== undefined) ep.value = md.extraPrompt;
+    // UI 재렌더
+    if (typeof renderScenes === 'function') renderScenes();
+    if (typeof renderAngleSlots === 'function') renderAngleSlots();
+    if (typeof updatePromptPreview === 'function') updatePromptPreview();
+    toast(`✅ 씀 설정 "${item.title}" 불러온`);
+  }, null);
+}
+
+function openVideoPicker(idx) {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  openAssetPicker('video', async (item) => {
+    const url = item.asset_url;
+    if (!url) { toast('❌ 영상 URL 없음'); return; }
+    S.vidUrls[idx] = url;
+    // 영상 카드 UI 업데이트
+    const player = document.getElementById(`vidPlayer${idx}`);
+    const saveBtn = document.getElementById(`vidSaveBtn${idx}`);
+    if (player) {
+      player.src = url;
+      player.style.display = 'block';
+    }
+    if (saveBtn) saveBtn.style.display = 'inline-flex';
+    if (typeof updateMergeBtn === 'function') updateMergeBtn();
+    toast(`✅ 컷 ${idx + 1} 영상 불러온`);
+  }, () => {
+    document.getElementById(`vidLoadInput${idx}`).click();
+  });
+}
+
+function openMergedVideoPicker() {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  openAssetPicker('merged_video', async (item) => {
+    const url = item.asset_url;
+    if (!url) { toast('❌ 영상 URL 없음'); return; }
+    _mergedVideoUrl = url;
+    _mergedVideoSize = item.file_size || 0;
+    const resultEl = document.getElementById('mergeResult');
+    if (resultEl) {
+      resultEl.innerHTML = `
+        <video controls src="${url}" style="width:100%;border-radius:6px;display:block;margin-bottom:8px"></video>
+        <button class="btn btn-primary btn-full" onclick="downloadMergedVideo()">통합 영상 저장</button>
+      `;
+    }
+    const statusEl = document.getElementById('mergeStatus');
+    if (statusEl) {
+      statusEl.textContent = `✅ 클라우드에서 불러온 — ${item.title}`;
+      statusEl.style.color = 'var(--green)';
+    }
+    toast(`✅ 통합 영상 "${item.title}" 불러온`);
+  }, null);
 }
 
 
