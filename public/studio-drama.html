@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>KorArt Pipeline v2</title>
+<!-- Supabase JS SDK v2 (인증 체크용) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Pretendard:wght@300;400;500;600;700;800;900&display=swap');
 :root {
@@ -791,6 +793,63 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 <div id="confirmBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99"></div>
 
 <script>
+// AUTH GATE — 로그인 필수 (비로그인 시 /studio로 이동)
+const SUPABASE_URL = 'https://hidtxdvncqrhjaiosiqd.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_LziYVaJBv9sazBKbos5_UQ_1ZVbEOJb';
+
+let sb = null;
+let currentUser = null;
+let currentSession = null;
+
+// 일찍 세션 체크
+(async function authGate() {
+  if (!window.supabase || !window.supabase.createClient) {
+    console.error('[Auth] Supabase SDK 로드 실패');
+    return;
+  }
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' },
+  });
+  window.__sb = sb;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      console.warn('[Auth] 로그인 필수 — /studio로 이동');
+      alert('🔒 로그인이 필요한 페이지입니다. 메인 페이지에서 로그인을 진행해주세요.');
+      window.location.href = '/studio';
+      return;
+    }
+    currentSession = session;
+    currentUser = session.user;
+    window.__currentUser = currentUser;
+    console.log('[Auth] 로그인 확인:', currentUser.email, currentUser.id);
+  } catch (e) {
+    console.error('[Auth] 세션 체크 오류:', e);
+    alert('인증 오류가 발생했습니다. 다시 로그인해주세요.');
+    window.location.href = '/studio';
+  }
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT' || !session) {
+      console.warn('[Auth] 로그아웃 감지 — /studio로 이동');
+      window.location.href = '/studio';
+    } else {
+      currentSession = session;
+      currentUser = session.user;
+      window.__currentUser = currentUser;
+    }
+  });
+})();
+
+function getCurrentUserId() {
+  return currentUser?.id || null;
+}
+function getCurrentUserEmail() {
+  return currentUser?.email || null;
+}
+function getAccessToken() {
+  return currentSession?.access_token || null;
+}
+
 // ════════════════════════════════════════════════════════════
 //  DATA
 // ════════════════════════════════════════════════════════════
