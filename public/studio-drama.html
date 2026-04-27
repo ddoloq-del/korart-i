@@ -3431,6 +3431,30 @@ function buildVidPrompt(i) {
   return p;
 }
 
+// 대사 글자 수 카운터 업데이트 (초당 4글자 기준)
+function updateScriptCounter(i) {
+  const scriptEl = document.getElementById(`vidScript${i}`);
+  const counterEl = document.getElementById(`vidScriptCounter${i}`);
+  if (!counterEl) return;
+  const dur = parseInt(document.getElementById(`vidDur${i}`)?.value) || S.cutDurations[i] || 5;
+  const max = dur * 4;
+  const current = scriptEl ? scriptEl.value.length : 0;
+  counterEl.textContent = `${current} / ${max}자 (${dur}초)`;
+  if (current > max) {
+    counterEl.style.color = 'var(--red)';
+    counterEl.style.fontWeight = '800';
+    if (scriptEl) scriptEl.style.borderColor = 'var(--red)';
+  } else if (current > max * 0.85) {
+    counterEl.style.color = 'var(--gold)';
+    counterEl.style.fontWeight = '700';
+    if (scriptEl) scriptEl.style.borderColor = 'var(--gold)';
+  } else {
+    counterEl.style.color = 'var(--ink3)';
+    counterEl.style.fontWeight = '600';
+    if (scriptEl) scriptEl.style.borderColor = 'var(--line)';
+  }
+}
+
 function renderVidCards() {
   const approved = S.cutApproval.map((ok,i)=>ok?i:-1).filter(i=>i>=0);
   const colors = ['#c8a04a','#3a70c0','#3e9660','#c03040'];
@@ -3460,7 +3484,10 @@ function renderVidCards() {
         </div>
         <!-- 대사 (화자 + 감정 + 대사) -->
         <div style="margin-bottom:8px">
-          <label style="font-size:10px;color:var(--ink3);display:block;margin-bottom:4px">대사 (선택 · Kling 3.0만)</label>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:6px">
+            <label style="font-size:10px;color:var(--ink3);margin:0">대사 (선택 · Kling 3.0만)</label>
+            <span id="vidScriptCounter${i}" style="font-size:9px;color:var(--ink3);font-weight:600">0 / ${(S.cutDurations[i]||5)*4}자 (${S.cutDurations[i]||5}초)</span>
+          </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
             <select id="vidSpeaker${i}" style="background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px;width:120px" ${!hasCut ? 'disabled' : ''}>
               <option value="">화자 선택</option>
@@ -3486,13 +3513,13 @@ function renderVidCards() {
               <option value="serious" ${S.cutEmotions[i]==='serious'?'selected':''}>진지 😐</option>
               <option value="romantic" ${S.cutEmotions[i]==='romantic'?'selected':''}>로맨틱 😍</option>
             </select>
-            <input id="vidScript${i}" placeholder='대사만 입력 (예: 나는 널 잊을 수 없어)' style="flex:1;min-width:160px;background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
+            <input id="vidScript${i}" oninput="updateScriptCounter(${i})" placeholder='대사만 입력 (예: 나는 널 잊을 수 없어)' style="flex:1;min-width:160px;background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
           </div>
-          <div style="font-size:9px;color:var(--ink3);margin-top:3px">화자·감정 선택은 설정되면 영상의 대사 논도 자별 입력 창이 자동 프롬프트에 합쳐집니다</div>
+          <div style="font-size:9px;color:var(--ink3);margin-top:3px">📝 최대 <strong style="color:var(--cream)">초당 4글자</strong>까지 음성 생성 (영상 길이 × 4자 = 최대 글자 수)</div>
         </div>
         <!-- 설정 -->
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
-          <select id="vidDur${i}" style="background:var(--bg3);border:1px solid var(--line);border-radius:4px;padding:4px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
+          <select id="vidDur${i}" onchange="S.cutDurations[${i}]=parseInt(this.value);updateScriptCounter(${i})" style="background:var(--bg3);border:1px solid var(--line);border-radius:4px;padding:4px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
             ${[3,4,5,6,7,8,9,10,11,12,13,14,15].map(n=>`<option value="${n}" ${S.cutDurations[i]===n?'selected':''}>${n}초</option>`).join('')}
           </select>
           <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink2);cursor:${hasCut?'pointer':'not-allowed'};opacity:${hasCut?1:0.5}">
@@ -3560,6 +3587,15 @@ async function generateCutVideo(i) {
   const script = document.getElementById(`vidScript${i}`)?.value.trim() || '';
   const speaker = document.getElementById(`vidSpeaker${i}`)?.value || '';
   const emotion = document.getElementById(`vidEmotion${i}`)?.value || '';
+
+  // 대사 글자 수 체크 (초당 4글자)
+  if (script) {
+    const maxChars = dur * 4;
+    if (script.length > maxChars) {
+      const proceed = confirm(`⚠️ 대사가 권장 길이를 초과합니다.\n\n현재: ${script.length}자\n최대: ${maxChars}자 (${dur}초 × 4)\n\n음성이 끊기거나 발음이 부자연스러울 수 있습니다. 계속할까요?`);
+      if (!proceed) return;
+    }
+  }
 
   // 감정 영어 지시문 매핑
   const emotionMap = {
