@@ -1016,7 +1016,33 @@ function loadAvatarLib() {
   catch { return []; }
 }
 function saveAvatarLib(arr) {
-  localStorage.setItem(LS_AV_KEY, JSON.stringify(arr));
+  try {
+    localStorage.setItem(LS_AV_KEY, JSON.stringify(arr));
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22) {
+      // 용량 초과 — dataURL을 URL으로 제거 후 재시도
+      console.warn('[saveAvatarLib] localStorage 용량 초과 — dataURL 제거 후 재시도');
+      const cleaned = arr.map(av => {
+        if (av.imgUrl && av.imgUrl.startsWith('data:')) {
+          return { ...av, imgUrl: '', _imgUrlMissing: true };  // dataURL 제거
+        }
+        return av;
+      });
+      try {
+        localStorage.setItem(LS_AV_KEY, JSON.stringify(cleaned));
+        if (typeof toast === 'function') {
+          toast('⚠️ 용량 한도 초과 — 일부 이미지는 클라우드에서 불러와주세요');
+        }
+      } catch (e2) {
+        console.error('[saveAvatarLib] 최종 실패:', e2);
+        if (typeof toast === 'function') {
+          toast('❌ 로컬 저장 실패 — ☁️ 클라우드만 사용해주세요');
+        }
+      }
+    } else {
+      throw e;
+    }
+  }
 }
 function loadSceneLib() {
   try { return JSON.parse(localStorage.getItem(LS_SC_KEY) || '[]'); }
@@ -2244,6 +2270,26 @@ async function saveAvatarToLibFromModalWithCloud() {
   if (customExtra) tags.push(customExtra);
   document.getElementById('avExtra').value = tags.join(', ');
 
+  // ⚠️ dataURL이면 먼저 fal에 업로드해서 URL로 변환 (localStorage 용량 보호)
+  let imgUrl = document.getElementById('avImgUrl').value || '';
+  if (imgUrl.startsWith('data:')) {
+    const falKey = document.getElementById('falKey')?.value.trim();
+    if (falKey) {
+      try {
+        toast('☁️ 이미지 업로드 중...');
+        const r = await fetch(imgUrl);
+        const blob = await r.blob();
+        const cdnUrl = await uploadToFalStorage(falKey, blob, `avatar_${Date.now()}.png`, blob.type || 'image/png');
+        imgUrl = cdnUrl;
+        document.getElementById('avImgUrl').value = cdnUrl;
+        log('ok', `[Avatar] dataURL → fal CDN URL로 변환: ${cdnUrl.slice(0, 60)}`);
+      } catch (e) {
+        log('warn', '[Avatar] dataURL 업로드 실패 (로컬에는 이미지 없이 저장됨): ' + e.message);
+        // 실패해도 계속 진행 — 로컬 용량 보호는 saveAvatarLib에서 처리됨
+      }
+    }
+  }
+
   const av = {
     id: S._editingAvId || Date.now(),
     name,
@@ -2255,12 +2301,12 @@ async function saveAvatarToLibFromModalWithCloud() {
     hair: document.getElementById('avHair').value.trim(),
     style: '',
     extra: document.getElementById('avExtra').value.trim(),
-    imgUrl: document.getElementById('avImgUrl').value || '',
+    imgUrl: imgUrl,
   };
-  // 1단계: 로컬 저장 (즜시 절대 안 잘롌— 이미 동작 중)
-  saveAvatarToLibFromModal();  // 로컬 localStorage 저장 수행
+  // 1단계: 로컬 저장 (이제 imgUrl은 URL이므로 용량 안전)
+  saveAvatarToLibFromModal();
   // 2단계: 클라우드 저장 (로그인 있으면)
-  if (currentUser && av.imgUrl) {
+  if (currentUser && av.imgUrl && !av.imgUrl.startsWith('data:')) {
     await saveAvatarToCloud(av);
   }
 }
