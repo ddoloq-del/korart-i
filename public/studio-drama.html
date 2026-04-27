@@ -3560,6 +3560,28 @@ function renderVidCards() {
   `;
   }).join('');
 
+  // 이미 생성된 영상 복원 — vidUrls에 저장된 영상이 있으면 플레이어에 다시 주입
+  for (let idx = 0; idx < 4; idx++) {
+    const url = S.vidUrls?.[idx];
+    if (!url) continue;
+    const player = document.getElementById(`vidPlayer${idx}`);
+    const saveBtn = document.getElementById(`vidSaveBtn${idx}`);
+    const status = document.getElementById(`vidStatus${idx}`);
+    if (player) {
+      player.src = url;
+      player.style.display = 'block';
+    }
+    if (saveBtn) saveBtn.style.display = 'inline-flex';
+    if (status) {
+      status.textContent = '✅ 생성 완료!';
+      status.style.color = 'var(--green)';
+    }
+  }
+
+  // 각 컷의 대사 글자 수 카운터 초기화
+  for (let idx = 0; idx < 4; idx++) {
+    if (typeof updateScriptCounter === 'function') updateScriptCounter(idx);
+  }
 }
 
 async function generateCutVideo(i) {
