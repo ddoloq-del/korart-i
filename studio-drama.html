@@ -1422,14 +1422,14 @@ function renderGlobalSteps(currentStep) {
     const wrap = document.getElementById(id);
     if (!wrap) return;
     let inner = '';
-    for (let s = 0; s < 7; s++) {
+    for (let s = 0; s < 6; s++) {
       const cls = s === currentStep ? 'active' : (s < currentStep ? 'done' : '');
       inner += `
         <div class="step-ind-item ${cls}" onclick="tryGoStep(${s})" style="cursor:pointer">
           <div class="step-ind-num">${s + 1}</div>
           <span>${STEP_LABELS[s]}</span>
         </div>`;
-      if (s < 6) inner += '<div class="step-ind-line ' + (s < currentStep ? 'done' : '') + '"></div>';
+      if (s < 5) inner += '<div class="step-ind-line ' + (s < currentStep ? 'done' : '') + '"></div>';
     }
     wrap.innerHTML = inner;
   });
