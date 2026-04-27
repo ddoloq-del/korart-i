@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -239,6 +239,8 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .badge-green{background:rgba(62,150,96,.12);border:1px solid rgba(62,150,96,.3);color:var(--green)}
 .prompt-preview{background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:8px 10px;font-family:'Menlo',monospace;font-size:10px;color:var(--ink2);line-height:1.6;white-space:pre-wrap;word-break:break-all;max-height:80px;overflow-y:auto}
 </style>
+<!-- FFmpeg.wasm — 영상 통합 (concat copy) -->
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.js" crossorigin="anonymous"></script>
 </head>
 <body>
 <div class="wrap">
@@ -611,23 +613,22 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <span class="panel-num">06</span>
       <span class="panel-cat">K-MOTION / VIDEO</span>
       <h1 class="panel-title">컷마다 <span class="accent">움직임</span>을</h1>
-      <p class="panel-sub">승인한 컷마다 독립 영상을 만들고, 마지막에 한 편으로 잇습니다.</p>
+      <p class="panel-sub">승인한 것마다 독립 영상을 만드세요.</p>
     </div>
 
     <div class="cut-vid-grid" id="cutVidGrid"></div>
 
-    <!-- 통합 버튼 -->
+    <!-- 영상 통합 박스 -->
     <div style="margin-top:20px;padding:14px;background:var(--bg3);border:1px solid var(--line);border-radius:10px" id="mergePanel">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div class="section-head" style="margin:0">📽 영상 통합</div>
-        <button class="btn btn-sm btn-ghost" onclick="resetStep6()" title="통합 결과만 초기화">단계 초기화</button>
+        <div class="section-head" style="margin:0">영상 통합</div>
+        <button class="btn btn-sm btn-ghost" onclick="resetMerge()" title="통합 결과만 초기화">단계 초기화</button>
       </div>
-      <div style="font-size:11px;color:var(--ink2);margin-bottom:10px">생성된 영상을 순서대로 이어붙입니다. (실시간 녹화 방식 — 영상 총 길이만큼 시간 소요)</div>
+      <div style="font-size:11px;color:var(--ink2);margin-bottom:10px">생성한 영상을 순서대로 이어붙입니다. (빠른 concat 방식 — 5~15초 소요)</div>
       <div id="mergeStatus" style="font-size:11px;color:var(--ink3);margin-bottom:8px"></div>
       <div id="mergeResult" style="margin-bottom:10px"></div>
       <button class="btn btn-primary btn-full" id="mergeBtn" onclick="mergeVideos()" disabled>영상 통합</button>
     </div>
-
 
   </div>
 
@@ -1415,20 +1416,20 @@ async function selectAspectRatio(value) {
 }
 
 function renderGlobalSteps(currentStep) {
-  // panelRatio + panel0~3 5개 panel에서 모두 동일한 6단계 인디케이터
+  // panelRatio + panel0~3 에서 모두 동일한 6단계 인디케이터
   const containers = ['globalStepsR', 'globalSteps0', 'globalSteps1', 'globalSteps2', 'globalSteps3'];
   containers.forEach(id => {
     const wrap = document.getElementById(id);
     if (!wrap) return;
     let inner = '';
-    for (let s = 0; s < 6; s++) {
+    for (let s = 0; s < 7; s++) {
       const cls = s === currentStep ? 'active' : (s < currentStep ? 'done' : '');
       inner += `
         <div class="step-ind-item ${cls}" onclick="tryGoStep(${s})" style="cursor:pointer">
           <div class="step-ind-num">${s + 1}</div>
           <span>${STEP_LABELS[s]}</span>
         </div>`;
-      if (s < 5) inner += '<div class="step-ind-line ' + (s < currentStep ? 'done' : '') + '"></div>';
+      if (s < 6) inner += '<div class="step-ind-line ' + (s < currentStep ? 'done' : '') + '"></div>';
     }
     wrap.innerHTML = inner;
   });
@@ -1918,16 +1919,7 @@ async function resetStep5() {
   toast('↻ 영상 생성 결과가 초기화되었습니다');
 }
 
-async function resetStep6() {
-  const ok = await showConfirm('통합 초기화', '통합한 영상 결과를 지웁니다. (개별 컷 영상은 유지)');
-  if (!ok) return;
-  const mergeResult = document.getElementById('mergeResult');
-  if (mergeResult) mergeResult.innerHTML = '';
-  const mergeStatus = document.getElementById('mergeStatus');
-  if (mergeStatus) mergeStatus.textContent = '';
-  log('info', '통합 단계 초기화 완료');
-  toast('↻ 통합 결과가 초기화되었습니다');
-}
+
 
 // 성별별 헤어스타일 옵션
 const HAIR_STYLES = {
@@ -3235,7 +3227,6 @@ function renderVidCards() {
     </div>
   `).join('');
 
-  updateMergeBtn();
 }
 
 async function generateCutVideo(i) {
@@ -3375,7 +3366,7 @@ async function generateCutVideo(i) {
     status.style.color = 'var(--green)';
 
     addVidCost(dur * cps);
-    updateMergeBtn();
+    if (typeof updateMergeBtn === 'function') updateMergeBtn();
     log('ok', `컷${i+1} 영상 완료: ${videoUrl.slice(0,60)}`);
     toast(`✅ 컷${i+1} 영상 생성 완료!`);
 
@@ -3387,173 +3378,6 @@ async function generateCutVideo(i) {
   } finally {
     btn.disabled = false;
     btn.innerHTML = `▶ 컷${i+1} 영상 재생성`;
-  }
-}
-
-function updateMergeBtn() {
-  const doneCount = S.vidUrls.filter(Boolean).length;
-  const btn = document.getElementById('mergeBtn');
-  const status = document.getElementById('mergeStatus');
-  if (btn) {
-    btn.disabled = doneCount < 2;
-    btn.textContent = doneCount >= 2
-      ? `🎞 영상 통합 (${doneCount}개)`
-      : `🎞 영상 통합 (영상 2개 이상 필요)`;
-  }
-  if (status) status.textContent = doneCount > 0 ? `완성된 영상: ${doneCount}개` : '';
-}
-
-// ════════════════════════════════════════════════════════════
-//  VIDEO MERGE — Canvas + MediaRecorder (ffmpeg.wasm 대체)
-//  영상들을 순차 재생하면서 캔버스에 그리고 MediaRecorder로 녹화
-// ════════════════════════════════════════════════════════════
-async function mergeVideos() {
-  const urls = S.vidUrls.filter(Boolean);
-  if (urls.length < 2) { toast('❌ 영상이 2개 이상 필요합니다'); return; }
-
-  const btn = document.getElementById('mergeBtn');
-  const result = document.getElementById('mergeResult');
-  const statusEl = document.getElementById('mergeStatus');
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spin"></div> 영상 로드 중...';
-  result.innerHTML = '';
-  log('info', `영상 통합 시작 — ${urls.length}개`);
-
-  try {
-    // 모든 비디오 엘리먼트 생성 + 메타데이터 로드
-    const videos = [];
-    for (let i = 0; i < urls.length; i++) {
-      btn.innerHTML = `<div class="spin"></div> 영상 ${i+1}/${urls.length} 로드 중...`;
-      const v = document.createElement('video');
-      v.crossOrigin = 'anonymous';
-      v.muted = false;
-      v.preload = 'auto';
-      v.src = urls[i];
-      await new Promise((res, rej) => {
-        v.onloadedmetadata = () => res();
-        v.onerror = () => rej(new Error(`영상 ${i+1} 로드 실패`));
-      });
-      // 데이터 충분히 로드되도록 대기
-      await new Promise((res) => {
-        if (v.readyState >= 4) { res(); return; }
-        v.oncanplaythrough = () => res();
-        // fallback timeout
-        setTimeout(res, 5000);
-      });
-      videos.push(v);
-      log('info', `영상 ${i+1} 로드 완료 (${v.videoWidth}x${v.videoHeight}, ${v.duration.toFixed(1)}초)`);
-    }
-
-    // 가장 큰 해상도 기준으로 캔버스 설정
-    const W = Math.max(...videos.map(v => v.videoWidth)) || 1280;
-    const H = Math.max(...videos.map(v => v.videoHeight)) || 720;
-
-    const canvas = document.createElement('canvas');
-    canvas.width = W; canvas.height = H;
-    const ctx = canvas.getContext('2d');
-
-    btn.innerHTML = '<div class="spin"></div> 통합 녹화 중... (실제 영상 길이만큼 대기)';
-
-    // Canvas captureStream
-    const canvasStream = canvas.captureStream(30);
-
-    // 오디오 트랙들 합치기 (각 영상의 오디오를 순차로)
-    // Web Audio API로 mix
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    const audioCtx = new AudioCtx();
-    const audioDest = audioCtx.createMediaStreamDestination();
-
-    // 모든 영상의 오디오를 dest에 연결 (재생할 때만 들림)
-    const audioSources = videos.map(v => {
-      try {
-        const src = audioCtx.createMediaElementSource(v);
-        src.connect(audioDest);
-        // src.connect(audioCtx.destination); // 모니터링 안 함 (chrome 자동재생 정책)
-        return src;
-      } catch (e) {
-        log('warn', '오디오 트랙 연결 실패: ' + e.message);
-        return null;
-      }
-    });
-
-    // 캔버스 + 오디오 합쳐서 MediaStream
-    const mixedStream = new MediaStream([
-      ...canvasStream.getVideoTracks(),
-      ...audioDest.stream.getAudioTracks(),
-    ]);
-
-    // MediaRecorder 시작
-    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
-      ? 'video/webm;codecs=vp9,opus'
-      : (MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
-         ? 'video/webm;codecs=vp8,opus'
-         : 'video/webm');
-    const recorder = new MediaRecorder(mixedStream, { mimeType, videoBitsPerSecond: 5_000_000 });
-    const chunks = [];
-    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-
-    const recDone = new Promise(res => { recorder.onstop = res; });
-    recorder.start();
-
-    // ── 영상 순차 재생 + 캔버스 그리기 ──
-    let drawing = true;
-    const drawLoop = () => {
-      if (!drawing) return;
-      const cur = videos[curIdx];
-      if (cur && !cur.paused && !cur.ended) {
-        // letterbox 처리
-        const vr = cur.videoWidth / cur.videoHeight;
-        const cr = W / H;
-        let dw, dh, dx, dy;
-        if (vr > cr) { dw = W; dh = W/vr; dx = 0; dy = (H-dh)/2; }
-        else        { dh = H; dw = H*vr; dy = 0; dx = (W-dw)/2; }
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0,0,W,H);
-        ctx.drawImage(cur, dx, dy, dw, dh);
-      }
-      requestAnimationFrame(drawLoop);
-    };
-
-    let curIdx = 0;
-    drawLoop();
-
-    for (let i = 0; i < videos.length; i++) {
-      curIdx = i;
-      const v = videos[i];
-      v.currentTime = 0;
-      log('info', `재생: 영상 ${i+1} (${v.duration.toFixed(1)}초)`);
-      await v.play();
-      await new Promise((res) => {
-        v.onended = () => res();
-      });
-      v.pause();
-    }
-
-    drawing = false;
-    recorder.stop();
-    await recDone;
-
-    audioCtx.close();
-
-    const blob = new Blob(chunks, { type: 'video/webm' });
-    const url = URL.createObjectURL(blob);
-    const sizeMB = (blob.size / 1024 / 1024).toFixed(1);
-
-    result.innerHTML = `
-      <video controls src="${url}" style="width:100%;border-radius:6px;display:block;margin-bottom:8px"></video>
-      <div style="font-size:10px;color:var(--ink3);margin-bottom:6px">크기: ${sizeMB} MB · 형식: WebM</div>
-      <a href="${url}" download="merged_${Date.now()}.webm" class="btn btn-primary btn-full" style="justify-content:center;text-decoration:none">💾 통합 영상 저장 (WebM)</a>
-    `;
-    log('ok', `영상 통합 완료 (${sizeMB} MB)`);
-    toast('✅ 영상 통합 완료!');
-
-  } catch(e) {
-    result.innerHTML = `<div style="color:var(--red);font-size:11px;padding:8px">❌ ${escHtml(e.message)}</div>`;
-    log('err', '통합 실패: ' + e.message);
-    toast('❌ ' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '🎞 영상 통합';
   }
 }
 
@@ -3749,6 +3573,148 @@ renderRatioGrid();
 // 씬 설정 변경 시 프롬프트 실시간 업데이트
 document.getElementById('extraPrompt')?.addEventListener('input', updatePromptPreview);
 document.getElementById('locCustomInput')?.addEventListener('input', updatePromptPreview);
+
+// ==================== 영상 통합 (ffmpeg concat copy 방식) ====================
+
+let _ffmpegInst = null;
+let _mergedBlob = null;
+
+// FFmpeg 인스턴스 로드 (최소 1회)
+async function _loadFFmpeg() {
+  if (_ffmpegInst) return _ffmpegInst;
+  if (!window.FFmpegWASM) {
+    throw new Error('FFmpeg 라이브러리가 로드되지 않았습니다');
+  }
+  const { FFmpeg } = window.FFmpegWASM;
+  const ff = new FFmpeg();
+  ff.on('log', ({ message }) => console.log('[ffmpeg]', message));
+  await ff.load({
+    coreURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.4/dist/umd/ffmpeg-core.js',
+    wasmURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.4/dist/umd/ffmpeg-core.wasm',
+  });
+  _ffmpegInst = ff;
+  return ff;
+}
+
+// 영상 통합 버튼 활성화 여부 업데이트
+function updateMergeBtn() {
+  const btn = document.getElementById('mergeBtn');
+  if (!btn) return;
+  const validClips = (S.vidUrls || []).filter(Boolean).length;
+  btn.disabled = validClips < 2;
+  if (validClips < 2) {
+    btn.title = '2개 이상의 컷 영상이 있어야 통합할 수 있습니다';
+  } else {
+    btn.title = `${validClips}개 영상을 순서대로 이어붙입니다`;
+  }
+}
+
+// 영상 통합 메인 함수 (concat copy 방식 — 재인코딩 X, 5~15초 소요)
+async function mergeVideos() {
+  const validClips = (S.vidUrls || []).filter(Boolean);
+  if (validClips.length < 2) {
+    toast('2개 이상의 컷 영상이 필요합니다');
+    return;
+  }
+
+  const btn = document.getElementById('mergeBtn');
+  const statusEl = document.getElementById('mergeStatus');
+  const resultEl = document.getElementById('mergeResult');
+  if (resultEl) resultEl.innerHTML = '';
+
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> 처리 중...';
+
+  try {
+    statusEl.textContent = 'FFmpeg 로딩 중...';
+    log('info', '영상 통합 시작 (concat copy 방식)');
+
+    const ff = await _loadFFmpeg();
+    const { fetchFile } = window.FFmpegWASM;
+
+    // 각 영상 파일 쓰기
+    const inputFiles = [];
+    for (let i = 0; i < validClips.length; i++) {
+      statusEl.textContent = `영상 ${i + 1}/${validClips.length} 다운로드 중...`;
+      const data = await fetchFile(validClips[i]);
+      const filename = `in${i}.mp4`;
+      await ff.writeFile(filename, data);
+      inputFiles.push(filename);
+      log('info', `${filename} 쓰기 완료 (${(data.byteLength/1024/1024).toFixed(2)}MB)`);
+    }
+
+    // concat list 생성
+    const concatList = inputFiles.map(f => `file '${f}'`).join('\n');
+    await ff.writeFile('concat.txt', concatList);
+
+    statusEl.textContent = '영상 이어붙이는 중...';
+    log('info', 'concat 실행 중...');
+
+    // 재인코딩 없이 빠르게 합치기
+    await ff.exec([
+      '-f', 'concat',
+      '-safe', '0',
+      '-i', 'concat.txt',
+      '-c', 'copy',
+      'merged.mp4'
+    ]);
+
+    statusEl.textContent = '결과 읽기 중...';
+    const outData = await ff.readFile('merged.mp4');
+    _mergedBlob = new Blob([outData.buffer], { type: 'video/mp4' });
+    const blobUrl = URL.createObjectURL(_mergedBlob);
+
+    // 결과 표시
+    if (resultEl) {
+      resultEl.innerHTML = `
+        <video controls src="${blobUrl}" style="width:100%;border-radius:6px;display:block;margin-bottom:8px"></video>
+        <button class="btn btn-primary btn-full" onclick="downloadMergedVideo()">통합 영상 저장</button>
+      `;
+    }
+    statusEl.textContent = `✅ 완료 — ${(outData.byteLength/1024/1024).toFixed(2)}MB`;
+    statusEl.style.color = 'var(--green)';
+    log('ok', `영상 통합 완료 (${validClips.length}개 → 1개)`);
+    toast('✅ 영상 통합 완료!');
+
+    // 이전 임시 파일 정리
+    try {
+      for (const f of inputFiles) await ff.deleteFile(f);
+      await ff.deleteFile('concat.txt');
+      await ff.deleteFile('merged.mp4');
+    } catch(e) { /* ignore */ }
+
+  } catch (e) {
+    console.error('[mergeVideos]', e);
+    statusEl.textContent = '❌ 오류: ' + e.message;
+    statusEl.style.color = 'var(--red)';
+    log('err', '영상 통합 오류: ' + e.message);
+    toast('❌ 영상 통합 실패: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '영상 통합';
+    updateMergeBtn();
+  }
+}
+
+function downloadMergedVideo() {
+  if (!_mergedBlob) { toast('저장할 영상이 없습니다'); return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(_mergedBlob);
+  a.download = 'korart_merged_' + Date.now() + '.mp4';
+  a.click();
+  log('info', '통합 영상 다운로드');
+}
+
+function resetMerge() {
+  _mergedBlob = null;
+  const resultEl = document.getElementById('mergeResult');
+  if (resultEl) resultEl.innerHTML = '';
+  const statusEl = document.getElementById('mergeStatus');
+  if (statusEl) { statusEl.textContent = ''; statusEl.style.color = ''; }
+  log('info', '통합 결과 초기화');
+  toast('통합 결과가 초기화되었습니다');
+}
+
 </script>
 </body>
 </html>
