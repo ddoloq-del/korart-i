@@ -239,8 +239,8 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .badge-green{background:rgba(62,150,96,.12);border:1px solid rgba(62,150,96,.3);color:var(--green)}
 .prompt-preview{background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:8px 10px;font-family:'Menlo',monospace;font-size:10px;color:var(--ink2);line-height:1.6;white-space:pre-wrap;word-break:break-all;max-height:80px;overflow-y:auto}
 </style>
-<!-- FFmpeg.wasm — 영상 통합 (concat copy) -->
-<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.js" crossorigin="anonymous"></script>
+<!-- FFmpeg.wasm — 영상 통합 (concat copy). same-origin 프록시 경유 — CORP 헤더 추가되어 COEP 환경에서 Worker spawn 가능 -->
+<script src="/ffmpeg-proxy/npm/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -3599,8 +3599,8 @@ async function _loadFFmpeg() {
   const ff = new FFmpeg();
   ff.on('log', ({ message }) => console.log('[ffmpeg]', message));
   await ff.load({
-    coreURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.4/dist/umd/ffmpeg-core.js',
-    wasmURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.4/dist/umd/ffmpeg-core.wasm',
+    coreURL: '/ffmpeg-proxy/npm/@ffmpeg/core@0.12.4/dist/umd/ffmpeg-core.js',
+    wasmURL: '/ffmpeg-proxy/npm/@ffmpeg/core@0.12.4/dist/umd/ffmpeg-core.wasm',
   });
   _ffmpegInst = ff;
   return ff;
