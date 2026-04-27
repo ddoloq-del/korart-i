@@ -144,37 +144,10 @@ export default {
         return new Response(falRes.body, { status: falRes.status, headers: resHeaders });
       }
 
-      // /ffmpeg-proxy/* → jsdelivr CDN 프록시 (CORP 헤더 추가 — COEP credentialless 환경에서 Worker spawn 가능)
-      if (url.pathname.startsWith('/ffmpeg-proxy/')) {
-        const targetPath = url.pathname.replace('/ffmpeg-proxy/', '');
-        const targetUrl = 'https://cdn.jsdelivr.net/' + targetPath;
-        try {
-          const upstream = await fetch(targetUrl, {
-            cf: { cacheTtl: 86400, cacheEverything: true },
-          });
-          if (!upstream.ok) {
-            return new Response('ffmpeg proxy upstream error: ' + upstream.status, { status: upstream.status });
-          }
-          const newHeaders = new Headers(upstream.headers);
-          newHeaders.set('Cross-Origin-Resource-Policy', 'cross-origin');
-          newHeaders.set('Access-Control-Allow-Origin', '*');
-          // Worker 스크립트는 적절한 MIME 필요
-          if (targetPath.endsWith('.js')) newHeaders.set('Content-Type', 'application/javascript; charset=utf-8');
-          if (targetPath.endsWith('.wasm')) newHeaders.set('Content-Type', 'application/wasm');
-          return new Response(upstream.body, { status: upstream.status, headers: newHeaders });
-        } catch (e) {
-          return new Response('ffmpeg proxy fetch failed: ' + e.message, { status: 502 });
-        }
-      }
-
-      // /studio-drama 또는 /studio-drama/ → studio-drama.html 서빙 (COOP/COEP 헤더 추가 — FFmpeg.wasm SharedArrayBuffer 필요)
+      // /studio-drama 또는 /studio-drama/ → studio-drama.html 서빙
       if (url.pathname === '/studio-drama' || url.pathname === '/studio-drama/' || url.pathname === '/studio-drama.html') {
         const assetUrl = new URL('/studio-drama.html', request.url);
-        const assetResp = await env.ASSETS.fetch(new Request(assetUrl.toString(), { method: 'GET', headers: request.headers }));
-        const newResp = new Response(assetResp.body, assetResp);
-        newResp.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
-        newResp.headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
-        return newResp;
+        return await env.ASSETS.fetch(new Request(assetUrl.toString(), { method: 'GET', headers: request.headers }));
       }
 
       // /studio 또는 /studio/ → studio.html 서빙
