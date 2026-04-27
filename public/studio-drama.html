@@ -3632,6 +3632,462 @@ async function uploadToFalStorage(key, blob, filename, contentTypeOverride) {
   return url;
 }
 
+// ============================================================
+//  KorartAssets — Supabase 기반 자산 저장/조회/삭제 모듈
+// ============================================================
+const KorartAssets = {
+  STORAGE_BUCKET: 'korart-assets',
+
+  // 자산 업로드 — URL 또는 dataURL을 Supabase Storage에 저장
+  // params: { type, title, sourceUrl?, sourceBlob?, thumbnail?, metadata, fileExt }
+  async upload(params) {
+    if (!sb || !currentUser) {
+      throw new Error('로그인이 필요합니다');
+    }
+    const { type, title, sourceUrl, sourceBlob, thumbnailUrl, metadata = {}, fileExt = 'bin' } = params;
+    const userId = currentUser.id;
+    const ts = Date.now();
+
+    let mainBlob = sourceBlob;
+    let mainPath = null;
+    let mainPublicUrl = null;
+    let fileSize = 0;
+
+    // 1) sourceUrl이 있으면 fetch해서 blob으로
+    if (sourceUrl && !sourceBlob) {
+      log('info', `[Assets] 자산 다운로드: ${sourceUrl.slice(0, 60)}...`);
+      const r = await fetch(sourceUrl);
+      if (!r.ok) throw new Error(`원본 fetch 실패: ${r.status}`);
+      mainBlob = await r.blob();
+    }
+
+    // 2) 매인 파일이 있으면 storage에 업로드
+    if (mainBlob) {
+      mainPath = `${userId}/${type}/${ts}.${fileExt}`;
+      fileSize = mainBlob.size;
+      log('info', `[Assets] storage 업로드: ${mainPath} (${(fileSize/1024).toFixed(1)}KB)`);
+      const { error: upErr } = await sb.storage.from(this.STORAGE_BUCKET).upload(mainPath, mainBlob, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: mainBlob.type || 'application/octet-stream',
+      });
+      if (upErr) throw new Error('Storage 업로드 실패: ' + upErr.message);
+      const { data: pub } = sb.storage.from(this.STORAGE_BUCKET).getPublicUrl(mainPath);
+      mainPublicUrl = pub.publicUrl;
+    }
+
+    // 3) 썸네일이 다르면 따로 업로드 (dataURL도 지원)
+    let thumbPath = null;
+    let thumbPublicUrl = null;
+    if (thumbnailUrl && thumbnailUrl !== mainPublicUrl) {
+      try {
+        let thumbBlob;
+        if (thumbnailUrl.startsWith('data:')) {
+          // dataURL → blob
+          const r = await fetch(thumbnailUrl);
+          thumbBlob = await r.blob();
+        } else {
+          const r = await fetch(thumbnailUrl);
+          thumbBlob = await r.blob();
+        }
+        const thumbExt = (thumbBlob.type.split('/')[1] || 'jpg').split(';')[0];
+        thumbPath = `${userId}/${type}/thumb_${ts}.${thumbExt}`;
+        const { error: thErr } = await sb.storage.from(this.STORAGE_BUCKET).upload(thumbPath, thumbBlob, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: thumbBlob.type || 'image/jpeg',
+        });
+        if (!thErr) {
+          const { data: pub2 } = sb.storage.from(this.STORAGE_BUCKET).getPublicUrl(thumbPath);
+          thumbPublicUrl = pub2.publicUrl;
+        }
+      } catch (e) {
+        log('warn', '[Assets] 썸네일 업로드 실패 (무시): ' + e.message);
+      }
+    }
+
+    // 4) DB에 메타데이터 insert
+    const insertRow = {
+      user_id: userId,
+      asset_type: type,
+      title: title || `${type}_${new Date().toLocaleString('ko-KR')}`,
+      thumbnail_url: thumbPublicUrl || mainPublicUrl,
+      asset_url: mainPublicUrl,
+      storage_path: mainPath,
+      metadata,
+      file_size: fileSize,
+    };
+    const { data: row, error: dbErr } = await sb
+      .from('user_assets')
+      .insert(insertRow)
+      .select()
+      .single();
+    if (dbErr) {
+      // 업로드 성공했으나 DB insert 실패 — storage 정리
+      if (mainPath) await sb.storage.from(this.STORAGE_BUCKET).remove([mainPath]).catch(()=>{});
+      if (thumbPath) await sb.storage.from(this.STORAGE_BUCKET).remove([thumbPath]).catch(()=>{});
+      throw new Error('DB 저장 실패: ' + dbErr.message);
+    }
+    log('ok', `[Assets] 저장 완료 (id: ${row.id})`);
+    return row;
+  },
+
+  // 세션처럼 파일 없이 메타데이터만 저장
+  async saveSceneSettings(title, metadata) {
+    if (!sb || !currentUser) throw new Error('로그인이 필요합니다');
+    const { data: row, error } = await sb.from('user_assets').insert({
+      user_id: currentUser.id,
+      asset_type: 'scene',
+      title: title || `씀 ${new Date().toLocaleString('ko-KR')}`,
+      metadata,
+      file_size: 0,
+    }).select().single();
+    if (error) throw new Error('씀 저장 실패: ' + error.message);
+    return row;
+  },
+
+  // 타입별 리스트 조회
+  async list(type, limit = 50) {
+    if (!sb || !currentUser) throw new Error('로그인이 필요합니다');
+    const { data, error } = await sb
+      .from('user_assets')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .eq('asset_type', type)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    if (error) throw new Error('리스트 조회 실패: ' + error.message);
+    return data || [];
+  },
+
+  // 자산 삭제 (파일 + DB row)
+  async delete(assetId) {
+    if (!sb || !currentUser) throw new Error('로그인이 필요합니다');
+    // 1. row 조회
+    const { data: row, error: selErr } = await sb
+      .from('user_assets').select('*').eq('id', assetId).single();
+    if (selErr) throw new Error('자산 조회 실패: ' + selErr.message);
+    // 2. storage 파일 삭제
+    const pathsToDelete = [];
+    if (row.storage_path) pathsToDelete.push(row.storage_path);
+    if (pathsToDelete.length) {
+      await sb.storage.from(this.STORAGE_BUCKET).remove(pathsToDelete).catch(e => {
+        log('warn', '[Assets] 파일 삭제 오류 (무시): ' + e.message);
+      });
+    }
+    // 3. DB row 삭제
+    const { error: delErr } = await sb.from('user_assets').delete().eq('id', assetId);
+    if (delErr) throw new Error('DB 삭제 실패: ' + delErr.message);
+    log('ok', `[Assets] 삭제 완료 (id: ${assetId})`);
+    return true;
+  },
+};
+window.KorartAssets = KorartAssets;
+
+// ============================================================
+//  자산 픽어모달 — 저장 리스트 + "로컬에서 추가" 버튼
+// ============================================================
+let _assetPickerState = {
+  type: null,
+  onSelect: null,
+  onLocalAdd: null,
+};
+
+async function openAssetPicker(type, onSelect, onLocalAdd) {
+  if (!currentUser) {
+    toast('❌ 로그인이 필요합니다');
+    return;
+  }
+  _assetPickerState = { type, onSelect, onLocalAdd };
+
+  // 모달 렌더
+  let modal = document.getElementById('assetPickerModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'assetPickerModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto';
+    modal.innerHTML = `
+      <div style="background:var(--bg2);border:1px solid var(--line2);border-radius:14px;width:100%;max-width:680px;padding:24px;position:relative;margin:auto">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+          <div>
+            <div style="font-size:11px;color:var(--pink);letter-spacing:2px;font-weight:700;text-transform:uppercase" id="assetPickerCat">ASSETS</div>
+            <div style="font-size:20px;font-weight:800;color:var(--cream);margin-top:4px" id="assetPickerTitle">내 저장 목록</div>
+          </div>
+          <button onclick="closeAssetPicker()" style="background:none;border:none;color:var(--ink3);font-size:22px;cursor:pointer;padding:4px 10px">닫기</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <button class="btn btn-sm btn-primary" onclick="_assetPickerLocalAdd()" id="assetPickerLocalBtn">📁 로컬에서 추가하기</button>
+          <div style="flex:1"></div>
+          <button class="btn btn-sm" onclick="_assetPickerRefresh()">새로고침</button>
+        </div>
+        <div id="assetPickerGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;min-height:200px;max-height:60vh;overflow-y:auto"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modal.onclick = (e) => { if (e.target === modal) closeAssetPicker(); };
+  }
+  modal.style.display = 'flex';
+
+  // 제목 설정
+  const titles = {
+    avatar: { cat: 'AVATAR', title: '저장된 아바타' },
+    cuts4: { cat: '4-CUT', title: '저장된 4컷' },
+    video: { cat: 'VIDEO', title: '저장된 영상' },
+    scene: { cat: 'SCENE', title: '저장된 씀 설정' },
+    merged_video: { cat: 'MERGED', title: '저장된 통합 영상' },
+  };
+  const t = titles[type] || { cat: 'ASSET', title: '저장된 자산' };
+  document.getElementById('assetPickerCat').textContent = t.cat;
+  document.getElementById('assetPickerTitle').textContent = t.title;
+  document.getElementById('assetPickerLocalBtn').style.display = onLocalAdd ? 'inline-flex' : 'none';
+
+  await _assetPickerRefresh();
+}
+
+async function _assetPickerRefresh() {
+  const grid = document.getElementById('assetPickerGrid');
+  const type = _assetPickerState.type;
+  if (!grid || !type) return;
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink3)">불러오는 중...</div>';
+  try {
+    const list = await KorartAssets.list(type);
+    if (list.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink3);font-size:12px">저장된 항목이 없습니다</div>';
+      return;
+    }
+    grid.innerHTML = list.map(item => {
+      const date = new Date(item.created_at).toLocaleDateString('ko-KR');
+      const sizeKb = item.file_size ? `${(item.file_size/1024).toFixed(0)}KB` : '';
+      const isVideo = type === 'video' || type === 'merged_video';
+      const thumb = item.thumbnail_url || (isVideo ? '' : item.asset_url) || '';
+      const previewHtml = thumb
+        ? `<img src="${thumb}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px;background:#0a0a0c">`
+        : (isVideo
+          ? `<div style="width:100%;aspect-ratio:16/9;background:var(--bg4);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:32px">🎬</div>`
+          : `<div style="width:100%;aspect-ratio:16/9;background:var(--bg4);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:32px">📄</div>`);
+      return `
+        <div class="asset-card" data-id="${item.id}" style="background:var(--bg3);border:1px solid var(--line);border-radius:8px;padding:8px;cursor:pointer;transition:.15s;position:relative" onmouseover="this.style.borderColor='var(--pink)'" onmouseout="this.style.borderColor='var(--line)'">
+          ${previewHtml}
+          <div style="font-size:11px;font-weight:700;color:var(--cream);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(item.title || '제목 없음')}</div>
+          <div style="font-size:9px;color:var(--ink3);margin-top:2px">${date} ${sizeKb}</div>
+          <div style="display:flex;gap:4px;margin-top:8px">
+            <button class="btn btn-sm btn-primary" style="flex:1;font-size:10px;padding:4px 6px" onclick="event.stopPropagation();_assetPickerSelect('${item.id}')">불러오기</button>
+            <button class="btn btn-sm btn-red" style="font-size:10px;padding:4px 8px" onclick="event.stopPropagation();_assetPickerDelete('${item.id}', this)" title="삭제">삭제</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (e) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--red);font-size:12px">오류: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function _assetPickerSelect(id) {
+  try {
+    const list = await KorartAssets.list(_assetPickerState.type);
+    const item = list.find(x => x.id === id);
+    if (!item) { toast('항목을 찾을 수 없습니다'); return; }
+    if (_assetPickerState.onSelect) {
+      await _assetPickerState.onSelect(item);
+    }
+    closeAssetPicker();
+  } catch (e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+async function _assetPickerDelete(id, btnEl) {
+  if (!confirm('이 항목을 삭제할까요? (되돌릴 수 없습니다)')) return;
+  try {
+    btnEl.textContent = '...';
+    btnEl.disabled = true;
+    await KorartAssets.delete(id);
+    toast('🗑️ 삭제됨');
+    await _assetPickerRefresh();
+  } catch (e) {
+    toast('❌ ' + e.message);
+    btnEl.textContent = '삭제';
+    btnEl.disabled = false;
+  }
+}
+
+function _assetPickerLocalAdd() {
+  if (_assetPickerState.onLocalAdd) {
+    _assetPickerState.onLocalAdd();
+  }
+  closeAssetPicker();
+}
+
+function closeAssetPicker() {
+  const modal = document.getElementById('assetPickerModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[c]);
+}
+
+// ============================================================
+//  각 타입별 저장 헬퍼 — 해당 버튼에 onclick으로 연결
+// ============================================================
+async function saveAvatarToCloud(av) {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  if (!av) { toast('❌ 아바타 정보 없음'); return; }
+  try {
+    toast('☁️ 클라우드 업로드 중...');
+    await KorartAssets.upload({
+      type: 'avatar',
+      title: av.name,
+      sourceUrl: av.imgUrl,
+      thumbnailUrl: av.imgUrl,
+      metadata: {
+        name: av.name, gender: av.gender, age: av.age, body: av.body,
+        hair: av.hair, style: av.style, extra: av.extra, imgUrl: av.imgUrl,
+      },
+      fileExt: 'png',
+    });
+    toast(`✅ "${av.name}" 클라우드 저장됨`);
+  } catch (e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+async function saveCuts4ToCloud() {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  if (!S.cutDataUrls || !S.cutDataUrls.some(Boolean)) { toast('❌ 저장할 4컷이 없습니다'); return; }
+  const title = prompt('4컷 제목 (선택):', `4컷 ${new Date().toLocaleDateString('ko-KR')}`);
+  if (title === null) return;
+  try {
+    toast('☁️ 업로드 중...');
+    // 그리드 이미지 생성 (캠버스)
+    const gridBlob = await _make4CutGridBlob();
+    await KorartAssets.upload({
+      type: 'cuts4',
+      title: title || `4컷 ${new Date().toLocaleString('ko-KR')}`,
+      sourceBlob: gridBlob,
+      metadata: {
+        cuts: S.cutDataUrls.filter(Boolean),
+        cutPubUrls: S.cutPubUrls || [],
+        ratio: S.ratio,
+        scene: S.scene,
+        prompts: S.cutPrompts || [],
+      },
+      fileExt: 'jpg',
+    });
+    toast('✅ 4컷 클라우드 저장됨');
+  } catch (e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+async function saveVideoToCloud(idx) {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  const url = S.vidUrls?.[idx];
+  if (!url) { toast('❌ 저장할 영상이 없습니다'); return; }
+  try {
+    toast('☁️ 업로드 중... (수십초 소요)');
+    await KorartAssets.upload({
+      type: 'video',
+      title: `컷 ${idx + 1} 영상 — ${new Date().toLocaleString('ko-KR')}`,
+      sourceUrl: url,
+      thumbnailUrl: S.cutDataUrls?.[idx] || null,
+      metadata: {
+        cutIndex: idx,
+        prompt: S.cutPrompts?.[idx] || '',
+        ratio: S.ratio,
+      },
+      fileExt: 'mp4',
+    });
+    toast('✅ 영상 클라우드 저장됨');
+  } catch (e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+async function saveMergedVideoToCloud() {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  if (!_mergedVideoUrl) { toast('❌ 저장할 통합 영상이 없습니다'); return; }
+  const title = prompt('통합 영상 제목 (선택):', `통합 영상 ${new Date().toLocaleDateString('ko-KR')}`);
+  if (title === null) return;
+  try {
+    toast('☁️ 업로드 중...');
+    await KorartAssets.upload({
+      type: 'merged_video',
+      title: title || `통합 영상 ${new Date().toLocaleString('ko-KR')}`,
+      sourceUrl: _mergedVideoUrl,
+      thumbnailUrl: S.cutDataUrls?.[0] || null,
+      metadata: {
+        sourceCount: (S.vidUrls || []).filter(Boolean).length,
+        ratio: S.ratio,
+      },
+      fileExt: 'mp4',
+    });
+    toast('✅ 통합 영상 클라우드 저장됨');
+  } catch (e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+async function saveSceneToCloud() {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  const title = prompt('씀 설정 제목:', `씀 ${new Date().toLocaleDateString('ko-KR')}`);
+  if (title === null) return;
+  try {
+    await KorartAssets.saveSceneSettings(title || '씀 설정', {
+      scene: S.scene,
+      season: S.season,
+      timeofday: S.timeofday,
+      weather: S.weather,
+      location: S.location,
+      locCustom: S.locCustom,
+      vehicle: S.vehicle,
+      personCount: S.personCount,
+      passerby: S.passerby,
+      passerbyDensity: S.passerbyDensity,
+      angles: S.angles,
+      extraPrompt: document.getElementById('extraPrompt')?.value || '',
+    });
+    toast(`✅ 씀 설정 "${title}" 저장됨`);
+  } catch (e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+// 4컷 그리드 이미지 생성 (저장용 jpg)
+async function _make4CutGridBlob() {
+  const cuts = (S.cutDataUrls || []).filter(Boolean);
+  if (cuts.length === 0) throw new Error('4컷 이미지 없음');
+  // 철번째 이미지 크기 기준
+  const img0 = await new Promise((res, rej) => {
+    const im = new Image();
+    im.onload = () => res(im);
+    im.onerror = rej;
+    im.src = cuts[0];
+  });
+  const w = img0.naturalWidth, h = img0.naturalHeight;
+  const canvas = document.createElement('canvas');
+  canvas.width = w * 2;
+  canvas.height = h * 2;
+  const ctx = canvas.getContext('2d');
+  for (let i = 0; i < 4 && i < cuts.length; i++) {
+    if (!cuts[i]) continue;
+    const im = await new Promise((res, rej) => {
+      const x = new Image();
+      x.onload = () => res(x);
+      x.onerror = rej;
+      x.src = cuts[i];
+    });
+    const x = (i % 2) * w;
+    const y = Math.floor(i / 2) * h;
+    ctx.drawImage(im, x, y, w, h);
+  }
+  return await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.85));
+}
+
+
 function downloadVideo(url, filename) {
   const a = document.createElement('a');
   a.href = url; a.download = filename || 'video.mp4';
