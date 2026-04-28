@@ -398,7 +398,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <div class="field">
         <label>계절</label>
         <div class="segs">
-          <div class="seg active" onclick="selOpt(this,'season','spring')">봄</div>
+          <div class="seg" onclick="selOpt(this,'season','spring')">봄</div>
           <div class="seg" onclick="selOpt(this,'season','summer')">여름</div>
           <div class="seg" onclick="selOpt(this,'season','autumn')">가을</div>
           <div class="seg" onclick="selOpt(this,'season','winter')">겨울</div>
@@ -411,7 +411,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <div class="segs">
           <div class="seg" onclick="selOpt(this,'timeofday','before dawn, 3-5am')">새벽</div>
           <div class="seg" onclick="selOpt(this,'timeofday','morning')">아침</div>
-          <div class="seg active" onclick="selOpt(this,'timeofday','daytime, midday')">낮</div>
+          <div class="seg" onclick="selOpt(this,'timeofday','daytime, midday')">낮</div>
           <div class="seg" onclick="selOpt(this,'timeofday','golden hour, dusk')">황혼</div>
           <div class="seg" onclick="selOpt(this,'timeofday','nighttime')">밤</div>
           <div class="seg" onclick="selOpt(this,'timeofday','late night, midnight')">심야</div>
@@ -422,7 +422,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <div class="field">
         <label>날씨</label>
         <div class="segs">
-          <div class="seg active" onclick="selOpt(this,'weather','clear sky')">맑음</div>
+          <div class="seg" onclick="selOpt(this,'weather','clear sky')">맑음</div>
           <div class="seg" onclick="selOpt(this,'weather','cloudy, overcast')">흐림</div>
           <div class="seg" onclick="selOpt(this,'weather','light rain, drizzle')">비</div>
           <div class="seg" onclick="selOpt(this,'weather','heavy rain, pouring')">폭우</div>
@@ -443,30 +443,30 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
           <div class="seg" onclick="selOpt(this,'location','indoor home living room')">실내(집)</div>
           <div class="seg" onclick="selOpt(this,'location','indoor cafe restaurant')">실내(카페)</div>
           <div class="seg" onclick="selOpt(this,'location','indoor office workspace')">실내(사무실)</div>
-          <div class="seg" onclick="selOpt(this,'location','hospital interior, hospital corridor')">🏥 병원</div>
-          <div class="seg" onclick="selOpt(this,'location','movie theater interior, cinema')">🎬 영화관</div>
-          <div class="seg" onclick="selOpt(this,'location','school classroom or hallway')">🏫 학교</div>
-          <div class="seg" onclick="selOpt(this,'location','mountain landscape, mountain hiking trail')">⛰️ 산</div>
-          <div class="seg" onclick="selOpt(this,'location','public restroom interior, clean bathroom')">🚻 화장실</div>
-          <div class="seg" id="vehicleToggleBtn" onclick="toggleVehiclePanel()">🚗 이동 수단 ▾</div>
-          <div class="seg" id="locCustomBtn" onclick="toggleLocCustom()">개인설정 ✏️</div>
+          <div class="seg" onclick="selOpt(this,'location','hospital interior, hospital corridor')">병원</div>
+          <div class="seg" onclick="selOpt(this,'location','movie theater interior, cinema')">영화관</div>
+          <div class="seg" onclick="selOpt(this,'location','school classroom or hallway')">학교</div>
+          <div class="seg" onclick="selOpt(this,'location','mountain landscape, mountain hiking trail')">산</div>
+          <div class="seg" onclick="selOpt(this,'location','public restroom interior, clean bathroom')">화장실</div>
+          <div class="seg" id="vehicleToggleBtn" onclick="toggleVehiclePanel()">이동 수단 ▾</div>
+          <div class="seg" id="locCustomBtn" onclick="toggleLocCustom()">개인설정</div>
         </div>
 
         <!-- 이동 수단 펼침 패널 -->
         <div id="vehiclePanel" style="display:none;margin-top:8px;padding:10px 12px;background:var(--bg3);border:1px solid var(--line);border-radius:8px">
           <div style="font-size:10px;color:var(--ink3);margin-bottom:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase">이동 수단</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
-            <div class="seg vehicle-seg" id="vehicle-boat" onclick="selVehicle('boat')">🚤 배</div>
+            <div class="seg vehicle-seg" id="vehicle-boat" onclick="selVehicle('boat')">배</div>
             <label style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--ink2);cursor:pointer;padding:4px 8px;border-radius:4px;background:var(--bg2);border:1px solid var(--line);user-select:none">
               <input type="checkbox" id="boatLux" onchange="updateVehicleSel('boat')" style="margin:0">고급
             </label>
-            <div class="seg vehicle-seg" id="vehicle-car" onclick="selVehicle('car')">🚗 자동차</div>
+            <div class="seg vehicle-seg" id="vehicle-car" onclick="selVehicle('car')">자동차</div>
             <label style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--ink2);cursor:pointer;padding:4px 8px;border-radius:4px;background:var(--bg2);border:1px solid var(--line);user-select:none">
               <input type="checkbox" id="carLux" onchange="updateVehicleSel('car')" style="margin:0">고급
             </label>
-            <div class="seg vehicle-seg" id="vehicle-subway" onclick="selVehicle('subway')">🚇 지하철</div>
-            <div class="seg vehicle-seg" id="vehicle-bus" onclick="selVehicle('bus')">🚌 버스</div>
-            <div class="seg vehicle-seg" id="vehicle-plane" onclick="selVehicle('plane')">✈️ 비행기</div>
+            <div class="seg vehicle-seg" id="vehicle-subway" onclick="selVehicle('subway')">지하철</div>
+            <div class="seg vehicle-seg" id="vehicle-bus" onclick="selVehicle('bus')">버스</div>
+            <div class="seg vehicle-seg" id="vehicle-plane" onclick="selVehicle('plane')">비행기</div>
           </div>
         </div>
 
@@ -477,7 +477,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <div class="field">
         <label>등장 인원</label>
         <div class="segs" id="personCountSegs">
-          <div class="seg active" onclick="setPersonCount(0,this)">없음</div>
+          <div class="seg" onclick="setPersonCount(0,this)">없음</div>
           <div class="seg" onclick="setPersonCount(1,this)">1명</div>
           <div class="seg" onclick="setPersonCount(2,this)">2명</div>
           <div class="seg" onclick="setPersonCount(3,this)">3명</div>
@@ -491,7 +491,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
           </label>
           <div id="passerbyDensity" style="display:none;margin-top:4px">
             <div class="segs">
-              <div class="seg active" onclick="selOpt(this,'passerbyDensity','a few passersby')">소수</div>
+              <div class="seg" onclick="selOpt(this,'passerbyDensity','a few passersby')">소수</div>
               <div class="seg" onclick="selOpt(this,'passerbyDensity','many passersby, crowded')">다수</div>
             </div>
           </div>
@@ -533,7 +533,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       </div>
 
       <!-- 앵글 선택 팝업 모달 -->
-      <div id="anglePickerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto" onclick="if(event.target===this)closeAnglePickerModal()">
+      <div id="anglePickerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto" onclick="if(event.target===this)closeAnglePickerModal()">
         <div style="background:var(--bg2);border:1px solid var(--line2);border-radius:14px;width:100%;max-width:620px;padding:22px;margin:auto">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
             <div>
@@ -1087,10 +1087,10 @@ const S = {
   aspectRatio: '',  // 16:9, 9:16, 1:1
   avatars: [],
   scene: 'romance',
-  season: 'spring',
-  timeofday: 'daytime, midday',
-  weather: 'clear sky',
-  location: 'indoor cafe restaurant',
+  season: '',
+  timeofday: '',
+  weather: '',
+  location: '',
   locCustom: false,
   personCount: 0,
   passerby: false,
@@ -1682,7 +1682,7 @@ function renderStep1Avatars() {
               `).join('')}
               <div onclick="toggleAvatarOutfitCustom(${av.id})"
                    class="outfit-seg ${isCustomOutfit ? 'active' : ''}"
-                   style="font-size:9px;padding:3px 6px;border-radius:3px;cursor:pointer;background:${isCustomOutfit ? 'var(--pink)' : 'var(--bg3)'};color:${isCustomOutfit ? '#fff' : 'var(--ink2)'};border:1px solid ${isCustomOutfit ? 'var(--pink)' : 'var(--line)'};font-weight:${isCustomOutfit ? '700' : '500'}">개인설정 ✏️</div>
+                   style="font-size:9px;padding:3px 6px;border-radius:3px;cursor:pointer;background:${isCustomOutfit ? 'var(--pink)' : 'var(--bg3)'};color:${isCustomOutfit ? '#fff' : 'var(--ink2)'};border:1px solid ${isCustomOutfit ? 'var(--pink)' : 'var(--line)'};font-weight:${isCustomOutfit ? '700' : '500'}">개인설정</div>
             </div>
             <input id="outfitCustom-${av.id}" placeholder="직접 입력 (예: red dress)"
                    value="${isCustomOutfit ? escHtml(outfit) : ''}"
@@ -2568,6 +2568,10 @@ function selScene(key, el) {
   }
   renderAngleSlots();
   updatePromptPreview();
+  // 씀 선택 시 자동으로 4단계(씀 상세)로 이동
+  if (typeof goSceneStepB === 'function') {
+    setTimeout(() => goSceneStepB(), 300);
+  }
 }
 
 function restoreSceneUI() {
@@ -3467,8 +3471,9 @@ function buildVidPrompt(i) {
   const sceneLoc = (loc || '').slice(0, 80);
   const cam = S.angles[i] || 'cinematic';
 
-  // 최종 조립 — 타겟 ~340자
-  let p = `Korean drama. ${sceneStyle}. ${S.season}, ${S.timeofday}, ${S.weather}, ${sceneLoc}. Camera: ${cam}. ${charLock} Cinematic.`;
+  // 세팅 조립 — 비어있는 값은 높은 제거
+  const ctx = [S.season, S.timeofday, S.weather, sceneLoc].filter(Boolean).join(', ');
+  let p = `Korean drama. ${sceneStyle}.${ctx ? ' ' + ctx + '.' : ''} Camera: ${cam}. ${charLock} Cinematic.`;
 
   // 컷별 설명 (S.cutDescriptions[i]) 통합 — 있을 때만 추가
   const cutDesc = (S.cutDescriptions && S.cutDescriptions[i] || '').trim();
@@ -4516,8 +4521,16 @@ function renderCustomSceneAnglesGrid() {
 let _customSceneAnglePickerIdx = -1;
 function openCustomSceneAnglePicker(idx) {
   _customSceneAnglePickerIdx = idx;
-  const modal = document.getElementById('anglePickerModal');
-  if (!modal) return;
+  // 장세한 anglePickerModal 재사용 — 우선 body로 이동 (panel 에 가려있는 문제 해결)
+  let modal = document.getElementById('anglePickerModal');
+  if (!modal) {
+    console.error('[CustomScene] anglePickerModal not found');
+    return;
+  }
+  // body 이동 (panel 안에 있으면 panel1 활성화 시 안 보입)
+  if (modal.parentElement && modal.parentElement.tagName !== 'BODY') {
+    document.body.appendChild(modal);
+  }
   const colors = ['var(--gold)','var(--blue)','var(--green)','var(--red)'];
   const lbl = document.getElementById('anglePickerCutLabel');
   if (lbl) {
