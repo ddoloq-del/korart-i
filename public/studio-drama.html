@@ -509,8 +509,8 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <div style="font-size:10px;color:var(--ink3);margin-bottom:6px;line-height:1.5">이전에 만든 컷이나 그리드 이미지를 첨부하면 배경·마감·조명 통일성을 유지하며 이어서 생성합니다.</div>
         <div style="display:flex;gap:6px;align-items:flex-start">
           <div id="continueRefPreview" style="width:120px;aspect-ratio:16/9;background:var(--bg3);border:1px dashed var(--line2);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:24px;flex-shrink:0;overflow:hidden"></div>
-          <div style="flex:1;display:flex;flex-direction:column;gap:6px">
-            <button class="btn btn-sm" onclick="document.getElementById('continueRefUpload').click()">파일 업로드</button>
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px;align-items:flex-start">
+            <button class="btn btn-sm" onclick="document.getElementById('continueRefUpload').click()" style="width:auto;padding:6px 14px;white-space:nowrap">파일 업로드</button>
             <div style="font-size:9px;color:var(--ink3);line-height:1.4">이전에 다운로드한 <strong>4컷 그리드</strong> 또는 <strong>단일 컷</strong> 이미지를 올려주세요.</div>
             <input type="file" id="continueRefUpload" accept="image/*" style="display:none" onchange="uploadContinueRef(event)">
           </div>
@@ -2568,10 +2568,10 @@ function selScene(key, el) {
   }
   renderAngleSlots();
   updatePromptPreview();
-  // 씀 선택 시 자동으로 4단계(씀 상세)로 이동
-  if (typeof goSceneStepB === 'function') {
-    setTimeout(() => goSceneStepB(), 300);
-  }
+  // 씀 선택 시 자동으로 4단계(씀 상세)로 이동 — 검증 우회 (goStep 직접)
+  setTimeout(() => {
+    if (typeof goStep === 'function') goStep(2);
+  }, 300);
 }
 
 function restoreSceneUI() {
@@ -2671,9 +2671,21 @@ function toggleVehiclePanel() {
 }
 
 function selVehicle(vehicle) {
-  document.querySelectorAll('.vehicle-seg').forEach(s => s.classList.remove('active'));
   const target = document.getElementById('vehicle-' + vehicle);
-  if (target) target.classList.add('active');
+  if (!target) return;
+
+  // 이미 활성화된 이동수단을 다시 누르면 해제 (토글)
+  if (target.classList.contains('active')) {
+    target.classList.remove('active');
+    document.getElementById('vehicleToggleBtn').classList.remove('active');
+    S.vehicle = '';
+    S.location = '';
+    if (typeof updatePromptPreview === 'function') updatePromptPreview();
+    return;
+  }
+
+  document.querySelectorAll('.vehicle-seg').forEach(s => s.classList.remove('active'));
+  target.classList.add('active');
 
   // 일반 location segs 해제
   document.querySelectorAll('.field').forEach(f => {
