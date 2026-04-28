@@ -868,7 +868,7 @@ const SCENES = {
   tension:  {name:'긴장',   style:'high contrast dramatic shadows, intense cold tones, sharp cinematic focus',
              angles:['Over-the-Shoulder (OTS)','Extreme Close-up (ECU)','Dutch Angle','Point of View (POV)']},
   breakup:  {name:'이별',   style:'melancholic rainy atmosphere, blue-gray tones, emotional soft lighting',
-             angles:['Wide Shot','Medium Close-up (MCU)','Close-up (CU)','Low Angle']},
+             angles:['Wide Shot','Medium Close-up (MCU)','Close-up (CU)','Rack Focus']},
   climax:   {name:'감정 절정',style:'extreme emotional expression, dramatic lighting, high contrast tears',
              angles:['Extreme Close-up (ECU)','Close-up (CU)','Low Angle','Zoom-in']},
   suspense: {name:'서스펜스',style:'dark ominous atmosphere, heavy shadows, noir desaturated tones',
@@ -876,9 +876,19 @@ const SCENES = {
   mellow:   {name:'막장',   style:'melodramatic exaggerated emotion, theatrical lighting, vivid colors',
              angles:['Two Shot','Close-up (CU)','Low Angle','Zoom-in']},
   action:   {name:'액션',   style:'dynamic motion blur, high contrast, sharp cinematic action, dramatic angles',
-             angles:['Low Angle','Wide Shot','Extreme Close-up (ECU)','Point of View (POV)']},
+             angles:['Low Angle','Wide Shot','Extreme Close-up (ECU)','Dolly Zoom']},
   slice:    {name:'일상',   style:'natural warm tones, candid daily life, soft comfortable lighting',
              angles:['Full Shot (FS)','Medium Close-up (MCU)','Two Shot','Eye-Level Shot']},
+  commercial:{name:'광고', style:'clean bright commercial lighting, vibrant product focus, polished cinematic style, premium aesthetic',
+             angles:['Macro Shot','Medium Close-up (MCU)','Establishing Shot','Rack Focus']},
+  vlog:     {name:'개인방송', style:'casual selfie-style lighting, warm friendly tone, intimate handheld feel, vlog aesthetic',
+             angles:['Eye-Level Shot','Medium Close-up (MCU)','Point of View (POV)','Single Shot']},
+  flashback:{name:'회상', style:'nostalgic warm fading tones, soft dreamy haze, vintage film grain, soft focus',
+             angles:['Shallow Depth of Field','Wide Shot','Medium Close-up (MCU)','Slow Motion']},
+  confession:{name:'고백', style:'intimate soft lighting, intense emotional warmth, trembling intensity, golden glow',
+             angles:['Extreme Close-up (ECU)','Close-up (CU)','Two Shot','Eye-Level Shot']},
+  horror:   {name:'공포', style:'dark unsettling atmosphere, deep shadows, eerie cold tones, suspenseful framing',
+             angles:['Dutch Angle','Extreme Close-up (ECU)','Point of View (POV)','Worm\'s Eye View']},
 };
 
 
@@ -2473,7 +2483,12 @@ function renderScenes() {
     {key:'suspense', emoji:'🌑', name:'서스펜스'},
     {key:'mellow',   emoji:'🌧', name:'막장'},
     {key:'action',   emoji:'💥', name:'액션'},
-    {key:'slice',    emoji:'☕', name:'일상'},
+    {key:'slice',      emoji:'☕',   name:'일상'},
+    {key:'commercial', emoji:'🛍️', name:'광고'},
+    {key:'vlog',       emoji:'🎥', name:'개인방송'},
+    {key:'flashback',  emoji:'📼', name:'회상'},
+    {key:'confession', emoji:'🌹', name:'고백'},
+    {key:'horror',     emoji:'👻', name:'공포'},
   ];
   const customs = loadSceneLib();
   let html = defaults.map(s => `
