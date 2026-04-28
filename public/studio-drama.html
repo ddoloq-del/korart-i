@@ -856,6 +856,208 @@ let currentSession = null;
 function getCurrentUserId() {
   return currentUser?.id || null;
 }
+
+// ============================================================
+//  자동 세션 저장/복구 — 새로고침·탭 닫아도 작업 유지 (localStorage)
+// ============================================================
+const SESSION_KEY = 'korart_v2_session';
+let _sessionSaveTimer = null;
+
+// dataURL·차단할 필드는 제외하고 S의 핵심 값만 일련으로 저장
+function _serializeSession() {
+  if (!S) return null;
+  // dataURL이 아닌 URL만 저장 (5MB 제한 회피)
+  const safeCutPubUrls = (S.cutPubUrls || []).map(u => (u && !u.startsWith?.('data:')) ? u : null);
+  return {
+    aspectRatio: S.aspectRatio,
+    avatars: (S.avatars || []).map(av => {
+      const copy = { ...av };
+      if (copy.imgUrl && copy.imgUrl.startsWith?.('data:')) copy.imgUrl = '';
+      return copy;
+    }),
+    scene: S.scene,
+    season: S.season,
+    timeofday: S.timeofday,
+    weather: S.weather,
+    location: S.location,
+    locCustom: S.locCustom,
+    locCustomValue: document.getElementById('locCustomInput')?.value || '',
+    vehicle: S.vehicle,
+    personCount: S.personCount,
+    passerby: S.passerby,
+    passerbyDensity: S.passerbyDensity,
+    angles: S.angles,
+    customAngleMode: S.customAngleMode,
+    cutPubUrls: safeCutPubUrls,        // dataURL 제외
+    // cutDataUrls는 저장 안 함 (5MB 제한)
+    cutApproval: S.cutApproval,
+    cutDurations: S.cutDurations,
+    cutAudio: S.cutAudio,
+    cutDescriptions: S.cutDescriptions,
+    cutEmotions: S.cutEmotions,
+    cutPrompts: S.cutPrompts,
+    vidUrls: S.vidUrls,                // fal.ai CDN URL (잘 저장됨)
+    extraPrompt: document.getElementById('extraPrompt')?.value || '',
+    sessionImgCost: S.sessionImgCost,
+    sessionVidCost: S.sessionVidCost,
+    _currentStep: S._currentStep,
+    _savedAt: Date.now(),
+  };
+}
+
+function _saveSessionNow() {
+  try {
+    const data = _serializeSession();
+    if (!data) return;
+    const serialized = JSON.stringify(data);
+    if (serialized.length > 4_500_000) {
+      console.warn('[Session] 용량 4.5MB 초과 — 업데이트 안함');
+      return;
+    }
+    localStorage.setItem(SESSION_KEY, serialized);
+  } catch (e) {
+    console.warn('[Session] 저장 실패:', e.message);
+  }
+}
+
+// debounced 저장 — 몇 초 동안 연속 호출되면 마지막 1회만 어고
+function saveSession() {
+  if (_sessionSaveTimer) clearTimeout(_sessionSaveTimer);
+  _sessionSaveTimer = setTimeout(_saveSessionNow, 800);
+}
+window.saveSession = saveSession;
+
+// 페이지 이탈/숨김 시 즉시 저장
+window.addEventListener('beforeunload', _saveSessionNow);
+window.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') _saveSessionNow();
+});
+
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    // 7일 이상 오래된 세션은 무시
+    if (data._savedAt && Date.now() - data._savedAt > 7 * 24 * 60 * 60 * 1000) {
+      console.warn('[Session] 7일 이상 오래된 세션 — 무시');
+      return null;
+    }
+    return data;
+  } catch (e) {
+    console.warn('[Session] 로드 실패:', e.message);
+    return null;
+  }
+}
+
+// S 객체에 데이터 부어넣기 + UI 동기화
+function restoreSession(data) {
+  if (!data || !S) return;
+  const fields = ['aspectRatio','avatars','scene','season','timeofday','weather','location','locCustom','vehicle','personCount','passerby','passerbyDensity','angles','customAngleMode','cutPubUrls','cutApproval','cutDurations','cutAudio','cutDescriptions','cutEmotions','cutPrompts','vidUrls','sessionImgCost','sessionVidCost'];
+  for (const f of fields) {
+    if (data[f] !== undefined) S[f] = data[f];
+  }
+  // step 복구
+  if (typeof data._currentStep === 'number') S._currentStep = data._currentStep;
+
+  // UI 동기화 (단계별)
+  setTimeout(() => {
+    // 0단계: 비율
+    if (data.aspectRatio) {
+      document.querySelectorAll('[onclick*="selRatio"]').forEach(el => {
+        if (el.getAttribute('onclick')?.includes(`'${data.aspectRatio}'`)) {
+          el.click?.();
+        }
+      });
+    }
+    // 2단계: 아바타 레더
+    if (typeof renderSavedAvatars === 'function') renderSavedAvatars();
+    // 3단계: 씀
+    if (typeof renderScenes === 'function') renderScenes();
+    // 4단계: 아바타 chip + segs 동기화
+    if (typeof renderStep1Avatars === 'function') renderStep1Avatars();
+    if (typeof restoreSceneUI === 'function') restoreSceneUI();
+    if (typeof renderAngleSlots === 'function') renderAngleSlots();
+    // extraPrompt 복원
+    const ep = document.getElementById('extraPrompt');
+    if (ep && typeof data.extraPrompt === 'string') ep.value = data.extraPrompt;
+    const lc = document.getElementById('locCustomInput');
+    if (lc && typeof data.locCustomValue === 'string') lc.value = data.locCustomValue;
+    // 5단계: 4컷 레더 (cutDataUrls는 없으니 cutPubUrls에서 불러옷)
+    if (typeof renderQuad === 'function') renderQuad();
+    // 6단계: 영상 카드 다시 그리고 vidUrls 복구
+    if (typeof renderVidCards === 'function') renderVidCards();
+    if (typeof updatePromptPreview === 'function') updatePromptPreview();
+    if (typeof updateMergeBtn === 'function') updateMergeBtn();
+  }, 200);
+}
+
+// 페이지 로드 시 복구 시도 (Auth 완료 후)
+function tryRestoreSessionOnLoad() {
+  const data = loadSession();
+  if (!data) return;
+  const ageHours = data._savedAt ? Math.round((Date.now() - data._savedAt) / 3600000) : 0;
+  const ageStr = ageHours < 1 ? '방금' : (ageHours < 24 ? `${ageHours}시간 전` : `${Math.round(ageHours/24)}일 전`);
+
+  // 완료된 세션 없으면 스킵
+  const hasContent = (data.avatars?.length > 0) || (data.cutPubUrls?.some(Boolean)) || (data.vidUrls?.some(Boolean)) || data.scene;
+  if (!hasContent) return;
+
+  restoreSession(data);
+  setTimeout(() => {
+    if (typeof toast === 'function') {
+      toast(`🔄 ${ageStr} 작업을 복구했어요`);
+    }
+  }, 500);
+}
+
+// 4종 주요 함수 hook — S 변경 시 자동 저장
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    tryRestoreSessionOnLoad();
+    // 단계 이동 후에도 저장 — goStep wrapper
+    if (typeof goStep === 'function' && !goStep._sessionWrapped) {
+      const orig = goStep;
+      goStep = function(n) {
+        const r = orig.apply(this, arguments);
+        saveSession();
+        return r;
+      };
+      goStep._sessionWrapped = true;
+      window.goStep = goStep;
+    }
+    // 주요 이벤트 자동 후킹 (변경 자동 저장)
+    const wrapFn = (fnName) => {
+      const fn = window[fnName];
+      if (typeof fn !== 'function' || fn._sessionWrapped) return;
+      window[fnName] = function() {
+        const r = fn.apply(this, arguments);
+        saveSession();
+        return r;
+      };
+      window[fnName]._sessionWrapped = true;
+    };
+    ['selScene','selOpt','selVehicle','setPersonCount','selectAngleForCut',
+     'updateCutDescription','setAspectRatio','addAvatarToScene','removeAvatarFromScene',
+     'toggleLocCustom','updatePasserby','setOutfit'].forEach(wrapFn);
+
+    // input/textarea 이벤트도 광용 리스너 (extraPrompt 등)
+    document.addEventListener('input', (e) => {
+      const id = e.target.id || '';
+      if (id === 'extraPrompt' || id === 'locCustomInput' || id.startsWith('vidScript') ||
+          id.startsWith('vidDur') || id.startsWith('cutDesc')) {
+        saveSession();
+      }
+    });
+    document.addEventListener('change', (e) => {
+      const id = e.target.id || '';
+      if (id.startsWith('vidEmotion') || id.startsWith('vidSpeaker') || id.startsWith('vidAudio') ||
+          id === 'passerbyCheck') {
+        saveSession();
+      }
+    });
+  }, 1500);  // 아바타/씀 레더링 후
+});
 function getCurrentUserEmail() {
   return currentUser?.email || null;
 }
@@ -3434,6 +3636,7 @@ async function goToStep3() {
         log('info', `컷${i+1} CDN 업로드 중...`);
         const blob = dataURLtoBlob(S.cutDataUrls[i]);
         S.cutPubUrls[i] = await uploadToFalStorage(falKey, blob, `cut_${i}.jpg`);
+      if (typeof saveSession === 'function') saveSession();
         log('ok', `컷${i+1} 업로드 완료: ${S.cutPubUrls[i].slice(0,50)}`);
       } catch(e) {
         log('warn', `컷${i+1} 업로드 실패: ${e.message}`);
@@ -3802,6 +4005,7 @@ async function generateCutVideo(i) {
     if (!videoUrl) throw new Error('영상 URL 없음: ' + JSON.stringify(d).slice(0,200));
 
     S.vidUrls[i] = videoUrl;
+    if (typeof saveSession === 'function') saveSession();
 
     const player = document.getElementById(`vidPlayer${i}`);
     player.src = videoUrl;
