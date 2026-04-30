@@ -2145,13 +2145,18 @@ let currentSession = null;
     window.location.href = '/studio';
   }
   sb.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_OUT' || !session) {
-      console.warn('[Auth] 로그아웃 감지 — /studio로 이동');
-      window.location.href = '/studio';
-    } else {
-      currentSession = session;
-      currentUser = session.user;
-      window.__currentUser = currentUser;
+    currentSession = session;
+    currentUser = session?.user || null;
+    renderNav();
+    if (event === 'SIGNED_IN' && currentUser) {
+      upsertProfileFromPending();
+      checkOnboardingNeeded();
+      // 로그인 성공 — 인증 모달 닫기
+      closeRequiredModal();
+      closeModal();
+    } else if (event === 'SIGNED_OUT' || !session) {
+      // 로그아웃 — 다시 인증 모달 표시 (로그인 필수)
+      setTimeout(() => showAuthRequiredModal(), 100);
     }
   });
 })();
@@ -7603,7 +7608,7 @@ function resetMerge() {
   //                      Auth 상태 동기화
   // ============================================================
 
-  // 초기 세션 확인
+  // 초기 세션 확인 — 비로그인 시 자동으로 인증 모달 표시
   sb.auth.getSession().then(({ data }) => {
     currentSession = data.session;
     currentUser = data.session?.user || null;
@@ -7611,6 +7616,9 @@ function resetMerge() {
     if (currentUser) {
       upsertProfileFromPending();
       checkOnboardingNeeded();
+    } else {
+      // studio.html은 로그인 필수 — 비로그인 시 인증 모달 자동 표시
+      setTimeout(() => showAuthRequiredModal(), 150);
     }
   });
 
@@ -8008,6 +8016,12 @@ function resetMerge() {
     if (event === 'SIGNED_IN' && currentUser) {
       upsertProfileFromPending();
       checkOnboardingNeeded();
+      // 로그인 성공 — 인증 모달 닫기
+      closeRequiredModal();
+      closeModal();
+    } else if (event === 'SIGNED_OUT' || !session) {
+      // 로그아웃 — 인증 필수 모달 다시 표시
+      setTimeout(() => showAuthRequiredModal(), 100);
     }
   });
 
