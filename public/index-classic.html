@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Korart-i — 프롬프트 없이, 선택만으로 영상.</title>
+<meta name="description" content="더 이상 프롬프트로 고민하지 마세요. 옵션만 입맛에 맞게 고르면 K-콘텐츠 영상이 완성됩니다.">
+
+<meta property="og:title" content="Korart-i — Korean Artistic Intelligence">
+<meta property="og:description" content="프롬프트 시대는 끝났습니다. 선택과 상세 설정으로 완성하는 영상.">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #0a0908;
+  --bg-2: #141210;
+  --bg-3: #1c1a17;
+  --bg-4: #252220;
+  --ink: #f5f1e8;
+  --ink-dim: #8a857d;
+  --ink-dimmer: #5a564f;
+  --accent: #e63946;
+  --accent-hover: #d62f3c;
+  --cream: #ead7b7;
+  --gold: #d4a574;
+  --line: #2a2825;
+  --line-lit: #3d3a35;
+  --success: #7cb87c;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+::selection { background: var(--accent); color: var(--ink); }
+
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 16px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(10, 9, 8, 0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--line);
+}
+
+.logo {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  cursor: pointer;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.logo-main {
+  font-family: 'Gowun Batang', serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--ink);
+}
+
+.logo-i {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 26px;
+  color: var(--accent);
+}
+
+.logo-dash {
+  color: var(--ink-dim);
+  font-weight: 300;
+  margin: 0 2px;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+}
+
+.nav-links a {
+  color: var(--ink-dim);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.2s;
+  letter-spacing: -0.01em;
+}
+
+.nav-links a:hover { color: var(--cream); }
+
+.nav-cta {
+  background: var(--accent);
+  color: var(--ink);
+  padding: 10px 22px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: -0.01em;
+}
+
+.nav-cta:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.nav-cta::after {
+  content: '→';
+  transition: transform 0.2s;
+}
+
+.nav-cta:hover::after { transform: translateX(3px); }
+
+/* ============ HERO ============ */
+.hero {
+  min-height: 100vh;
+  padding: 140px 40px 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1100px;
+  height: 1100px;
+  background: radial-gradient(circle, rgba(230, 57, 70, 0.09) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: 5%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(212, 165, 116, 0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 1000px;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 500;
+  margin-bottom: 36px;
+  padding: 10px 22px;
+  border: 1px solid rgba(212, 165, 116, 0.3);
+  background: rgba(212, 165, 116, 0.05);
+}
+
+.hero-eyebrow::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--success);
+  border-radius: 50%;
+  animation: blink 2s ease-in-out infinite;
+  box-shadow: 0 0 8px var(--success);
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.hero-pretitle {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: clamp(18px, 2vw, 24px);
+  color: var(--ink-dim);
+  margin-bottom: 20px;
+  letter-spacing: -0.01em;
+  position: relative;
+  display: inline-block;
+}
+
+.hero-pretitle .strike {
+  position: relative;
+  color: var(--ink-dimmer);
+}
+
+.hero-pretitle .strike::before {
+  content: '';
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  top: 50%;
+  height: 1.5px;
+  background: var(--accent);
+  transform: rotate(-3deg);
+  opacity: 0.85;
+}
+
+.hero-title {
+  font-family: 'Gowun Batang', serif;
+  font-size: clamp(48px, 7.5vw, 100px);
+  font-weight: 700;
+  line-height: 0.96;
+  letter-spacing: -0.035em;
+  margin-bottom: 32px;
+  color: var(--cream);
+}
+
+.hero-title em {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+  position: relative;
+}
+
+.hero-title em::after {
+  content: '';
+  position: absolute;
+  bottom: 0.08em;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--accent);
+  opacity: 0.25;
+}
+
+.hero-sub {
+  font-size: clamp(17px, 1.5vw, 22px);
+  color: var(--ink-dim);
+  max-width: 720px;
+  line-height: 1.65;
+  margin: 0 auto 56px;
+}
+
+.hero-sub strong {
+  color: var(--cream);
+  font-weight: 500;
+}
+
+.hero-ctas {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 56px;
+}
+
+.cta-primary {
+  background: var(--accent);
+  color: var(--ink);
+  padding: 20px 42px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  border: none;
+}
+
+.cta-primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px rgba(230, 57, 70, 0.35);
+}
+
+.cta-primary::after {
+  content: '→';
+  font-size: 18px;
+  transition: transform 0.2s;
+}
+
+.cta-primary:hover::after { transform: translateX(5px); }
+
+.cta-secondary {
+  background: transparent;
+  color: var(--ink);
+  padding: 20px 36px;
+  border: 1px solid var(--line-lit);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cta-secondary:hover {
+  border-color: var(--cream);
+  background: var(--bg-2);
+}
+
+.hero-contrast {
+  margin-top: 24px;
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  max-width: 760px;
+  width: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.contrast-card {
+  flex: 1 1 320px;
+  min-width: 280px;
+  padding: 18px 22px;
+  border-radius: 0;
+  text-align: left;
+  position: relative;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  letter-spacing: -0.005em;
+}
+
+.contrast-card.before {
+  background: rgba(230, 57, 70, 0.04);
+  border: 1px solid rgba(230, 57, 70, 0.18);
+  border-left: 2px solid var(--accent);
+  color: var(--ink-dim);
+}
+
+.contrast-card.before code {
+  color: var(--ink-dimmer);
+  font-style: italic;
+  text-decoration: line-through;
+  text-decoration-color: rgba(230, 57, 70, 0.5);
+  text-decoration-thickness: 1px;
+}
+
+.contrast-card.after {
+  background: rgba(124, 184, 124, 0.04);
+  border: 1px solid rgba(124, 184, 124, 0.2);
+  border-left: 2px solid var(--success);
+  color: var(--ink-dim);
+}
+
+.contrast-card.after code {
+  color: var(--cream);
+  font-style: normal;
+}
+
+.contrast-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.contrast-card.before .contrast-label { color: var(--accent); }
+.contrast-card.after  .contrast-label { color: var(--success); }
+
+.contrast-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 24px;
+  color: var(--accent);
+  flex: 0 0 32px;
+}
+
+@media (max-width: 720px) {
+  .contrast-arrow { flex: 0 0 100%; transform: rotate(90deg); padding: 8px 0; }
+}
+
+.showcase {
+  padding: 100px 40px 140px;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 56px;
+}
+
+.showcase-tile {
+  aspect-ratio: 9/16;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.showcase-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 12px,
+    rgba(245, 241, 232, 0.015) 12px,
+    rgba(245, 241, 232, 0.015) 24px
+  );
+  pointer-events: none;
+}
+
+.showcase-placeholder {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  color: var(--ink-dimmer);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-align: center;
+  padding: 20px;
+}
+
+.showcase-placeholder-num {
+  display: block;
+  font-size: 36px;
+  color: var(--line-lit);
+  margin-bottom: 8px;
+  font-style: italic;
+}
+
+.how {
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+  padding: 140px 40px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.how-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 500;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.section-eyebrow::before {
+  content: '';
+  width: 32px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.section-title {
+  font-family: 'Gowun Batang', serif;
+  font-size: clamp(36px, 5vw, 60px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  margin-bottom: 24px;
+  max-width: 820px;
+  color: var(--cream);
+}
+
+.section-title em {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+}
+
+.section-sub {
+  font-size: 17px;
+  color: var(--ink-dim);
+  line-height: 1.6;
+  max-width: 640px;
+  margin-bottom: 56px;
+}
+
+.how-steps {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0;
+  margin-top: 64px;
+  position: relative;
+}
+
+.how-steps::before {
+  content: '';
+  position: absolute;
+  top: 32px;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--line-lit) 8%,
+    var(--accent) 50%,
+    var(--line-lit) 92%,
+    transparent 100%);
+}
+
+.how-step {
+  position: relative;
+  padding: 0 12px;
+  text-align: center;
+  z-index: 1;
+}
+
+.how-step-num {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--bg-2);
+  border: 1px solid var(--line-lit);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 26px;
+  color: var(--ink-dim);
+  transition: all 0.3s;
+}
+
+.how-step:hover .how-step-num {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.08);
+  box-shadow: 0 0 28px rgba(230, 57, 70, 0.35);
+}
+
+.how-step-name {
+  font-family: 'Gowun Batang', serif;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+  color: var(--cream);
+}
+
+.how-step-desc {
+  font-size: 11px;
+  color: var(--ink-dim);
+  line-height: 1.55;
+  margin-bottom: 12px;
+}
+
+.how-step-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.how-step-tag.manual { color: var(--accent); }
+
+.how-bottom {
+  text-align: center;
+  margin-top: 80px;
+}
+
+.gallery {
+  padding: 140px 40px;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-top: 56px;
+}
+
+.scene-tile {
+  aspect-ratio: 3/4;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  padding: 22px 20px;
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  cursor: pointer;
+}
+
+.scene-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 30%,
+    var(--scene-color) 0%,
+    transparent 60%);
+  opacity: 0.12;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.scene-tile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 60%, var(--scene-color) 200%);
+  opacity: 0.08;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.scene-tile:hover {
+  transform: translateY(-4px);
+  border-color: var(--scene-color);
+}
+
+.scene-tile:hover::before { opacity: 0.25; }
+.scene-tile:hover::after  { opacity: 0.18; }
+
+.scene-tile-top { position: relative; z-index: 1; }
+
+.scene-mood {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--scene-color);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+
+.scene-mood::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--scene-color);
+  box-shadow: 0 0 6px var(--scene-color);
+}
+
+.scene-num {
+  position: absolute;
+  top: 22px;
+  right: 20px;
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 22px;
+  color: var(--line-lit);
+  line-height: 1;
+  z-index: 1;
+}
+
+.scene-tile-bottom { position: relative; z-index: 1; }
+
+.scene-name-ko {
+  font-family: 'Gowun Batang', serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+  color: var(--cream);
+}
+
+.scene-name-en {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-dim);
+  margin-bottom: 12px;
+}
+
+.scene-angles {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--ink-dimmer);
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.scene-tile.more {
+  background: transparent;
+  border: 1px dashed var(--line-lit);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: default;
+}
+
+.scene-tile.more:hover {
+  transform: none;
+  border-color: var(--gold);
+}
+
+.scene-tile.more::before,
+.scene-tile.more::after { display: none; }
+
+.more-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.more-symbol {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 48px;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.more-text {
+  font-family: 'Gowun Batang', serif;
+  font-size: 14px;
+  color: var(--cream);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.more-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.gallery-note {
+  margin-top: 40px;
+  padding: 20px 24px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--gold);
+  font-size: 13px;
+  color: var(--ink-dim);
+  line-height: 1.6;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.gallery-note strong {
+  color: var(--cream);
+  font-weight: 600;
+}
+
+.gallery-note-icon {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 22px;
+  color: var(--gold);
+  flex: 0 0 28px;
+  text-align: center;
+}
+
+.compare {
+  background: var(--bg-2);
+  padding: 140px 40px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.compare-inner { max-width: 1200px; margin: 0 auto; }
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 48px;
+}
+
+.compare-col {
+  padding: 44px 40px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+}
+
+.compare-col.bad {
+  border-color: rgba(230, 57, 70, 0.2);
+  background: linear-gradient(180deg, rgba(230, 57, 70, 0.04) 0%, transparent 100%), var(--bg);
+}
+
+.compare-col.good {
+  border-color: rgba(124, 184, 124, 0.25);
+  background: linear-gradient(180deg, rgba(124, 184, 124, 0.05) 0%, transparent 100%), var(--bg);
+}
+
+.compare-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+
+.compare-col.bad  .compare-label { color: var(--accent); }
+.compare-col.good .compare-label { color: var(--success); }
+
+.compare-headline {
+  font-family: 'Gowun Batang', serif;
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 28px;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--cream);
+}
+
+.compare-list { list-style: none; }
+
+.compare-list li {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  color: var(--ink-dim);
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  line-height: 1.55;
+}
+
+.compare-list li:last-child { border-bottom: none; }
+
+.compare-list li::before {
+  flex: 0 0 18px;
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.compare-col.bad  .compare-list li::before { content: '✗'; color: var(--accent); }
+.compare-col.good .compare-list li::before { content: '✓'; color: var(--success); }
+
+.pricing {
+  padding: 140px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 48px;
+}
+
+.price-card {
+  padding: 36px 32px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  position: relative;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+
+.price-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--line-lit);
+}
+
+.price-card.featured {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, rgba(230, 57, 70, 0.06) 0%, transparent 100%), var(--bg-2);
+}
+
+.price-card.featured::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: -1px; right: -1px;
+  height: 3px;
+  background: var(--accent);
+}
+
+.price-badge {
+  position: absolute;
+  top: -13px;
+  right: 24px;
+  background: var(--accent);
+  color: var(--ink);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  font-weight: 600;
+}
+
+.price-icon {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 28px;
+  color: var(--ink-dim);
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.price-card.featured .price-icon { color: var(--accent); }
+
+.price-name {
+  font-family: 'Gowun Batang', serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+  color: var(--cream);
+}
+
+.price-tag {
+  font-size: 13px;
+  color: var(--ink-dim);
+  margin-bottom: 28px;
+  line-height: 1.4;
+}
+
+.price-amount {
+  font-family: 'Gowun Batang', serif;
+  font-size: 44px;
+  font-weight: 700;
+  color: var(--cream);
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+  line-height: 1;
+}
+
+.price-amount .unit {
+  font-size: 16px;
+  color: var(--ink-dim);
+  font-weight: 400;
+}
+
+.price-per {
+  font-size: 12px;
+  color: var(--ink-dim);
+  margin-bottom: 18px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.price-points {
+  background: rgba(212, 165, 116, 0.06);
+  border: 1px solid rgba(212, 165, 116, 0.2);
+  padding: 12px 14px;
+  margin-bottom: 24px;
+}
+
+.price-points-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.price-points-value {
+  font-family: 'Gowun Batang', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cream);
+  letter-spacing: -0.01em;
+}
+
+.price-points-value .pt-unit {
+  font-size: 12px;
+  color: var(--gold);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.05em;
+  margin-left: 4px;
+}
+
+.price-features {
+  list-style: none;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  margin-bottom: 28px;
+  flex: 1;
+}
+
+.price-features li {
+  padding: 9px 0;
+  font-size: 13px;
+  color: var(--ink-dim);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.55;
+}
+
+.price-features li::before {
+  content: '✓';
+  color: var(--success);
+  flex: 0 0 14px;
+  font-weight: 700;
+}
+
+.price-cta {
+  display: block;
+  padding: 14px 0;
+  background: var(--bg-3);
+  border: 1px solid var(--line-lit);
+  color: var(--ink);
+  text-align: center;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+  letter-spacing: -0.01em;
+}
+
+.price-cta:hover {
+  border-color: var(--cream);
+  background: var(--bg-4);
+}
+
+.price-card.featured .price-cta {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.price-card.featured .price-cta:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.extra-points {
+  margin-top: 32px;
+  padding: 28px 32px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.extra-points-info {
+  flex: 1;
+  min-width: 280px;
+}
+
+.extra-points-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.extra-points-title {
+  font-family: 'Gowun Batang', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cream);
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+.extra-points-sub {
+  font-size: 13px;
+  color: var(--ink-dim);
+  line-height: 1.5;
+}
+
+.extra-points-rate {
+  font-family: 'Gowun Batang', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--cream);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.extra-points-rate .small {
+  font-size: 14px;
+  color: var(--gold);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.price-note {
+  text-align: center;
+  margin-top: 32px;
+  font-size: 13px;
+  color: var(--ink-dim);
+  line-height: 1.6;
+}
+
+.faq {
+  padding: 140px 40px;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.faq-list { margin-top: 48px; }
+
+.faq-item {
+  border-bottom: 1px solid var(--line);
+  padding: 24px 0;
+}
+
+.faq-q {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-family: 'Gowun Batang', serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--cream);
+}
+
+.faq-q::after {
+  content: '+';
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 28px;
+  color: var(--accent);
+  font-weight: 400;
+  transition: transform 0.3s;
+  flex: 0 0 28px;
+  text-align: center;
+  line-height: 1;
+}
+
+.faq-item.open .faq-q::after {
+  content: '−';
+  transform: rotate(180deg);
+}
+
+.faq-a {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, margin 0.3s;
+  font-size: 14px;
+  color: var(--ink-dim);
+  line-height: 1.75;
+}
+
+.faq-item.open .faq-a {
+  max-height: 500px;
+  margin-top: 18px;
+}
+
+.final {
+  padding: 160px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.final::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 900px;
+  height: 900px;
+  background: radial-gradient(circle, rgba(230, 57, 70, 0.06) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.final-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.final-title {
+  font-family: 'Gowun Batang', serif;
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  margin-bottom: 28px;
+  color: var(--cream);
+}
+
+.final-title em {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+}
+
+.final-sub {
+  font-size: 17px;
+  color: var(--ink-dim);
+  margin-bottom: 48px;
+  line-height: 1.6;
+}
+
+footer {
+  padding: 60px 40px 40px;
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+
+.footer-inner { max-width: 1200px; margin: 0 auto; }
+
+.footer-logo {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.footer-tagline {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  color: var(--ink-dim);
+  font-size: 15px;
+  margin-bottom: 32px;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: var(--ink-dim);
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.2s;
+}
+
+.footer-links a:hover { color: var(--cream); }
+
+.footer-copy {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-dimmer);
+  letter-spacing: 0.05em;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  line-height: 1.8;
+}
+
+.footer-copy .tagline {
+  display: block;
+  margin-top: 8px;
+  color: var(--ink-dim);
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 0;
+}
+
+@media (max-width: 1100px) {
+  .gallery-grid { grid-template-columns: repeat(4, 1fr); }
+  .showcase-grid { grid-template-columns: repeat(2, 1fr); }
+  .how-steps { grid-template-columns: repeat(3, 1fr); gap: 32px 20px; }
+  .how-steps::before { display: none; }
+}
+
+@media (max-width: 768px) {
+  nav { padding: 14px 20px; }
+  .nav-links { display: none; }
+  .hero { padding: 120px 20px 60px; min-height: auto; }
+  .showcase, .gallery, .pricing, .faq, .final { padding: 80px 20px; }
+  .compare, .how { padding: 80px 20px; }
+  .compare-grid { grid-template-columns: 1fr; }
+  .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .showcase-grid { grid-template-columns: 1fr; }
+  .how-steps { grid-template-columns: 1fr; gap: 32px; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .hero-ctas { flex-direction: column; align-items: stretch; width: 100%; }
+  .cta-primary, .cta-secondary { justify-content: center; }
+  .scene-tile { padding: 18px 16px; }
+  .scene-name-ko { font-size: 18px; }
+  .extra-points { flex-direction: column; align-items: flex-start; }
+  .extra-points-rate { font-size: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="logo">
+    <span class="logo-main">Korart</span><span class="logo-dash">-</span><span class="logo-i">i</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#scenes">씬 갤러리</a></li>
+    <li><a href="#how">작동 방식</a></li>
+    <li><a href="#pricing">구독</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <a href="studio.html" class="nav-cta">로그인 / 가입</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-eyebrow">Korean Artistic Intelligence</div>
+
+    <p class="hero-pretitle">
+      옵션은 내 입맛에 맞게,
+    </p>
+
+    <h1 class="hero-title">
+      상세 설정으로<br>
+      <em>나만의 영상 완성.</em>
+    </h1>
+
+    <p class="hero-sub">
+      어렵게 단어를 짜내던 프롬프트 시대는 끝났습니다.
+      <strong>선택과 상세 설정으로</strong> 완성하는 K-콘텐츠 영상 메이킹.
+      AI가 4컷 미리보기로 확인시켜 주고, 영상까지 한 번에.
+    </p>
+
+    <div class="hero-ctas">
+      <a href="studio.html" class="cta-primary">가입하고 시작하기</a>
+      <a href="#how" class="cta-secondary">작동 방식 보기 ↓</a>
+    </div>
+
+    <div class="hero-contrast">
+      <div class="contrast-card before">
+        <span class="contrast-label">기존 AI 영상</span>
+        <code>"a young Korean woman in her 20s with long black hair, wearing a beige trench coat, walking through cherry blossoms in Seoul during golden hour..."</code>
+      </div>
+      <div class="contrast-arrow">→</div>
+      <div class="contrast-card after">
+        <span class="contrast-label">Korart-i</span>
+        <code>씬: 로맨스 · 계절: 봄 · 시간: 황혼<br>장소: 한강 · 인물: 나의 아바타<br><strong style="color:var(--success)">→ 클릭으로 끝.</strong></code>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase">
+  <div class="section-eyebrow">Showcase</div>
+  <h2 class="section-title">Korart-i로 만든 <em>영상.</em></h2>
+  <p class="section-sub">
+    실제 사용자가 만든 영상들. 곧 채워집니다.
+  </p>
+
+  <div class="showcase-grid">
+    <div class="showcase-tile"><div class="showcase-placeholder"><span class="showcase-placeholder-num">i</span>coming soon</div></div>
+    <div class="showcase-tile"><div class="showcase-placeholder"><span class="showcase-placeholder-num">ii</span>coming soon</div></div>
+    <div class="showcase-tile"><div class="showcase-placeholder"><span class="showcase-placeholder-num">iii</span>coming soon</div></div>
+    <div class="showcase-tile"><div class="showcase-placeholder"><span class="showcase-placeholder-num">iv</span>coming soon</div></div>
+    <div class="showcase-tile"><div class="showcase-placeholder"><span class="showcase-placeholder-num">v</span>coming soon</div></div>
+    <div class="showcase-tile"><div class="showcase-placeholder"><span class="showcase-placeholder-num">vi</span>coming soon</div></div>
+  </div>
+</section>
+
+<section class="how" id="how">
+  <div class="how-inner">
+    <div class="section-eyebrow">How It Works</div>
+    <h2 class="section-title">고르고, 다듬고, <em>완성.</em></h2>
+    <p class="section-sub">
+      복잡한 프롬프트 엔지니어링은 Korart-i가. 당신은 분위기와 인물만 선택하세요.
+      재생성 낭비 없이 한 번에.
+    </p>
+
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-step-num">i</div>
+        <div class="how-step-name">씬 분위기</div>
+        <div class="how-step-desc">갤러리에서 1개 선택<br>+ 비율 자동 추천</div>
+        <div class="how-step-tag manual">선택</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">ii</div>
+        <div class="how-step-name">아바타</div>
+        <div class="how-step-desc">얼굴·헤어 등록<br>모든 씬 재사용</div>
+        <div class="how-step-tag manual">선택</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">iii</div>
+        <div class="how-step-name">상세 설정</div>
+        <div class="how-step-desc">시간·날씨·장소<br>+ 카메라 앵글 4개</div>
+        <div class="how-step-tag manual">선택</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">iv</div>
+        <div class="how-step-name">4컷 생성</div>
+        <div class="how-step-desc">한 번에 4컷<br>통일감 확보</div>
+        <div class="how-step-tag">자동</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">v</div>
+        <div class="how-step-name">컷별 영상</div>
+        <div class="how-step-desc">승인된 컷만<br>5초 영상 변환</div>
+        <div class="how-step-tag">자동</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">vi</div>
+        <div class="how-step-name">통합·다운로드</div>
+        <div class="how-step-desc">순서대로 이어붙임<br>MP4·쇼츠 변환</div>
+        <div class="how-step-tag">자동</div>
+      </div>
+    </div>
+
+    <div class="how-bottom">
+      <a href="studio.html" class="cta-primary">가입하고 시작하기</a>
+    </div>
+  </div>
+</section>
+
+<section class="gallery" id="scenes">
+  <div class="section-eyebrow">Scene Gallery</div>
+  <h2 class="section-title">분위기를 고르면,<br><em>나머지는 자동으로.</em></h2>
+  <p class="section-sub">
+    각 씬마다 한국 콘텐츠에 맞춘 조명·색감·카메라 앵글이 사전 설계되어 있어요.
+    클릭만 하면 그 씬에 최적화된 4개 카메라 앵글이 자동 적용됩니다.
+    씬은 계속 추가 업데이트됩니다.
+  </p>
+
+  <div class="gallery-grid">
+    <a href="studio.html?scene=romance" class="scene-tile" style="--scene-color:#ff7a9d">
+      <div class="scene-tile-top"><div class="scene-mood">Romance</div></div>
+      <div class="scene-num">·</div>
+      <div class="scene-tile-bottom">
+        <h3 class="scene-name-ko">로맨스</h3>
+        <p class="scene-name-en">warm golden hour</p>
+        <p class="scene-angles">Two Shot · MCU · Eye-Level</p>
+      </div>
+    </a>
+
+    <a href="studio.html?scene=tension" class="scene-tile" style="--scene-color:#6b8cff">
+      <div class="scene-tile-top"><div class="scene-mood">Tension</div></div>
+      <div class="scene-num">·</div>
+      <div class="scene-tile-bottom">
+        <h3 class="scene-name-ko">긴장</h3>
+        <p class="scene-name-en">cold dramatic shadows</p>
+        <p class="scene-angles">OTS · ECU · Dutch Angle</p>
+      </div>
+    </a>
+
+    <a href="studio.html?scene=breakup" class="scene-tile" style="--scene-color:#6ba0c8">
+      <div class="scene-tile-top"><div class="scene-mood">Breakup</div></div>
+      <div class="scene-num">·</div>
+      <div class="scene-tile-bottom">
+        <h3 class="scene-name-ko">이별</h3>
+        <p class="scene-name-en">melancholic blue-gray</p>
+        <p class="scene-angles">Wide · MCU · Rack Focus</p>
+      </div>
+    </a>
+
+    <a href="studio.html?scene=climax" class="scene-tile" style="--scene-color:#ff5544">
+      <div class="scene-tile-top"><div class="scene-mood">Climax</div></div>
+      <div class="scene-num">·</div>
+      <div class="scene-tile-bottom">
+        <h3 class="scene-name-ko">감정 절정</h3>
+        <p class="scene-name-en">extreme emotional</p>
+        <p class="scene-angles">ECU · Low Angle · Zoom</p>
+      </div>
+    </a>
+
+    <a href="studio.html?scene=suspense" class="scene-tile" style="--scene-color:#4a4860">
+      <div class="scene-tile-top"><div class="scene-mood">Suspense</div></div>
+      <div class="scene-num">·</div>
+      <div class="scene-tile-bottom">
+        <h3 class="scene-name-ko">서스펜스</h3>
+        <p class="scene-name-en">noir desaturated</p>
+        <p class="scene-angles">Dutch · POV · ECU</p>
+      </div>
+    </a>
+
+    <a href="studio.html?scene=mellow" class="scene-tile" style="--scene-color:#d860a0">
+      <div class="scene-tile-top"><div class="scene-mood">Melodrama</div></div>
+      <div class="scene-num">·</div>
+      <div class="scene-tile-bottom">
+        <h3 class="scene-name-ko">막장</h3>
+        <p class="scene-name-en">theatrical vivid</p>
+        <p class="scene-angles">Two Shot · CU · Zoom-in</p>
+      </div>
+    </a>
+
+    <a href="studio.html?scene=action" class="scene-tile" style="--scene-color:#ff8c3a">
+      <div class="scene-tile-top"><div class="scene-mood">Action</div></div>
+      <div class="scene-num">·</div>
+      <div class="scene-tile-bottom">
+        <h3 class="scene-name-ko">액션</h3>
+        <p class="scene-name-en">dynamic motion blur</p>
+        <p class="scene-angles">Low Angle · Wide · Dolly</p>
+      </div>
+    </a>
+
+    <a href="studio.html?scene=slice" class="scene-tile" style="--scene-color:#f0c878">
+      <div class="scene-tile-top"><div class="scene-mood">Daily Life</div></div>
+      <div class="scene-num">·</div>
+      <div class="scene-tile-bottom">
+        <h3 class="scene-name-ko">일상</h3>
+        <p class="scene-name-en">natural warm tones</p>
+        <p class="scene-angles">Full · MCU · Eye-Level</p>
+      </div>
+    </a>
+
+    <a href="studio.html?scene=commercial" class="scene-tile" style="--scene-color:#5cd6c8">
+      <div class="scene-tile-top"><div class="scene-mood">Commercial</div></div>
+      <div class="scene-num">·</div>
+      <div class="scene-tile-bottom">
+        <h3 class="scene-name-ko">광고</h3>
+        <p class="scene-name-en">premium polished</p>
+        <p class="scene-angles">Macro · MCU · Establishing</p>
+      </div>
+    </a>
+
+    <a href="studio.html?scene=vlog" class="scene-tile" style="--scene-color:#ffb070">
+      <div class="scene-tile-top"><div class="scene-mood">Vlog</div></div>
+      <div class="scene-num">·</div>
+      <div class="scene-tile-bottom">
+        <h3 class="scene-name-ko">개인방송</h3>
+        <p class="scene-name-en">selfie-style intimate</p>
+        <p class="scene-angles">Eye-Level · MCU · POV</p>
+      </div>
+    </a>
+
+    <a href="studio.html?scene=flashback" class="scene-tile" style="--scene-color:#c89870">
+      <div class="scene-tile-top"><div class="scene-mood">Flashback</div></div>
+      <div class="scene-num">·</div>
+      <div class="scene-tile-bottom">
+        <h3 class="scene-name-ko">회상</h3>
+        <p class="scene-name-en">nostalgic dreamy haze</p>
+        <p class="scene-angles">Shallow DOF · Wide · Slow Mo</p>
+      </div>
+    </a>
+
+    <a href="studio.html?scene=confession" class="scene-tile" style="--scene-color:#ff9f70">
+      <div class="scene-tile-top"><div class="scene-mood">Confession</div></div>
+      <div class="scene-num">·</div>
+      <div class="scene-tile-bottom">
+        <h3 class="scene-name-ko">고백</h3>
+        <p class="scene-name-en">trembling golden glow</p>
+        <p class="scene-angles">ECU · CU · Two Shot</p>
+      </div>
+    </a>
+
+    <a href="studio.html?scene=horror" class="scene-tile" style="--scene-color:#503848">
+      <div class="scene-tile-top"><div class="scene-mood">Horror</div></div>
+      <div class="scene-num">·</div>
+      <div class="scene-tile-bottom">
+        <h3 class="scene-name-ko">공포</h3>
+        <p class="scene-name-en">eerie deep shadows</p>
+        <p class="scene-angles">Dutch · ECU · POV</p>
+      </div>
+    </a>
+
+    <a href="studio.html?scene=foodie" class="scene-tile" style="--scene-color:#ff8050">
+      <div class="scene-tile-top"><div class="scene-mood">Mukbang</div></div>
+      <div class="scene-num">·</div>
+      <div class="scene-tile-bottom">
+        <h3 class="scene-name-ko">먹방</h3>
+        <p class="scene-name-en">appetizing ASMR</p>
+        <p class="scene-angles">Bird's Eye · Macro · ECU</p>
+      </div>
+    </a>
+
+    <a href="studio.html?scene=travel" class="scene-tile" style="--scene-color:#88c878">
+      <div class="scene-tile-top"><div class="scene-mood">Scenery</div></div>
+      <div class="scene-num">·</div>
+      <div class="scene-tile-bottom">
+        <h3 class="scene-name-ko">풍경</h3>
+        <p class="scene-name-en">breathtaking landscape</p>
+        <p class="scene-angles">Wide · Drone · Bird's Eye</p>
+      </div>
+    </a>
+
+    <a href="studio.html?scene=fitness" class="scene-tile" style="--scene-color:#ff4a78">
+      <div class="scene-tile-top"><div class="scene-mood">Fitness</div></div>
+      <div class="scene-num">·</div>
+      <div class="scene-tile-bottom">
+        <h3 class="scene-name-ko">운동</h3>
+        <p class="scene-name-en">athletic energetic</p>
+        <p class="scene-angles">Low Angle · Full · Tracking</p>
+      </div>
+    </a>
+
+    <a href="studio.html?scene=dance" class="scene-tile" style="--scene-color:#d878ff">
+      <div class="scene-tile-top"><div class="scene-mood">Dance</div></div>
+      <div class="scene-num">·</div>
+      <div class="scene-tile-bottom">
+        <h3 class="scene-name-ko">댄스</h3>
+        <p class="scene-name-en">K-pop synchronized</p>
+        <p class="scene-angles">Wide · Full · Crane</p>
+      </div>
+    </a>
+
+    <a href="studio.html?scene=interview" class="scene-tile" style="--scene-color:#98a878">
+      <div class="scene-tile-top"><div class="scene-mood">Interview</div></div>
+      <div class="scene-num">·</div>
+      <div class="scene-tile-bottom">
+        <h3 class="scene-name-ko">인터뷰</h3>
+        <p class="scene-name-en">documentary natural</p>
+        <p class="scene-angles">Bust · MCU · OTS</p>
+      </div>
+    </a>
+
+    <a href="studio.html?scene=mv" class="scene-tile" style="--scene-color:#b870ff">
+      <div class="scene-tile-top"><div class="scene-mood">Music Video</div></div>
+      <div class="scene-num">·</div>
+      <div class="scene-tile-bottom">
+        <h3 class="scene-name-ko">뮤직비디오</h3>
+        <p class="scene-name-en">stylized cinematic</p>
+        <p class="scene-angles">Wide · Crane · Slow Mo</p>
+      </div>
+    </a>
+
+    <div class="scene-tile more">
+      <div class="more-content">
+        <span class="more-symbol">+</span>
+        <span class="more-text">계속 추가됩니다</span>
+        <span class="more-sub">stay tuned</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="gallery-note">
+    <span class="gallery-note-icon">i</span>
+    <div>
+      <strong>씬은 사용자 피드백에 따라 계속 추가됩니다.</strong>
+      만들고 싶은 씬이 있다면 언제든 제안해 주세요.
+      구독자에게는 새로운 씬이 가장 먼저 열립니다.
+    </div>
+  </div>
+</section>
+
+<section class="compare">
+  <div class="compare-inner">
+    <div class="section-eyebrow">The Difference</div>
+    <h2 class="section-title">단어 짜내기에<br><em>지치지 않으셨나요?</em></h2>
+    <p class="section-sub">
+      해외 서비스는 영어 프롬프트 한 줄에 결과가 좌우됩니다.
+      Korart-i는 다른 길을 택했습니다.
+    </p>
+
+    <div class="compare-grid">
+      <div class="compare-col bad">
+        <div class="compare-label">기존 AI 영상</div>
+        <h3 class="compare-headline">프롬프트 글짓기 → 운에 맡기기</h3>
+        <ul class="compare-list">
+          <li>영어로 단어를 정확히 짜내야 결과가 좋음</li>
+          <li>AI가 한국 문화·외모·음식을 자주 오해석</li>
+          <li>마음에 안 들면 또 결제, 또 재생성</li>
+          <li>프롬프트 가이드만 수십 개 — 학습 비용 큼</li>
+          <li>구독 강제, 사용 안 해도 빠져나감</li>
+        </ul>
+      </div>
+
+      <div class="compare-col good">
+        <div class="compare-label">Korart-i</div>
+        <h3 class="compare-headline">씬 선택 → 옵션 클릭 → 완성</h3>
+        <ul class="compare-list">
+          <li>옵션을 고르기만 하면 끝 — 글짓기 불필요</li>
+          <li>한국 문화·외모·음식 특화 프리셋 자동</li>
+          <li>4컷으로 먼저 미리보기</li>
+          <li>씬마다 최적 카메라 앵글 4개 자동</li>
+          <li>구독 + 추가 포인트 결제, 둘 다 자유</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing" id="pricing">
+  <div class="section-eyebrow">Subscription</div>
+  <h2 class="section-title">구독으로 매달,<br><em>포인트로 자유롭게.</em></h2>
+  <p class="section-sub">
+    매달 일정 포인트가 충전되는 구독을 선택하세요.
+    부족하면 언제든 추가 포인트를 따로 구매할 수 있습니다.
+    <strong style="color:var(--cream);font-weight:500">1포인트 = 50원</strong> 단위.
+  </p>
+
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-icon">i</div>
+      <div class="price-name">Starter</div>
+      <div class="price-tag">개인 크리에이터·실험용</div>
+      <div class="price-amount">29,000<span class="unit">원</span></div>
+      <div class="price-per">/ 월</div>
+      <div class="price-points">
+        <div class="price-points-label">매월 충전 포인트</div>
+        <div class="price-points-value">580<span class="pt-unit">P</span></div>
+      </div>
+      <ul class="price-features">
+        <li>모든 씬 사용 가능</li>
+        <li>아바타 라이브러리 무제한</li>
+        <li>영상 1편당 약 50~150P 차감</li>
+        <li>720p · 9:16 쇼츠 변환</li>
+        <li>광고 등 상업 이용 가능</li>
+      </ul>
+      <a href="studio.html" class="price-cta">구독 시작</a>
+    </div>
+
+    <div class="price-card featured">
+      <div class="price-badge">추천</div>
+      <div class="price-icon">ii</div>
+      <div class="price-name">Creator</div>
+      <div class="price-tag">유튜버·인플루언서</div>
+      <div class="price-amount">59,000<span class="unit">원</span></div>
+      <div class="price-per">/ 월</div>
+      <div class="price-points">
+        <div class="price-points-label">매월 충전 포인트</div>
+        <div class="price-points-value">1,250<span class="pt-unit">P</span></div>
+      </div>
+      <ul class="price-features">
+        <li>Starter의 모든 기능</li>
+        <li>1080p 고화질 + 오디오</li>
+        <li>씬별 최적 모델 자동 선택</li>
+        <li>16:9 · 1:1 · 9:16 모두 지원</li>
+        <li>새 씬 우선 액세스</li>
+        <li>4컷 무료 재생성 무제한</li>
+      </ul>
+      <a href="studio.html" class="price-cta">구독 시작</a>
+    </div>
+
+    <div class="price-card">
+      <div class="price-icon">iii</div>
+      <div class="price-name">Studio</div>
+      <div class="price-tag">에이전시·브랜드</div>
+      <div class="price-amount">99,000<span class="unit">원</span></div>
+      <div class="price-per">/ 월</div>
+      <div class="price-points">
+        <div class="price-points-label">매월 충전 포인트</div>
+        <div class="price-points-value">2,200<span class="pt-unit">P</span></div>
+      </div>
+      <ul class="price-features">
+        <li>Creator의 모든 기능</li>
+        <li>최고 품질 모델 고정</li>
+        <li>4K 업스케일 옵션</li>
+        <li>팀 협업 (최대 3명)</li>
+        <li>커스텀 씬 제작 신청 가능</li>
+        <li>우선 기술 지원</li>
+      </ul>
+      <a href="studio.html" class="price-cta">구독 시작</a>
+    </div>
+  </div>
+
+  <div class="extra-points">
+    <div class="extra-points-info">
+      <div class="extra-points-label">Need More?</div>
+      <div class="extra-points-title">추가 포인트, 따로 구매</div>
+      <div class="extra-points-sub">
+        구독 포인트가 부족할 때 언제든 추가 충전.
+        남은 포인트는 다음 달로 이월됩니다.
+      </div>
+    </div>
+    <div class="extra-points-rate">
+      1<span class="small">P</span>
+      <span style="color:var(--ink-dim);font-size:18px;margin:0 8px">=</span>
+      50<span class="small">원</span>
+    </div>
+  </div>
+
+  <div class="price-note">
+    구독 해지 언제든 가능 · 신용카드 · 토스페이 · 카카오페이 지원 · 영수증·세금계산서 발행
+  </div>
+</section>
+
+<section class="faq" id="faq">
+  <div class="section-eyebrow">FAQ</div>
+  <h2 class="section-title">자주 묻는 <em>질문.</em></h2>
+
+  <div class="faq-list">
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">정말 프롬프트를 안 써도 되나요?</div>
+      <div class="faq-a">
+        네, 거의 안 써도 됩니다. 씬 분위기, 시간대, 날씨, 장소, 인물 같은 옵션을 클릭으로 고르면 Korart-i가 내부에서 그에 맞는 영어 프롬프트를 자동 생성합니다. 영어 잘 못해도, 영상 용어 몰라도 같은 결과를 얻을 수 있어요. 자유 입력란이 있긴 하지만 선택 사항입니다.
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">씬은 몇 개이고 계속 늘어나나요?</div>
+      <div class="faq-a">
+        현재 다양한 씬이 준비되어 있고, 사용자 피드백과 트렌드에 따라 계속 추가됩니다. Creator 이상 구독자에게는 새 씬이 가장 먼저 열립니다. Studio 구독자는 원하는 커스텀 씬을 직접 신청할 수도 있어요.
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">회원가입은 필수인가요?</div>
+      <div class="faq-a">
+        네, 사이트의 거의 모든 기능은 가입한 사용자에게만 공개됩니다. 씬 갤러리도 가입 후에 둘러볼 수 있어요. 가입은 무료이며, 구독은 가입 후 별도로 시작할 수 있습니다. 이메일 / 카카오 / 구글 로그인을 지원합니다.
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">포인트는 어떻게 쓰이나요?</div>
+      <div class="faq-a">
+        영상 1편 생성에 약 50~150포인트가 사용됩니다 (씬·화질·길이에 따라 다름). 1포인트는 50원이며, 구독에 매달 일정 포인트가 자동 충전됩니다. 부족하면 추가로 따로 구매하거나 더 높은 구독 플랜으로 변경할 수 있어요. 사용하지 않은 포인트는 다음 달로 이월됩니다.
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">왜 4컷 미리보기 단계가 있나요?</div>
+      <div class="faq-a">
+        영상 AI는 "시작 프레임"에서 인물·의상·배경을 결정합니다. 저가 4컷에서 원하는 구도를 먼저 확정한 뒤 그 이미지를 레퍼런스로 넣으면, 재생성 없이 한 번에 원하는 결과가 나옵니다. 특히 K-pop 멤버 인원수처럼 AI가 실수하기 쉬운 요소를 4컷 단계에서 확정할 수 있어 결과적으로 비용이 크게 줄어듭니다. Creator 이상 구독자는 4컷 재생성이 무제한 무료입니다.
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">상업적으로 사용할 수 있나요?</div>
+      <div class="faq-a">
+        네, 모든 구독 플랜에서 생성된 영상은 상업적 이용이 가능합니다. 광고, 쇼츠, 브랜드 콘텐츠, 유튜브 수익화까지 모두 허용됩니다. 단, 실존 인물의 외모·목소리를 무단 복제하는 용도는 금지됩니다.
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">아바타란 무엇인가요?</div>
+      <div class="faq-a">
+        얼굴·헤어·체형·안경 같은 인물 특징을 한 번 등록해두면, 모든 씬에 같은 인물로 재사용할 수 있어요. 시즌이 바뀌어도 같은 캐릭터가 등장하는 시리즈물 같은 콘텐츠를 만들기 좋습니다. 클라우드에 저장되니 다른 기기에서도 그대로 불러올 수 있어요.
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Korart-i는 어떤 뜻인가요?</div>
+      <div class="faq-a">
+        Korean Artistic Intelligence의 줄임말입니다. 한국의 예술적 감성을 AI로 구현하는 서비스라는 의미를 담고 있어요. 발음은 "코아트아이" 또는 줄여서 "코아티"로 부르시면 됩니다.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="final">
+  <div class="final-inner">
+    <h2 class="final-title">
+      더 이상 단어를<br><em>짜내지 마세요.</em>
+    </h2>
+    <p class="final-sub">
+      옵션만 클릭하면 영상이 완성됩니다.
+      당신만의 첫 씬, 지금 시작하세요.
+    </p>
+    <a href="studio.html" class="cta-primary">가입하고 시작하기</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <span class="logo-main">Korart</span><span class="logo-dash">-</span><span class="logo-i">i</span>
+    </div>
+    <div class="footer-tagline">Korean Artistic Intelligence</div>
+
+    <div class="footer-links">
+      <a href="#scenes">씬 갤러리</a>
+      <a href="#how">작동 방식</a>
+      <a href="#pricing">구독</a>
+      <a href="#faq">FAQ</a>
+      <a href="studio.html">스튜디오</a>
+      <a href="privacy.html">개인정보</a>
+      <a href="terms.html">약관</a>
+    </div>
+
+    <div class="footer-copy">
+      © 2026 Korart-i · All rights reserved · Built in Seoul
+      <span class="tagline">선택만 하세요. 영상이 완성됩니다.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+function toggleFaq(el) {
+  el.classList.toggle('open');
+}
+
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', function(e) {
+    const href = this.getAttribute('href');
+    if (href === '#') return;
+    const target = document.querySelector(href);
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -60px 0px' });
+
+document.querySelectorAll('.showcase, .how, .gallery, .compare, .pricing, .faq, .final').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(24px)';
+  el.style.transition = 'opacity 0.7s ease-out, transform 0.7s ease-out';
+  observer.observe(el);
+});
+</script>
+
+</body>
+</html>
