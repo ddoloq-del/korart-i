@@ -27,3 +27,18 @@ server.js
 *.key
 secrets/
 node_modules/
+
+
+# Backups
+*.bak
+public/*.bak
+
+# Old/legacy folders kept locally
+public/studio_old/
+
+# Claude workspace
+.claude/
+
+# Wrangler login artifacts
+wlogin.txt
+wrangler_login_out.txt
