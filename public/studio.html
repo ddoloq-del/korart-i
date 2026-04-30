@@ -7,30 +7,43 @@
 <!-- Supabase JS SDK v2 (인증 체크용) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Pretendard:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Instrument+Serif:ital@0;1&family=Pretendard:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Nanum+Pen+Script&display=swap');
 :root {
-  --bg:    #0a0a0c;
-  --bg2:   #131316;
-  --bg3:   #1a1a1f;
-  --bg4:   #232328;
-  --line:  #2a2a30;
-  --line2: #3a3a42;
-  --ink:   #f5f5f7;
-  --ink2:  #a8a8b0;
-  --ink3:  #6a6a72;
-  --cream: #f0e6d0;
-  --pink:  #ff6b9d;
-  --pink2: #e54f80;
-  --coral: #ff8c7a;
-  --gold:  #ffb84d;
-  --gold2: #c89020;
-  --green: #4ade80;
-  --red:   #ff5577;
+  /* Backgrounds (warmer dark, matching landing) */
+  --bg:    #0a0908;
+  --bg2:   #141210;
+  --bg3:   #1c1a17;
+  --bg4:   #252220;
+  --line:  #2a2825;
+  --line2: #3d3a35;
+
+  /* Text (cream-tinted) */
+  --ink:   #f5f1e8;
+  --ink2:  #8a857d;
+  --ink3:  #5a564f;
+
+  /* Brand accents (warm red + cream + gold) */
+  --cream: #ead7b7;
+  --pink:  #e63946;   /* main accent (red); var name kept for back-compat */
+  --pink2: #d62f3c;   /* darker red for hover */
+  --coral: #ead7b7;   /* repurposed as cream */
+  --gold:  #d4a574;   /* warm gold */
+  --gold2: #b88a5c;   /* darker gold */
+
+  /* Status */
+  --green: #7cb87c;
+  --red:   #d62f3c;
   --blue:  #60a5fa;
   --teal:  #5eead4;
+
+  /* Typography */
   font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
 }
-@import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap');
+
+/* Headline / display fonts (matching landing) */
+.font-serif  { font-family: 'Gowun Batang', serif; }
+.font-italic { font-family: 'Instrument Serif', serif; font-style: italic; }
+.font-mono   { font-family: 'JetBrains Mono', monospace; }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;font-weight:400;letter-spacing:-0.01em}
 
