@@ -266,8 +266,12 @@ nav {
 }
 
 .hero-title .hl {
-  color: var(--accent);
   font-weight: 800;
+  background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #f472b6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 .hero-title em {
   font-family: 'Pretendard', sans-serif;
@@ -367,7 +371,7 @@ nav {
 }
 
 .hero-contrast {
-  margin-top: 24px;
+  margin: 24px auto 0 auto;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -1418,7 +1422,8 @@ footer {
     <div class="hero-eyebrow">Korean Artistic Intelligence</div>
 
     <h1 class="hero-title">
-      프롬프트 없이 <span class="hl">클릭만으로</span><br>
+      프롬프트 없이<br>
+      <span class="hl">클릭</span>만으로<br>
       <em>나만의 영상 완성.</em>
     </h1>
 
