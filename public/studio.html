@@ -253,9 +253,1290 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .badge-gold{background:rgba(200,160,74,.15);border:1px solid rgba(200,160,74,.3);color:var(--gold)}
 .badge-green{background:rgba(62,150,96,.12);border:1px solid rgba(62,150,96,.3);color:var(--green)}
 .prompt-preview{background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:8px 10px;font-family:'Menlo',monospace;font-size:10px;color:var(--ink2);line-height:1.6;white-space:pre-wrap;word-break:break-all;max-height:80px;overflow-y:auto}
+
+
+/* === KorartiAuth CSS (extracted from b86d661) === */
+.auth-login-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: transparent;
+  border: 1px solid var(--cream);
+  border-radius: 999px;
+  color: var(--cream);
+  font-family: 'Pretendard Variable', Pretendard, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 12px;
+  white-space: nowrap;
+}
+
+.auth-login-btn:hover {
+  background: var(--cream);
+  color: var(--bg);
+}
+
+.auth-profile-wrap {
+  position: relative;
+  margin-left: 12px;
+}
+
+.auth-profile-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 4px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  font-family: 'Pretendard Variable', Pretendard, sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.auth-profile-btn:hover { border-color: var(--line-lit); }
+
+.auth-profile-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.auth-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.auth-profile-name {
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.auth-profile-caret {
+  color: var(--ink-dim);
+  font-size: 10px;
+  margin-left: 2px;
+}
+
+.auth-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 240px;
+  background: var(--bg-2);
+  border: 1px solid var(--line-lit);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  padding: 6px;
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.auth-dropdown.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.auth-dropdown-header {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 6px;
+}
+
+.auth-dropdown-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cream);
+  margin-bottom: 2px;
+  word-break: break-word;
+}
+
+.auth-dropdown-email {
+  font-size: 12px;
+  color: var(--ink-dim);
+  word-break: break-all;
+}
+
+.auth-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  color: var(--ink);
+  font-family: 'Pretendard Variable', Pretendard, sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.12s ease;
+}
+
+.auth-dropdown-item:hover { background: var(--bg-3); }
+
+.auth-dropdown-item.danger { color: var(--accent); }
+
+.auth-dropdown-item.danger:hover { background: rgba(230, 57, 70, 0.08); }
+
+.auth-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 9, 8, 0.80);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 16px;
+  overflow-y: auto;
+}
+
+.auth-modal-overlay.active {
+  display: flex;
+  animation: authFadeIn 0.2s ease;
+}
+
+.auth-modal {
+  background: var(--bg-2);
+  border: 1px solid var(--line-lit);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 420px;
+  padding: 36px 32px 32px;
+  position: relative;
+  animation: authSlideUp 0.22s ease;
+  margin: auto 0;
+}
+
+.auth-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--ink-dim);
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.auth-modal-close:hover {
+  background: var(--bg-3);
+  color: var(--ink);
+}
+
+.auth-modal-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-family: 'Gowun Batang', serif;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.auth-modal-logo .dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.auth-modal-logo em {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  color: var(--accent);
+  font-size: 20px;
+  margin: 0 1px;
+}
+
+.auth-modal-title {
+  font-family: 'Gowun Batang', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--cream);
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.auth-modal-sub {
+  font-size: 13px;
+  color: var(--ink-dim);
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.auth-field {
+  margin-bottom: 14px;
+}
+
+.auth-field label {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-dim);
+  margin-bottom: 6px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.auth-field input {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  font-family: 'Pretendard Variable', Pretendard, sans-serif;
+  font-size: 14px;
+  transition: border-color 0.15s ease;
+}
+
+.auth-field input:focus {
+  outline: none;
+  border-color: var(--cream);
+}
+
+.auth-field input::placeholder {
+  color: var(--ink-dimmer);
+}
+
+.auth-field .hint {
+  font-size: 11px;
+  color: var(--ink-dimmer);
+  margin-top: 4px;
+}
+
+.auth-submit-btn {
+  width: 100%;
+  padding: 13px;
+  background: var(--cream);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  font-family: 'Pretendard Variable', Pretendard, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-top: 8px;
+}
+
+.auth-submit-btn:hover {
+  background: #fff;
+  transform: translateY(-1px);
+}
+
+.auth-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: var(--ink-dimmer);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.auth-google-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--bg-3);
+  color: var(--ink);
+  border: 1px solid var(--line-lit);
+  border-radius: 8px;
+  font-family: 'Pretendard Variable', Pretendard, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.auth-google-btn:hover {
+  background: var(--bg);
+  border-color: var(--cream);
+}
+
+.auth-google-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-onboarding-modal {
+  max-width: 460px;
+}
+
+.auth-google-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.auth-switch-text {
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-dim);
+  margin-top: 20px;
+}
+
+.auth-switch-text a {
+  color: var(--cream);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  margin-left: 4px;
+}
+
+.auth-error {
+  background: rgba(230, 57, 70, 0.08);
+  border: 1px solid rgba(230, 57, 70, 0.3);
+  color: var(--accent);
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-bottom: 14px;
+  display: none;
+}
+
+.auth-error.show { display: block; }
+
+.auth-success {
+  background: rgba(124, 184, 124, 0.08);
+  border: 1px solid rgba(124, 184, 124, 0.3);
+  color: var(--success);
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-bottom: 14px;
+  display: none;
+}
+
+.auth-success.show { display: block; }
+
+.auth-verify-notice {
+  text-align: center;
+  padding: 16px 0;
+}
+
+.auth-verify-icon {
+  font-size: 44px;
+  margin-bottom: 12px;
+}
+
+.auth-verify-title {
+  font-family: 'Gowun Batang', serif;
+  font-size: 20px;
+  color: var(--cream);
+  margin-bottom: 10px;
+}
+
+.auth-verify-text {
+  font-size: 13px;
+  color: var(--ink-dim);
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+
+.auth-verify-email {
+  color: var(--cream);
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.auth-required-modal .auth-modal {
+  max-width: 380px;
+  text-align: center;
+}
+
+.auth-required-icon {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.auth-required-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.auth-required-actions button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: 'Pretendard Variable', Pretendard, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.auth-required-cancel {
+  background: transparent;
+  border: 1px solid var(--line-lit);
+  color: var(--ink-dim);
+}
+
+.auth-required-cancel:hover {
+  color: var(--ink);
+  border-color: var(--cream);
+}
+
+.auth-required-login {
+  background: var(--cream);
+  border: 1px solid var(--cream);
+  color: var(--bg);
+}
+
+.auth-required-login:hover { background: #fff; }
+
+  .auth-modal { padding: 28px 22px 24px; }
+
+  .auth-profile-name { max-width: 80px; }
+
+.auth-nick-status {
+  font-size: 11px;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+.auth-nick-status.checking { color: var(--ink-dim); }
+
+.auth-nick-status.available { color: var(--success); }
+
+.auth-nick-status.taken { color: var(--accent); }
+
+.auth-nick-status.invalid { color: var(--accent); }
+
+.auth-forgot-wrap {
+  text-align: right;
+  margin-top: -6px;
+  margin-bottom: 14px;
+}
+
+.auth-forgot-link {
+  font-size: 12px;
+  color: var(--ink-dim);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.auth-forgot-link:hover {
+  color: var(--cream);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth-account-section {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.auth-account-section:last-of-type {
+  border-bottom: none;
+}
+
+.auth-account-label {
+  font-size: 11px;
+  color: var(--ink-dim);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.auth-account-value {
+  font-size: 15px;
+  color: var(--ink);
+  word-break: break-all;
+}
+
+.auth-account-edit-btn {
+  background: transparent;
+  border: 1px solid var(--line-lit);
+  color: var(--ink-dim);
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.auth-account-edit-btn:hover {
+  color: var(--cream);
+  border-color: var(--cream);
+}
+
+.auth-account-nick-edit {
+  margin-top: 8px;
+}
+
+.auth-account-nick-edit input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  font-family: 'Pretendard Variable', Pretendard, sans-serif;
+  font-size: 14px;
+}
+
+.auth-account-nick-edit input:focus {
+  outline: none;
+  border-color: var(--cream);
+}
+
+.auth-account-edit-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  justify-content: flex-end;
+}
+
+.auth-account-cancel-btn,
+.auth-account-save-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'Pretendard Variable', Pretendard, sans-serif;
+  border: 1px solid var(--line-lit);
+  transition: all 0.15s ease;
+}
+
+.auth-account-cancel-btn {
+  background: transparent;
+  color: var(--ink-dim);
+}
+
+.auth-account-save-btn {
+  background: var(--cream);
+  color: var(--bg);
+  border-color: var(--cream);
+}
+
+.auth-account-save-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.auth-account-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 16px -32px;
+}
+
+.auth-account-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-dim);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding-top: 4px;
+}
+
+.auth-account-action-btn {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Pretendard Variable', Pretendard, sans-serif;
+  transition: all 0.15s ease;
+  margin-bottom: 8px;
+}
+
+.auth-account-action-btn:hover {
+  border-color: var(--line-lit);
+  background: var(--bg-2);
+}
+
+.auth-account-action-btn.danger {
+  color: var(--accent);
+  border-color: rgba(230, 57, 70, 0.3);
+}
+
+.auth-account-action-btn.danger:hover {
+  background: rgba(230, 57, 70, 0.08);
+  border-color: var(--accent);
+}
+
+.auth-warning-box {
+  background: rgba(230, 57, 70, 0.06);
+  border: 1px solid rgba(230, 57, 70, 0.25);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+.auth-warning-box strong {
+  color: var(--cream);
+}
+
+.auth-warning-box ul {
+  margin: 8px 0 0 20px;
+  padding: 0;
+  color: var(--ink-dim);
+  font-size: 12px;
+}
+
+.auth-warning-box li {
+  margin-bottom: 4px;
+}
+
+.auth-warning-box p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.auth-delete-confirm-btn {
+  flex: 1;
+  padding: 13px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Pretendard Variable', Pretendard, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.auth-delete-confirm-btn:hover {
+  background: #c72a36;
+}
+
+.auth-delete-confirm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-field input[type="date"] {
+  color-scheme: dark;
+  font-family: 'Pretendard Variable', Pretendard, sans-serif;
+}
+
+.auth-field input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.auth-field input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+.auth-consent {
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 18px 0 8px;
+}
+
+.auth-consent-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 8px -14px;
+}
+
+.auth-consent-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+  user-select: none;
+}
+
+.auth-consent-item input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.auth-consent-checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1.5px solid var(--line-lit);
+  background: var(--bg-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.auth-consent-item:hover .auth-consent-checkbox {
+  border-color: var(--cream);
+}
+
+.auth-consent-item input[type="checkbox"]:checked + .auth-consent-checkbox {
+  background: var(--cream);
+  border-color: var(--cream);
+}
+
+.auth-consent-item input[type="checkbox"]:checked + .auth-consent-checkbox::after {
+  content: '✓';
+  color: var(--bg);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.auth-consent-all {
+  padding: 4px 0 8px;
+}
+
+.auth-consent-all .auth-consent-label strong {
+  font-size: 14px;
+  color: var(--cream);
+  font-weight: 600;
+}
+
+.auth-consent-label {
+  line-height: 1.5;
+  flex: 1;
+}
+
+.auth-consent-label a {
+  color: var(--cream);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth-consent-label a:hover {
+  color: #fff;
+}
+
+.auth-consent-req {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 11px;
+  margin-right: 2px;
+}
+
+.auth-consent-opt {
+  color: var(--ink-dim);
+  font-weight: 500;
+  font-size: 11px;
+  margin-right: 2px;
+}
+
 </style>
 </head>
 <body>
+
+<!-- =========================== KorartiAuth Modals (restored) =========================== -->
+<div class="auth-modal-overlay" id="authModal" onclick="if(event.target===this)KorartiAuth.closeModal()">
+  <div class="auth-modal">
+    <button class="auth-modal-close" onclick="KorartiAuth.closeModal()" aria-label="닫기">✕</button>
+
+    <!-- 로고 -->
+    <div class="auth-modal-logo">
+      <span class="dot"></span>
+      <span>Korart</span><em>i</em>
+    </div>
+
+    <!-- === 로그인 뷰 === -->
+    <div id="authViewLogin">
+      <h2 class="auth-modal-title">다시 오신 걸 환영해요</h2>
+      <p class="auth-modal-sub">로그인하고 한국 감성을 이어가세요</p>
+
+      <div class="auth-error" id="authLoginError"></div>
+
+      <div class="auth-field">
+        <label for="authLoginEmail">이메일</label>
+        <input type="email" id="authLoginEmail" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label for="authLoginPassword">비밀번호</label>
+        <input type="password" id="authLoginPassword" placeholder="••••••••" autocomplete="current-password">
+      </div>
+
+      <div class="auth-forgot-wrap">
+        <a class="auth-forgot-link" onclick="KorartiAuth.switchView('forgot')">비밀번호를 잊으셨나요?</a>
+      </div>
+
+      <button class="auth-submit-btn" onclick="KorartiAuth.handleLogin()" id="authLoginBtn">
+        로그인
+      </button>
+
+      <div class="auth-divider">또는</div>
+
+      <button class="auth-google-btn" onclick="KorartiAuth.handleGoogleLogin()" id="authGoogleLoginBtn">
+        <svg class="auth-google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Google로 계속하기
+      </button>
+
+      <div class="auth-switch-text">
+        아직 계정이 없으신가요?
+        <a onclick="KorartiAuth.switchView('signup')">회원가입</a>
+      </div>
+    </div>
+
+    <!-- === 회원가입 뷰 === -->
+    <div id="authViewSignup" style="display:none;">
+      <h2 class="auth-modal-title">Korart-i 시작하기</h2>
+      <p class="auth-modal-sub">이메일 인증 후 바로 이용하실 수 있어요</p>
+
+      <div class="auth-error" id="authSignupError"></div>
+
+      <div class="auth-field">
+        <label for="authSignupName">이름</label>
+        <input type="text" id="authSignupName" placeholder="홍길동" maxlength="40" autocomplete="name">
+      </div>
+      <div class="auth-field">
+        <label for="authSignupNickname">닉네임 <span class="auth-nick-status" id="authNickStatus"></span></label>
+        <input type="text" id="authSignupNickname" placeholder="2~16자, 한글/영문/숫자/_" maxlength="16" autocomplete="off">
+        <div class="hint">다른 회원에게 표시되는 이름이에요. 나중에 변경할 수 있어요.</div>
+      </div>
+      <div class="auth-field">
+        <label for="authSignupBirthdate">생년월일</label>
+        <input type="text" id="authSignupBirthdate" placeholder="주민등록번호 앞 6자리 (예: 920315)" inputmode="numeric" maxlength="6" autocomplete="off">
+        <div class="hint">YYMMDD 형식, 만 14세 이상만 가입할 수 있어요</div>
+      </div>
+      <div class="auth-field">
+        <label for="authSignupEmail">이메일</label>
+        <input type="email" id="authSignupEmail" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label for="authSignupPassword">비밀번호</label>
+        <input type="password" id="authSignupPassword" placeholder="8자 이상" autocomplete="new-password">
+        <div class="hint">영문 + 숫자 조합 8자 이상을 권장해요</div>
+      </div>
+
+      <!-- === 약관 동의 === -->
+      <div class="auth-consent">
+        <label class="auth-consent-item auth-consent-all">
+          <input type="checkbox" id="authConsentAll" onchange="KorartiAuth.toggleAllConsents(this)">
+          <span class="auth-consent-checkbox"></span>
+          <span class="auth-consent-label"><strong>전체 동의</strong> (선택 항목 포함)</span>
+        </label>
+        <div class="auth-consent-divider"></div>
+        <label class="auth-consent-item">
+          <input type="checkbox" id="authConsentAge" data-required="1" onchange="KorartiAuth.syncAllConsent()">
+          <span class="auth-consent-checkbox"></span>
+          <span class="auth-consent-label"><span class="auth-consent-req">[필수]</span> 만 14세 이상입니다</span>
+        </label>
+        <label class="auth-consent-item">
+          <input type="checkbox" id="authConsentTerms" data-required="1" onchange="KorartiAuth.syncAllConsent()">
+          <span class="auth-consent-checkbox"></span>
+          <span class="auth-consent-label">
+            <span class="auth-consent-req">[필수]</span> <a href="/terms" target="_blank" rel="noopener">이용약관</a>에 동의합니다
+          </span>
+        </label>
+        <label class="auth-consent-item">
+          <input type="checkbox" id="authConsentPrivacy" data-required="1" onchange="KorartiAuth.syncAllConsent()">
+          <span class="auth-consent-checkbox"></span>
+          <span class="auth-consent-label">
+            <span class="auth-consent-req">[필수]</span> <a href="/privacy" target="_blank" rel="noopener">개인정보 수집·이용</a>에 동의합니다
+          </span>
+        </label>
+        <label class="auth-consent-item">
+          <input type="checkbox" id="authConsentMarketing" onchange="KorartiAuth.syncAllConsent()">
+          <span class="auth-consent-checkbox"></span>
+          <span class="auth-consent-label"><span class="auth-consent-opt">[선택]</span> 마케팅 정보 및 이벤트 소식 수신 동의</span>
+        </label>
+      </div>
+
+      <button class="auth-submit-btn" onclick="KorartiAuth.handleSignup()" id="authSignupBtn">
+        가입하고 인증 메일 받기
+      </button>
+
+      <div class="auth-divider">또는</div>
+
+      <button class="auth-google-btn" onclick="KorartiAuth.handleGoogleLogin()" id="authGoogleSignupBtn">
+        <svg class="auth-google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Google로 가입하기
+      </button>
+
+      <div class="auth-switch-text">
+        이미 계정이 있으신가요?
+        <a onclick="KorartiAuth.switchView('login')">로그인</a>
+      </div>
+    </div>
+
+    <!-- === 이메일 인증 안내 뷰 === -->
+    <div id="authViewVerify" style="display:none;">
+      <div class="auth-verify-notice">
+        <div class="auth-verify-icon">✉️</div>
+        <h2 class="auth-verify-title">인증 메일을 보냈어요</h2>
+        <p class="auth-verify-text">
+          <span class="auth-verify-email" id="authVerifyEmail">-</span> 으로<br>
+          인증 링크를 담은 이메일을 발송했어요.
+        </p>
+        <p class="auth-verify-text" style="margin-top:12px;">
+          이메일의 링크를 클릭하면 가입이 완료되고 자동으로 로그인돼요.
+        </p>
+        <p class="auth-verify-text" style="font-size:11px; color:var(--ink-dimmer); margin-top:16px;">
+          메일이 오지 않으면 스팸함을 확인해주세요.<br>
+          몇 분이 지나도 오지 않는다면 회원가입을 다시 시도해보세요.
+        </p>
+        <button class="auth-submit-btn" style="margin-top:24px;" onclick="KorartiAuth.closeModal()">
+          확인
+        </button>
+      </div>
+    </div>
+
+    <!-- === 비밀번호 찾기 뷰 === -->
+    <div id="authViewForgot" style="display:none;">
+      <h2 class="auth-modal-title">비밀번호 찾기</h2>
+      <p class="auth-modal-sub">가입하신 이메일로 재설정 링크를 보내드려요</p>
+
+      <div class="auth-error" id="authForgotError"></div>
+
+      <div class="auth-field">
+        <label for="authForgotEmail">이메일</label>
+        <input type="email" id="authForgotEmail" placeholder="you@example.com" autocomplete="email">
+      </div>
+
+      <button class="auth-submit-btn" onclick="KorartiAuth.handleForgotPassword()" id="authForgotBtn">
+        재설정 링크 받기
+      </button>
+
+      <div class="auth-switch-text">
+        비밀번호가 기억났나요?
+        <a onclick="KorartiAuth.switchView('login')">로그인</a>
+      </div>
+    </div>
+
+    <!-- === 비밀번호 재설정 완료 안내 뷰 === -->
+    <div id="authViewForgotSent" style="display:none;">
+      <div class="auth-verify-notice">
+        <div class="auth-verify-icon">🔑</div>
+        <h2 class="auth-verify-title">재설정 링크를 보냈어요</h2>
+        <p class="auth-verify-text">
+          <span class="auth-verify-email" id="authForgotSentEmail">-</span> 으로<br>
+          비밀번호 재설정 링크를 보냈어요.
+        </p>
+        <p class="auth-verify-text" style="margin-top:12px;">
+          이메일의 링크를 클릭해 새 비밀번호를 설정해주세요.
+        </p>
+        <p class="auth-verify-text" style="font-size:11px; color:var(--ink-dimmer); margin-top:16px;">
+          메일이 오지 않으면 스팸함을 확인해주세요.<br>
+          몇 분이 지나도 오지 않는다면 다시 시도해보세요.
+        </p>
+        <button class="auth-submit-btn" style="margin-top:24px;" onclick="KorartiAuth.closeModal()">
+          확인
+        </button>
+      </div>
+    </div>
+
+    <!-- === 새 비밀번호 설정 뷰 (이메일 링크 타고 온 경우) === -->
+    <div id="authViewNewPassword" style="display:none;">
+      <h2 class="auth-modal-title">새 비밀번호 설정</h2>
+      <p class="auth-modal-sub">새로 사용하실 비밀번호를 입력해주세요</p>
+
+      <div class="auth-error" id="authNewPasswordError"></div>
+
+      <div class="auth-field">
+        <label for="authNewPassword1">새 비밀번호</label>
+        <input type="password" id="authNewPassword1" placeholder="8자 이상" autocomplete="new-password">
+      </div>
+      <div class="auth-field">
+        <label for="authNewPassword2">비밀번호 확인</label>
+        <input type="password" id="authNewPassword2" placeholder="한 번 더 입력해주세요" autocomplete="new-password">
+      </div>
+
+      <button class="auth-submit-btn" onclick="KorartiAuth.handleNewPassword()" id="authNewPasswordBtn">
+        비밀번호 변경하기
+      </button>
+
+    </div>
+  </div>
+</div>
+
+<!-- 내 정보 모달 -->
+<div class="auth-modal-overlay auth-account-modal" id="authAccountModal" onclick="if(event.target===this)KorartiAuth.closeAccountModal()">
+  <div class="auth-modal" style="max-width:520px;">
+    <button class="auth-modal-close" onclick="KorartiAuth.closeAccountModal()" aria-label="닫기">✕</button>
+
+    <h2 class="auth-modal-title" style="text-align:left;margin-bottom:24px;">내 정보</h2>
+
+    <!-- 프로필 정보 섹션 -->
+    <div class="auth-account-section">
+      <div class="auth-account-label">이메일</div>
+      <div class="auth-account-value" id="acctEmail">-</div>
+    </div>
+    <div class="auth-account-section">
+      <div class="auth-account-label">이름</div>
+      <div class="auth-account-value" id="acctName">-</div>
+    </div>
+    <div class="auth-account-section">
+      <div class="auth-account-label">
+        닉네임
+        <button class="auth-account-edit-btn" onclick="KorartiAuth.toggleNicknameEdit()" id="acctNickEditBtn">수정</button>
+      </div>
+      <div class="auth-account-value" id="acctNickDisplay">-</div>
+      <div class="auth-account-nick-edit" id="acctNickEdit" style="display:none;">
+        <input type="text" id="acctNickInput" placeholder="2~16자, 한글/영문/숫자/_" maxlength="16">
+        <span class="auth-nick-status" id="acctNickStatus"></span>
+        <div class="auth-account-edit-actions">
+          <button class="auth-account-cancel-btn" onclick="KorartiAuth.cancelNicknameEdit()">취소</button>
+          <button class="auth-account-save-btn" onclick="KorartiAuth.saveNickname()" id="acctNickSaveBtn">저장</button>
+        </div>
+      </div>
+    </div>
+    <div class="auth-account-section">
+      <div class="auth-account-label">생년월일</div>
+      <div class="auth-account-value" id="acctBirthdate">-</div>
+    </div>
+    <div class="auth-account-section">
+      <div class="auth-account-label">가입일</div>
+      <div class="auth-account-value" id="acctJoinedAt">-</div>
+    </div>
+
+    <!-- 보안 섹션 -->
+    <div class="auth-account-divider"></div>
+    <div class="auth-account-section-title">보안</div>
+    <button class="auth-account-action-btn" onclick="KorartiAuth.openChangePassword()">
+      <span>🔐 비밀번호 변경</span>
+      <span style="color:var(--ink-dim);">→</span>
+    </button>
+
+    <!-- 계정 삭제 섹션 -->
+    <div class="auth-account-divider"></div>
+    <div class="auth-account-section-title" style="color:var(--accent);">계정 관리</div>
+    <button class="auth-account-action-btn danger" onclick="KorartiAuth.openDeleteAccount()">
+      <span>회원 탈퇴</span>
+      <span style="color:var(--accent);">→</span>
+    </button>
+  </div>
+</div>
+
+<!-- 비밀번호 변경 모달 -->
+<div class="auth-modal-overlay" id="authChangePasswordModal" onclick="if(event.target===this)KorartiAuth.closeChangePassword()">
+  <div class="auth-modal">
+    <button class="auth-modal-close" onclick="KorartiAuth.closeChangePassword()" aria-label="닫기">✕</button>
+    <h2 class="auth-modal-title">비밀번호 변경</h2>
+    <p class="auth-modal-sub">새로 사용하실 비밀번호를 입력해주세요</p>
+
+    <div class="auth-error" id="authChangePwError"></div>
+    <div class="auth-success" id="authChangePwSuccess"></div>
+
+    <div class="auth-field">
+      <label for="authChangePw1">새 비밀번호</label>
+      <input type="password" id="authChangePw1" placeholder="8자 이상" autocomplete="new-password">
+    </div>
+    <div class="auth-field">
+      <label for="authChangePw2">비밀번호 확인</label>
+      <input type="password" id="authChangePw2" placeholder="한 번 더 입력해주세요" autocomplete="new-password">
+    </div>
+
+    <button class="auth-submit-btn" onclick="KorartiAuth.handleChangePassword()" id="authChangePwBtn">
+      변경하기
+    </button>
+  </div>
+</div>
+
+<!-- 회원 탈퇴 모달 -->
+<div class="auth-modal-overlay" id="authDeleteAccountModal" onclick="if(event.target===this)KorartiAuth.closeDeleteAccount()">
+  <div class="auth-modal">
+    <button class="auth-modal-close" onclick="KorartiAuth.closeDeleteAccount()" aria-label="닫기">✕</button>
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:42px;margin-bottom:10px;">⚠️</div>
+      <h2 class="auth-modal-title" style="color:var(--accent);">정말 탈퇴하시겠어요?</h2>
+    </div>
+
+    <div class="auth-warning-box">
+      <strong>탈퇴 시 다음 정보가 모두 삭제돼요:</strong>
+      <ul>
+        <li>계정 정보 (이메일, 이름, 닉네임, 생년월일)</li>
+        <li>저장된 프롬프트 및 생성 기록</li>
+        <li>크레딧 잔액</li>
+      </ul>
+      <p style="margin-top:10px;color:var(--accent);">이 작업은 <strong>되돌릴 수 없어요</strong>.</p>
+    </div>
+
+    <div class="auth-error" id="authDeleteError"></div>
+
+    <div class="auth-field" style="margin-top:20px;">
+      <label for="authDeleteConfirm">계속하려면 아래에 <strong style="color:var(--accent);">탈퇴합니다</strong>를 입력해주세요</label>
+      <input type="text" id="authDeleteConfirm" placeholder="탈퇴합니다" autocomplete="off">
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button class="auth-required-cancel" style="flex:1;padding:13px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;" onclick="KorartiAuth.closeDeleteAccount()">
+        취소
+      </button>
+      <button class="auth-delete-confirm-btn" onclick="KorartiAuth.handleDeleteAccount()" id="authDeleteBtn">
+        탈퇴하기
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 로그인 필요 안내 모달 (씬 선택 후) -->
+<div class="auth-modal-overlay auth-required-modal" id="authRequiredModal" onclick="if(event.target===this)KorartiAuth.closeRequiredModal()">
+  <div class="auth-modal">
+    <button class="auth-modal-close" onclick="KorartiAuth.closeRequiredModal()" aria-label="닫기">✕</button>
+    <div class="auth-required-icon">🔒</div>
+    <h2 class="auth-modal-title">로그인이 필요해요</h2>
+    <p class="auth-modal-sub">
+      시나리오 작성부터는 로그인한 회원만 이용할 수 있어요.<br>
+      이미 선택하신 씬은 그대로 유지돼요.
+    </p>
+    <div class="auth-required-actions">
+      <button class="auth-required-cancel" onclick="KorartiAuth.closeRequiredModal()">
+        다음에 할게요
+      </button>
+      <button class="auth-required-login" onclick="KorartiAuth.closeRequiredModal(); KorartiAuth.openModal('login');">
+        로그인 / 회원가입
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- 온보딩 모달 (Google 등 OAuth 첫 사용자) -->
+<div class="auth-modal-overlay" id="authOnboardingModal">
+  <div class="auth-modal auth-onboarding-modal">
+    <div class="auth-modal-logo">
+      <span class="dot"></span>
+      <span>Korart</span><em>i</em>
+    </div>
+
+    <h2 class="auth-modal-title">환영해요! 마지막 단계예요</h2>
+    <p class="auth-modal-sub">서비스 이용을 위해 몇 가지만 입력해주세요</p>
+
+    <div class="auth-error" id="authOnboardingError"></div>
+
+    <div class="auth-field">
+      <label for="authOnboardingNickname">닉네임 <span class="auth-nick-status" id="authOnboardingNickStatus"></span></label>
+      <input type="text" id="authOnboardingNickname" placeholder="2~16자, 한글/영문/숫자/_" maxlength="16" autocomplete="off">
+      <div class="hint">서비스 내에서 표시될 이름이에요</div>
+    </div>
+
+    <div class="auth-field">
+      <label for="authOnboardingBirthdate">생년월일</label>
+      <input type="text" id="authOnboardingBirthdate" placeholder="주민등록번호 앞 6자리 (예: 920315)" inputmode="numeric" maxlength="6" autocomplete="off">
+      <div class="hint">YYMMDD 형식, 만 14세 이상만 가입할 수 있어요</div>
+    </div>
+
+    <!-- === 약관 동의 === -->
+    <div class="auth-consent">
+      <label class="auth-consent-item auth-consent-all">
+        <input type="checkbox" id="authOnboardingConsentAll" onchange="KorartiAuth.toggleAllOnboardingConsents(this)">
+        <span class="auth-consent-checkbox"></span>
+        <span class="auth-consent-label"><strong>전체 동의</strong> (선택 항목 포함)</span>
+      </label>
+      <div class="auth-consent-divider"></div>
+      <label class="auth-consent-item">
+        <input type="checkbox" id="authOnboardingConsentAge" onchange="KorartiAuth.syncOnboardingConsent()">
+        <span class="auth-consent-checkbox"></span>
+        <span class="auth-consent-label"><span class="auth-consent-req">[필수]</span> 만 14세 이상입니다</span>
+      </label>
+      <label class="auth-consent-item">
+        <input type="checkbox" id="authOnboardingConsentTerms" onchange="KorartiAuth.syncOnboardingConsent()">
+        <span class="auth-consent-checkbox"></span>
+        <span class="auth-consent-label">
+          <span class="auth-consent-req">[필수]</span> <a href="/terms" target="_blank" rel="noopener">이용약관</a>에 동의합니다
+        </span>
+      </label>
+      <label class="auth-consent-item">
+        <input type="checkbox" id="authOnboardingConsentPrivacy" onchange="KorartiAuth.syncOnboardingConsent()">
+        <span class="auth-consent-checkbox"></span>
+        <span class="auth-consent-label">
+          <span class="auth-consent-req">[필수]</span> <a href="/privacy" target="_blank" rel="noopener">개인정보 수집·이용</a>에 동의합니다
+        </span>
+      </label>
+      <label class="auth-consent-item">
+        <input type="checkbox" id="authOnboardingConsentMarketing" onchange="KorartiAuth.syncOnboardingConsent()">
+        <span class="auth-consent-checkbox"></span>
+        <span class="auth-consent-label"><span class="auth-consent-opt">[선택]</span> 마케팅 정보 및 이벤트 소식 수신 동의</span>
+      </label>
+    </div>
+
+    <button class="auth-submit-btn" onclick="KorartiAuth.handleOnboardingSubmit()" id="authOnboardingBtn">
+      시작하기
+    </button>
+
+    <div class="auth-switch-text">
+      <a onclick="KorartiAuth.cancelOnboarding()" style="color:var(--ink-dim);">로그아웃하고 나가기</a>
+    </div>
+  </div>
+</div>
+
+<!-- =========================== /KorartiAuth Modals =========================== -->
+
 <div class="wrap">
 
 <!-- ══ TOPBAR ══ -->
@@ -267,6 +1548,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   </div>
   <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
     <input type="password" id="falKey" placeholder="fal.ai API key" style="background:var(--bg3);border:1px solid var(--line);border-radius:8px;padding:7px 12px;color:var(--ink);font-size:12px;width:240px;font-family:inherit">
+    <div id="authNavSlot"><!-- KorartiAuth가 렌더링 --></div>
   </div>
   <!-- cost-badge 숨김: 내부 함수(updateCost 등)가 참조하는 ID 때문에 hidden 원소만 유지 -->
   <div style="display:none">
@@ -825,6 +2107,8 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 <div id="confirmBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99"></div>
 
 <script>
+// === 기존 단순 인증 게이트 비활성화 (KorartiAuth 모듈로 대체됨) ===
+/*
 // AUTH GATE — 로그인 필수 (비로그인 시 /studio로 이동)
 const SUPABASE_URL = 'https://hidtxdvncqrhjaiosiqd.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_LziYVaJBv9sazBKbos5_UQ_1ZVbEOJb';
@@ -871,6 +2155,7 @@ let currentSession = null;
     }
   });
 })();
+*/
 
 function getCurrentUserId() {
   return currentUser?.id || null;
@@ -5605,6 +6890,1207 @@ function resetMerge() {
     </div>
   </div>
 </div>
+
+
+
+<!-- =========================== KorartiAuth IIFE (restored) =========================== -->
+<script>
+(function() {
+  // --- Supabase 초기화 ---
+  const SUPABASE_URL = 'https://hidtxdvncqrhjaiosiqd.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_LziYVaJBv9sazBKbos5_UQ_1ZVbEOJb';
+
+  if (!window.supabase || !window.supabase.createClient) {
+    console.error('[Korarti Auth] Supabase SDK가 로드되지 않았어요.');
+    return;
+  }
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce'
+    }
+  });
+
+  // --- 상태 ---
+  let currentUser = null;
+  let currentSession = null;
+
+  // ============================================================
+  //                          UI 렌더링
+  // ============================================================
+
+  function renderNav() {
+    const slot = document.getElementById('authNavSlot');
+    if (!slot) return;
+
+    if (!currentUser) {
+      // 비로그인
+      slot.innerHTML = `
+        <button class="auth-login-btn" onclick="KorartiAuth.openModal('login')">
+          로그인 / 회원가입
+        </button>`;
+      return;
+    }
+
+    // 로그인 상태 — 프로필 버튼
+    const name = getUserDisplayName();
+    const email = currentUser.email || '';
+    const avatarUrl = getUserAvatarUrl();
+    const initial = (name || email || '?').charAt(0).toUpperCase();
+
+    const avatarHtml = avatarUrl
+      ? `<img src="${escapeHtml(avatarUrl)}" alt="프로필" onerror="this.replaceWith(Object.assign(document.createTextNode('${escapeHtml(initial)}'),{}))">`
+      : escapeHtml(initial);
+
+    slot.innerHTML = `
+      <div class="auth-profile-wrap">
+        <button class="auth-profile-btn" onclick="KorartiAuth.toggleDropdown()" id="authProfileBtn">
+          <span class="auth-profile-avatar">${avatarHtml}</span>
+          <span class="auth-profile-name">${escapeHtml(name)}</span>
+          <span class="auth-profile-caret">▼</span>
+        </button>
+        <div class="auth-dropdown" id="authDropdown">
+          <div class="auth-dropdown-header">
+            <div class="auth-dropdown-name">${escapeHtml(name)}</div>
+            <div class="auth-dropdown-email">${escapeHtml(email)}</div>
+          </div>
+          <button class="auth-dropdown-item" onclick="KorartiAuth.openAccountModal()">
+            <span>👤</span> 내 정보
+          </button>
+          <button class="auth-dropdown-item danger" onclick="KorartiAuth.handleLogout()">
+            <span>↗</span> 로그아웃
+          </button>
+        </div>
+      </div>`;
+  }
+
+  function getUserDisplayName() {
+    if (!currentUser) return '';
+    const meta = currentUser.user_metadata || {};
+    return meta.display_name || meta.name || meta.full_name || (currentUser.email ? currentUser.email.split('@')[0] : '회원');
+  }
+
+  function getUserAvatarUrl() {
+    if (!currentUser) return null;
+    const meta = currentUser.user_metadata || {};
+    return meta.avatar_url || meta.picture || null;
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  // ============================================================
+  //                          모달 제어
+  // ============================================================
+
+  function openModal(view) {
+    resetModalState();
+    switchView(view || 'login');
+    document.getElementById('authModal').classList.add('active');
+    // 첫 입력칸에 포커스
+    setTimeout(() => {
+      const firstInput = document.querySelector('#authModal .auth-modal-overlay.active, #authModal')
+        .querySelector('[style*="display:none"]');
+      const activeView = view === 'signup' ? 'authSignupName' : 'authLoginEmail';
+      const el = document.getElementById(activeView);
+      if (el) el.focus();
+    }, 100);
+  }
+
+  function closeModal() {
+    document.getElementById('authModal').classList.remove('active');
+    resetModalState();
+  }
+
+  function switchView(view) {
+    document.getElementById('authViewLogin').style.display = view === 'login' ? '' : 'none';
+    document.getElementById('authViewSignup').style.display = view === 'signup' ? '' : 'none';
+    document.getElementById('authViewVerify').style.display = view === 'verify' ? '' : 'none';
+    const v1 = document.getElementById('authViewForgot');
+    if (v1) v1.style.display = view === 'forgot' ? '' : 'none';
+    const v2 = document.getElementById('authViewForgotSent');
+    if (v2) v2.style.display = view === 'forgotSent' ? '' : 'none';
+    const v3 = document.getElementById('authViewNewPassword');
+    if (v3) v3.style.display = view === 'newPassword' ? '' : 'none';
+    hideError();
+  }
+
+  function resetModalState() {
+    hideError();
+    ['authLoginEmail','authLoginPassword','authSignupName','authSignupNickname','authSignupBirthdate','authSignupEmail','authSignupPassword','authForgotEmail','authNewPassword1','authNewPassword2']
+      .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    ['authConsentAll','authConsentAge','authConsentTerms','authConsentPrivacy','authConsentMarketing']
+      .forEach(id => { const el = document.getElementById(id); if (el) el.checked = false; });
+    // 닉네임 상태 표시 초기화
+    const ns = document.getElementById('authNickStatus');
+    if (ns) { ns.textContent = ''; ns.className = 'auth-nick-status'; }
+  }
+
+  function showError(view, msg) {
+    const errorMap = {
+      'login': 'authLoginError',
+      'signup': 'authSignupError',
+      'forgot': 'authForgotError',
+      'newPassword': 'authNewPasswordError',
+      'changePw': 'authChangePwError',
+      'delete': 'authDeleteError'
+    };
+    const id = errorMap[view] || 'authLoginError';
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  function showSuccess(view, msg) {
+    const id = view === 'changePw' ? 'authChangePwSuccess' : null;
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  function hideError() {
+    ['authLoginError','authSignupError','authForgotError','authNewPasswordError','authChangePwError','authDeleteError'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('show');
+    });
+    ['authChangePwSuccess'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('show');
+    });
+  }
+
+  // 로그인 필요 모달 (씬 선택 후)
+  function showAuthRequiredModal() {
+    document.getElementById('authRequiredModal').classList.add('active');
+  }
+  function closeRequiredModal() {
+    document.getElementById('authRequiredModal').classList.remove('active');
+  }
+
+  // ============================================================
+  //                          드롭다운
+  // ============================================================
+
+  function toggleDropdown() {
+    const dd = document.getElementById('authDropdown');
+    if (dd) dd.classList.toggle('open');
+  }
+
+  // 외부 클릭 시 드롭다운 닫기
+  document.addEventListener('click', (e) => {
+    const wrap = document.querySelector('.auth-profile-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+      const dd = document.getElementById('authDropdown');
+      if (dd) dd.classList.remove('open');
+    }
+  });
+
+  // ============================================================
+  //                      인증 핸들러
+  // ============================================================
+
+  async function handleLogin() {
+    const email = document.getElementById('authLoginEmail').value.trim();
+    const password = document.getElementById('authLoginPassword').value;
+    const btn = document.getElementById('authLoginBtn');
+
+    hideError();
+
+    if (!email || !password) {
+      showError('login', '이메일과 비밀번호를 모두 입력해주세요.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '로그인 중...';
+
+    try {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) {
+        const msg = translateAuthError(error);
+        showError('login', msg);
+      } else {
+        // 성공 — onAuthStateChange가 처리
+        closeModal();
+      }
+    } catch (e) {
+      console.error(e);
+      showError('login', '로그인 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '로그인';
+    }
+  }
+
+  async function handleSignup() {
+    const name = document.getElementById('authSignupName').value.trim();
+    const nickname = document.getElementById('authSignupNickname').value.trim();
+    const birthdate = document.getElementById('authSignupBirthdate').value;
+    const email = document.getElementById('authSignupEmail').value.trim();
+    const password = document.getElementById('authSignupPassword').value;
+    const btn = document.getElementById('authSignupBtn');
+
+    const consentAge = document.getElementById('authConsentAge').checked;
+    const consentTerms = document.getElementById('authConsentTerms').checked;
+    const consentPrivacy = document.getElementById('authConsentPrivacy').checked;
+    const consentMarketing = document.getElementById('authConsentMarketing').checked;
+
+    hideError();
+
+    // 클라이언트 검증
+    if (!name) { showError('signup', '이름을 입력해주세요.'); return; }
+    if (name.length < 2) { showError('signup', '이름은 2자 이상이어야 해요.'); return; }
+
+    if (!nickname) { showError('signup', '닉네임을 입력해주세요.'); return; }
+    const nickValidation = validateNickname(nickname);
+    if (!nickValidation.ok) { showError('signup', nickValidation.msg); return; }
+
+    if (!birthdate) { showError('signup', '생년월일을 입력해주세요.'); return; }
+    const parsedBirth = parseBirthdate6(birthdate);
+    if (!parsedBirth) {
+      showError('signup', '생년월일을 YYMMDD 6자리로 정확히 입력해주세요. (예: 920315)');
+      return;
+    }
+    const age = calcAge(parsedBirth);
+    if (age === null || age < 0) { showError('signup', '올바른 생년월일을 입력해주세요.'); return; }
+    if (age < 14) {
+      showError('signup', '만 14세 이상만 가입할 수 있어요.');
+      return;
+    }
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showError('signup', '올바른 이메일 주소를 입력해주세요.'); return;
+    }
+    if (!password || password.length < 8) {
+      showError('signup', '비밀번호는 8자 이상이어야 해요.'); return;
+    }
+
+    if (!consentAge) { showError('signup', '만 14세 이상 확인에 동의해주세요.'); return; }
+    if (!consentTerms) { showError('signup', '이용약관에 동의해주세요.'); return; }
+    if (!consentPrivacy) { showError('signup', '개인정보 수집·이용에 동의해주세요.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = '가입 중...';
+
+    try {
+      const nowIso = new Date().toISOString();
+      const { data, error } = await sb.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            display_name: name,
+            name: name,
+            nickname: nickname,
+            birthdate: parsedBirth,
+            terms_agreed_at: nowIso,
+            privacy_agreed_at: nowIso,
+            marketing_agreed_at: consentMarketing ? nowIso : null,
+            terms_version: '1.0',
+            privacy_version: '1.0'
+          },
+          emailRedirectTo: window.location.origin + '/studio'
+        }
+      });
+
+      if (error) {
+        const msg = translateAuthError(error);
+        showError('signup', msg);
+      } else {
+        // 회원가입 메타데이터 로컬 저장 (이메일 인증 후 로그인 시 profiles에 복사)
+        try {
+          localStorage.setItem('korarti_pending_profile', JSON.stringify({
+            email: email,
+            display_name: name,
+            nickname: nickname,
+            birthdate: parsedBirth,
+            terms_agreed_at: nowIso,
+            privacy_agreed_at: nowIso,
+            marketing_agreed_at: consentMarketing ? nowIso : null,
+            terms_version: '1.0',
+            privacy_version: '1.0'
+          }));
+        } catch (_) { /* localStorage 에러 무시 */ }
+
+        // 이메일 인증 메일 발송됨 → 안내 화면 전환
+        document.getElementById('authVerifyEmail').textContent = email;
+        switchView('verify');
+      }
+    } catch (e) {
+      console.error(e);
+      showError('signup', '회원가입 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '가입하고 인증 메일 받기';
+    }
+  }
+
+  // YYMMDD 6자리 → YYYY-MM-DD 변환 (+ 유효성 검증)
+  // 규칙: YY <= 오늘 연도 뒤 2자리면 20YY, 아니면 19YY
+  // 예: "260101" (2026 오늘) → 2026-01-01 (오늘보다 미래면 null)
+  //     "110101" → 2011-01-01, "850101" → 1985-01-01
+  function parseBirthdate6(raw) {
+    if (!raw) return null;
+    const s = String(raw).trim();
+    if (!/^\d{6}$/.test(s)) return null;
+
+    const yy = parseInt(s.slice(0, 2), 10);
+    const mm = parseInt(s.slice(2, 4), 10);
+    const dd = parseInt(s.slice(4, 6), 10);
+
+    if (mm < 1 || mm > 12) return null;
+    if (dd < 1 || dd > 31) return null;
+
+    const now = new Date();
+    const currentYY = now.getFullYear() % 100;
+    const yyyy = (yy <= currentYY) ? (2000 + yy) : (1900 + yy);
+
+    // JavaScript Date로 실제 유효성 검사 (예: 02/30 같은 건 거름)
+    const d = new Date(yyyy, mm - 1, dd);
+    if (d.getFullYear() !== yyyy || d.getMonth() !== mm - 1 || d.getDate() !== dd) return null;
+    if (d > now) return null; // 미래 날짜 차단
+
+    const yyyyStr = String(yyyy).padStart(4, '0');
+    const mmStr = String(mm).padStart(2, '0');
+    const ddStr = String(dd).padStart(2, '0');
+    return yyyyStr + '-' + mmStr + '-' + ddStr;
+  }
+
+  // 만 나이 계산
+  function calcAge(birthdateStr) {
+    if (!birthdateStr) return null;
+    const birth = new Date(birthdateStr);
+    if (isNaN(birth.getTime())) return null;
+    const now = new Date();
+    if (birth > now) return -1;
+    let age = now.getFullYear() - birth.getFullYear();
+    const m = now.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age--;
+    return age;
+  }
+
+  // 전체 동의 토글
+  function toggleAllConsents(master) {
+    const ids = ['authConsentAge', 'authConsentTerms', 'authConsentPrivacy', 'authConsentMarketing'];
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.checked = master.checked;
+    });
+  }
+
+  // 하위 체크박스가 모두 체크되면 전체 동의도 자동 체크
+  function syncAllConsent() {
+    const ids = ['authConsentAge', 'authConsentTerms', 'authConsentPrivacy', 'authConsentMarketing'];
+    const all = ids.every(id => {
+      const el = document.getElementById(id);
+      return el && el.checked;
+    });
+    const master = document.getElementById('authConsentAll');
+    if (master) master.checked = all;
+  }
+
+  // 프로필 upsert (이메일 인증 후 로그인 시 호출)
+  async function upsertProfileFromPending() {
+    if (!currentUser) return;
+    let pending = null;
+    try {
+      const raw = localStorage.getItem('korarti_pending_profile');
+      if (raw) pending = JSON.parse(raw);
+    } catch (_) { pending = null; }
+
+    const meta = currentUser.user_metadata || {};
+    const profileData = {
+      id: currentUser.id,
+      display_name: (pending && pending.display_name) || meta.display_name || meta.name || null,
+      nickname: (pending && pending.nickname) || meta.nickname || null,
+      birthdate: (pending && pending.birthdate) || meta.birthdate || null,
+      avatar_url: meta.avatar_url || meta.picture || null,
+      terms_agreed_at: (pending && pending.terms_agreed_at) || meta.terms_agreed_at || null,
+      privacy_agreed_at: (pending && pending.privacy_agreed_at) || meta.privacy_agreed_at || null,
+      marketing_agreed_at: (pending && pending.marketing_agreed_at) || meta.marketing_agreed_at || null,
+      terms_version: (pending && pending.terms_version) || meta.terms_version || '1.0',
+      privacy_version: (pending && pending.privacy_version) || meta.privacy_version || '1.0'
+    };
+
+    try {
+      const { error } = await sb.from('profiles').upsert(profileData, { onConflict: 'id' });
+      if (error) {
+        // 닉네임 중복이면 nickname 제외하고 다시 시도 (매우 드문 상황)
+        if (error.code === '23505' && profileData.nickname) {
+          console.warn('[profile upsert] nickname conflict, retrying without nickname');
+          delete profileData.nickname;
+          await sb.from('profiles').upsert(profileData, { onConflict: 'id' });
+        } else {
+          console.warn('[profile upsert]', error);
+        }
+      }
+      // 성공이든 실패든 pending 정리 (재시도 루프 방지)
+      try { localStorage.removeItem('korarti_pending_profile'); } catch (_) {}
+    } catch (e) {
+      console.warn('[profile upsert] exception', e);
+    }
+  }
+
+  // Google OAuth 로그인 (공통: 로그인/회원가입 버튼)
+  async function handleGoogleLogin() {
+    try {
+      const { error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/studio',
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent'
+          }
+        }
+      });
+      if (error) {
+        console.error('Google login error:', error);
+        showError('login', 'Google 로그인 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.');
+      }
+      // 성공 시 Supabase가 Google로 리디렉션 → 돌아오면 onAuthStateChange에서 처리
+    } catch (e) {
+      console.error('Google login exception:', e);
+      showError('login', 'Google 로그인 중 오류가 발생했어요.');
+    }
+  }
+
+  // ===========================================================
+  //                      온보딩 (OAuth 첫 사용자)
+  // ===========================================================
+
+  // SIGNED_IN 시 호출 — profiles에 nickname 없으면 온보딩 모달 오픈
+  async function checkOnboardingNeeded() {
+    if (!currentUser) return;
+    try {
+      const { data: profile, error } = await sb
+        .from('profiles')
+        .select('nickname, birthdate, terms_agreed_at')
+        .eq('id', currentUser.id)
+        .maybeSingle();
+
+      if (error) {
+        console.warn('[onboarding check]', error);
+        return;
+      }
+
+      // 닉네임 없거나 약관 동의 기록 없으면 온보딩 필요
+      const needsOnboarding = !profile || !profile.nickname || !profile.terms_agreed_at;
+      if (needsOnboarding) {
+        openOnboardingModal();
+      }
+    } catch (e) {
+      console.warn('[onboarding check] exception', e);
+    }
+  }
+
+  function openOnboardingModal() {
+    // 입력 필드 초기화
+    ['authOnboardingNickname','authOnboardingBirthdate'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    ['authOnboardingConsentAll','authOnboardingConsentAge','authOnboardingConsentTerms','authOnboardingConsentPrivacy','authOnboardingConsentMarketing'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.checked = false;
+    });
+    const errEl = document.getElementById('authOnboardingError');
+    if (errEl) { errEl.textContent = ''; errEl.classList.remove('show'); }
+    const statusEl = document.getElementById('authOnboardingNickStatus');
+    if (statusEl) { statusEl.textContent = ''; statusEl.className = 'auth-nick-status'; }
+
+    document.getElementById('authOnboardingModal').classList.add('active');
+
+    // 닉네임 입력 자동 디바운스 + 생년월일 숫자 필터
+    setupOnboardingFilters();
+  }
+
+  function closeOnboardingModal() {
+    document.getElementById('authOnboardingModal').classList.remove('active');
+  }
+
+  function setupOnboardingFilters() {
+    const nickInput = document.getElementById('authOnboardingNickname');
+    if (nickInput && !nickInput.dataset.filterBound) {
+      nickInput.dataset.filterBound = '1';
+      const statusEl = document.getElementById('authOnboardingNickStatus');
+      nickInput.addEventListener('input', (e) => {
+        debouncedNickCheck(e.target.value, statusEl);
+      });
+    }
+    const birthInput = document.getElementById('authOnboardingBirthdate');
+    if (birthInput && !birthInput.dataset.filterBound) {
+      birthInput.dataset.filterBound = '1';
+      birthInput.addEventListener('input', (e) => {
+        const digitsOnly = (e.target.value || '').replace(/\D/g, '').slice(0, 6);
+        if (e.target.value !== digitsOnly) e.target.value = digitsOnly;
+      });
+    }
+  }
+
+  function toggleAllOnboardingConsents(master) {
+    const ids = ['authOnboardingConsentAge', 'authOnboardingConsentTerms', 'authOnboardingConsentPrivacy', 'authOnboardingConsentMarketing'];
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.checked = master.checked;
+    });
+  }
+
+  function syncOnboardingConsent() {
+    const ids = ['authOnboardingConsentAge', 'authOnboardingConsentTerms', 'authOnboardingConsentPrivacy', 'authOnboardingConsentMarketing'];
+    const all = ids.every(id => {
+      const el = document.getElementById(id);
+      return el && el.checked;
+    });
+    const master = document.getElementById('authOnboardingConsentAll');
+    if (master) master.checked = all;
+  }
+
+  function showOnboardingError(msg) {
+    const el = document.getElementById('authOnboardingError');
+    if (el) {
+      el.textContent = msg;
+      el.classList.add('show');
+    }
+  }
+
+  function hideOnboardingError() {
+    const el = document.getElementById('authOnboardingError');
+    if (el) el.classList.remove('show');
+  }
+
+  async function handleOnboardingSubmit() {
+    if (!currentUser) {
+      showOnboardingError('로그인 정보가 없어요. 다시 로그인해주세요.');
+      return;
+    }
+    const nickname = document.getElementById('authOnboardingNickname').value.trim();
+    const birthdate = document.getElementById('authOnboardingBirthdate').value.trim();
+    const consentAge = document.getElementById('authOnboardingConsentAge').checked;
+    const consentTerms = document.getElementById('authOnboardingConsentTerms').checked;
+    const consentPrivacy = document.getElementById('authOnboardingConsentPrivacy').checked;
+    const consentMarketing = document.getElementById('authOnboardingConsentMarketing').checked;
+    const btn = document.getElementById('authOnboardingBtn');
+
+    hideOnboardingError();
+
+    // 닉네임 검증
+    const nickValidation = validateNickname(nickname);
+    if (!nickValidation.ok) { showOnboardingError(nickValidation.msg); return; }
+
+    // 생년월일 검증
+    if (!birthdate) { showOnboardingError('생년월일을 입력해주세요.'); return; }
+    const parsedBirth = parseBirthdate6(birthdate);
+    if (!parsedBirth) {
+      showOnboardingError('생년월일을 YYMMDD 6자리로 정확히 입력해주세요.');
+      return;
+    }
+    const age = calcAge(parsedBirth);
+    if (age === null || age < 14) {
+      showOnboardingError('만 14세 이상만 가입할 수 있어요.');
+      return;
+    }
+
+    // 동의 검증
+    if (!consentAge) { showOnboardingError('만 14세 이상 확인에 동의해주세요.'); return; }
+    if (!consentTerms) { showOnboardingError('이용약관에 동의해주세요.'); return; }
+    if (!consentPrivacy) { showOnboardingError('개인정보 수집·이용에 동의해주세요.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = '처리 중...';
+
+    try {
+      // 닉네임 중복 재확인
+      const { data: avail } = await sb.rpc('check_nickname_available', { p_nickname: nickname });
+      if (!avail) {
+        showOnboardingError('이미 사용 중인 닉네임이거나 형식이 올바르지 않아요.');
+        return;
+      }
+
+      const nowIso = new Date().toISOString();
+      const meta = currentUser.user_metadata || {};
+
+      const profileData = {
+        id: currentUser.id,
+        nickname: nickname,
+        display_name: meta.full_name || meta.name || meta.display_name || nickname,
+        birthdate: parsedBirth,
+        avatar_url: meta.avatar_url || meta.picture || null,
+        terms_agreed_at: nowIso,
+        privacy_agreed_at: nowIso,
+        marketing_agreed_at: consentMarketing ? nowIso : null,
+        terms_version: '1.0',
+        privacy_version: '1.0'
+      };
+
+      const { error } = await sb.from('profiles').upsert(profileData, { onConflict: 'id' });
+      if (error) {
+        console.error('[onboarding upsert]', error);
+        showOnboardingError('저장 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.');
+        return;
+      }
+
+      // user_metadata도 업데이트
+      try {
+        await sb.auth.updateUser({
+          data: {
+            nickname: nickname,
+            birthdate: parsedBirth,
+            terms_agreed_at: nowIso,
+            privacy_agreed_at: nowIso,
+            marketing_agreed_at: consentMarketing ? nowIso : null,
+            terms_version: '1.0',
+            privacy_version: '1.0'
+          }
+        });
+      } catch (_) { /* metadata 업데이트 실패해도 profiles는 저장됨 */ }
+
+      closeOnboardingModal();
+      renderNav();
+    } catch (e) {
+      console.error('[onboarding submit]', e);
+      showOnboardingError('저장 중 오류가 발생했어요.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '시작하기';
+    }
+  }
+
+  // 온보딩 취소 = 로그아웃
+  async function cancelOnboarding() {
+    closeOnboardingModal();
+    try {
+      await sb.auth.signOut();
+    } catch (_) {}
+  }
+
+  async function handleLogout() {
+    try {
+      const dd = document.getElementById('authDropdown');
+      if (dd) dd.classList.remove('open');
+      await sb.auth.signOut();
+      // onAuthStateChange가 renderNav() 호출
+    } catch (e) {
+      console.error('로그아웃 오류', e);
+    }
+  }
+
+  function translateAuthError(error) {
+    const raw = (error && (error.message || String(error))) || '';
+    const low = raw.toLowerCase();
+    if (low.includes('invalid login')) return '이메일 또는 비밀번호가 올바르지 않아요.';
+    if (low.includes('email not confirmed')) return '이메일 인증이 완료되지 않았어요. 메일을 확인해주세요.';
+    if (low.includes('user already registered')) return '이미 가입된 이메일이에요. 로그인을 시도해보세요.';
+    if (low.includes('password should be at least')) return '비밀번호는 최소 6자 이상이어야 해요.';
+    if (low.includes('rate limit') || low.includes('too many')) return '너무 많이 시도했어요. 잠시 후 다시 시도해주세요.';
+    if (low.includes('network') || low.includes('fetch')) return '네트워크 오류가 발생했어요. 연결을 확인해주세요.';
+    return raw || '알 수 없는 오류가 발생했어요.';
+  }
+
+  // ============================================================
+  //                      Auth 상태 동기화
+  // ============================================================
+
+  // 초기 세션 확인
+  sb.auth.getSession().then(({ data }) => {
+    currentSession = data.session;
+    currentUser = data.session?.user || null;
+    renderNav();
+    if (currentUser) {
+      upsertProfileFromPending();
+      checkOnboardingNeeded();
+    }
+  });
+
+﻿  // 생년월일 입력: 숫자만 허용 + 자동 자르기
+  function setupBirthdateFilter() {
+    const el = document.getElementById("authSignupBirthdate");
+    if (!el || el.dataset.filterBound) return;
+    el.dataset.filterBound = "1";
+    el.addEventListener("input", (e) => {
+      const digitsOnly = (e.target.value || "").replace(/\D/g, "").slice(0, 6);
+      if (e.target.value !== digitsOnly) e.target.value = digitsOnly;
+    });
+  }
+  setupBirthdateFilter();
+
+  // ==== 닉네임 검증 & 중복 체크 ====
+  function validateNickname(nickname) {
+    const n = String(nickname || "").trim();
+    if (!n) return { ok: false, msg: "닉네임을 입력해주세요." };
+    if (n.length < 2) return { ok: false, msg: "닉네임은 2자 이상이어야 해요." };
+    if (n.length > 16) return { ok: false, msg: "닉네임은 16자 이하로 입력해주세요." };
+    if (!/^[가-힣a-zA-Z0-9_]+$/.test(n)) {
+      return { ok: false, msg: "닉네임은 한글, 영문, 숫자, 밑줄(_)만 사용할 수 있어요." };
+    }
+    return { ok: true };
+  }
+
+  function isValidEmailFormat(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email || "");
+  }
+
+  function debounce(fn, wait) {
+    let t;
+    return function(...args) {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), wait);
+    };
+  }
+﻿  async function checkNicknameAvailability(nickname, statusEl) {
+    if (!statusEl) return;
+    const v = validateNickname(nickname);
+    if (!v.ok) {
+      if (!nickname) { statusEl.textContent = ""; statusEl.className = "auth-nick-status"; return; }
+      statusEl.textContent = v.msg;
+      statusEl.className = "auth-nick-status invalid";
+      return;
+    }
+    statusEl.textContent = "확인 중...";
+    statusEl.className = "auth-nick-status checking";
+    try {
+      const { data, error } = await sb.rpc("check_nickname_available", { p_nickname: nickname });
+      if (error) { statusEl.textContent = ""; statusEl.className = "auth-nick-status"; return; }
+      if (data === true) {
+        statusEl.textContent = "✓ 사용 가능";
+        statusEl.className = "auth-nick-status available";
+      } else {
+        statusEl.textContent = "이미 사용 중이에요";
+        statusEl.className = "auth-nick-status taken";
+      }
+    } catch (e) {
+      statusEl.textContent = "";
+      statusEl.className = "auth-nick-status";
+    }
+  }
+
+  const debouncedNickCheck = debounce((nickname, statusEl) => {
+    checkNicknameAvailability(nickname, statusEl);
+  }, 500);
+
+  async function checkEmailAvailability(email) {
+    if (!isValidEmailFormat(email)) return null;
+    try {
+      const { data, error } = await sb.rpc("check_email_available", { p_email: email });
+      if (error) return null;
+      return data === true;
+    } catch (e) { return null; }
+  }
+
+  const debouncedEmailCheck = debounce(async (email, onResult) => {
+    const res = await checkEmailAvailability(email);
+    if (typeof onResult === "function") onResult(res);
+  }, 700);
+
+  function setupSignupRealtimeChecks() {
+    const nickInput = document.getElementById("authSignupNickname");
+    const nickStatus = document.getElementById("authNickStatus");
+    if (nickInput && !nickInput.dataset.checkBound) {
+      nickInput.dataset.checkBound = "1";
+      nickInput.addEventListener("input", (e) => {
+        const v = e.target.value.trim();
+        debouncedNickCheck(v, nickStatus);
+      });
+    }
+    const emailInput = document.getElementById("authSignupEmail");
+    if (emailInput && !emailInput.dataset.checkBound) {
+      emailInput.dataset.checkBound = "1";
+      emailInput.addEventListener("input", (e) => {
+        const v = e.target.value.trim();
+        const errEl = document.getElementById("authSignupError");
+        if (!isValidEmailFormat(v)) return;
+        debouncedEmailCheck(v, (available) => {
+          if (available === false) {
+            showError("signup", "이미 가입된 이메일이에요. 로그인해주세요.");
+          } else if (available === true && errEl && errEl.textContent.includes("이미 가입")) {
+            errEl.classList.remove("show");
+          }
+        });
+      });
+    }
+  }
+  setupSignupRealtimeChecks();
+﻿  // ==== 비밀번호 찾기 / 재설정 ====
+  async function handleForgotPassword() {
+    const email = document.getElementById("authForgotEmail").value.trim();
+    const btn = document.getElementById("authForgotBtn");
+    hideError();
+    if (!isValidEmailFormat(email)) {
+      showError("forgot", "올바른 이메일 주소를 입력해주세요.");
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = "전송 중...";
+    try {
+      const { error } = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + "/studio?reset=1"
+      });
+      if (error) {
+        showError("forgot", translateAuthError(error));
+      } else {
+        document.getElementById("authForgotSentEmail").textContent = email;
+        switchView("forgotSent");
+      }
+    } catch (e) {
+      console.error(e);
+      showError("forgot", "오류가 발생했어요. 잠시 후 다시 시도해주세요.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "재설정 링크 받기";
+    }
+  }
+
+  async function handleNewPassword() {
+    const p1 = document.getElementById("authNewPassword1").value;
+    const p2 = document.getElementById("authNewPassword2").value;
+    const btn = document.getElementById("authNewPasswordBtn");
+    hideError();
+    if (!p1 || p1.length < 8) { showError("newPassword", "비밀번호는 8자 이상이어야 해요."); return; }
+    if (p1 !== p2) { showError("newPassword", "비밀번호가 일치하지 않아요."); return; }
+    btn.disabled = true;
+    btn.textContent = "변경 중...";
+    try {
+      const { error } = await sb.auth.updateUser({ password: p1 });
+      if (error) {
+        showError("newPassword", translateAuthError(error));
+      } else {
+        try {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("reset");
+          url.hash = "";
+          window.history.replaceState({}, "", url.toString());
+        } catch (_) {}
+        alert("비밀번호가 변경됐어요. 이제 새 비밀번호로 이용하실 수 있어요.");
+        closeModal();
+      }
+    } catch (e) {
+      console.error(e);
+      showError("newPassword", "오류가 발생했어요.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "비밀번호 변경하기";
+    }
+  }
+
+  function checkPasswordResetMode() {
+    try {
+      const url = new URL(window.location.href);
+      if (url.searchParams.get("reset") === "1") {
+        openModal("newPassword");
+      }
+    } catch (_) {}
+  }
+﻿  // ==== 내 정보 모달 ====
+  let cachedProfile = null;
+
+  async function loadMyProfile() {
+    if (!currentUser) return null;
+    try {
+      const { data, error } = await sb.from("profiles")
+        .select("*").eq("id", currentUser.id).maybeSingle();
+      if (error) { console.warn("[loadMyProfile]", error); return null; }
+      cachedProfile = data;
+      return data;
+    } catch (e) { console.warn(e); return null; }
+  }
+
+  async function openAccountModal() {
+    if (!currentUser) { openModal("login"); return; }
+    document.getElementById("authAccountModal").classList.add("active");
+    const dd = document.getElementById("authDropdown");
+    if (dd) dd.classList.remove("open");
+    const meta = currentUser.user_metadata || {};
+    document.getElementById("acctEmail").textContent = currentUser.email || "-";
+    document.getElementById("acctName").textContent = meta.display_name || meta.name || "-";
+    document.getElementById("acctNickDisplay").textContent = meta.nickname || "-";
+    document.getElementById("acctBirthdate").textContent = meta.birthdate || "-";
+    const createdAt = currentUser.created_at ? new Date(currentUser.created_at) : null;
+    document.getElementById("acctJoinedAt").textContent = createdAt ? formatDate(createdAt) : "-";
+    const profile = await loadMyProfile();
+    if (profile) {
+      if (profile.display_name) document.getElementById("acctName").textContent = profile.display_name;
+      document.getElementById("acctNickDisplay").textContent = profile.nickname || "-";
+      if (profile.birthdate) document.getElementById("acctBirthdate").textContent = profile.birthdate;
+    }
+  }
+
+  function closeAccountModal() {
+    document.getElementById("authAccountModal").classList.remove("active");
+    cancelNicknameEdit();
+  }
+
+  function formatDate(d) {
+    if (!d) return "-";
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return y + "년 " + m + "월 " + day + "일";
+  }
+
+  function toggleNicknameEdit() {
+    const editEl = document.getElementById("acctNickEdit");
+    const displayEl = document.getElementById("acctNickDisplay");
+    const btn = document.getElementById("acctNickEditBtn");
+    const input = document.getElementById("acctNickInput");
+    const status = document.getElementById("acctNickStatus");
+    if (editEl.style.display === "none" || !editEl.style.display) {
+      editEl.style.display = "";
+      displayEl.style.display = "none";
+      btn.textContent = "닫기";
+      input.value = (cachedProfile && cachedProfile.nickname) || "";
+      input.focus();
+      if (status) { status.textContent = ""; status.className = "auth-nick-status"; }
+      if (!input.dataset.checkBound) {
+        input.dataset.checkBound = "1";
+        input.addEventListener("input", (e) => {
+          const v = e.target.value.trim();
+          if (cachedProfile && v === cachedProfile.nickname) {
+            status.textContent = "";
+            status.className = "auth-nick-status";
+            return;
+          }
+          debouncedNickCheck(v, status);
+        });
+      }
+    } else {
+      cancelNicknameEdit();
+    }
+  }
+
+  function cancelNicknameEdit() {
+    const editEl = document.getElementById("acctNickEdit");
+    const displayEl = document.getElementById("acctNickDisplay");
+    const btn = document.getElementById("acctNickEditBtn");
+    if (editEl) editEl.style.display = "none";
+    if (displayEl) displayEl.style.display = "";
+    if (btn) btn.textContent = "수정";
+  }
+﻿  async function saveNickname() {
+    const input = document.getElementById("acctNickInput");
+    const status = document.getElementById("acctNickStatus");
+    const saveBtn = document.getElementById("acctNickSaveBtn");
+    const newNick = input.value.trim();
+    const v = validateNickname(newNick);
+    if (!v.ok) {
+      if (status) { status.textContent = v.msg; status.className = "auth-nick-status invalid"; }
+      return;
+    }
+    if (cachedProfile && newNick === cachedProfile.nickname) {
+      cancelNicknameEdit();
+      return;
+    }
+    saveBtn.disabled = true;
+    saveBtn.textContent = "저장 중...";
+    try {
+      const { data: avail } = await sb.rpc("check_nickname_available", { p_nickname: newNick });
+      if (avail !== true) {
+        if (status) { status.textContent = "이미 사용 중이에요"; status.className = "auth-nick-status taken"; }
+        saveBtn.disabled = false; saveBtn.textContent = "저장";
+        return;
+      }
+      const { error } = await sb.from("profiles").update({ nickname: newNick }).eq("id", currentUser.id);
+      if (error) {
+        if (status) { status.textContent = "저장 실패"; status.className = "auth-nick-status invalid"; }
+      } else {
+        await sb.auth.updateUser({ data: { nickname: newNick } });
+        if (cachedProfile) cachedProfile.nickname = newNick;
+        document.getElementById("acctNickDisplay").textContent = newNick;
+        cancelNicknameEdit();
+        renderNav();
+      }
+    } catch (e) {
+      console.error(e);
+      if (status) { status.textContent = "오류가 발생했어요"; status.className = "auth-nick-status invalid"; }
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = "저장";
+    }
+  }
+
+  function openChangePassword() {
+    closeAccountModal();
+    document.getElementById("authChangePw1").value = "";
+    document.getElementById("authChangePw2").value = "";
+    hideError();
+    document.getElementById("authChangePasswordModal").classList.add("active");
+  }
+
+  function closeChangePassword() {
+    document.getElementById("authChangePasswordModal").classList.remove("active");
+  }
+
+  async function handleChangePassword() {
+    const p1 = document.getElementById("authChangePw1").value;
+    const p2 = document.getElementById("authChangePw2").value;
+    const btn = document.getElementById("authChangePwBtn");
+    hideError();
+    if (!p1 || p1.length < 8) { showError("changePw", "비밀번호는 8자 이상이어야 해요."); return; }
+    if (p1 !== p2) { showError("changePw", "비밀번호가 일치하지 않아요."); return; }
+    btn.disabled = true;
+    btn.textContent = "변경 중...";
+    try {
+      const { error } = await sb.auth.updateUser({ password: p1 });
+      if (error) {
+        showError("changePw", translateAuthError(error));
+      } else {
+        showSuccess("changePw", "비밀번호가 변경됐어요.");
+        document.getElementById("authChangePw1").value = "";
+        document.getElementById("authChangePw2").value = "";
+        setTimeout(() => { closeChangePassword(); }, 1500);
+      }
+    } catch (e) {
+      console.error(e);
+      showError("changePw", "오류가 발생했어요.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "변경하기";
+    }
+  }
+
+  function openDeleteAccount() {
+    closeAccountModal();
+    document.getElementById("authDeleteConfirm").value = "";
+    hideError();
+    document.getElementById("authDeleteAccountModal").classList.add("active");
+  }
+
+  function closeDeleteAccount() {
+    document.getElementById("authDeleteAccountModal").classList.remove("active");
+  }
+
+  async function handleDeleteAccount() {
+    const confirmText = document.getElementById("authDeleteConfirm").value.trim();
+    const btn = document.getElementById("authDeleteBtn");
+    hideError();
+    if (confirmText !== "탈퇴합니다") {
+      showError("delete", "확인 문구를 정확히 입력해주세요: 탈퇴합니다");
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = "처리 중...";
+    try {
+      const { error } = await sb.rpc("delete_my_account");
+      if (error) {
+        showError("delete", "탈퇴 처리 중 오류: " + (error.message || ""));
+      } else {
+        try { await sb.auth.signOut(); } catch (_) {}
+        try { localStorage.removeItem("korarti_pending_profile"); } catch (_) {}
+        alert("탈퇴가 완료됐어요. 그동안 Korart-i를 이용해주셔서 감사해요.");
+        closeDeleteAccount();
+        try { window.location.href = "/"; } catch (_) { window.location.reload(); }
+      }
+    } catch (e) {
+      console.error(e);
+      showError("delete", "오류가 발생했어요.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "탈퇴하기";
+    }
+  }
+
+  // 세션 변경 감지
+  sb.auth.onAuthStateChange((event, session) => {
+    currentSession = session;
+    currentUser = session?.user || null;
+    renderNav();
+    if (event === 'SIGNED_IN' && currentUser) {
+      upsertProfileFromPending();
+      checkOnboardingNeeded();
+    }
+  });
+
+  // ============================================================
+  //                      전역 API 노출
+  // ============================================================
+  window.KorartiAuth = {
+    isLoggedIn: () => !!currentUser,
+    getUser: () => currentUser,
+    getSession: () => currentSession,
+    openModal,
+    closeModal,
+    switchView,
+    showAuthRequiredModal,
+    closeRequiredModal,
+    toggleDropdown,
+    handleLogin,
+    handleSignup,
+    handleGoogleLogin,
+    handleOnboardingSubmit,
+    cancelOnboarding,
+    toggleAllOnboardingConsents,
+    syncOnboardingConsent,
+    handleLogout,
+    handleForgotPassword,
+    handleNewPassword,
+    toggleAllConsents,
+    syncAllConsent,
+    openAccountModal,
+    closeAccountModal,
+    toggleNicknameEdit,
+    cancelNicknameEdit,
+    saveNickname,
+    openChangePassword,
+    closeChangePassword,
+    handleChangePassword,
+    openDeleteAccount,
+    closeDeleteAccount,
+    handleDeleteAccount,
+    // 내부용 (Supabase 클라이언트 재사용 가능)
+    _sb: sb
+  };
+
+  // 비밀번호 재설정 링크로 진입한 경우 자동으로 재설정 모달 열기
+  // Supabase는 해당 링크 진입 시 onAuthStateChange의 PASSWORD_RECOVERY 이벤트로 알림
+  sb.auth.onAuthStateChange((event) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      setTimeout(() => openModal('newPassword'), 300);
+    }
+  });
+  // URL에 reset=1 파라미터가 있으면 즉시 모달 열기
+  checkPasswordResetMode();
+
+  // Enter 키로 폼 제출
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const modal = document.getElementById('authModal');
+    if (!modal || !modal.classList.contains('active')) return;
+
+    const loginVisible = document.getElementById('authViewLogin').style.display !== 'none';
+    const signupVisible = document.getElementById('authViewSignup').style.display !== 'none';
+
+    if (loginVisible && document.activeElement && modal.contains(document.activeElement)) {
+      e.preventDefault();
+      handleLogin();
+    } else if (signupVisible && document.activeElement && modal.contains(document.activeElement)) {
+      e.preventDefault();
+      handleSignup();
+    }
+  });
+
+  // ESC로 모달 닫기
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (document.getElementById('authRequiredModal').classList.contains('active')) {
+      closeRequiredModal();
+    } else if (document.getElementById('authModal').classList.contains('active')) {
+      closeModal();
+    }
+  });
+
+})();
+</script>
 
 </body>
 </html>
