@@ -7014,6 +7014,10 @@ function resetMerge() {
   function closeModal() {
     document.getElementById('authModal').classList.remove('active');
     resetModalState();
+    // X로 닫았는데 비로그인 상태면 index로 (스튜디오 사용 불가)
+    if (!currentUser) {
+      window.location.href = 'index.html';
+    }
   }
 
   function switchView(view) {
@@ -7082,6 +7086,10 @@ function resetMerge() {
   }
   function closeRequiredModal() {
     document.getElementById('authRequiredModal').classList.remove('active');
+    // 인증 모달 닫을 때 비로그인 상태면 index로 redirect (스튜디오 사용 불가)
+    if (!currentUser) {
+      window.location.href = 'index.html';
+    }
   }
 
   // ============================================================
@@ -7618,7 +7626,17 @@ function resetMerge() {
       checkOnboardingNeeded();
     } else {
       // studio.html은 로그인 필수 — 비로그인 시 인증 모달 자동 표시
-      setTimeout(() => showAuthRequiredModal(), 150);
+      // URL 파라미터로 어떤 모달을 띄울지 결정 (?login=1, ?signup=1, 기본=required)
+      const urlParams = new URLSearchParams(window.location.search);
+      setTimeout(() => {
+        if (urlParams.get('signup') === '1') {
+          openModal('signup');
+        } else if (urlParams.get('login') === '1') {
+          openModal('login');
+        } else {
+          showAuthRequiredModal();
+        }
+      }, 150);
     }
   });
 
