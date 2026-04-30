@@ -55,7 +55,7 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 .brand-text{color:var(--ink)}
 .brand-sub{font-size:11px;color:var(--ink3);font-style:normal;font-weight:500;margin-left:4px;letter-spacing:.5px}
 .cost-badge{margin-left:auto;display:flex;align-items:center;gap:14px;font-size:11px}
-.cost-pill{background:var(--bg3);border:1px solid var(--line);border-radius:20px;padding:5px 12px;color:var(--ink2);font-weight:600}
+.cost-pill{background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:5px 12px;color:var(--ink2);font-weight:600}
 .cost-pill strong{color:var(--cream)}
 .main{flex:1;padding:24px 28px 80px;max-width:1400px;width:100%;margin:0 auto}
 
@@ -65,17 +65,17 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 .sb-section{padding:12px 14px 8px;font-size:9px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px}
 .sb-key{padding:6px 14px}
 .sb-key label{font-size:10px;color:var(--ink3);display:block;margin-bottom:3px}
-.sb-key input{width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px}
+.sb-key input{width:100%;background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:5px 8px;color:var(--ink);font-size:11px}
 .sb-model{padding:4px 14px}
 .sb-model label{font-size:10px;color:var(--ink3);display:block;margin-bottom:3px}
-.sb-model select{width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px}
+.sb-model select{width:100%;background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:5px 8px;color:var(--ink);font-size:11px}
 .sb-cost{padding:10px 14px;border-top:1px solid var(--line);margin-top:auto}
 .cost-row{display:flex;justify-content:space-between;font-size:10px;color:var(--ink3);margin-bottom:3px}
 .cost-val{color:var(--cream);font-weight:700}
 
 /* ── steps nav ── */
-.steps{display:flex;gap:6px;margin-bottom:24px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:6px}
-.step-btn{flex:1;padding:10px 8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--ink3);cursor:pointer;text-align:center;transition:.15s;border:none;background:none;letter-spacing:-.01em}
+.steps{display:flex;gap:6px;margin-bottom:24px;background:var(--bg2);border:1px solid var(--line);border-radius: 0;padding:6px}
+.step-btn{flex:1;padding:10px 8px;border-radius: 0;font-size:12px;font-weight:600;color:var(--ink3);cursor:pointer;text-align:center;transition:.15s;border:none;background:none;letter-spacing:-.01em}
 .step-btn.active{background:rgba(99,102,241,.12);color:var(--pink);font-weight:700;box-shadow:inset 0 0 0 1px rgba(99,102,241,.35)}
 .step-btn:hover:not(.active){background:var(--bg3);color:var(--ink)}
 .step-btn.done{color:var(--green)}
@@ -87,19 +87,19 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 /* ── ratio cards ── */
 .ratio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px}
 @media (max-width: 900px) { .ratio-grid{grid-template-columns:repeat(2,1fr)} }
-.ratio-card{background:var(--bg2);border:2px solid var(--line);border-radius:12px;padding:24px 16px 18px;cursor:pointer;transition:.2s;text-align:left;position:relative;overflow:hidden}
+.ratio-card{background:var(--bg2);border:2px solid var(--line);border-radius: 0;padding:24px 16px 18px;cursor:pointer;transition:.2s;text-align:left;position:relative;overflow:hidden}
 .ratio-card:hover{border-color:var(--line2);transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.4)}
 .ratio-card.active{border-color:var(--pink);box-shadow:0 0 0 1px var(--pink),0 12px 32px rgba(255,107,157,.2)}
-.ratio-thumb{display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.08);border-radius:8px;margin:0 auto 18px;font-family:Georgia,'Times New Roman',serif;font-style:italic;color:var(--ink2);font-weight:500}
+.ratio-thumb{display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.08);border-radius: 0;margin:0 auto 18px;font-family:Georgia,'Times New Roman',serif;font-style:italic;color:var(--ink2);font-weight:500}
 .ratio-card.active .ratio-thumb{color:var(--pink)}
 .ratio-val{font-size:18px;font-weight:800;color:var(--cream);letter-spacing:-.02em;display:flex;align-items:center;gap:6px;margin-bottom:6px}
 .ratio-card.active .ratio-val{color:var(--pink)}
-.ratio-badge{font-size:10px;font-weight:800;padding:3px 7px;border-radius:4px;background:var(--pink);color:#fff;letter-spacing:0}
-.ratio-badge-sm{font-size:9px;background:rgba(255,107,157,.18);color:var(--pink);padding:2px 6px;border-radius:3px;font-weight:700}
+.ratio-badge{font-size:10px;font-weight:800;padding:3px 7px;border-radius: 0;background:var(--pink);color:#fff;letter-spacing:0}
+.ratio-badge-sm{font-size:9px;background:rgba(255,107,157,.18);color:var(--pink);padding:2px 6px;border-radius: 0;font-weight:700}
 .ratio-size{font-size:11px;color:var(--ink3);margin-bottom:6px;font-variant-numeric:tabular-nums}
 .ratio-purpose{font-size:11px;color:var(--ink2);font-weight:500}
 
-.info-box{display:flex;align-items:flex-start;gap:14px;padding:16px 20px;background:rgba(255,107,157,.04);border:1px solid rgba(255,107,157,.18);border-left:3px solid var(--pink);border-radius:10px;margin:24px 0 28px}
+.info-box{display:flex;align-items:flex-start;gap:14px;padding:16px 20px;background:rgba(255,107,157,.04);border:1px solid rgba(255,107,157,.18);border-left:3px solid var(--pink);border-radius: 0;margin:24px 0 28px}
 .info-box-icon{font-size:22px;line-height:1;margin-top:2px}
 .info-box-content{flex:1;font-size:12px;color:var(--ink2);line-height:1.7}
 .info-box-content strong{color:var(--cream);font-size:13px}
@@ -131,7 +131,7 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 }
 
 /* ── buttons ── */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--line2);background:var(--bg3);color:var(--ink);transition:.15s;letter-spacing:-.01em}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius: 0;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--line2);background:var(--bg3);color:var(--ink);transition:.15s;letter-spacing:-.01em}
 .btn:hover{background:var(--bg4);border-color:var(--ink3)}
 .btn:disabled{opacity:.35;cursor:not-allowed}
 .btn-primary{background:var(--pink);border-color:transparent;color:#fff;font-weight:700;box-shadow:0 4px 16px rgba(99,102,241,.25)}
@@ -151,13 +151,13 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 .cat-label::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--pink)}
 .hero-title{font-size:36px;font-weight:800;letter-spacing:-.03em;line-height:1.2;margin-bottom:8px}
 .hero-sub{font-size:13px;color:var(--ink2);font-weight:400;margin-bottom:24px;line-height:1.7}
-.section-card{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden}
+.section-card{background:var(--bg2);border:1px solid var(--line);border-radius: 0;padding:24px;margin-bottom:20px;position:relative;overflow:hidden}
 .section-card::before{content:attr(data-num);position:absolute;top:18px;right:24px;font-size:48px;font-weight:900;color:var(--bg3);letter-spacing:-.05em;line-height:1;font-style:italic;font-family:Georgia,serif;pointer-events:none}
 .section-card-title{font-size:20px;font-weight:800;color:var(--cream);margin-bottom:4px;letter-spacing:-.02em}
 .section-card-sub{font-size:11px;color:var(--ink3);margin-bottom:18px}
 /* ── segs ── */
 .segs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
-.seg{padding:6px 12px;border-radius:6px;border:1px solid var(--line);background:var(--bg3);color:var(--ink2);font-size:12px;cursor:pointer;transition:.12s;user-select:none;font-weight:500}
+.seg{padding:6px 12px;border-radius: 0;border:1px solid var(--line);background:var(--bg3);color:var(--ink2);font-size:12px;cursor:pointer;transition:.12s;user-select:none;font-weight:500}
 .seg:hover{border-color:var(--ink3);color:var(--ink)}
 .seg.active{border-color:var(--pink);background:rgba(255,107,157,.1);color:var(--pink);font-weight:700}
 .seg.active-blue{border-color:var(--blue);background:rgba(58,112,192,.12);color:var(--blue);font-weight:700}
@@ -166,23 +166,33 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 /* ── form ── */
 .field{margin-bottom:14px}
 .field label{font-size:11px;color:var(--ink2);display:block;margin-bottom:5px;font-weight:600}
-.field input, .field select, .field textarea{width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:5px;padding:7px 10px;color:var(--ink);font-size:12px;font-family:inherit}
+.field input, .field select, .field textarea{width:100%;background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:7px 10px;color:var(--ink);font-size:12px;font-family:inherit}
 .field textarea{resize:vertical;line-height:1.6}
 .field-row{display:flex;gap:10px}
 .field-row .field{flex:1}
 
 /* ── avatar cards ── */
 .av-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:14px}
-.av-card{background:var(--bg3);border:1px solid var(--line);border-radius:8px;padding:12px;position:relative}
+.av-card{background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:12px;position:relative}
 .av-card.selected{border-color:var(--gold)}
 .av-card-del{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;background:rgba(192,48,64,.15);border:1px solid var(--red);color:var(--red);font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .av-name{font-size:12px;font-weight:700;color:var(--cream);margin-bottom:6px}
 .av-tags{display:flex;flex-wrap:wrap;gap:3px}
-.av-tag{font-size:9px;padding:2px 6px;border-radius:3px;background:var(--bg4);color:var(--ink3);border:1px solid var(--line)}
+.av-tag{font-size:9px;padding:2px 6px;border-radius: 0;background:var(--bg4);color:var(--ink3);border:1px solid var(--line)}
 
 /* ── scene grid ── */
-.scene-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
-.scene-card{background:var(--bg3);border:2px solid var(--line);border-radius:14px;padding:24px 14px;cursor:pointer;text-align:center;transition:.18s;position:relative;overflow:hidden;aspect-ratio:1.3/1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.scene-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+.scene-card{background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:18px 18px 16px 18px;cursor:pointer;text-align:left;transition:.18s;position:relative;overflow:hidden;aspect-ratio:16/9;display:flex;flex-direction:column;justify-content:space-between;gap:8px}
+.scene-card .sc-cat{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--pink);text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.scene-card .sc-cat::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--pink);display:inline-block}
+.scene-card .sc-title-block{display:flex;flex-direction:column;gap:4px;flex:1;justify-content:center;margin:4px 0}
+.scene-card .sc-name{font-family:'Pretendard',sans-serif;font-size:22px;font-weight:700;color:var(--cream);letter-spacing:-.02em;line-height:1.1}
+.scene-card .sc-vidstyle{font-family:'Pretendard',sans-serif;font-size:11px;font-weight:400;color:var(--ink2);font-style:italic;line-height:1.35;letter-spacing:.005em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.scene-card .sc-cam{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;color:var(--ink3);letter-spacing:.05em;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.scene-card.active .sc-cat{color:var(--pink)}
+.scene-card.active .sc-name{color:#fff}
+.scene-card.active .sc-vidstyle{color:var(--ink)}
+.scene-card.active .sc-cam{color:var(--ink2)}
 .scene-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(99,102,241,0) 0%,rgba(99,102,241,.08) 100%);opacity:0;transition:.2s;pointer-events:none}
 .scene-card:hover{border-color:var(--line2);transform:translateY(-2px)}
 .scene-card:hover::after{opacity:1}
@@ -192,21 +202,21 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 .scene-name{font-size:13px;font-weight:800;color:var(--cream);letter-spacing:-.01em}
 
 /* ── quad grid ── */
-.quad{display:grid;grid-template-columns:1fr 1fr;gap:3px;background:var(--bg3);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:14px;aspect-ratio:16/9}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:3px;background:var(--bg3);border:1px solid var(--line);border-radius: 0;overflow:hidden;margin-bottom:14px;aspect-ratio:16/9}
 .qcell{position:relative;background:#111;overflow:hidden;cursor:pointer}
 .qcell img{width:100%;height:100%;object-fit:cover;display:block}
 .qcell-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);opacity:0;transition:.2s}
 .qcell:hover .qcell-overlay{opacity:1}
-.q-badge{position:absolute;top:6px;left:6px;font-size:9px;font-weight:800;padding:2px 7px;border-radius:3px;background:rgba(0,0,0,.7);color:var(--cream)}
-.q-num{position:absolute;bottom:6px;left:6px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px}
-.q-status{position:absolute;top:6px;right:6px;font-size:9px;padding:2px 6px;border-radius:3px}
+.q-badge{position:absolute;top:6px;left:6px;font-size:9px;font-weight:800;padding:2px 7px;border-radius: 0;background:rgba(0,0,0,.7);color:var(--cream)}
+.q-num{position:absolute;bottom:6px;left:6px;font-size:10px;font-weight:700;padding:2px 7px;border-radius: 0}
+.q-status{position:absolute;top:6px;right:6px;font-size:9px;padding:2px 6px;border-radius: 0}
 
 /* ── angle picker ── */
 .angle-picker{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
 .angle-row{border-bottom:1px solid var(--line);margin-bottom:8px;padding-bottom:6px}
 .angle-row:last-child{border:none;margin:0;padding:0}
 .angle-cat{font-size:9px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
-.angle-item{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:5px;border:1px solid var(--line);background:var(--bg3);cursor:pointer;transition:.12s}
+.angle-item{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius: 0;border:1px solid var(--line);background:var(--bg3);cursor:pointer;transition:.12s}
 .angle-item:hover{border-color:var(--line2)}
 .angle-item.sel-1{border-color:#c8a04a;background:rgba(200,160,74,.12);color:var(--gold)}
 .angle-item.sel-2{border-color:#3a70c0;background:rgba(58,112,192,.12);color:var(--blue)}
@@ -218,16 +228,16 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 
 /* ── cut video cards ── */
 .cut-vid-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:16px}
-.cut-vid-card{background:var(--bg3);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.cut-vid-card{background:var(--bg3);border:1px solid var(--line);border-radius: 0;overflow:hidden}
 .cut-vid-header{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
-.cut-vid-thumb{width:48px;height:32px;object-fit:cover;border-radius:4px;border:1px solid var(--line)}
+.cut-vid-thumb{width:48px;height:32px;object-fit:cover;border-radius: 0;border:1px solid var(--line)}
 .cut-vid-title{font-size:12px;font-weight:700;color:var(--cream)}
 .cut-vid-body{padding:12px}
-.cut-vid-video{width:100%;border-radius:6px;display:block;margin-top:8px}
+.cut-vid-video{width:100%;border-radius: 0;display:block;margin-top:8px}
 .cut-vid-status{font-size:10px;color:var(--ink3);padding:6px 0}
 
 /* ── log ── */
-.log-wrap{background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:10px;font-family:'Menlo','Consolas',monospace;font-size:10px;height:140px;overflow-y:auto;margin-top:14px}
+.log-wrap{background:var(--bg2);border:1px solid var(--line);border-radius: 0;padding:10px;font-family:'Menlo','Consolas',monospace;font-size:10px;height:140px;overflow-y:auto;margin-top:14px}
 .log-line{padding:1px 0;line-height:1.5}
 .log-ok{color:var(--green)}
 .log-err{color:var(--red)}
@@ -239,20 +249,20 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 .spin{width:16px;height:16px;border:2px solid var(--line2);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
 
 /* ── toast ── */
-#toast{position:fixed;bottom:24px;right:24px;background:var(--bg4);border:1px solid var(--line2);border-radius:8px;padding:10px 16px;font-size:12px;color:var(--ink);z-index:999;opacity:0;transform:translateY(8px);transition:.3s;pointer-events:none}
+#toast{position:fixed;bottom:24px;right:24px;background:var(--bg4);border:1px solid var(--line2);border-radius: 0;padding:10px 16px;font-size:12px;color:var(--ink);z-index:999;opacity:0;transform:translateY(8px);transition:.3s;pointer-events:none}
 #toast.show{opacity:1;transform:translateY(0)}
 
 /* ── misc ── */
 .divider{height:1px;background:var(--line);margin:14px 0}
 .tag-row{display:flex;flex-wrap:wrap;gap:4px}
-.tag{font-size:10px;padding:2px 8px;border-radius:12px;background:var(--bg4);border:1px solid var(--line);color:var(--ink3)}
+.tag{font-size:10px;padding:2px 8px;border-radius: 0;background:var(--bg4);border:1px solid var(--line);color:var(--ink3)}
 input[type=checkbox]{accent-color:var(--gold);width:13px;height:13px}
 select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235c6172'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
 .section-head{font-size:11px;font-weight:700;color:var(--cream);margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.badge{font-size:9px;padding:2px 7px;border-radius:3px;font-weight:700}
+.badge{font-size:9px;padding:2px 7px;border-radius: 0;font-weight:700}
 .badge-gold{background:rgba(200,160,74,.15);border:1px solid rgba(200,160,74,.3);color:var(--gold)}
 .badge-green{background:rgba(62,150,96,.12);border:1px solid rgba(62,150,96,.3);color:var(--green)}
-.prompt-preview{background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:8px 10px;font-family:'Menlo',monospace;font-size:10px;color:var(--ink2);line-height:1.6;white-space:pre-wrap;word-break:break-all;max-height:80px;overflow-y:auto}
+.prompt-preview{background:var(--bg2);border:1px solid var(--line);border-radius: 0;padding:8px 10px;font-family:'Menlo',monospace;font-size:10px;color:var(--ink2);line-height:1.6;white-space:pre-wrap;word-break:break-all;max-height:80px;overflow-y:auto}
 
 
 /* === KorartiAuth CSS (extracted from b86d661) === */
@@ -263,7 +273,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   padding: 8px 18px;
   background: transparent;
   border: 1px solid var(--cream);
-  border-radius: 999px;
+  border-radius: 0;
   color: var(--cream);
   font-family: 'Pretendard Variable', Pretendard, sans-serif;
   font-size: 13px;
@@ -292,7 +302,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   padding: 4px 12px 4px 4px;
   background: var(--bg-3);
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: 0;
   color: var(--ink);
   font-family: 'Pretendard Variable', Pretendard, sans-serif;
   font-size: 13px;
@@ -344,7 +354,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   min-width: 240px;
   background: var(--bg-2);
   border: 1px solid var(--line-lit);
-  border-radius: 10px;
+  border-radius: 0;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
   padding: 6px;
   z-index: 200;
@@ -393,7 +403,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   font-family: 'Pretendard Variable', Pretendard, sans-serif;
   font-size: 13px;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 0;
   transition: background 0.12s ease;
 }
 
@@ -424,7 +434,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .auth-modal {
   background: var(--bg-2);
   border: 1px solid var(--line-lit);
-  border-radius: 14px;
+  border-radius: 0;
   width: 100%;
   max-width: 420px;
   padding: 36px 32px 32px;
@@ -516,7 +526,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   padding: 12px 14px;
   background: var(--bg-3);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 0;
   color: var(--ink);
   font-family: 'Pretendard Variable', Pretendard, sans-serif;
   font-size: 14px;
@@ -544,7 +554,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   background: var(--cream);
   color: var(--bg);
   border: none;
-  border-radius: 8px;
+  border-radius: 0;
   font-family: 'Pretendard Variable', Pretendard, sans-serif;
   font-size: 14px;
   font-weight: 600;
@@ -589,7 +599,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   background: var(--bg-3);
   color: var(--ink);
   border: 1px solid var(--line-lit);
-  border-radius: 8px;
+  border-radius: 0;
   font-family: 'Pretendard Variable', Pretendard, sans-serif;
   font-size: 14px;
   font-weight: 500;
@@ -641,7 +651,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   border: 1px solid rgba(230, 57, 70, 0.3);
   color: var(--accent);
   padding: 10px 12px;
-  border-radius: 6px;
+  border-radius: 0;
   font-size: 12px;
   margin-bottom: 14px;
   display: none;
@@ -654,7 +664,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   border: 1px solid rgba(124, 184, 124, 0.3);
   color: var(--success);
   padding: 10px 12px;
-  border-radius: 6px;
+  border-radius: 0;
   font-size: 12px;
   margin-bottom: 14px;
   display: none;
@@ -711,7 +721,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .auth-required-actions button {
   flex: 1;
   padding: 12px;
-  border-radius: 8px;
+  border-radius: 0;
   font-family: 'Pretendard Variable', Pretendard, sans-serif;
   font-size: 13px;
   font-weight: 500;
@@ -806,7 +816,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   border: 1px solid var(--line-lit);
   color: var(--ink-dim);
   padding: 3px 10px;
-  border-radius: 12px;
+  border-radius: 0;
   font-size: 11px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -826,7 +836,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   padding: 10px 12px;
   background: var(--bg-3);
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 0;
   color: var(--ink);
   font-family: 'Pretendard Variable', Pretendard, sans-serif;
   font-size: 14px;
@@ -847,7 +857,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .auth-account-cancel-btn,
 .auth-account-save-btn {
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: 0;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -893,7 +903,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   padding: 14px 16px;
   background: var(--bg-3);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 0;
   color: var(--ink);
   font-size: 14px;
   cursor: pointer;
@@ -923,7 +933,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .auth-warning-box {
   background: rgba(230, 57, 70, 0.06);
   border: 1px solid rgba(230, 57, 70, 0.25);
-  border-radius: 8px;
+  border-radius: 0;
   padding: 16px;
   margin-bottom: 8px;
   font-size: 13px;
@@ -957,7 +967,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   background: var(--accent);
   color: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: 0;
   font-family: 'Pretendard Variable', Pretendard, sans-serif;
   font-size: 14px;
   font-weight: 600;
@@ -992,7 +1002,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .auth-consent {
   background: var(--bg-3);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 0;
   padding: 12px 14px;
   margin: 18px 0 8px;
 }
@@ -1023,7 +1033,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .auth-consent-checkbox {
   width: 18px;
   height: 18px;
-  border-radius: 4px;
+  border-radius: 0;
   border: 1.5px solid var(--line-lit);
   background: var(--bg-2);
   display: flex;
@@ -1434,7 +1444,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     </div>
 
     <div style="display:flex;gap:10px;margin-top:20px;">
-      <button class="auth-required-cancel" style="flex:1;padding:13px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;" onclick="KorartiAuth.closeDeleteAccount()">
+      <button class="auth-required-cancel" style="flex:1;padding:13px;border-radius: 0;font-size:14px;font-weight:500;cursor:pointer;" onclick="KorartiAuth.closeDeleteAccount()">
         취소
       </button>
       <button class="auth-delete-confirm-btn" onclick="KorartiAuth.handleDeleteAccount()" id="authDeleteBtn">
@@ -1547,7 +1557,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <span class="brand-sub">— Studio</span>
   </div>
   <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
-    <input type="password" id="falKey" placeholder="fal.ai API key" style="background:var(--bg3);border:1px solid var(--line);border-radius:8px;padding:7px 12px;color:var(--ink);font-size:12px;width:240px;font-family:inherit">
+    <input type="password" id="falKey" placeholder="fal.ai API key" style="background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:7px 12px;color:var(--ink);font-size:12px;width:240px;font-family:inherit">
     <div id="authNavSlot"><!-- KorartiAuth가 렌더링 --></div>
   </div>
   <!-- cost-badge 숨김: 내부 함수(updateCost 등)가 참조하는 ID 때문에 hidden 원소만 유지 -->
@@ -1623,7 +1633,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     </div>
 
     <!-- 저장된 아바타 -->
-    <div style="background:var(--bg3);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px">
+    <div style="background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:14px;margin-bottom:14px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px;flex-wrap:wrap">
         <div class="section-head" style="margin:0">📂 아바타 리스트</div>
         <div style="display:flex;gap:6px;align-items:center">
@@ -1665,7 +1675,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
           <div style="display:flex;align-items:center;gap:8px"><button class="btn btn-sm" onclick="openMyCustomSceneModal()" title="나만의 씬 분위기 만들기" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">+ 나만의 씬 분위기 만들기</button>
           <button class="btn btn-sm btn-ghost" onclick="openScenePicker()" title="클라우드에 저장한 나만의 씬 분위기 불러오기">클라우드 불러오기</button></div>
         </div>
-        <div class="scene-grid" id="sceneGrid" style="grid-template-columns:repeat(4,1fr);gap:12px"></div>
+        <div class="scene-grid" id="sceneGrid" style="grid-template-columns:repeat(3,1fr);gap:14px"></div>
       </div>
     </div>
 
@@ -1688,7 +1698,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <label style="margin:0;font-size:13px;font-weight:700">등장 아바타 선택하기</label>
         <button class="btn btn-sm btn-ghost" onclick="tryGoStep(1)">+ 아바타 추가</button>
       </div>
-      <div id="step1AvatarChips" style="display:flex;flex-wrap:wrap;gap:10px;padding:12px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;min-height:50px"></div>
+      <div id="step1AvatarChips" style="display:flex;flex-wrap:wrap;gap:10px;padding:12px;background:var(--bg2);border:1px solid var(--line);border-radius: 0;min-height:50px"></div>
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
@@ -1758,11 +1768,11 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
           <div style="font-size:10px;color:var(--ink3);margin-bottom:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase">이동 수단</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
             <div class="seg vehicle-seg" id="vehicle-boat" onclick="selVehicle('boat')">배</div>
-            <label style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--ink2);cursor:pointer;padding:4px 8px;border-radius:4px;background:var(--bg2);border:1px solid var(--line);user-select:none">
+            <label style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--ink2);cursor:pointer;padding:4px 8px;border-radius: 0;background:var(--bg2);border:1px solid var(--line);user-select:none">
               <input type="checkbox" id="boatLux" onchange="updateVehicleSel('boat')" style="margin:0">고급
             </label>
             <div class="seg vehicle-seg" id="vehicle-car" onclick="selVehicle('car')">자동차</div>
-            <label style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--ink2);cursor:pointer;padding:4px 8px;border-radius:4px;background:var(--bg2);border:1px solid var(--line);user-select:none">
+            <label style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--ink2);cursor:pointer;padding:4px 8px;border-radius: 0;background:var(--bg2);border:1px solid var(--line);user-select:none">
               <input type="checkbox" id="carLux" onchange="updateVehicleSel('car')" style="margin:0">고급
             </label>
             <div class="seg vehicle-seg" id="vehicle-subway" onclick="selVehicle('subway')">지하철</div>
@@ -1771,7 +1781,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
           </div>
         </div>
 
-        <input id="locCustomInput" placeholder="수식어 또는 단독 장소 입력: 예) 고급진 / 낡은 / 어두운 (또는 단독으로: rooftop at night)" style="display:none;margin-top:6px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:4px;padding:6px 8px;color:var(--ink);font-size:12px">
+        <input id="locCustomInput" placeholder="수식어 또는 단독 장소 입력: 예) 고급진 / 낡은 / 어두운 (또는 단독으로: rooftop at night)" style="display:none;margin-top:6px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:6px 8px;color:var(--ink);font-size:12px">
       </div>
 
       <!-- 행인 포함 -->
@@ -1798,7 +1808,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         </div>
         <div style="font-size:10px;color:var(--ink3);margin-bottom:6px;line-height:1.5">이전에 만든 컷이나 그리드 이미지를 첨부하면 배경·마감·조명 통일성을 유지하며 이어서 생성합니다.</div>
         <div style="display:flex;gap:6px;align-items:flex-start">
-          <div id="continueRefPreview" style="width:120px;aspect-ratio:16/9;background:var(--bg3);border:1px dashed var(--line2);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:24px;flex-shrink:0;overflow:hidden"></div>
+          <div id="continueRefPreview" style="width:120px;aspect-ratio:16/9;background:var(--bg3);border:1px dashed var(--line2);border-radius: 0;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:24px;flex-shrink:0;overflow:hidden"></div>
           <div style="flex:1;display:flex;flex-direction:column;gap:6px;align-items:flex-start">
             <button class="btn btn-sm" onclick="document.getElementById('continueRefUpload').click()" style="width:auto;padding:6px 14px;white-space:nowrap">파일 업로드</button>
             <div style="font-size:9px;color:var(--ink3);line-height:1.4">이전에 다운로드한 <strong>4컷 그리드</strong> 또는 <strong>단일 컷</strong> 이미지를 올려주세요.</div>
@@ -1824,7 +1834,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 
       <!-- 앵글 선택 팝업 모달 -->
       <div id="anglePickerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto" onclick="if(event.target===this)closeAnglePickerModal()">
-        <div style="background:var(--bg2);border:1px solid var(--line2);border-radius:14px;width:100%;max-width:620px;padding:22px;margin:auto">
+        <div style="background:var(--bg2);border:1px solid var(--line2);border-radius: 0;width:100%;max-width:620px;padding:22px;margin:auto">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
             <div>
               <div id="anglePickerCutLabel" style="font-size:11px;color:var(--pink);letter-spacing:2px;font-weight:700;text-transform:uppercase">CUT 1</div>
@@ -1946,7 +1956,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 <!-- 아바타 추가/수정 모달 -->
 <div id="avModalBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:90"></div>
 <div id="avModal" style="display:none;position:fixed;inset:0;z-index:91;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto">
-  <div style="background:var(--bg2);border:1px solid var(--line2);border-radius:14px;width:100%;max-width:560px;padding:28px;position:relative;margin:auto">
+  <div style="background:var(--bg2);border:1px solid var(--line2);border-radius: 0;width:100%;max-width:560px;padding:28px;position:relative;margin:auto">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
       <div>
         <div style="font-size:11px;color:var(--pink);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:4px" id="avModalCat">NEW AVATAR</div>
@@ -2037,7 +2047,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <div class="field">
       <label>헤어스타일</label>
       <div class="segs" id="avHairSegs"></div>
-      <input id="avHairCustom" placeholder="개인설정: 직접 입력 (예: 양 갈래, 단발 + 앞머리) — 입력 즉시 적용됨" oninput="useCustomHairAuto()" style="width:100%;margin-top:6px;background:var(--bg3);border:1px solid var(--line);border-radius:5px;padding:6px 10px;color:var(--ink);font-size:11px">
+      <input id="avHairCustom" placeholder="개인설정: 직접 입력 (예: 양 갈래, 단발 + 앞머리) — 입력 즉시 적용됨" oninput="useCustomHairAuto()" style="width:100%;margin-top:6px;background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:6px 10px;color:var(--ink);font-size:11px">
       <input type="hidden" id="avHair" value="">
       <div id="avHairSelected" style="font-size:10px;color:var(--ink3);margin-top:4px"></div>
     </div>
@@ -2052,14 +2062,14 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <div class="seg" data-extra="monolid eyes, no double eyelid" onclick="toggleExtraTag(this)">👁️ 쌍커풀 없음</div>
       </div>
       <div style="display:flex;gap:6px;align-items:center;margin-top:6px">
-        <input id="avExtraCustom" placeholder="개인설정: 직접 입력 (예: 턱수염, 점)" style="flex:1;background:var(--bg3);border:1px solid var(--line);border-radius:5px;padding:6px 10px;color:var(--ink);font-size:11px">
+        <input id="avExtraCustom" placeholder="개인설정: 직접 입력 (예: 턱수염, 점)" style="flex:1;background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:6px 10px;color:var(--ink);font-size:11px">
       </div>
       <input type="hidden" id="avExtra" value="">
     </div>
 
     <!-- 아바타 이미지 -->
     <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;padding:12px;background:var(--bg);border:1px solid var(--line);border-radius:8px">
-      <div id="avImgPreview" style="width:180px;height:120px;background:var(--bg4);border:1px dashed var(--line2);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:32px;flex-shrink:0;overflow:hidden">👤</div>
+      <div id="avImgPreview" style="width:180px;height:120px;background:var(--bg4);border:1px dashed var(--line2);border-radius: 0;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:32px;flex-shrink:0;overflow:hidden">👤</div>
       <div style="flex:1">
         <div style="font-size:11px;color:var(--ink2);margin-bottom:6px;font-weight:600">📸 아바타 얼굴</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
@@ -2084,7 +2094,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 
 <!-- confirm modal -->
 <div id="confirmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;flex-direction:column">
-  <div style="background:var(--bg3);border:1px solid var(--line2);border-radius:12px;padding:24px;max-width:380px;width:90%">
+  <div style="background:var(--bg3);border:1px solid var(--line2);border-radius: 0;padding:24px;max-width:380px;width:90%">
     <div id="confirmTitle" style="font-size:14px;font-weight:800;color:var(--cream);margin-bottom:12px"></div>
     <div id="confirmBody" style="font-size:12px;color:var(--ink2);line-height:1.8;margin-bottom:18px"></div>
     <div style="display:flex;gap:8px">
@@ -3216,10 +3226,10 @@ function renderStep1Avatars() {
       }
     }
     return `
-      <div style="background:${isCast?'rgba(200,160,74,.12)':'var(--bg2)'};border:2px solid ${isCast?'var(--gold)':'var(--line)'};border-radius:8px;overflow:hidden;transition:.15s;position:relative">
+      <div style="background:${isCast?'rgba(200,160,74,.12)':'var(--bg2)'};border:2px solid ${isCast?'var(--gold)':'var(--line)'};border-radius: 0;overflow:hidden;transition:.15s;position:relative">
         ${isCast ? `<div style="position:absolute;top:5px;right:5px;display:flex;gap:4px;z-index:3">
-            <button onclick="event.stopPropagation();uncastAvatar(${av.id})" title="출연 해제" style="background:rgba(0,0,0,.65);border:1px solid var(--line2);color:#fff;font-size:11px;font-weight:700;width:20px;height:20px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1">×</button>
-            <div style="background:var(--gold);color:#000;font-size:9px;font-weight:800;padding:2px 6px;border-radius:3px;display:flex;align-items:center">${cutBadge}</div>
+            <button onclick="event.stopPropagation();uncastAvatar(${av.id})" title="출연 해제" style="background:rgba(0,0,0,.65);border:1px solid var(--line2);color:#fff;font-size:11px;font-weight:700;width:20px;height:20px;border-radius: 0;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1">×</button>
+            <div style="background:var(--gold);color:#000;font-size:9px;font-weight:800;padding:2px 6px;border-radius: 0;display:flex;align-items:center">${cutBadge}</div>
           </div>` : ''}
         <div onclick="openAvatarCutPicker(${av.id})" style="cursor:pointer">
           ${av.imgUrl
@@ -3237,16 +3247,16 @@ function renderStep1Avatars() {
               ${outfitOptions.map(o => `
                 <div onclick="setAvatarOutfit(${av.id}, '${o.en.replace(/'/g, "\\'")}', this)"
                      class="outfit-seg ${outfit === o.en ? 'active' : ''}"
-                     style="font-size:9px;padding:3px 6px;border-radius:3px;cursor:pointer;background:${outfit === o.en ? 'var(--gold)' : 'var(--bg3)'};color:${outfit === o.en ? '#000' : 'var(--ink2)'};border:1px solid ${outfit === o.en ? 'var(--gold)' : 'var(--line)'};font-weight:${outfit === o.en ? '700' : '500'}">${o.ko}</div>
+                     style="font-size:9px;padding:3px 6px;border-radius: 0;cursor:pointer;background:${outfit === o.en ? 'var(--gold)' : 'var(--bg3)'};color:${outfit === o.en ? '#000' : 'var(--ink2)'};border:1px solid ${outfit === o.en ? 'var(--gold)' : 'var(--line)'};font-weight:${outfit === o.en ? '700' : '500'}">${o.ko}</div>
               `).join('')}
               <div onclick="toggleAvatarOutfitCustom(${av.id})"
                    class="outfit-seg ${isCustomOutfit ? 'active' : ''}"
-                   style="font-size:9px;padding:3px 6px;border-radius:3px;cursor:pointer;background:${isCustomOutfit ? 'var(--pink)' : 'var(--bg3)'};color:${isCustomOutfit ? '#fff' : 'var(--ink2)'};border:1px solid ${isCustomOutfit ? 'var(--pink)' : 'var(--line)'};font-weight:${isCustomOutfit ? '700' : '500'}">개인설정</div>
+                   style="font-size:9px;padding:3px 6px;border-radius: 0;cursor:pointer;background:${isCustomOutfit ? 'var(--pink)' : 'var(--bg3)'};color:${isCustomOutfit ? '#fff' : 'var(--ink2)'};border:1px solid ${isCustomOutfit ? 'var(--pink)' : 'var(--line)'};font-weight:${isCustomOutfit ? '700' : '500'}">개인설정</div>
             </div>
             <input id="outfitCustom-${av.id}" placeholder="직접 입력 (예: red dress)"
                    value="${isCustomOutfit ? escHtml(outfit) : ''}"
                    oninput="updateAvatarOutfitCustom(${av.id}, this.value)"
-                   style="display:${isCustomOutfit ? 'block' : 'none'};margin-top:5px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:4px;padding:4px 6px;color:var(--ink);font-size:10px;box-sizing:border-box">
+                   style="display:${isCustomOutfit ? 'block' : 'none'};margin-top:5px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:4px 6px;color:var(--ink);font-size:10px;box-sizing:border-box">
           </div>
         ` : ''}
       </div>
@@ -3349,7 +3359,7 @@ function renderAvatarCutPickerGrid() {
     const on = _avatarCutPickerSelection.includes(i);
     html += `
       <div onclick="toggleAvatarCutPick(${i})"
-           style="cursor:pointer;padding:14px 8px;border-radius:8px;border:2px solid ${on ? 'var(--gold)' : 'var(--line)'};background:${on ? 'rgba(200,160,74,.14)' : 'var(--bg3)'};text-align:center;transition:.15s;user-select:none">
+           style="cursor:pointer;padding:14px 8px;border-radius: 0;border:2px solid ${on ? 'var(--gold)' : 'var(--line)'};background:${on ? 'rgba(200,160,74,.14)' : 'var(--bg3)'};text-align:center;transition:.15s;user-select:none">
         <div style="font-size:18px;font-weight:800;color:${on ? 'var(--gold)' : 'var(--ink2)'}">${on ? '☑' : '☐'} 컷${i+1}</div>
       </div>
     `;
@@ -3615,7 +3625,7 @@ function renderAvatars() {
   grid.innerHTML = S.avatars.map(av => `
     <div class="av-card">
       <div class="av-card-del" onclick="deleteAvatar(${av.id})">✕</div>
-      ${av.imgUrl ? `<img src="${av.imgUrl}" style="width:100%;height:120px;object-fit:cover;border-radius:6px;margin-bottom:8px">` : ''}
+      ${av.imgUrl ? `<img src="${av.imgUrl}" style="width:100%;height:120px;object-fit:cover;border-radius: 0;margin-bottom:8px">` : ''}
       <div class="av-name">${escHtml(av.name)}</div>
       <div class="av-tags">
         <div class="av-tag">${av.gender === 'Korean man' ? '남성' : '여성'}</div>
@@ -4081,7 +4091,7 @@ function renderSavedAvatars() {
 
   // + 아바타 추가 카드
   const addCard = `
-    <div onclick="openAvatarModal()" style="background:var(--bg2);border:2px dashed var(--line2);border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;aspect-ratio:1;transition:.15s;color:var(--ink3)"
+    <div onclick="openAvatarModal()" style="background:var(--bg2);border:2px dashed var(--line2);border-radius: 0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;aspect-ratio:1;transition:.15s;color:var(--ink3)"
          onmouseover="this.style.borderColor='var(--pink)';this.style.color='var(--pink)';this.style.background='rgba(255,107,157,.04)'"
          onmouseout="this.style.borderColor='var(--line2)';this.style.color='var(--ink3)';this.style.background='var(--bg2)'">
       <div style="font-size:36px;line-height:1;margin-bottom:8px;font-weight:300">+</div>
@@ -4123,7 +4133,7 @@ function renderSavedAvatars() {
     if (av.hair) tags.push(av.hair.split(',')[0]);
     if (av.extra) tags.push(av.extra.split(',')[0]);
     return `
-      <div onclick="editAvatarInLib(${av.id})" style="background:var(--bg2);border:1px solid var(--line);border-radius:8px;overflow:hidden;cursor:pointer;transition:.15s;position:relative" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--line)'">
+      <div onclick="editAvatarInLib(${av.id})" style="background:var(--bg2);border:1px solid var(--line);border-radius: 0;overflow:hidden;cursor:pointer;transition:.15s;position:relative" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--line)'">
         <div onclick="event.stopPropagation();deleteAvatarFromLib(${av.id})" style="position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:var(--red);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2" title="삭제">✕</div>
         ${av.imgUrl
           ? `<img src="${av.imgUrl}" style="width:100%;aspect-ratio:1;object-fit:cover;object-position:left top;display:block;background:#f0f0f0">`
@@ -4131,7 +4141,7 @@ function renderSavedAvatars() {
         <div style="padding:8px 10px">
           <div style="font-size:12px;font-weight:700;color:var(--cream);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(av.name)}</div>
           <div style="display:flex;flex-wrap:wrap;gap:3px">
-            ${tags.slice(0,5).map(t => `<span style="font-size:9px;padding:1px 6px;border-radius:3px;background:var(--bg4);color:var(--ink2)">${escHtml(t)}</span>`).join('')}
+            ${tags.slice(0,5).map(t => `<span style="font-size:9px;padding:1px 6px;border-radius: 0;background:var(--bg4);color:var(--ink2)">${escHtml(t)}</span>`).join('')}
           </div>
         </div>
       </div>
@@ -4166,20 +4176,20 @@ function renderEraChips() {
       const activeKo = isActive ? (ERAS[S.era] && ERAS[S.era].ko) || g.ko : g.ko;
 
       html += `<div style="position:relative;display:inline-block">
-        <button onclick="toggleEraDropdown('${groupKey}', event)" style="padding:10px 14px;background:${bg};color:${color};border:1.5px solid ${border};border-radius:8px;cursor:pointer;font-size:13px;font-weight:${isActive?'800':'600'};display:inline-flex;align-items:center;gap:8px;transition:all .15s">
+        <button onclick="toggleEraDropdown('${groupKey}', event)" style="padding:10px 14px;background:${bg};color:${color};border:1.5px solid ${border};border-radius: 0;cursor:pointer;font-size:13px;font-weight:${isActive?'800':'600'};display:inline-flex;align-items:center;gap:8px;transition:all .15s">
           <span>${activeKo}</span>
           <span style="font-size:10px;opacity:.7">▼</span>
         </button>
-        <div id="eraDropdown_${groupKey}" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:var(--bg3);border:1px solid var(--line2);border-radius:8px;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:100;min-width:160px">
+        <div id="eraDropdown_${groupKey}" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:var(--bg3);border:1px solid var(--line2);border-radius: 0;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:100;min-width:160px">
           ${subOptions.map(([subKey, e]) => {
             const isSubActive = S.era === subKey;
-            return `<button onclick="selectEra('${subKey}')" style="display:block;width:100%;text-align:left;padding:8px 12px;background:${isSubActive ? 'rgba(255,107,157,.15)' : 'transparent'};border:none;border-radius:5px;color:${isSubActive ? 'var(--pink)' : 'var(--ink)'};cursor:pointer;font-size:12px;font-weight:${isSubActive ? '700' : '500'}">${e.ko}</button>`;
+            return `<button onclick="selectEra('${subKey}')" style="display:block;width:100%;text-align:left;padding:8px 12px;background:${isSubActive ? 'rgba(255,107,157,.15)' : 'transparent'};border:none;border-radius: 0;color:${isSubActive ? 'var(--pink)' : 'var(--ink)'};cursor:pointer;font-size:12px;font-weight:${isSubActive ? '700' : '500'}">${e.ko}</button>`;
           }).join('')}
         </div>
       </div>`;
     } else {
       // 단순 칩 (현대극)
-      html += `<button onclick="selectEra('${g.defaultKey}')" style="padding:10px 16px;background:${bg};color:${color};border:1.5px solid ${border};border-radius:8px;cursor:pointer;font-size:13px;font-weight:${isActive?'800':'600'};display:inline-flex;align-items:center;gap:8px;transition:all .15s"><span>${g.ko}</span></button>`;
+      html += `<button onclick="selectEra('${g.defaultKey}')" style="padding:10px 16px;background:${bg};color:${color};border:1.5px solid ${border};border-radius: 0;cursor:pointer;font-size:13px;font-weight:${isActive?'800':'600'};display:inline-flex;align-items:center;gap:8px;transition:all .15s"><span>${g.ko}</span></button>`;
     }
   });
 
@@ -4247,18 +4257,27 @@ function renderScenes() {
     {key:'interview',  name:'인터뷰'},
     {key:'mv',         name:'뮤직비디오'},
   ];
+  // 카테고리 영문 라벨 (스크린샷 스타일)
+  const SCENE_CAT = {
+    romance:'ROMANCE', tension:'TENSION', breakup:'BREAKUP', climax:'EMOTION',
+    suspense:'SUSPENSE', mellow:'MELODRAMA', action:'ACTION', slice:'DAILY',
+    commercial:'COMMERCIAL', vlog:'VLOG', flashback:'FLASHBACK', confession:'CONFESSION',
+    horror:'HORROR', foodie:'FOODIE', travel:'TRAVEL', fitness:'FITNESS',
+    dance:'DANCE', interview:'INTERVIEW', mv:'MUSIC VIDEO',
+  };
   const customs = loadSceneLib();
-  let html = defaults.map(s => `
-    <div class="scene-card${S.scene===s.key?' active':''}" onclick="selScene('${s.key}',this)">
-      <div class="scene-name" style="font-size:13px;font-weight:700;padding:14px 8px;text-align:center">${s.name}</div>
-    </div>
-  `).join('');
-  html += customs.map(s => `
-    <div class="scene-card${S.scene===('custom_'+s.id)?' active':''}" style="position:relative" onclick="selScene('custom_${s.id}',this)">
-      <div onclick="event.stopPropagation();deleteSceneFromLib(${s.id})" style="position:absolute;top:4px;right:4px;width:16px;height:16px;border-radius:50%;background:rgba(192,48,64,.2);border:1px solid var(--red);color:var(--red);font-size:9px;display:flex;align-items:center;justify-content:center;cursor:pointer">✕</div>
-      <div class="scene-name" style="font-size:13px;font-weight:700;padding:14px 8px;text-align:center">${escHtml(s.name)}</div>
-    </div>
-  `).join('');
+  let html = defaults.map(s => {
+    const sc = SCENES[s.key] || {};
+    const vidStyle = sc.vidStyle || '';
+    const cam = (sc.angles || []).slice(0,3).join(' \u00b7 ');
+    const cat = SCENE_CAT[s.key] || s.key.toUpperCase();
+    return `<div class="scene-card${S.scene===s.key?' active':''}" onclick="selScene('${s.key}',this)"><div class="sc-cat">${cat}</div><div class="sc-title-block"><div class="sc-name">${s.name}</div>${vidStyle ? `<div class="sc-vidstyle">${vidStyle}</div>` : ''}</div>${cam ? `<div class="sc-cam">${cam}</div>` : ''}</div>`;
+  }).join('');
+  html += customs.map(s => {
+    const vidStyle = s.style ? s.style.split(',').slice(0,3).join(',').trim() : '';
+    const cam = (s.angles || []).slice(0,3).join(' \u00b7 ');
+    return `<div class="scene-card${S.scene===('custom_'+s.id)?' active':''}" onclick="selScene('custom_${s.id}',this)"><div onclick="event.stopPropagation();deleteSceneFromLib(${s.id})" style="position:absolute;top:6px;right:6px;width:20px;height:20px;background:rgba(0,0,0,.55);border:1px solid var(--line2);color:var(--ink2);font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3">✕</div><div class="sc-cat">CUSTOM</div><div class="sc-title-block"><div class="sc-name">${escHtml(s.name)}</div>${vidStyle ? `<div class="sc-vidstyle">${escHtml(vidStyle)}</div>` : ''}</div>${cam ? `<div class="sc-cam">${cam}</div>` : ''}</div>`;
+  }).join('');
   grid.innerHTML = html;
 }
 
@@ -4559,12 +4578,12 @@ function pickModel(kind) {
       <div style="font-size:11px;color:var(--ink3);margin-bottom:12px">생성에 사용할 모델을 선택하세요</div>
       <div style="display:flex;flex-direction:column;gap:8px;max-height:380px;overflow-y:auto">
         ${list.map((m, i) => `
-          <div onclick="_pickModelChoice(${i})" style="cursor:pointer;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);transition:.15s;display:flex;align-items:center;gap:10px"
+          <div onclick="_pickModelChoice(${i})" style="cursor:pointer;padding:12px 14px;border-radius: 0;border:1px solid var(--line);background:var(--bg2);transition:.15s;display:flex;align-items:center;gap:10px"
                onmouseover="this.style.borderColor='var(--pink)';this.style.background='rgba(255,107,157,.05)'"
                onmouseout="this.style.borderColor='var(--line)';this.style.background='var(--bg2)'">
             <div style="flex:1">
               <div style="font-size:13px;font-weight:700;color:var(--cream);margin-bottom:2px">
-                ${m.label}${m.recommended ? ' <span style="font-size:9px;background:linear-gradient(135deg,#818cf8 0%,#c084fc 50%,#f472b6 100%);color:#fff;padding:2px 7px;border-radius:10px;margin-left:4px;font-weight:800">추천</span>' : ''}
+                ${m.label}${m.recommended ? ' <span style="font-size:9px;background:linear-gradient(135deg,#818cf8 0%,#c084fc 50%,#f472b6 100%);color:#fff;padding:2px 7px;border-radius: 0;margin-left:4px;font-weight:800">추천</span>' : ''}
               </div>
               <div style="font-size:11px;color:var(--ink3)">${m.sub}</div>
             </div>
@@ -4621,7 +4640,7 @@ function showAngleInfo(label) {
   const bodyEl = document.getElementById('confirmBody');
   titleEl.textContent = label;
   bodyEl.innerHTML = `
-    ${imgSrc ? `<img src="${imgSrc}" style="width:100%;border-radius:6px;margin-bottom:12px;background:#fff">` : ''}
+    ${imgSrc ? `<img src="${imgSrc}" style="width:100%;border-radius: 0;margin-bottom:12px;background:#fff">` : ''}
     <div style="margin-bottom:10px">
       <div style="font-size:10px;color:var(--ink3);font-weight:700;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">설명</div>
       <div style="font-size:13px;color:var(--cream);line-height:1.6">${escHtml(desc.ko)}</div>
@@ -4687,7 +4706,7 @@ function initAnglePicker() {
         const desc = ANGLE_DESCRIPTIONS[item.label];
         const tipText = desc ? `${desc.ko}\n\n[언제 쓰면 좋은지]\n${desc.use}` : item.tip;
         return `
-        <div class="angle-card" data-angle="${escHtml(item.label)}" onclick="toggleAngle('${escHtml(item.label).replace(/'/g, "\\'")}', this)" style="position:relative;background:var(--bg3);border:2px solid var(--line);border-radius:6px;overflow:hidden;cursor:pointer;transition:.15s">
+        <div class="angle-card" data-angle="${escHtml(item.label)}" onclick="toggleAngle('${escHtml(item.label).replace(/'/g, "\\'")}', this)" style="position:relative;background:var(--bg3);border:2px solid var(--line);border-radius: 0;overflow:hidden;cursor:pointer;transition:.15s">
           <div class="angle-num-badge" style="display:none;position:absolute;top:4px;left:4px;width:18px;height:18px;border-radius:50%;color:#000;font-size:10px;font-weight:800;align-items:center;justify-content:center;z-index:3"></div>
           <div onclick="event.stopPropagation();showAngleInfo('${escHtml(item.label).replace(/'/g, "\\'")}')" style="position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.65);color:var(--cream);font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:3" title="설명 보기">?</div>
           ${imgSrc ? `<img src="${imgSrc}" style="width:100%;aspect-ratio:1.4/1;object-fit:cover;display:block;background:#fff">` : `<div style="width:100%;aspect-ratio:1.4/1;background:var(--bg4)"></div>`}
@@ -4752,7 +4771,7 @@ function renderAngleSlots() {
     html += `
       <div style="display:flex;gap:8px;align-items:stretch">
         <!-- 앵글 카드 (클릭 시 모달) -->
-        <div onclick="openAnglePickerModal(${i})" style="flex:0 0 140px;cursor:pointer;padding:10px 8px;border-radius:6px;border:1.5px solid ${angle ? color : 'var(--line)'};background:${angle ? `rgba(${i===0?'255,184,77':i===1?'96,165,250':i===2?'74,222,128':'255,85,119'},0.08)` : 'var(--bg3)'};text-align:center;transition:.15s;display:flex;flex-direction:column;justify-content:center" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'" title="클릭하여 앵글 선택">
+        <div onclick="openAnglePickerModal(${i})" style="flex:0 0 140px;cursor:pointer;padding:10px 8px;border-radius: 0;border:1.5px solid ${angle ? color : 'var(--line)'};background:${angle ? `rgba(${i===0?'255,184,77':i===1?'96,165,250':i===2?'74,222,128':'255,85,119'},0.08)` : 'var(--bg3)'};text-align:center;transition:.15s;display:flex;flex-direction:column;justify-content:center" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'" title="클릭하여 앵글 선택">
           <div style="font-size:11px;font-weight:800;color:${color};letter-spacing:1px">CUT ${i+1}</div>
           ${angle ? `
             <div style="font-size:10px;font-weight:700;color:var(--cream);margin-top:4px;line-height:1.2">${escHtml(angle)}</div>
@@ -4766,7 +4785,7 @@ function renderAngleSlots() {
           id="cutDesc${i}"
           oninput="updateCutDescription(${i}, this.value)"
           placeholder="컷 ${i+1} 설명 입력 (원하는 콘티・명장・감정 등) — 선택"
-          style="flex:1;min-height:64px;background:var(--bg3);border:1px solid var(--line);border-radius:6px;padding:8px 10px;color:var(--ink);font-size:11px;font-family:inherit;line-height:1.5;resize:vertical"
+          style="flex:1;min-height:64px;background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:8px 10px;color:var(--ink);font-size:11px;font-family:inherit;line-height:1.5;resize:vertical"
         >${escHtml(desc)}</textarea>
       </div>
     `;
@@ -4819,7 +4838,7 @@ function openAnglePickerModal(cutIdx) {
         const safeAngle = angle.replace(/'/g, "\\'").replace(/"/g, '&quot;');
         html += `
           <div onclick="selectAngleForCut('${safeAngle}')"
-               style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-radius:6px;border:1px solid ${isSelected ? colors[cutIdx] : 'var(--line)'};background:${isSelected ? `rgba(${rgbs[cutIdx]},0.1)` : 'var(--bg3)'};margin-bottom:5px;cursor:pointer;transition:.12s"
+               style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-radius: 0;border:1px solid ${isSelected ? colors[cutIdx] : 'var(--line)'};background:${isSelected ? `rgba(${rgbs[cutIdx]},0.1)` : 'var(--bg3)'};margin-bottom:5px;cursor:pointer;transition:.12s"
                onmouseover="this.style.background='var(--bg4)'"
                onmouseout="this.style.background='${isSelected ? `rgba(${rgbs[cutIdx]},0.1)` : 'var(--bg3)'}'">
             <div style="flex:1;min-width:0">
@@ -4840,7 +4859,7 @@ function openAnglePickerModal(cutIdx) {
       const isSelected = S.angles[cutIdx] === angle;
       const safeAngle = angle.replace(/'/g, "\\'").replace(/"/g, '&quot;');
       html += `
-        <div onclick="selectAngleForCut('${safeAngle}')" style="padding:8px 12px;border-radius:6px;border:1px solid ${isSelected ? colors[cutIdx] : 'var(--line)'};background:${isSelected ? `rgba(${rgbs[cutIdx]},0.1)` : 'var(--bg3)'};margin-bottom:5px;cursor:pointer">
+        <div onclick="selectAngleForCut('${safeAngle}')" style="padding:8px 12px;border-radius: 0;border:1px solid ${isSelected ? colors[cutIdx] : 'var(--line)'};background:${isSelected ? `rgba(${rgbs[cutIdx]},0.1)` : 'var(--bg3)'};margin-bottom:5px;cursor:pointer">
           <div style="font-size:12px;font-weight:700;color:var(--cream)">${escHtml(angle)}</div>
           <div style="font-size:10px;color:var(--ink2);margin-top:2px">${escHtml(meta.ko)}</div>
           <div style="font-size:9px;color:var(--ink3);margin-top:2px;font-style:italic">${escHtml(meta.use)}</div>
@@ -5097,8 +5116,8 @@ function renderQuad() {
       ${url ? `<img src="${url}">` : '<div style="background:#111;width:100%;height:100%"></div>'}
       <div class="q-badge" style="background:rgba(0,0,0,.75);border:1px solid ${colors[i]}40;color:${colors[i]}">${S.angles[i] || '컷'+(i+1)}</div>
       <div class="q-num" style="background:${colors[i]}cc">컷${i+1}</div>
-      ${url ? `<div onclick="downloadImage(S.cutDataUrls[${i}], 'korart_cut${i+1}_${Date.now()}.jpg')" style="position:absolute;bottom:6px;right:6px;font-size:11px;padding:4px 8px;border-radius:4px;background:rgba(0,0,0,.7);color:#fff;cursor:pointer;border:1px solid rgba(255,255,255,.2)" title="이 컷 저장">💾</div>` : ''}
-      ${!S.cutApproval[i] ? '<div style="position:absolute;top:6px;right:6px;font-size:9px;padding:2px 6px;border-radius:3px;background:rgba(192,48,64,.8);color:#fff">제외</div>' : ''}
+      ${url ? `<div onclick="downloadImage(S.cutDataUrls[${i}], 'korart_cut${i+1}_${Date.now()}.jpg')" style="position:absolute;bottom:6px;right:6px;font-size:11px;padding:4px 8px;border-radius: 0;background:rgba(0,0,0,.7);color:#fff;cursor:pointer;border:1px solid rgba(255,255,255,.2)" title="이 컷 저장">💾</div>` : ''}
+      ${!S.cutApproval[i] ? '<div style="position:absolute;top:6px;right:6px;font-size:9px;padding:2px 6px;border-radius: 0;background:rgba(192,48,64,.8);color:#fff">제외</div>' : ''}
     </div>
   `).join('');
 }
@@ -5107,16 +5126,16 @@ function renderCutControls() {
   const grid = document.getElementById('cutCtrlGrid');
   const colors = ['#c8a04a','#3a70c0','#3e9660','#c03040'];
   grid.innerHTML = S.cutDataUrls.map((url, i) => `
-    <div style="background:var(--bg2);border:1px solid ${S.cutApproval[i] ? colors[i]+'60' : 'var(--line)'};border-radius:8px;padding:10px">
+    <div style="background:var(--bg2);border:1px solid ${S.cutApproval[i] ? colors[i]+'60' : 'var(--line)'};border-radius: 0;padding:10px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        ${url ? `<img src="${url}" style="width:48px;height:32px;object-fit:cover;border-radius:4px;border:1px solid var(--line)">` : ''}
+        ${url ? `<img src="${url}" style="width:48px;height:32px;object-fit:cover;border-radius: 0;border:1px solid var(--line)">` : ''}
         <div>
           <div style="font-size:11px;font-weight:700;color:${colors[i]}">컷${i+1}</div>
           <div style="font-size:9px;color:var(--ink3)">${S.angles[i]||''}</div>
         </div>
         <div style="margin-left:auto;display:flex;gap:4px">
-          <div onclick="setCutApproval(${i},true)" style="cursor:pointer;padding:3px 8px;border-radius:3px;font-size:10px;font-weight:700;border:1px solid ${S.cutApproval[i]?'var(--green)':'var(--line)'};background:${S.cutApproval[i]?'rgba(62,150,96,.15)':'var(--bg3)'};color:${S.cutApproval[i]?'var(--green)':'var(--ink3)'}">✓</div>
-          <div onclick="setCutApproval(${i},false)" style="cursor:pointer;padding:3px 8px;border-radius:3px;font-size:10px;font-weight:700;border:1px solid ${!S.cutApproval[i]?'var(--red)':'var(--line)'};background:${!S.cutApproval[i]?'rgba(192,48,64,.12)':'var(--bg3)'};color:${!S.cutApproval[i]?'var(--red)':'var(--ink3)'}">✕</div>
+          <div onclick="setCutApproval(${i},true)" style="cursor:pointer;padding:3px 8px;border-radius: 0;font-size:10px;font-weight:700;border:1px solid ${S.cutApproval[i]?'var(--green)':'var(--line)'};background:${S.cutApproval[i]?'rgba(62,150,96,.15)':'var(--bg3)'};color:${S.cutApproval[i]?'var(--green)':'var(--ink3)'}">✓</div>
+          <div onclick="setCutApproval(${i},false)" style="cursor:pointer;padding:3px 8px;border-radius: 0;font-size:10px;font-weight:700;border:1px solid ${!S.cutApproval[i]?'var(--red)':'var(--line)'};background:${!S.cutApproval[i]?'rgba(192,48,64,.12)':'var(--bg3)'};color:${!S.cutApproval[i]?'var(--red)':'var(--ink3)'}">✕</div>
         </div>
       </div>
       <!-- 영상 설정 (승인된 컷만) -->
@@ -5124,7 +5143,7 @@ function renderCutControls() {
       <div style="border-top:1px solid var(--line)'${S.cutApproval[i] ? '' : ';opacity:.5'};padding-top:8px;margin-top:4px">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
           <label style="font-size:10px;color:var(--ink3)">영상 길이</label>
-          <select onchange="S.cutDurations[${i}]=parseInt(this.value)" style="background:var(--bg3);border:1px solid var(--line);border-radius:4px;padding:3px 6px;color:var(--ink);font-size:11px">
+          <select onchange="S.cutDurations[${i}]=parseInt(this.value)" style="background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:3px 6px;color:var(--ink);font-size:11px">
             ${[3,4,5,6,7,8,9,10,11,12,13,14,15].map(n=>`<option value="${n}" ${S.cutDurations[i]===n?'selected':''}>${n}초</option>`).join('')}
           </select>
           <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--ink3);margin-left:auto;cursor:pointer">
@@ -5314,7 +5333,7 @@ function renderVidCards() {
         <!-- 추가 개인설정 (영상에 더할 디테일) -->
         <div style="margin-bottom:8px">
           <label style="font-size:10px;color:var(--ink3);display:block;margin-bottom:3px">추가 개인설정 <span style="color:var(--ink3);font-weight:400">(선택)</span></label>
-          <input id="vidExtra${i}" placeholder="예: 비가 점점 거세진다 / 카메라가 천천히 줌인 / 표정이 점차 굳어진다" style="width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
+          <input id="vidExtra${i}" placeholder="예: 비가 점점 거세진다 / 카메라가 천천히 줌인 / 표정이 점차 굳어진다" style="width:100%;background:var(--bg2);border:1px solid var(--line);border-radius: 0;padding:5px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
           <div style="font-size:9px;color:var(--ink3);margin-top:3px">기본 영상 프롬프트는 자동 생성되며, 입력한 내용은 추가 디테일로 합쳐집니다</div>
         </div>
         <!-- 대사 (화자 + 감정 + 대사) -->
@@ -5324,14 +5343,14 @@ function renderVidCards() {
             <span id="vidScriptCounter${i}" style="font-size:9px;color:var(--ink3);font-weight:600">0 / ${(S.cutDurations[i]||5)*4}자 (${S.cutDurations[i]||5}초)</span>
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <select id="vidSpeaker${i}" style="background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px;width:120px" ${!hasCut ? 'disabled' : ''}>
+            <select id="vidSpeaker${i}" style="background:var(--bg2);border:1px solid var(--line);border-radius: 0;padding:5px 8px;color:var(--ink);font-size:11px;width:120px" ${!hasCut ? 'disabled' : ''}>
               <option value="">화자 선택</option>
               <option value="woman">여자</option>
               <option value="man">남자</option>
               <option value="narrator-woman">나레이션 (여자)</option>
               <option value="narrator-man">나레이션 (남자)</option>
             </select>
-            <select id="vidEmotion${i}" onchange="S.cutEmotions[${i}]=this.value" style="background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px;width:120px" ${!hasCut ? 'disabled' : ''}>
+            <select id="vidEmotion${i}" onchange="S.cutEmotions[${i}]=this.value" style="background:var(--bg2);border:1px solid var(--line);border-radius: 0;padding:5px 8px;color:var(--ink);font-size:11px;width:120px" ${!hasCut ? 'disabled' : ''}>
               <option value="">감정 선택</option>
               <option value="angry" ${S.cutEmotions[i]==='angry'?'selected':''}>화남 😠</option>
               <option value="shouting" ${S.cutEmotions[i]==='shouting'?'selected':''}>소리침 📢</option>
@@ -5348,13 +5367,13 @@ function renderVidCards() {
               <option value="serious" ${S.cutEmotions[i]==='serious'?'selected':''}>진지 😐</option>
               <option value="romantic" ${S.cutEmotions[i]==='romantic'?'selected':''}>로맨틱 😍</option>
             </select>
-            <input id="vidScript${i}" oninput="updateScriptCounter(${i})" placeholder='대사만 입력 (예: 나는 널 잊을 수 없어)' style="flex:1;min-width:160px;background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
+            <input id="vidScript${i}" oninput="updateScriptCounter(${i})" placeholder='대사만 입력 (예: 나는 널 잊을 수 없어)' style="flex:1;min-width:160px;background:var(--bg2);border:1px solid var(--line);border-radius: 0;padding:5px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
           </div>
           <div style="font-size:9px;color:var(--ink3);margin-top:3px">최대 <strong style="color:var(--cream)">초당 4글자</strong>까지 음성 생성 (영상 길이 × 4자 = 최대 글자 수)</div>
         </div>
         <!-- 설정 -->
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
-          <select id="vidDur${i}" onchange="S.cutDurations[${i}]=parseInt(this.value);updateScriptCounter(${i})" style="background:var(--bg3);border:1px solid var(--line);border-radius:4px;padding:4px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
+          <select id="vidDur${i}" onchange="S.cutDurations[${i}]=parseInt(this.value);updateScriptCounter(${i})" style="background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:4px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
             ${[3,4,5,6,7,8,9,10,11,12,13,14,15].map(n=>`<option value="${n}" ${S.cutDurations[i]===n?'selected':''}>${n}초</option>`).join('')}
           </select>
           <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink2);cursor:${hasCut?'pointer':'not-allowed'};opacity:${hasCut?1:0.5}">
@@ -5967,7 +5986,7 @@ async function openAssetPicker(type, onSelect, onLocalAdd) {
     modal.id = 'assetPickerModal';
     modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto';
     modal.innerHTML = `
-      <div style="background:var(--bg2);border:1px solid var(--line2);border-radius:14px;width:100%;max-width:680px;padding:24px;position:relative;margin:auto">
+      <div style="background:var(--bg2);border:1px solid var(--line2);border-radius: 0;width:100%;max-width:680px;padding:24px;position:relative;margin:auto">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
           <div>
             <div style="font-size:11px;color:var(--pink);letter-spacing:2px;font-weight:700;text-transform:uppercase" id="assetPickerCat">ASSETS</div>
@@ -6021,12 +6040,12 @@ async function _assetPickerRefresh() {
       const isVideo = type === 'video' || type === 'merged_video';
       const thumb = item.thumbnail_url || (isVideo ? '' : item.asset_url) || '';
       const previewHtml = thumb
-        ? `<img src="${thumb}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px;background:#0a0a0c">`
+        ? `<img src="${thumb}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius: 0;background:#0a0a0c">`
         : (isVideo
-          ? `<div style="width:100%;aspect-ratio:16/9;background:var(--bg4);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:32px">🎬</div>`
-          : `<div style="width:100%;aspect-ratio:16/9;background:var(--bg4);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:32px">📄</div>`);
+          ? `<div style="width:100%;aspect-ratio:16/9;background:var(--bg4);border-radius: 0;display:flex;align-items:center;justify-content:center;font-size:32px">🎬</div>`
+          : `<div style="width:100%;aspect-ratio:16/9;background:var(--bg4);border-radius: 0;display:flex;align-items:center;justify-content:center;font-size:32px">📄</div>`);
       return `
-        <div class="asset-card" data-id="${item.id}" style="background:var(--bg3);border:1px solid var(--line);border-radius:8px;padding:8px;cursor:pointer;transition:.15s;position:relative" onmouseover="this.style.borderColor='var(--pink)'" onmouseout="this.style.borderColor='var(--line)'">
+        <div class="asset-card" data-id="${item.id}" style="background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:8px;cursor:pointer;transition:.15s;position:relative" onmouseover="this.style.borderColor='var(--pink)'" onmouseout="this.style.borderColor='var(--line)'">
           ${previewHtml}
           <div style="font-size:11px;font-weight:700;color:var(--cream);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(item.title || '제목 없음')}</div>
           <div style="font-size:9px;color:var(--ink3);margin-top:2px">${date} ${sizeKb}</div>
@@ -6229,7 +6248,7 @@ function openMyCustomSceneModal() {
     modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:30px 20px;overflow-y:auto';
     modal.onclick = (e) => { if (e.target === modal) closeMyCustomSceneModal(); };
     modal.innerHTML = `
-      <div style="background:var(--bg2);border:1px solid var(--line2);border-radius:14px;width:100%;max-width:640px;padding:24px;margin:auto">
+      <div style="background:var(--bg2);border:1px solid var(--line2);border-radius: 0;width:100%;max-width:640px;padding:24px;margin:auto">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
           <div>
             <div style="font-size:11px;color:var(--pink);letter-spacing:2px;font-weight:700;text-transform:uppercase">CUSTOM SCENE</div>
@@ -6244,7 +6263,7 @@ function openMyCustomSceneModal() {
 
         <div style="margin-bottom:14px">
           <label style="display:block;font-size:11px;color:var(--ink2);margin-bottom:5px;font-weight:700">씬 이름 (한국어 권장)</label>
-          <input id="customSceneName" placeholder="예: 도시 룩터, 명산수설, 고양이 카페" maxlength="20" style="width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:6px;padding:8px 10px;color:var(--ink);font-size:13px">
+          <input id="customSceneName" placeholder="예: 도시 룩터, 명산수설, 고양이 카페" maxlength="20" style="width:100%;background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:8px 10px;color:var(--ink);font-size:13px">
         </div>
 
         <div style="margin-bottom:14px">
@@ -6252,7 +6271,7 @@ function openMyCustomSceneModal() {
             <label style="font-size:11px;color:var(--ink2);font-weight:700;margin:0">씬 프롬프트 (영어 권장)</label>
             <span id="customSceneStyleCounter" style="font-size:9px;color:var(--ink3);font-weight:600">0 / 200자</span>
           </div>
-          <textarea id="customSceneStyle" oninput="updateCustomSceneStyleCounter()" maxlength="200" rows="3" placeholder="예: bright neon city night lighting, vibrant cyberpunk colors, cinematic urban aesthetic" style="width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:6px;padding:8px 10px;color:var(--ink);font-size:12px;font-family:inherit;line-height:1.5;resize:vertical"></textarea>
+          <textarea id="customSceneStyle" oninput="updateCustomSceneStyleCounter()" maxlength="200" rows="3" placeholder="예: bright neon city night lighting, vibrant cyberpunk colors, cinematic urban aesthetic" style="width:100%;background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:8px 10px;color:var(--ink);font-size:12px;font-family:inherit;line-height:1.5;resize:vertical"></textarea>
           <div style="font-size:9px;color:var(--ink3);margin-top:3px;line-height:1.5">소프트·조명·컬러·분위기 등을 영어 키워드로 설명하세요. 권장: 80~150자.</div>
         </div>
 
@@ -6300,7 +6319,7 @@ function renderCustomSceneAnglesGrid() {
   for (let i = 0; i < 4; i++) {
     const angle = S._customSceneAngles[i] || '';
     html += `
-      <div onclick="openCustomSceneAnglePicker(${i})" style="cursor:pointer;padding:10px 6px;border-radius:6px;border:1.5px solid ${angle ? colors[i] : 'var(--line)'};background:${angle ? 'rgba(94,234,212,.06)' : 'var(--bg3)'};text-align:center;transition:.15s">
+      <div onclick="openCustomSceneAnglePicker(${i})" style="cursor:pointer;padding:10px 6px;border-radius: 0;border:1.5px solid ${angle ? colors[i] : 'var(--line)'};background:${angle ? 'rgba(94,234,212,.06)' : 'var(--bg3)'};text-align:center;transition:.15s">
         <div style="font-size:10px;font-weight:800;color:${colors[i]};letter-spacing:1px">CUT ${i+1}</div>
         <div style="font-size:9px;font-weight:700;color:var(--cream);margin-top:4px;line-height:1.2">${angle ? escHtml(angle) : '클릭하여 선택'}</div>
       </div>
@@ -6343,7 +6362,7 @@ function openCustomSceneAnglePicker(idx) {
         const ko = meta.ko || '';
         const isSelected = S._customSceneAngles[idx] === angle;
         const safe = angle.replace(/'/g, "\\'");
-        html += `<div onclick="selectCustomSceneAngle('${safe}')" style="padding:8px 12px;border-radius:6px;border:1px solid ${isSelected?colors[idx]:'var(--line)'};background:${isSelected?'var(--bg4)':'var(--bg3)'};margin-bottom:5px;cursor:pointer">
+        html += `<div onclick="selectCustomSceneAngle('${safe}')" style="padding:8px 12px;border-radius: 0;border:1px solid ${isSelected?colors[idx]:'var(--line)'};background:${isSelected?'var(--bg4)':'var(--bg3)'};margin-bottom:5px;cursor:pointer">
           <div style="font-size:12px;font-weight:700;color:var(--cream)">${escHtml(angle)}</div>
           <div style="font-size:10px;color:var(--ink2);margin-top:2px">${escHtml(ko)}</div>
         </div>`;
@@ -6639,7 +6658,7 @@ function openMergedVideoPicker() {
     const resultEl = document.getElementById('mergeResult');
     if (resultEl) {
       resultEl.innerHTML = `
-        <video controls src="${url}" style="width:100%;border-radius:6px;display:block;margin-bottom:8px"></video>
+        <video controls src="${url}" style="width:100%;border-radius: 0;display:block;margin-bottom:8px"></video>
         <button class="btn btn-primary btn-full" onclick="downloadMergedVideo()">통합 영상 저장</button>
       `;
     }
@@ -6833,7 +6852,7 @@ async function mergeVideos() {
     // 결과 표시
     if (resultEl) {
       resultEl.innerHTML = `
-        <video controls src="${mergedUrl}" style="width:100%;border-radius:6px;display:block;margin-bottom:8px"></video>
+        <video controls src="${mergedUrl}" style="width:100%;border-radius: 0;display:block;margin-bottom:8px"></video>
         <button class="btn btn-primary btn-full" onclick="downloadMergedVideo()">통합 영상 저장</button>
       `;
     }
@@ -6889,7 +6908,7 @@ function resetMerge() {
 
 <!-- 아바타 컷별 출연 선택 팝업 -->
 <div id="avatarCutPickerModal" onclick="if(event.target===this)cancelAvatarCutPicker()" style="position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:9999">
-  <div style="background:var(--bg2);border:1px solid var(--line2);border-radius:12px;padding:20px;width:300px;max-width:90vw">
+  <div style="background:var(--bg2);border:1px solid var(--line2);border-radius: 0;padding:20px;width:300px;max-width:90vw">
     <div style="font-size:13px;font-weight:800;color:var(--cream);margin-bottom:14px" id="avatarCutPickerName">출연 컷 선택</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px" id="avatarCutPickerGrid"></div>
     <div style="display:flex;gap:8px">
