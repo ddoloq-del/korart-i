@@ -265,6 +265,10 @@ nav {
   color: var(--cream);
 }
 
+.hero-title .hl {
+  color: var(--accent);
+  font-weight: 800;
+}
 .hero-title em {
   font-family: 'Pretendard', sans-serif;
   font-style: normal;
@@ -365,7 +369,7 @@ nav {
 .hero-contrast {
   margin-top: 24px;
   display: flex;
-  align-items: stretch;
+  align-items: center;
   gap: 14px;
   max-width: 760px;
   width: 100%;
@@ -396,9 +400,7 @@ nav {
 .contrast-card.before code {
   color: var(--ink-dimmer);
   font-style: italic;
-  text-decoration: line-through;
-  text-decoration-color: rgba(230, 57, 70, 0.5);
-  text-decoration-thickness: 1px;
+  opacity: 0.7;
 }
 
 .contrast-card.after {
@@ -1416,7 +1418,7 @@ footer {
     <div class="hero-eyebrow">Korean Artistic Intelligence</div>
 
     <h1 class="hero-title">
-      프롬프트 없이 클릭만으로<br>
+      프롬프트 없이 <span class="hl">클릭만으로</span><br>
       <em>나만의 영상 완성.</em>
     </h1>
 
