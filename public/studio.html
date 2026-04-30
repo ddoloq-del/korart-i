@@ -51,7 +51,7 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 .wrap{display:flex;flex-direction:column;min-height:100vh}
 .topbar{background:rgba(10,10,12,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:14px 28px;position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:24px}
 .brand{font-size:18px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
-.brand-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#818cf8 0%,#c084fc 50%,#f472b6 100%);box-shadow:0 0 12px var(--pink)}
+.brand-dot{width:8px;height:8px;border-radius:50%;background:var(--pink);box-shadow:0 0 12px var(--pink)}
 .brand-text{color:var(--ink)}
 .brand-sub{font-size:11px;color:var(--ink3);font-style:normal;font-weight:500;margin-left:4px;letter-spacing:.5px}
 .cost-badge{margin-left:auto;display:flex;align-items:center;gap:14px;font-size:11px}
@@ -76,7 +76,7 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 /* ── steps nav ── */
 .steps{display:flex;gap:6px;margin-bottom:24px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:6px}
 .step-btn{flex:1;padding:10px 8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--ink3);cursor:pointer;text-align:center;transition:.15s;border:none;background:none;letter-spacing:-.01em}
-.step-btn.active{background:linear-gradient(135deg,rgba(255,107,157,.15),rgba(255,140,122,.1));color:var(--pink);font-weight:700;box-shadow:inset 0 0 0 1px rgba(255,107,157,.3)}
+.step-btn.active{background:rgba(99,102,241,.12);color:var(--pink);font-weight:700;box-shadow:inset 0 0 0 1px rgba(99,102,241,.35)}
 .step-btn:hover:not(.active){background:var(--bg3);color:var(--ink)}
 .step-btn.done{color:var(--green)}
 
@@ -94,7 +94,7 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 .ratio-card.active .ratio-thumb{color:var(--pink)}
 .ratio-val{font-size:18px;font-weight:800;color:var(--cream);letter-spacing:-.02em;display:flex;align-items:center;gap:6px;margin-bottom:6px}
 .ratio-card.active .ratio-val{color:var(--pink)}
-.ratio-badge{font-size:10px;font-weight:800;padding:3px 7px;border-radius:4px;background:linear-gradient(135deg,#818cf8 0%,#c084fc 50%,#f472b6 100%);color:#fff;letter-spacing:0}
+.ratio-badge{font-size:10px;font-weight:800;padding:3px 7px;border-radius:4px;background:var(--pink);color:#fff;letter-spacing:0}
 .ratio-badge-sm{font-size:9px;background:rgba(255,107,157,.18);color:var(--pink);padding:2px 6px;border-radius:3px;font-weight:700}
 .ratio-size{font-size:11px;color:var(--ink3);margin-bottom:6px;font-variant-numeric:tabular-nums}
 .ratio-purpose{font-size:11px;color:var(--ink2);font-weight:500}
@@ -134,8 +134,8 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--line2);background:var(--bg3);color:var(--ink);transition:.15s;letter-spacing:-.01em}
 .btn:hover{background:var(--bg4);border-color:var(--ink3)}
 .btn:disabled{opacity:.35;cursor:not-allowed}
-.btn-primary{background:linear-gradient(135deg,#818cf8 0%,#c084fc 50%,#f472b6 100%);border-color:transparent;color:#fff;font-weight:700;box-shadow:0 4px 16px rgba(255,107,157,.25)}
-.btn-primary:hover{background:linear-gradient(135deg,var(--pink2),var(--pink));box-shadow:0 6px 20px rgba(255,107,157,.35)}
+.btn-primary{background:var(--pink);border-color:transparent;color:#fff;font-weight:700;box-shadow:0 4px 16px rgba(99,102,241,.25)}
+.btn-primary:hover{background:var(--pink2);box-shadow:0 6px 20px rgba(99,102,241,.35)}
 .btn-primary:disabled{background:var(--bg3);border-color:var(--line);color:var(--ink3);box-shadow:none}
 .btn-sm{padding:5px 11px;font-size:11px}
 .btn-full{width:100%;justify-content:center}
@@ -183,10 +183,10 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 /* ── scene grid ── */
 .scene-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
 .scene-card{background:var(--bg3);border:2px solid var(--line);border-radius:14px;padding:24px 14px;cursor:pointer;text-align:center;transition:.18s;position:relative;overflow:hidden;aspect-ratio:1.3/1;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.scene-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,107,157,0) 0%,rgba(255,107,157,.08) 100%);opacity:0;transition:.2s;pointer-events:none}
+.scene-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(99,102,241,0) 0%,rgba(99,102,241,.08) 100%);opacity:0;transition:.2s;pointer-events:none}
 .scene-card:hover{border-color:var(--line2);transform:translateY(-2px)}
 .scene-card:hover::after{opacity:1}
-.scene-card.active{border-color:var(--pink);background:linear-gradient(135deg,rgba(255,107,157,.08),rgba(255,140,122,.04));box-shadow:0 0 24px rgba(255,107,157,.15)}
+.scene-card.active{border-color:var(--pink);background:rgba(99,102,241,.08);box-shadow:0 0 24px rgba(99,102,241,.18)}
 .scene-card.active .scene-name{color:var(--pink)}
 .scene-emoji{font-size:32px;margin-bottom:8px;filter:saturate(1.1)}
 .scene-name{font-size:13px;font-weight:800;color:var(--cream);letter-spacing:-.01em}
@@ -1662,8 +1662,8 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <div class="field">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <label style="margin:0;font-size:14px;font-weight:700">씬 분위기를 선택하세요</label>
-          <button class="btn btn-sm" onclick="openMyCustomSceneModal()" title="나만의 씬 분위기 만들기" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">+ 나만의 씬 분위기 만들기</button>
-          <button class="btn btn-sm btn-ghost" onclick="openScenePicker()" title="클라우드에 저장한 나만의 씬 분위기 불러오기">클라우드 불러오기</button>
+          <div style="display:flex;align-items:center;gap:8px"><button class="btn btn-sm" onclick="openMyCustomSceneModal()" title="나만의 씬 분위기 만들기" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">+ 나만의 씬 분위기 만들기</button>
+          <button class="btn btn-sm btn-ghost" onclick="openScenePicker()" title="클라우드에 저장한 나만의 씬 분위기 불러오기">클라우드 불러오기</button></div>
         </div>
         <div class="scene-grid" id="sceneGrid" style="grid-template-columns:repeat(4,1fr);gap:12px"></div>
       </div>
