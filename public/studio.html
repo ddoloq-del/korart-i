@@ -184,7 +184,7 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 .scene-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
 .scene-card{background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:18px 18px 16px 18px;cursor:pointer;text-align:left;transition:.18s;position:relative;overflow:hidden;aspect-ratio:16/9;display:flex;flex-direction:column;justify-content:space-between;gap:8px}
 .scene-card .sc-cat{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--pink);text-transform:uppercase;display:flex;align-items:center;gap:6px}
-.scene-card .sc-cat::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--pink);display:inline-block}
+.scene-card .sc-cat::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block}
 .scene-card .sc-title-block{display:flex;flex-direction:column;gap:4px;flex:1;justify-content:center;margin:4px 0}
 .scene-card .sc-name{font-family:'Pretendard',sans-serif;font-size:22px;font-weight:700;color:var(--cream);letter-spacing:-.02em;line-height:1.1}
 .scene-card .sc-vidstyle{font-family:'Pretendard',sans-serif;font-size:11px;font-weight:400;color:var(--ink2);font-style:italic;line-height:1.35;letter-spacing:.005em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -4265,13 +4265,22 @@ function renderScenes() {
     horror:'HORROR', foodie:'FOODIE', travel:'TRAVEL', fitness:'FITNESS',
     dance:'DANCE', interview:'INTERVIEW', mv:'MUSIC VIDEO',
   };
+
+  // 카테고리 색상 (씬 분위기에 맞춰)
+  const SCENE_COLOR = {
+    romance:'#f472b6', tension:'#ef4444', breakup:'#60a5fa', climax:'#c084fc',
+    suspense:'#a78bfa', mellow:'#e879f9', action:'#fb923c', slice:'#4ade80',
+    commercial:'#fbbf24', vlog:'#22d3ee', flashback:'#a5b4fc', confession:'#fb7185',
+    horror:'#dc2626', foodie:'#facc15', travel:'#5eead4', fitness:'#a3e635',
+    dance:'#ec4899', interview:'#7dd3fc', mv:'#a855f7',
+  };
   const customs = loadSceneLib();
   let html = defaults.map(s => {
     const sc = SCENES[s.key] || {};
     const vidStyle = sc.vidStyle || '';
     const cam = (sc.angles || []).slice(0,3).join(' \u00b7 ');
     const cat = SCENE_CAT[s.key] || s.key.toUpperCase();
-    return `<div class="scene-card${S.scene===s.key?' active':''}" onclick="selScene('${s.key}',this)"><div class="sc-cat">${cat}</div><div class="sc-title-block"><div class="sc-name">${s.name}</div>${vidStyle ? `<div class="sc-vidstyle">${vidStyle}</div>` : ''}</div>${cam ? `<div class="sc-cam">${cam}</div>` : ''}</div>`;
+    return `<div class="scene-card${S.scene===s.key?' active':''}" onclick="selScene('${s.key}',this)"><div class="sc-cat" style="color:${SCENE_COLOR[s.key] || '#818cf8'}">${cat}</div><div class="sc-title-block"><div class="sc-name">${s.name}</div>${vidStyle ? `<div class="sc-vidstyle">${vidStyle}</div>` : ''}</div>${cam ? `<div class="sc-cam">${cam}</div>` : ''}</div>`;
   }).join('');
   html += customs.map(s => {
     const vidStyle = s.style ? s.style.split(',').slice(0,3).join(',').trim() : '';
