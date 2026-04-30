@@ -1774,27 +1774,16 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <input id="locCustomInput" placeholder="수식어 또는 단독 장소 입력: 예) 고급진 / 낡은 / 어두운 (또는 단독으로: rooftop at night)" style="display:none;margin-top:6px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:4px;padding:6px 8px;color:var(--ink);font-size:12px">
       </div>
 
-      <!-- 등장 인원 -->
+      <!-- 행인 포함 -->
       <div class="field">
-        <label>등장 인원</label>
-        <div class="segs" id="personCountSegs">
-          <div class="seg" onclick="setPersonCount(0,this)">없음</div>
-          <div class="seg" onclick="setPersonCount(1,this)">1명</div>
-          <div class="seg" onclick="setPersonCount(2,this)">2명</div>
-          <div class="seg" onclick="setPersonCount(3,this)">3명</div>
-          <div class="seg" onclick="setPersonCount(4,this)">4명</div>
-          <div class="seg" onclick="setPersonCount(5,this)">5명</div>
-          <div class="seg" onclick="setPersonCount(6,this)">6명</div>
-        </div>
-        <div id="passerbyWrap" style="display:none;margin-top:6px">
-          <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink2);cursor:pointer">
-            <input type="checkbox" id="passerbyCheck" onchange="updatePasserby()"> 행인 포함
-          </label>
-          <div id="passerbyDensity" style="display:none;margin-top:4px">
-            <div class="segs">
-              <div class="seg" onclick="selOpt(this,'passerbyDensity','a few passersby')">소수</div>
-              <div class="seg" onclick="selOpt(this,'passerbyDensity','many passersby, crowded')">다수</div>
-            </div>
+        <label>행인</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);cursor:pointer;padding:10px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:8px">
+          <input type="checkbox" id="passerbyCheck" onchange="updatePasserby()" style="cursor:pointer"> 배경에 행인 포함
+        </label>
+        <div id="passerbyDensity" style="display:none;margin-top:6px">
+          <div class="segs">
+            <div class="seg" onclick="selOpt(this,'passerbyDensity','a few passersby')">소수</div>
+            <div class="seg" onclick="selOpt(this,'passerbyDensity','many passersby, crowded')">다수</div>
           </div>
         </div>
       </div>
@@ -3172,6 +3161,17 @@ function backToSceneStepA() {
   tryGoStep(1);
 }
 
+function uncastAvatar(libId) {
+  // 캐스팅에서 제거 — S.avatars (씬에 등장하는 아바타 배열)에서 제외
+  S.avatars = (S.avatars || []).filter(a => (a._libId || a.id) !== libId);
+  // 컷별 출연 정보도 정리
+  if (S.avatarCuts && S.avatarCuts[libId]) {
+    delete S.avatarCuts[libId];
+  }
+  renderStep1Avatars();
+  if (typeof updatePromptPreview === 'function') updatePromptPreview();
+  if (typeof toast === 'function') toast('출연에서 제외했어요', 1000);
+}
 function renderStep1Avatars() {
   const wrap = document.getElementById('step1AvatarChips');
   if (!wrap) return;
@@ -3217,7 +3217,10 @@ function renderStep1Avatars() {
     }
     return `
       <div style="background:${isCast?'rgba(200,160,74,.12)':'var(--bg2)'};border:2px solid ${isCast?'var(--gold)':'var(--line)'};border-radius:8px;overflow:hidden;transition:.15s;position:relative">
-        ${isCast ? `<div style="position:absolute;top:5px;right:5px;background:var(--gold);color:#000;font-size:9px;font-weight:800;padding:2px 6px;border-radius:3px;z-index:2">${cutBadge}</div>` : ''}
+        ${isCast ? `<div style="position:absolute;top:5px;right:5px;display:flex;gap:4px;z-index:3">
+            <button onclick="event.stopPropagation();uncastAvatar(${av.id})" title="출연 해제" style="background:rgba(0,0,0,.65);border:1px solid var(--line2);color:#fff;font-size:11px;font-weight:700;width:20px;height:20px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1">×</button>
+            <div style="background:var(--gold);color:#000;font-size:9px;font-weight:800;padding:2px 6px;border-radius:3px;display:flex;align-items:center">${cutBadge}</div>
+          </div>` : ''}
         <div onclick="openAvatarCutPicker(${av.id})" style="cursor:pointer">
           ${av.imgUrl
             ? `<img src="${av.imgUrl}" style="width:100%;aspect-ratio:1;object-fit:cover;object-position:left top;display:block;background:#f0f0f0">`
