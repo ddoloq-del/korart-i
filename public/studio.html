@@ -2049,6 +2049,21 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <div id="avHairSelected" style="font-size:10px;color:var(--ink3);margin-top:4px"></div>
     </div>
 
+    <!-- 피부색 -->
+    <div class="field">
+      <label>피부색</label>
+      <div class="segs" id="avSkinSegs" style="flex-wrap:wrap">
+        <div class="seg" data-skin="very fair white skin" onclick="pickSkin(this)">매우 밝음</div>
+        <div class="seg" data-skin="fair pale skin" onclick="pickSkin(this)">밝음</div>
+        <div class="seg" data-skin="natural Korean skin tone, light beige" onclick="pickSkin(this)">자연 톤</div>
+        <div class="seg" data-skin="warm tanned skin" onclick="pickSkin(this)">약간 어두움</div>
+        <div class="seg" data-skin="deep tanned skin, sun-kissed" onclick="pickSkin(this)">어두움</div>
+      </div>
+      <input id="avSkinCustom" placeholder="개인설정: 직접 입력 (예: 도자기처럼 흰 피부, 햇볕에 그을린 구릿빛) — 입력 즉시 적용됨" oninput="useCustomSkinAuto()" style="width:100%;margin-top:6px;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:6px 10px;color:var(--ink);font-size:11px">
+      <input type="hidden" id="avSkin" value="">
+      <div id="avSkinSelected" style="font-size:10px;color:var(--ink3);margin-top:4px"></div>
+    </div>
+
     <!-- 추가 묘사 (액세서리) -->
     <div class="field">
       <label>액세서리 / 추가 묘사</label>
@@ -3698,6 +3713,7 @@ function addAvatar() {
     age: document.getElementById('avAge').value,
     body: document.getElementById('avBody').value,
     hair: document.getElementById('avHair').value.trim(),
+    skin: document.getElementById('avSkin').value.trim(),
     style: (document.getElementById('avStyle')?.value || '').trim(),
     extra: document.getElementById('avExtra').value.trim(),
     imgUrl: document.getElementById('avImgUrl').value || '',
@@ -3711,6 +3727,10 @@ function addAvatar() {
 function clearAvatarForm() {
   document.getElementById('avName').value = '';
   document.getElementById('avHair').value = '';
+  document.getElementById('avSkin').value = '';
+  document.getElementById('avSkinCustom').value = '';
+  document.querySelectorAll('#avSkinSegs .seg').forEach(s => s.classList.remove('active'));
+  if (typeof updateAvSkinSelected === 'function') updateAvSkinSelected();
   if (document.getElementById('avStyle')) document.getElementById('avStyle').value = '';
   document.getElementById('avExtra').value = '';
   clearAvatarImage();
@@ -4053,6 +4073,10 @@ function openAvatarModal(editId) {
       refreshHairList();
       // 헤어 - HAIR_STYLES에서 매칭되면 active, 아니면 custom
       document.getElementById('avHair').value = av.hair || '';
+      document.getElementById('avSkin').value = av.skin || '';
+      document.getElementById('avSkinCustom').value = '';
+      document.querySelectorAll('#avSkinSegs .seg').forEach(s => s.classList.toggle('active', s.dataset.skin === av.skin));
+      if (typeof updateAvSkinSelected === 'function') updateAvSkinSelected();
       const matchHair = (HAIR_STYLES[av.gender] || []).find(h => h.en === av.hair);
       if (matchHair) {
         document.querySelectorAll('#avHairSegs .seg').forEach(s => {
@@ -4153,6 +4177,33 @@ function useCustomHairAuto() {
   }
   updateAvHairSelected();
 }
+
+// === 피부색 선택 ===
+function pickSkin(el) {
+  document.querySelectorAll('#avSkinSegs .seg').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  const skinEn = el.dataset.skin || '';
+  document.getElementById('avSkin').value = skinEn;
+  document.getElementById('avSkinCustom').value = '';
+  updateAvSkinSelected();
+}
+
+function useCustomSkinAuto() {
+  const v = document.getElementById('avSkinCustom').value.trim();
+  document.getElementById('avSkin').value = v;
+  if (v) {
+    document.querySelectorAll('#avSkinSegs .seg').forEach(s => s.classList.remove('active'));
+  }
+  updateAvSkinSelected();
+}
+
+function updateAvSkinSelected() {
+  const v = document.getElementById('avSkin').value;
+  const el = document.getElementById('avSkinSelected');
+  if (el) {
+    el.textContent = v ? `선택됨: ${v}` : '';
+  }
+}
 // 호환성: 기존 useCustomHair는 새 함수로 라우팅
 function useCustomHair() { useCustomHairAuto(); }
 
@@ -4194,6 +4245,7 @@ function saveAvatarToLibFromModal() {
     height: document.getElementById('avHeight').value,
     look: document.getElementById('avLook').value,
     hair: document.getElementById('avHair').value.trim(),
+    skin: document.getElementById('avSkin').value.trim(),
     style: '',
     extra: document.getElementById('avExtra').value.trim(),
     imgUrl: document.getElementById('avImgUrl').value || '',
@@ -4262,6 +4314,7 @@ async function saveAvatarToLibFromModalWithCloud() {
     height: document.getElementById('avHeight').value,
     look: document.getElementById('avLook').value,
     hair: document.getElementById('avHair').value.trim(),
+    skin: document.getElementById('avSkin').value.trim(),
     style: '',
     extra: document.getElementById('avExtra').value.trim(),
     imgUrl: imgUrl,
@@ -4287,6 +4340,7 @@ function saveAvatarToLib() {
     age: document.getElementById('avAge').value,
     body: document.getElementById('avBody').value,
     hair: document.getElementById('avHair').value.trim(),
+    skin: document.getElementById('avSkin').value.trim(),
     style: (document.getElementById('avStyle')?.value || '').trim(),
     extra: document.getElementById('avExtra').value.trim(),
     imgUrl: document.getElementById('avImgUrl').value || '',
@@ -5225,6 +5279,7 @@ function buildImagePrompt() {
     charDesc = S.avatars.map(av => {
       const parts = [av.gender, av.age, av.body];
       if (av.hair) parts.push(av.hair);
+      if (av.skin) parts.push(av.skin);
       if (av.extra) parts.push(av.extra);
       if (av.outfit && av.outfit.trim()) parts.push(av.outfit.trim());
       return av.name + ': ' + parts.join(', ');
@@ -5276,6 +5331,7 @@ async function buildImagePromptForApi() {
     charDesc = translatedAvs.map(av => {
       const parts = [av.gender, av.age, av.body];
       if (av.hair) parts.push(av.hair);
+      if (av.skin) parts.push(av.skin);
       if (av.extra) parts.push(av.extra);
       if (av.outfit && av.outfit.trim()) parts.push(av.outfit.trim());
       return av.name + ': ' + parts.join(', ');
@@ -5504,6 +5560,7 @@ function buildOneCutPrompt(i) {
     charDesc = avs.map(av => {
       const parts = [av.gender, av.age, av.body];
       if (av.hair) parts.push(av.hair);
+      if (av.skin) parts.push(av.skin);
       if (av.extra) parts.push(av.extra);
       if (av.outfit && av.outfit.trim()) parts.push(av.outfit.trim());
       return av.name + ': ' + parts.join(', ');
@@ -6287,6 +6344,7 @@ async function callFalImageWithRef(key, model, prompt, size, refImageUrls) {
     if (av.height) parts.push(av.height);
     if (av.look)   parts.push(av.look.split(',')[0]);
     if (hairEn)    parts.push(hairEn);
+    if (av.skin)   parts.push(av.skin);
     if (extraEn)   parts.push(extraEn);
     const desc = parts.length ? ` (${parts.join(', ')})` : '';
     return `Image ${i+1}: ${nameEn}${desc}`;
