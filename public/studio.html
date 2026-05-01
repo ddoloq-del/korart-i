@@ -3407,7 +3407,7 @@ function renderStep1Avatars() {
     const outfitOptions = (typeof getOutfitsForCurrentEra === 'function') ? getOutfitsForCurrentEra() : [];
     // 현재 cast.outfit이 active 옵션과 매치하는지 (en 또는 luxEn)
     const outfitMatch = outfitOptions.find(o => o.en === outfit || o.luxEn === outfit);
-    const isCustomOutfit = outfit && outfit !== ' ' && !outfitMatch;
+    const isCustomOutfit = (outfit === ' ' || (outfit && !outfitMatch));
     // 출연 컷 뱃지 — S.avatarCuts 기반
     let cutBadge = '';
     if (isCast) {
@@ -3945,24 +3945,57 @@ async function resetStep5() {
 // 성별별 헤어스타일 옵션
 const HAIR_STYLES = {
   'Korean man': [
-    { ko: '짧은 머리',    en: 'short black hair' },
-    { ko: '댄디컷',       en: 'dandy cut, neat side-parted hair' },
-    { ko: '투블럭',       en: 'two-block undercut hairstyle' },
-    { ko: '스포츠컷',     en: 'short sporty haircut' },
-    { ko: '슬릭백',       en: 'slicked back hair' },
-    { ko: '장발',         en: 'long hair tied back' },
-    { ko: '곱슬머리',     en: 'curly black hair' },
-    { ko: '대머리',       en: 'bald, no hair' },
+    // === 현대 (modern) ===
+    { ko: '짧은 머리',    en: 'short black hair', era: 'modern' },
+    { ko: '댄디컷',       en: 'dandy cut, neat side-parted hair', era: 'modern' },
+    { ko: '투블럭',       en: 'two-block undercut hairstyle', era: 'modern' },
+    { ko: '스포츠컷',     en: 'short sporty haircut', era: 'modern' },
+    { ko: '슬릭백',       en: 'slicked back hair', era: 'modern' },
+    { ko: '장발',         en: 'long hair tied back', era: 'modern' },
+    { ko: '곱슬머리',     en: 'curly black hair', era: 'modern' },
+    { ko: '대머리',       en: 'bald, no hair', era: 'modern' },
+    // === 사극 (historical) ===
+    { ko: '상투 (양반)',   en: 'traditional Korean topknot sangtu with gat hat, Joseon yangban nobleman', era: 'historical' },
+    { ko: '상투 (서민)',   en: 'traditional Korean topknot sangtu, plain commoner without hat', era: 'historical' },
+    { ko: '풀어진 장발',   en: 'long loose black hair, Joseon era warrior or wandering scholar', era: 'historical' },
+    { ko: '삭발 (승려)',   en: 'shaved bald head, Korean Buddhist monk', era: 'historical' },
+    { ko: '곤룡포 머리',   en: 'Joseon king crown hairstyle with golden royal hat', era: 'historical' },
+    // === 경성 (gyeongseong) ===
+    { ko: '포마드 가르마', en: '1920s pomade slick side-part, Korean modern boy haircut', era: 'gyeongseong' },
+    { ko: '모던보이 짧은', en: '1920s short cropped haircut, Korean modern boy style', era: 'gyeongseong' },
+    { ko: '학생 빡빡',     en: '1920s shaved short hair, Korean colonial era student', era: 'gyeongseong' },
+    // === 레트로 (retro) ===
+    { ko: '80s 펌',       en: '1980s Korean permed hair, retro vintage hairstyle', era: 'retro' },
+    { ko: '90s 댄디',     en: '1990s Korean dandy cut, retro neat side-parted hair', era: 'retro' },
+    { ko: '더벅머리',     en: '1990s shaggy messy long hair, retro Korean style', era: 'retro' },
+    { ko: '레트로 슬릭',  en: 'retro Korean slicked-back hair, 1980s vintage style', era: 'retro' },
   ],
   'Korean woman': [
-    { ko: '긴 생머리',    en: 'long straight black hair' },
-    { ko: '단발',         en: 'bob cut, shoulder length straight hair' },
-    { ko: '웨이브',       en: 'wavy long hair' },
-    { ko: '포니테일',     en: 'ponytail hairstyle' },
-    { ko: '숏컷',         en: 'short pixie cut' },
-    { ko: '양 갈래',      en: 'twin pigtails' },
-    { ko: '롱 웨이브',    en: 'long wavy curly hair' },
-    { ko: '단발 + 앞머리',  en: 'bob cut with bangs' },
+    // === 현대 (modern) ===
+    { ko: '긴 생머리',    en: 'long straight black hair', era: 'modern' },
+    { ko: '단발',         en: 'bob cut, shoulder length straight hair', era: 'modern' },
+    { ko: '웨이브',       en: 'wavy long hair', era: 'modern' },
+    { ko: '포니테일',     en: 'ponytail hairstyle', era: 'modern' },
+    { ko: '숏컷',         en: 'short pixie cut', era: 'modern' },
+    { ko: '양 갈래',      en: 'twin pigtails', era: 'modern' },
+    { ko: '롱 웨이브',    en: 'long wavy curly hair', era: 'modern' },
+    { ko: '단발 + 앞머리',  en: 'bob cut with bangs', era: 'modern' },
+    // === 사극 (historical) ===
+    { ko: '쪽진머리',     en: 'traditional Korean jjokjin meori bun, Joseon married woman hairstyle', era: 'historical' },
+    { ko: '댕기머리',     en: 'traditional Korean dangki braid, Joseon young unmarried woman', era: 'historical' },
+    { ko: '트레머리 (궁녀)', en: 'Joseon court lady gungnyeo trae meori, palace hairstyle', era: 'historical' },
+    { ko: '어여머리 (왕비)', en: 'Joseon queen eoyeo meori, ornate royal hairstyle with golden ornaments', era: 'historical' },
+    { ko: '기생 화관',    en: 'Joseon gisaeng elaborate hair with floral ornaments', era: 'historical' },
+    // === 경성 (gyeongseong) ===
+    { ko: '단발 모던걸',  en: '1920s Korean modern girl bob cut, finger waves', era: 'gyeongseong' },
+    { ko: '트레머리',     en: '1920s traditional Korean rolled bun trae meori', era: 'gyeongseong' },
+    { ko: '포마드 컬',    en: '1920s Korean Western-style pomade waves', era: 'gyeongseong' },
+    { ko: '기생 한복머리', en: '1920s Korean gisaeng traditional updo with elaborate ornaments', era: 'gyeongseong' },
+    // === 레트로 (retro) ===
+    { ko: '80s 펌',       en: '1980s Korean voluminous permed hair, retro big curls', era: 'retro' },
+    { ko: '90s 단발',     en: '1990s Korean shoulder-length bob, retro vintage', era: 'retro' },
+    { ko: '레트로 트윈테일', en: '1990s Korean twin tails, retro pigtails', era: 'retro' },
+    { ko: '긴 직모',      en: '1990s long straight hair with bangs, retro Korean style', era: 'retro' },
   ],
 };
 
@@ -4081,9 +4114,14 @@ function refreshHairList() {
   const gender = document.getElementById('avGender').value;
   const list = HAIR_STYLES[gender] || HAIR_STYLES['Korean man'];
   const segs = document.getElementById('avHairSegs');
-  segs.innerHTML = list.map(h => `
-    <div class="seg" data-hair-en="${escHtml(h.en)}" onclick="pickHair(this, '${escHtml(h.en).replace(/'/g, "\\'")}')">${escHtml(h.ko)}</div>
-  `).join('');
+  const ERA_LABELS = { modern: '현대', historical: '사극', gyeongseong: '경성', retro: '레트로' };
+  const ERA_COLORS = { modern: 'var(--ink3)', historical: 'var(--gold)', gyeongseong: 'var(--blue)', retro: 'var(--coral)' };
+  segs.innerHTML = list.map(h => {
+    const eraLabel = ERA_LABELS[h.era] || '';
+    const eraColor = ERA_COLORS[h.era] || 'var(--ink3)';
+    const labelHtml = eraLabel ? '<span style="font-size:8px;color:' + eraColor + ';font-weight:700;letter-spacing:.05em;margin-right:4px">[' + eraLabel + ']</span>' : '';
+    return '<div class="seg" data-hair-en="' + escHtml(h.en) + '" onclick="pickHair(this, \'' + escHtml(h.en).replace(/'/g, "\\'") + '\')">' + labelHtml + h.ko + '</div>';
+  }).join('');
   // 기존 hair 값 있으면 active
   const cur = document.getElementById('avHair').value;
   if (cur) {
