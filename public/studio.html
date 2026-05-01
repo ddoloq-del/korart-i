@@ -2108,60 +2108,43 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 <div id="confirmBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99"></div>
 
 <script>
-// === 기존 단순 인증 게이트 비활성화 (KorartiAuth 모듈로 대체됨) ===
-/*
-// AUTH GATE — 로그인 필수 (비로그인 시 /studio로 이동)
-const SUPABASE_URL = 'https://hidtxdvncqrhjaiosiqd.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_LziYVaJBv9sazBKbos5_UQ_1ZVbEOJb';
+// === Supabase 변수 (옛 인증 게이트 — alert/redirect 제거됨, KorartiAuth와 공존) ===
+const _MAIN_SUPABASE_URL = 'https://hidtxdvncqrhjaiosiqd.supabase.co';
+const _MAIN_SUPABASE_KEY = 'sb_publishable_LziYVaJBv9sazBKbos5_UQ_1ZVbEOJb';
 
 let sb = null;
 let currentUser = null;
 let currentSession = null;
 
-// 일찍 세션 체크
-(async function authGate() {
+// 일찍 세션 체크 — alert/redirect 없이 변수만 세팅
+(async function authBootstrap() {
   if (!window.supabase || !window.supabase.createClient) {
     console.error('[Auth] Supabase SDK 로드 실패');
     return;
   }
-  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  sb = window.supabase.createClient(_MAIN_SUPABASE_URL, _MAIN_SUPABASE_KEY, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' },
   });
   window.__sb = sb;
   try {
     const { data: { session } } = await sb.auth.getSession();
-    if (!session) {
-      console.warn('[Auth] 로그인 필수 — /studio로 이동');
-      alert('🔒 로그인이 필요한 페이지입니다. 메인 페이지에서 로그인을 진행해주세요.');
-      window.location.href = '/studio';
-      return;
+    if (session) {
+      currentSession = session;
+      currentUser = session.user;
+      window.__currentUser = currentUser;
+      console.log('[Auth] 로그인 확인:', currentUser.email);
     }
-    currentSession = session;
-    currentUser = session.user;
-    window.__currentUser = currentUser;
-    console.log('[Auth] 로그인 확인:', currentUser.email, currentUser.id);
+    // 비로그인 — KorartiAuth가 모달 처리, 여기는 변수만 세팅
   } catch (e) {
     console.error('[Auth] 세션 체크 오류:', e);
-    alert('인증 오류가 발생했습니다. 다시 로그인해주세요.');
-    window.location.href = '/studio';
   }
   sb.auth.onAuthStateChange((event, session) => {
     currentSession = session;
     currentUser = session?.user || null;
-    renderNav();
-    if (event === 'SIGNED_IN' && currentUser) {
-      upsertProfileFromPending();
-      checkOnboardingNeeded();
-      // 로그인 성공 — 인증 모달 닫기
-      closeRequiredModal();
-      closeModal();
-    } else if (event === 'SIGNED_OUT' || !session) {
-      // 로그아웃 — 다시 인증 모달 표시 (로그인 필수)
-      setTimeout(() => showAuthRequiredModal(), 100);
-    }
+    window.__currentUser = currentUser;
+    window.__currentSession = currentSession;
   });
 })();
-*/
 
 function getCurrentUserId() {
   return currentUser?.id || null;
