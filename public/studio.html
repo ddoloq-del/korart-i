@@ -1854,6 +1854,26 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     </div>
 
     <div style="max-width:700px">
+      <!-- 모드 탭 (4컷 / 1컷) -->
+      <div style="display:flex;gap:0;margin-bottom:12px;border-bottom:2px solid var(--line)">
+        <div class="cuts-tab active" data-mode="4cut" onclick="switchCutsMode('4cut')" style="padding:10px 18px;cursor:pointer;font-size:13px;font-weight:700;color:var(--cream);border-bottom:2px solid var(--gold);margin-bottom:-2px;transition:.15s">4컷 모드</div>
+        <div class="cuts-tab" data-mode="1cut" onclick="switchCutsMode('1cut')" style="padding:10px 18px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink3);border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s">1컷 모드</div>
+        <div style="flex:1"></div>
+        <div style="font-size:10px;color:var(--ink3);align-self:center;padding:0 12px" id="cutsModeHint">한 번에 4개 컷을 통일감 있게 생성합니다</div>
+      </div>
+
+      <!-- 1컷 모드 컨트롤 (4컷 모드일 때 숨김) -->
+      <div id="oneCutControls" style="display:none;margin-bottom:12px;padding:12px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:0">
+        <div style="font-size:10px;color:var(--ink3);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">생성할 컷 선택</div>
+        <div class="segs" id="oneCutSelector" style="margin-bottom:10px">
+          <div class="seg active" onclick="selectOneCutIdx(0, this)">컷 1</div>
+          <div class="seg" onclick="selectOneCutIdx(1, this)">컷 2</div>
+          <div class="seg" onclick="selectOneCutIdx(2, this)">컷 3</div>
+          <div class="seg" onclick="selectOneCutIdx(3, this)">컷 4</div>
+        </div>
+        <div style="font-size:11px;color:var(--ink2);line-height:1.5" id="oneCutInfo">선택한 컷의 카메라 앵글과 묘사로 단독 이미지를 생성합니다.<br>나머지 컷은 그대로 유지됩니다.</div>
+      </div>
+
       <!-- quad -->
       <div class="quad" id="quad">
         <div class="qcell" style="grid-column:1/-1;grid-row:1/-1;display:flex;align-items:center;justify-content:center;background:#0a0a0c">
@@ -1868,8 +1888,8 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       </div>
 
       <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
-        <button class="btn btn-primary" id="genImgBtn" onclick="generateImage()">4컷 생성</button>
-        <button class="btn btn-sm" onclick="generateImage()" title="재생성">재생성</button>
+        <button class="btn btn-primary" id="genImgBtn" onclick="generateByMode()">4컷 생성</button>
+        <button class="btn btn-sm" onclick="generateByMode()" title="재생성">재생성</button>
         <div style="flex:1"></div>
         <button class="btn btn-sm" onclick="downloadGrid()" title="현재 4컷을 한 장 이미지로 저장">💾 로컬저장</button>
         <button class="btn btn-sm" onclick="saveCuts4ToCloud()" title="클라우드에 저장" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">☁️ 클라우드</button>
@@ -5245,6 +5265,251 @@ async function goToStep2() {
 // ════════════════════════════════════════════════════════════
 //  STEP 2: 4컷 이미지 생성
 // ════════════════════════════════════════════════════════════
+
+
+// === 5단계 모드 (4컷 / 1컷) ===
+let _cutsMode = '4cut';   // 4cut | 1cut
+let _oneCutIdx = 0;        // 1컷 모드에서 선택한 컷 인덱스 (0~3)
+
+function switchCutsMode(mode) {
+  _cutsMode = mode;
+  // 탭 active 표시
+  document.querySelectorAll('.cuts-tab').forEach(t => {
+    const isActive = t.dataset.mode === mode;
+    t.classList.toggle('active', isActive);
+    t.style.color = isActive ? 'var(--cream)' : 'var(--ink3)';
+    t.style.fontWeight = isActive ? '700' : '600';
+    t.style.borderBottom = isActive ? '2px solid var(--gold)' : '2px solid transparent';
+  });
+  // 1컷 컨트롤 표시/숨김
+  const oneCtrl = document.getElementById('oneCutControls');
+  if (oneCtrl) oneCtrl.style.display = mode === '1cut' ? 'block' : 'none';
+  // 힌트 + 버튼 텍스트
+  const hint = document.getElementById('cutsModeHint');
+  if (hint) hint.textContent = mode === '4cut'
+    ? '한 번에 4개 컷을 통일감 있게 생성합니다'
+    : '4개 중 하나만 골라 단독 생성합니다 (나머지는 그대로 유지)';
+  const btn = document.getElementById('genImgBtn');
+  if (btn && !btn.disabled) {
+    btn.innerHTML = mode === '4cut' ? '4컷 생성' : `컷 ${_oneCutIdx + 1} 생성`;
+  }
+}
+
+function selectOneCutIdx(i, el) {
+  _oneCutIdx = i;
+  // active 표시
+  if (el && el.parentElement) {
+    el.parentElement.querySelectorAll('.seg').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+  }
+  // 정보 텍스트 + 버튼 텍스트 갱신
+  const info = document.getElementById('oneCutInfo');
+  if (info) {
+    const angle = (S.angles && S.angles[i]) || '(앵글 미지정)';
+    const desc = (S.cutDescriptions && S.cutDescriptions[i]) || '';
+    info.innerHTML = `<strong style="color:var(--gold)">컷 ${i+1}</strong> · ${angle}${desc ? ' · ' + desc : ''}<br><span style="color:var(--ink3)">선택한 컷만 생성하고 나머지는 유지됩니다.</span>`;
+  }
+  const btn = document.getElementById('genImgBtn');
+  if (btn && !btn.disabled) btn.innerHTML = `컷 ${i+1} 생성`;
+}
+
+// 모드에 따라 generateImage 또는 generateOneCut 호출
+async function generateByMode() {
+  if (_cutsMode === '1cut') {
+    return generateOneCut();
+  }
+  return generateImage();
+}
+
+// 1컷 단독 생성 — 선택한 컷의 앵글/묘사로 단일 이미지 생성
+async function generateOneCut() {
+  const falKey = document.getElementById('falKey').value.trim();
+  if (!falKey) { toast('❌ fal.ai API 키를 입력해주세요'); return; }
+
+  const i = _oneCutIdx;
+  if (!S.angles || !S.angles[i]) {
+    toast('❌ 컷 ' + (i+1) + '의 카메라 앵글이 설정되어 있지 않습니다');
+    return;
+  }
+
+  // 모델 선택
+  const picked = await pickModel('img');
+  if (!picked) return;
+
+  const confirmOk = await showConfirm(
+    `이 모델로 컷 ${i+1} 생성`,
+    `<div style="padding:8px 0">
+       <div style="font-size:14px;font-weight:700;color:var(--cream);margin-bottom:6px">${picked.label}</div>
+       <div style="font-size:12px;color:var(--ink2);margin-bottom:14px">${picked.sub}</div>
+       <div style="font-size:13px;color:var(--ink2)">컷 ${i+1}만 단독으로 생성합니다. 나머지 컷은 유지됩니다.</div>
+     </div>`
+  );
+  if (!confirmOk) return;
+
+  const model = picked.value;
+  const btn = document.getElementById('genImgBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> 생성 중...';
+
+  // 레퍼런스 이미지 — 이 컷에 출연하는 아바타들만
+  let refImgs = [];
+  if (S.avatarCuts) {
+    // 각 아바타 검사: 이 컷에 출연하는지
+    for (const av of (S.avatars || [])) {
+      const libId = av._libId || av.id;
+      const cuts = S.avatarCuts[libId];
+      const inThisCut = !cuts || (Array.isArray(cuts) && cuts.includes(i));
+      if (inThisCut && av.imgUrl) refImgs.push(av.imgUrl);
+    }
+  } else {
+    refImgs = (S.avatars || []).filter(av => av.imgUrl).map(av => av.imgUrl);
+  }
+  // 참고 이미지(continueRef)도 추가
+  if (S.continueRefDataUrl) {
+    try {
+      if (!S.continueRefPubUrl) {
+        const blob = dataURLtoBlob(S.continueRefDataUrl);
+        S.continueRefPubUrl = await uploadToFalStorage(falKey, blob, 'continue_ref.jpg');
+      }
+      refImgs.push(S.continueRefPubUrl);
+    } catch (e) { log('warn', '참고 이미지 업로드 실패: ' + e.message); }
+  }
+  const useRef = refImgs.length > 0;
+
+  // 단일 컷 프롬프트 빌드
+  let prompt;
+  try {
+    prompt = await buildOneCutPromptForApi(i);
+  } catch (e) {
+    log('err', '프롬프트 빌드 실패: ' + e.message);
+    prompt = buildOneCutPrompt(i);
+  }
+
+  log('info', `1컷 생성 시작 — 컷 ${i+1}, ${model}${useRef ? ' (' + refImgs.length + '개 레퍼런스)' : ''}`);
+  log('info', `프롬프트: ${prompt.slice(0,80)}...`);
+
+  // 생성 중 placeholder — quad의 해당 cell만 갱신
+  renderQuadOneLoading(i);
+
+  try {
+    // 비율에 맞는 사이즈
+    const sizeStr = getOneCutImgSize();
+    const url = await callFalImage(falKey, model, prompt, sizeStr, refImgs.length ? refImgs : null);
+
+    // 다운로드 -> dataURL
+    const r = await fetch(url);
+    const blob = await r.blob();
+    const dataUrl = await new Promise((res, rej) => {
+      const fr = new FileReader();
+      fr.onload = () => res(fr.result);
+      fr.onerror = rej;
+      fr.readAsDataURL(blob);
+    });
+
+    // S.cutDataUrls[i]만 갱신
+    S.cutDataUrls[i] = dataUrl;
+    if (S.cutPubUrls) S.cutPubUrls[i] = null;  // 재업로드 필요
+    if (!S.cutApproval) S.cutApproval = [true, true, true, true];
+    S.cutApproval[i] = true;
+
+    // grid 다시 렌더
+    renderQuad();
+    document.getElementById('cutCtrlWrap').style.display = '';
+    renderCutControls();
+
+    // 비용
+    const sel = document.getElementById('imgModel');
+    const cpm = parseFloat(sel.options[sel.selectedIndex]?.dataset?.cpm) || 0.07;
+    addImgCost(cpm / 4);  // 1컷이라 1/4 비용 추정
+
+    log('ok', `컷 ${i+1} 생성 완료`);
+    toast(`✅ 컷 ${i+1} 생성 완료!`);
+  } catch (e) {
+    log('err', '1컷 생성 실패: ' + e.message);
+    toast('❌ ' + e.message);
+    renderQuad();  // placeholder 복원
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `컷 ${i+1} 생성`;
+  }
+}
+
+// 단일 컷용 사이즈 — 4컷 grid 한 칸의 비율 (16:9 또는 9:16)
+function getOneCutImgSize() {
+  const ratio = S.aspectRatio || '16:9';
+  if (ratio === '9:16') return '1024x1792';
+  if (ratio === '1:1')  return '1024x1024';
+  return '1792x1024';
+}
+
+// 단일 컷 프롬프트 (한글) — buildImagePrompt와 비슷하나 panel 1개
+function buildOneCutPrompt(i) {
+  const sc = SCENES[S.scene];
+  // 이 컷에 출연하는 아바타들
+  const avs = (S.avatars || []).filter(av => {
+    const libId = av._libId || av.id;
+    const cuts = S.avatarCuts ? S.avatarCuts[libId] : null;
+    return !cuts || (Array.isArray(cuts) && cuts.includes(i));
+  });
+  let charDesc = '';
+  if (avs.length) {
+    charDesc = avs.map(av => {
+      const parts = [av.gender, av.age, av.body];
+      if (av.hair) parts.push(av.hair);
+      if (av.extra) parts.push(av.extra);
+      if (av.outfit && av.outfit.trim()) parts.push(av.outfit.trim());
+      return av.name + ': ' + parts.join(', ');
+    }).join(' | ');
+  }
+  const loc = (typeof getCombinedLocation === 'function') ? getCombinedLocation() : (S.location || '');
+  const bgDesc = [S.season, S.timeofday, S.weather, loc].filter(Boolean).join(', ');
+  let personDesc = '';
+  if (S.personCount > 0) {
+    personDesc = `${S.personCount} person${S.personCount>1?'s':''} in the scene`;
+    if (S.passerby) personDesc += `, with ${S.passerbyDensity}`;
+  }
+  const angle = (S.angles && S.angles[i]) || '';
+  const cutDesc = (S.cutDescriptions && S.cutDescriptions[i]) || '';
+  const extra = document.getElementById('extraPrompt')?.value.trim() || '';
+  return `Create a single Korean drama scene image, cinematic photo, no panels.\n${charDesc ? 'CHARACTERS: ' + charDesc + '.\n' : ''}VISUAL STYLE: ${sc.style}.\nTIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.\nENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}\nCAMERA ANGLE: ${angle}${cutDesc ? ' (' + cutDesc + ')' : ''}.${extra ? '\nEXTRA: ' + extra : ''}`;
+}
+
+// API용 (한글 -> 영문 번역) — buildImagePromptForApi 패턴
+async function buildOneCutPromptForApi(i) {
+  // buildImagePromptForApi가 4컷 버전 — 우리는 단순히 buildOneCutPrompt 결과를 그대로 사용
+  // 시대/장소 키워드는 이미 영문이므로 추가 번역 불필요
+  return buildOneCutPrompt(i);
+}
+
+// 1컷 생성 중 placeholder — quad의 해당 셀만 spin
+function renderQuadOneLoading(i) {
+  const quad = document.getElementById('quad');
+  if (!quad) return;
+  // 기존 4컷이 이미 있으면 그대로 두고 해당 셀만 덮음
+  // 아니면 빈 grid 만들기
+  const cells = quad.querySelectorAll('.qcell');
+  if (cells.length === 4) {
+    cells[i].innerHTML = '<div class="spin" style="width:24px;height:24px;border-width:3px"></div>';
+    cells[i].style.background = '#0a0a0c';
+    return;
+  }
+  // 빈 grid 처음 만들기
+  let html = '';
+  for (let k = 0; k < 4; k++) {
+    if (k === i) {
+      html += `<div class="qcell" style="background:#0a0a0c;display:flex;align-items:center;justify-content:center"><div class="spin" style="width:24px;height:24px;border-width:3px"></div></div>`;
+    } else {
+      const has = S.cutDataUrls && S.cutDataUrls[k];
+      if (has) {
+        html += `<div class="qcell"><img src="${has}" style="width:100%;height:100%;object-fit:cover"></div>`;
+      } else {
+        html += `<div class="qcell" style="background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:11px">컷 ${k+1}</div>`;
+      }
+    }
+  }
+  quad.innerHTML = html;
+}
+
 async function generateImage() {
   const falKey = document.getElementById('falKey').value.trim();
   if (!falKey) { toast('❌ fal.ai API 키를 입력해주세요'); return; }
