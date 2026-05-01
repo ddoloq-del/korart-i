@@ -8600,17 +8600,11 @@ function resetMerge() {
       // 로그인 성공 — 인증 모달 닫기
       closeRequiredModal();
       closeModal();
-      // OAuth 콜백이거나 처음 로그인이면 mypage로 redirect
+      // OAuth 콜백일 때만 mypage로 redirect (페이지에 직접 들어온 경우는 그대로)
       const isOAuthCallback = window.location.hash.includes('access_token') ||
                               window.location.search.includes('code=');
-      const wasUnauthed = !window.__previouslyAuthed;
-      if (isOAuthCallback || wasUnauthed) {
-        window.__previouslyAuthed = true;
-        // studio 작업 중이 아니면 mypage로
-        const onStudioWorking = (typeof S !== 'undefined' && S._currentStep > 0);
-        if (!onStudioWorking) {
-          window.location.href = 'mypage.html';
-        }
+      if (isOAuthCallback) {
+        window.location.href = 'mypage.html';
       }
     } else if (event === 'SIGNED_OUT' || !session) {
       // 로그아웃 — 인증 필수 모달 다시 표시

@@ -1445,7 +1445,7 @@ footer {
     </p>
 
     <div class="hero-ctas">
-      <a href="studio.html" class="cta-primary">가입하고 시작하기</a>
+      <a href="studio.html" class="cta-primary" onclick="return goStartCTA(event)">가입하고 시작하기</a>
       <a href="#how" class="cta-secondary">작동 방식 보기 ↓</a>
     </div>
 
@@ -1529,7 +1529,7 @@ footer {
     </div>
 
     <div class="how-bottom">
-      <a href="studio.html" class="cta-primary">가입하고 시작하기</a>
+      <a href="studio.html" class="cta-primary" onclick="return goStartCTA(event)">가입하고 시작하기</a>
     </div>
   </div>
 </section>
@@ -1957,7 +1957,7 @@ footer {
       옵션만 클릭하면 영상이 완성됩니다.
       당신만의 첫 씬, 지금 시작하세요.
     </p>
-    <a href="studio.html" class="cta-primary">가입하고 시작하기</a>
+    <a href="studio.html" class="cta-primary" onclick="return goStartCTA(event)">가입하고 시작하기</a>
   </div>
 </section>
 
@@ -1973,7 +1973,7 @@ footer {
       <a href="#how">작동 방식</a>
       <a href="#pricing">구독</a>
       <a href="#faq">FAQ</a>
-      <a href="studio.html">스튜디오</a>
+      <a href="studio.html" onclick="return goStartCTA(event)">스튜디오</a>
       <a href="privacy.html">개인정보</a>
       <a href="terms.html">약관</a>
     </div>
@@ -2175,7 +2175,7 @@ document.querySelectorAll('.showcase, .how, .gallery, .compare, .pricing, .faq, 
     if (!ctaGroup) return;
     const name = user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || '사용자';
     ctaGroup.innerHTML = `
-      <a href="studio.html" style="background:var(--accent);border:none;color:#fff;padding:8px 20px;border-radius:999px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block">스튜디오 입장 →</a>
+      <a href="mypage.html" style="background:var(--accent);border:none;color:#fff;padding:8px 20px;border-radius:999px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block">마이페이지 →</a>
       <button onclick="indexLogout()" style="background:transparent;border:1px solid var(--ink-dim);color:var(--ink-dim);padding:8px 14px;border-radius:999px;font-family:inherit;font-size:12px;cursor:pointer">로그아웃</button>
     `;
   }
@@ -2282,6 +2282,30 @@ document.querySelectorAll('.showcase, .how, .gallery, .compare, .pricing, .faq, 
     checkSession();
   }
 })();
+</script>
+
+<script>
+// 로그인 상태에 따라 적절한 페이지로 이동
+function goStartCTA(e) {
+  if (e) e.preventDefault();
+  // Supabase 세션 토큰이 localStorage에 있으면 로그인된 것으로 간주
+  // Supabase는 'sb-<project-ref>-auth-token' 형식으로 저장
+  let isLoggedIn = false;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('sb-') && k.endsWith('-auth-token')) {
+        const v = localStorage.getItem(k);
+        if (v && v !== 'null' && v.length > 10) {
+          isLoggedIn = true;
+          break;
+        }
+      }
+    }
+  } catch (_) {}
+  window.location.href = isLoggedIn ? 'mypage.html' : 'studio.html';
+  return false;
+}
 </script>
 </body>
 </html>
