@@ -2523,6 +2523,63 @@ function renderVehicleOptions() {
   wrap.innerHTML = html;
 }
 
+// === 시대별 의상 옵션 ===
+const OUTFITS_BY_ERA = {
+  modern: [
+    { ko: '정장',     en: 'wearing a formal business suit',
+      hasLux: true, luxEn: 'wearing a luxury designer suit, premium tailored fabric' },
+    { ko: '캐쥬얼',   en: 'wearing casual clothes, t-shirt and jeans' },
+    { ko: '츄리닝',   en: 'wearing a tracksuit, sportswear' },
+    { ko: '교복',     en: 'wearing a Korean school uniform' },
+  ],
+  historical: [
+    { ko: '평민 한복', en: 'wearing traditional Korean commoner hanbok, simple white and beige' },
+    { ko: '양반 한복', en: 'wearing Joseon era yangban nobleman hanbok, refined silk',
+      hasLux: true, luxEn: 'wearing a high-ranking Joseon noble hanbok, luxurious silk with gold embroidery and jade ornaments' },
+    { ko: '군복',     en: 'wearing Joseon era Korean military uniform with armor',
+      hasLux: true, luxEn: 'wearing a Joseon era general\'s armor with golden helmet and sword, royal military attire' },
+    { ko: '왕족',     en: 'wearing Joseon royal family attire, dragon robe with crown' },
+    { ko: '궁녀',     en: 'wearing Joseon court lady gungnyeo hanbok, palace servant attire' },
+    { ko: '승려',     en: 'wearing Korean Buddhist monk robe, gray traditional monastic clothing' },
+    { ko: '무사',     en: 'wearing Joseon era warrior swordsman attire, martial arts clothing' },
+  ],
+  gyeongseong: [
+    { ko: '모던보이', en: 'wearing 1920s Korean modern boy outfit, vintage suit with hat, modernist style' },
+    { ko: '모던걸',   en: 'wearing 1920s Korean modern girl outfit, vintage Western dress with hat' },
+    { ko: '양복',     en: 'wearing 1920s Western style suit',
+      hasLux: true, luxEn: 'wearing a 1920s luxury Western tailored suit with vintage accessories, upper class colonial era' },
+    { ko: '개량 한복', en: 'wearing 1920s modernized Korean hanbok, traditional with Western influences' },
+    { ko: '학생복',   en: 'wearing 1920s Korean student uniform during colonial era' },
+    { ko: '기생 한복', en: 'wearing 1920s gisaeng courtesan elaborate hanbok, traditional entertainer attire' },
+  ],
+  retro: [
+    { ko: '캐쥬얼',   en: 'wearing retro Korean casual clothes, vintage 80s 90s 2000s style' },
+    { ko: '정장',     en: 'wearing a retro Korean business suit',
+      hasLux: true, luxEn: 'wearing a retro luxury Korean tailored suit, high-end vintage fashion' },
+    { ko: '교복',     en: 'wearing a retro Korean school uniform, vintage style' },
+    { ko: '츄리닝',   en: 'wearing a retro tracksuit, vintage Korean sportswear' },
+    { ko: '청바지+티셔츠', en: 'wearing retro Korean blue jeans and t-shirt, vintage casual fashion' },
+    { ko: '작업복',   en: 'wearing retro Korean blue worker uniform, vintage labor attire' },
+  ],
+};
+
+function getOutfitsForCurrentEra() {
+  const eraKey = S.era || 'modern';
+  if (OUTFITS_BY_ERA[eraKey]) return OUTFITS_BY_ERA[eraKey];
+  const group = (ERAS[eraKey] && ERAS[eraKey].group) || 'modern';
+  return OUTFITS_BY_ERA[group] || OUTFITS_BY_ERA.modern;
+}
+
+function getAllOutfitsForCurrentEra() {
+  const outs = getOutfitsForCurrentEra();
+  const all = [];
+  for (const o of outs) {
+    all.push(o.en);
+    if (o.luxEn) all.push(o.luxEn);
+  }
+  return all;
+}
+
 function getLocationsForCurrentEra() {
   const eraKey = S.era || 'modern';
   if (LOCATIONS_BY_ERA[eraKey]) return LOCATIONS_BY_ERA[eraKey];
@@ -3311,14 +3368,10 @@ function renderStep1Avatars() {
     // 출연 중인 아바타의 outfit 가져오기
     const cast = S.avatars.find(a => (a._libId || a.id) === av.id);
     const outfit = cast?.outfit || '';
-    const outfitOptions = [
-      { ko: '정장',     en: 'wearing a formal business suit' },
-      { ko: '캐쥬얼',   en: 'wearing casual clothes, t-shirt and jeans' },
-      { ko: '츄리닝',   en: 'wearing a tracksuit, sportswear' },
-      { ko: '교복',     en: 'wearing a Korean school uniform' },
-    ];
-    const outfitMatch = outfitOptions.find(o => o.en === outfit);
-    const isCustomOutfit = outfit && !outfitMatch;
+    const outfitOptions = (typeof getOutfitsForCurrentEra === 'function') ? getOutfitsForCurrentEra() : [];
+    // 현재 cast.outfit이 active 옵션과 매치하는지 (en 또는 luxEn)
+    const outfitMatch = outfitOptions.find(o => o.en === outfit || o.luxEn === outfit);
+    const isCustomOutfit = outfit && outfit !== ' ' && !outfitMatch;
     // 출연 컷 뱃지 — S.avatarCuts 기반
     let cutBadge = '';
     if (isCast) {
@@ -3350,11 +3403,19 @@ function renderStep1Avatars() {
           <div style="padding:6px 8px 8px;border-top:1px solid rgba(200,160,74,.25);background:rgba(0,0,0,.18)">
             <div style="font-size:9px;color:var(--ink3);margin-bottom:4px;font-weight:600">의상</div>
             <div style="display:flex;flex-wrap:wrap;gap:3px">
-              ${outfitOptions.map(o => `
-                <div onclick="setAvatarOutfit(${av.id}, '${o.en.replace(/'/g, "\\'")}', this)"
-                     class="outfit-seg ${outfit === o.en ? 'active' : ''}"
-                     style="font-size:9px;padding:3px 6px;border-radius: 0;cursor:pointer;background:${outfit === o.en ? 'var(--gold)' : 'var(--bg3)'};color:${outfit === o.en ? '#000' : 'var(--ink2)'};border:1px solid ${outfit === o.en ? 'var(--gold)' : 'var(--line)'};font-weight:${outfit === o.en ? '700' : '500'}">${o.ko}</div>
-              `).join('')}
+              ${outfitOptions.map(o => {
+                 const enEsc = o.en.replace(/'/g, "\\'");
+                 const luxEnEsc = o.luxEn ? o.luxEn.replace(/'/g, "\\'") : "";
+                 const isStdActive = outfit === o.en;
+                 const isLuxActive = o.luxEn && outfit === o.luxEn;
+                 const isAnyActive = isStdActive || isLuxActive;
+                 const luxBoxId = `outfitLux-${av.id}-${o.ko.replace(/[^\w]/g,"")}`;
+                 let html = `<div onclick="setAvatarOutfitWithLux(${av.id}, '${enEsc}', '${luxEnEsc}', '${luxBoxId}', this)" class="outfit-seg ${isAnyActive ? 'active' : ''}" style="font-size:9px;padding:3px 6px;border-radius:0;cursor:pointer;background:${isAnyActive ? 'var(--gold)' : 'var(--bg3)'};color:${isAnyActive ? '#000' : 'var(--ink2)'};border:1px solid ${isAnyActive ? 'var(--gold)' : 'var(--line)'};font-weight:${isAnyActive ? '700' : '500'}">${o.ko}</div>`;
+                 if (o.luxEn) {
+                   html += `<label style="display:inline-flex;align-items:center;gap:2px;font-size:9px;cursor:pointer;padding:2px 5px;border-radius:0;background:var(--bg3);border:1px solid ${isLuxActive ? 'var(--gold)' : 'var(--line)'};user-select:none;font-weight:${isLuxActive ? '700' : '500'};color:${isLuxActive ? 'var(--gold)' : 'var(--ink2)'}"><input type="checkbox" id="${luxBoxId}" ${isLuxActive ? 'checked' : ''} onchange="toggleOutfitLux(${av.id}, '${enEsc}', '${luxEnEsc}', this)" style="margin:0;width:9px;height:9px">고급</label>`;
+                 }
+                 return html;
+               }).join('')}
               <div onclick="toggleAvatarOutfitCustom(${av.id})"
                    class="outfit-seg ${isCustomOutfit ? 'active' : ''}"
                    style="font-size:9px;padding:3px 6px;border-radius: 0;cursor:pointer;background:${isCustomOutfit ? 'var(--pink)' : 'var(--bg3)'};color:${isCustomOutfit ? '#fff' : 'var(--ink2)'};border:1px solid ${isCustomOutfit ? 'var(--pink)' : 'var(--line)'};font-weight:${isCustomOutfit ? '700' : '500'}">개인설정</div>
@@ -3383,16 +3444,38 @@ function setAvatarOutfit(libId, outfitEn, el) {
   renderStep1Avatars();
 }
 
+// 시대별 의상 — 표준 옵션 클릭 (고급 체크박스 상태도 고려)
+function setAvatarOutfitWithLux(libId, stdEn, luxEn, luxBoxId, el) {
+  const cast = S.avatars.find(a => (a._libId || a.id) === libId);
+  if (!cast) return;
+  // 토글: 같은 옵션 또 클릭하면 해제
+  const luxBox = luxBoxId ? document.getElementById(luxBoxId) : null;
+  const wantLux = luxBox && luxBox.checked;
+  const target = (wantLux && luxEn) ? luxEn : stdEn;
+  if (cast.outfit === target) {
+    cast.outfit = '';
+  } else {
+    cast.outfit = target;
+  }
+  renderStep1Avatars();
+}
+
+// 시대별 의상 — 고급 체크박스 토글
+function toggleOutfitLux(libId, stdEn, luxEn, el) {
+  const cast = S.avatars.find(a => (a._libId || a.id) === libId);
+  if (!cast) return;
+  const isLux = el.checked;
+  if (cast.outfit === stdEn || cast.outfit === luxEn) {
+    cast.outfit = isLux ? luxEn : stdEn;
+  }
+  renderStep1Avatars();
+}
+
 function toggleAvatarOutfitCustom(libId) {
   const cast = S.avatars.find(a => (a._libId || a.id) === libId);
   if (!cast) return;
   // 이미 custom이면 토글 해제
-  const fixedOutfits = [
-    'wearing a formal business suit',
-    'wearing casual clothes, t-shirt and jeans',
-    'wearing a tracksuit, sportswear',
-    'wearing a Korean school uniform'
-  ];
+  const fixedOutfits = (typeof getAllOutfitsForCurrentEra === 'function') ? getAllOutfitsForCurrentEra() : [];
   const isCustom = cast.outfit && !fixedOutfits.includes(cast.outfit);
   if (isCustom) {
     cast.outfit = '';
@@ -4340,6 +4423,11 @@ function selectEra(key) {
     S.vehicle = '';
     renderLocationOptions();
     if (typeof renderVehicleOptions === 'function') renderVehicleOptions();
+    // 시대 변경 시 모든 캐스팅 아바타의 의상 초기화 (시대별 옵션이 다르므로)
+    if (S.avatars && S.avatars.length) {
+      S.avatars.forEach(a => { a.outfit = ''; });
+    }
+    if (typeof renderStep1Avatars === 'function') renderStep1Avatars();
     if (typeof updatePromptPreview === 'function') updatePromptPreview();
   }
 }
