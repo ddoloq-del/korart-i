@@ -3124,10 +3124,16 @@ function goStep(n) {
     const sc = SCENES[S.scene];
     const labelEl = document.getElementById('selectedSceneLabel');
     if (labelEl && sc) labelEl.textContent = sc.name || S.scene;
+    // 헤더 먼저 갱신 (다른 함수가 panel을 건드리기 전에)
+    updateScenePanelHeader('B');
     restoreSceneUI();
     renderAngleSlots();
     renderStep1Avatars();
+    // 다시 한번 — restoreSceneUI 등이 헤더를 덮어쓸 가능성에 대비
     updateScenePanelHeader('B');
+    // 추가 fail-safe — panel-num 직접 04로 강제
+    const __numEl = document.getElementById('panel1Num');
+    if (__numEl) __numEl.textContent = '04';
   }
   // panel1 step-bar 좌/우 버튼 동적 변경
   const navWrap = document.getElementById('panel1Nav');
@@ -4571,6 +4577,14 @@ function restoreSceneUI() {
   document.getElementById('passerbyWrap').style.display = S.personCount > 0 ? '' : 'none';
   document.getElementById('passerbyCheck').checked = S.passerby;
   document.getElementById('passerbyDensity').style.display = S.passerby ? '' : 'none';
+
+  // Fail-safe: sceneStepB가 보일 때 헤더 강제 'B' 갱신
+  if (typeof updateScenePanelHeader === 'function') {
+    const stepB = document.getElementById('sceneStepB');
+    if (stepB && stepB.style.display !== 'none') {
+      updateScenePanelHeader('B');
+    }
+  }
 }
 
 function saveSceneToLib() {
