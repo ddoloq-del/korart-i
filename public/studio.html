@@ -1551,7 +1551,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 
 <!-- ══ TOPBAR ══ -->
 <div class="topbar">
-  <div class="brand">
+  <div class="brand" onclick="window.location.href='index.html'" style="cursor:pointer" title="홈으로">
     <span class="brand-dot"></span>
     <span class="brand-text">Korart</span>
     <span class="brand-sub">— Studio</span>
@@ -1593,7 +1593,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   <!-- ══ STEP 0 (NEW): 비율 선택 ══ -->
   <div class="panel show" id="panelRatio">
     <div class="panel-step-bar">
-      <button class="btn" onclick="window.location.href='studio.html'">홈으로</button>
+      <button class="btn" onclick="window.location.href='index.html'">홈으로</button>
       <div class="step-indicator" id="globalStepsR"></div>
       <button class="btn btn-primary" id="ratioNextBtn" onclick="tryGoStep(1)" disabled style="opacity:.5;cursor:not-allowed">다음</button>
     </div>
