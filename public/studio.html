@@ -7554,9 +7554,16 @@ function resetMerge() {
   function closeModal() {
     document.getElementById('authModal').classList.remove('active');
     resetModalState();
-    // X로 닫았는데 비로그인 상태면 index로 (스튜디오 사용 불가)
+    // 비로그인 시 redirect — 다른 인증 모달이 열려있으면 대기
     if (!currentUser) {
-      window.location.href = 'index.html';
+      setTimeout(() => {
+        const authModalActive = document.getElementById('authModal').classList.contains('active');
+        const requiredActive = document.getElementById('authRequiredModal').classList.contains('active');
+        const onboardingActive = document.getElementById('authOnboardingModal').classList.contains('active');
+        if (!authModalActive && !requiredActive && !onboardingActive && !currentUser) {
+          window.location.href = 'index.html';
+        }
+      }, 100);
     }
   }
 
@@ -7626,9 +7633,15 @@ function resetMerge() {
   }
   function closeRequiredModal() {
     document.getElementById('authRequiredModal').classList.remove('active');
-    // 인증 모달 닫을 때 비로그인 상태면 index로 redirect (스튜디오 사용 불가)
+    // 비로그인 시 redirect — 다른 인증 모달이 열리려는 상황엔 대기
     if (!currentUser) {
-      window.location.href = 'index.html';
+      setTimeout(() => {
+        const authModalActive = document.getElementById('authModal').classList.contains('active');
+        const stillRequired = document.getElementById('authRequiredModal').classList.contains('active');
+        if (!authModalActive && !stillRequired && !currentUser) {
+          window.location.href = 'index.html';
+        }
+      }, 100);
     }
   }
 
