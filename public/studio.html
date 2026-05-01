@@ -1784,24 +1784,29 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <input id="locCustomInput" placeholder="수식어 또는 단독 장소 입력: 예) 고급진 / 낡은 / 어두운 (또는 단독으로: rooftop at night)" style="display:none;margin-top:6px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:6px 8px;color:var(--ink);font-size:12px">
       </div>
 
-      <!-- 행인 (선택) -->
+      <!-- 행인 포함 -->
       <div class="field">
-        <label>행인 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span></label>
-        <div class="segs">
-          <div class="seg" onclick="selPasserby(this,'a few passersby')">소수</div>
-          <div class="seg" onclick="selPasserby(this,'many passersby, crowded')">다수</div>
+        <label>행인</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);cursor:pointer;padding:10px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:8px">
+          <input type="checkbox" id="passerbyCheck" onchange="updatePasserby()" style="cursor:pointer"> 배경에 행인 포함
+        </label>
+        <div id="passerbyDensity" style="display:none;margin-top:6px">
+          <div class="segs">
+            <div class="seg" onclick="selOpt(this,'passerbyDensity','a few passersby')">소수</div>
+            <div class="seg" onclick="selOpt(this,'passerbyDensity','many passersby, crowded')">다수</div>
+          </div>
         </div>
       </div>
 
-      <!-- 참고 이미지 -->
+      <!-- 이전 컷 이어서 만들기 -->
       <div class="field" id="continueRefField">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
           <label style="margin:0;display:flex;align-items:center;gap:6px">
-            참고 이미지 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span>
+            이전 컷 이어서 만들기 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span>
           </label>
           <button class="btn btn-sm btn-ghost" id="continueRefClearBtn" onclick="clearContinueRef()" style="display:none">제거</button>
         </div>
-        <div style="font-size:10px;color:var(--ink3);margin-bottom:6px;line-height:1.5">참고할 이미지를 첨부하면 배경·마감·조명·스타일을 참고해서 생성합니다.</div>
+        <div style="font-size:10px;color:var(--ink3);margin-bottom:6px;line-height:1.5">이전에 만든 컷이나 그리드 이미지를 첨부하면 배경·마감·조명 통일성을 유지하며 이어서 생성합니다.</div>
         <div style="display:flex;gap:6px;align-items:flex-start">
           <div id="continueRefPreview" style="width:120px;aspect-ratio:16/9;background:var(--bg3);border:1px dashed var(--line2);border-radius: 0;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:24px;flex-shrink:0;overflow:hidden"></div>
           <div style="flex:1;display:flex;flex-direction:column;gap:6px;align-items:flex-start">
@@ -3223,7 +3228,7 @@ function renderStep1Avatars() {
     return `
       <div style="background:${isCast?'rgba(200,160,74,.12)':'var(--bg2)'};border:2px solid ${isCast?'var(--gold)':'var(--line)'};border-radius: 0;overflow:hidden;transition:.15s;position:relative">
         ${isCast ? `<div style="position:absolute;top:5px;right:5px;display:flex;gap:4px;z-index:3">
-            <button onclick="event.stopPropagation();uncastAvatar(${av.id})" title="출연 해제 — 이 아바타를 캐스팅에서 제외" onmouseover="this.style.background='#ef4444';this.style.color='#fff'" onmouseout="this.style.background='rgba(239,68,68,.85)';this.style.color='#fff'" style="background:rgba(239,68,68,.85);border:1px solid #ef4444;color:#fff;font-size:14px;font-weight:800;width:24px;height:24px;border-radius:0;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;box-shadow:0 2px 6px rgba(0,0,0,.5);transition:.15s">×</button>
+            <button onclick="event.stopPropagation();uncastAvatar(${av.id})" title="출연 해제" style="background:rgba(0,0,0,.65);border:1px solid var(--line2);color:#fff;font-size:11px;font-weight:700;width:20px;height:20px;border-radius: 0;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1">×</button>
             <div style="background:var(--gold);color:#000;font-size:9px;font-weight:800;padding:2px 6px;border-radius: 0;display:flex;align-items:center">${cutBadge}</div>
           </div>` : ''}
         <div onclick="openAvatarCutPicker(${av.id})" style="cursor:pointer">
@@ -4542,31 +4547,752 @@ function setPersonCount(n, el) {
   updatePromptPreview();
 }
 
-function selPasserby(el, density) {
-  // segs의 active 토글 (한 번 더 클릭하면 해제)
-  const wasActive = el.classList.contains('active');
-  el.parentElement.querySelectorAll('.seg').forEach(s => s.classList.remove('active'));
-  if (wasActive) {
-    // 같은 칩 또 누름 → 행인 끄기
-    S.passerby = false;
-    S.passerbyDensity = '';
-  } else {
-    el.classList.add('active');
-    S.passerby = true;
-    S.passerbyDensity = density;
-  }
+function updatePasserby() {
+  S.passerby = document.getElementById('passerbyCheck').checked;
+  document.getElementById('passerbyDensity').style.display = S.passerby ? '' : 'none';
   updatePromptPreview();
 }
 
-function updatePasserby() {
-  // 체크박스가 사라져서 호환용으로만 남김 (호출되어도 안전)
-  const cb = document.getElementById('passerbyCheck');
-  if (cb) {
-    S.passerby = cb.checked;
-    const dn = document.getElementById('passerbyDensity');
-    if (dn) dn.style.display = S.passerby ? '' : 'none';
-    updatePromptPreview();
+// ── Angle picker ──
+// ════════════════════════════════════════════════════════════
+//  모델 선택 모달 (이미지/영상 생성 시마다 호출)
+// ════════════════════════════════════════════════════════════
+const IMG_MODELS = [
+  { value: 'openai/gpt-image-2', cpm: 0.04, quality: 'low',    label: 'GPT Image 2 — Low',    sub: '$0.04/장 · 빠름·저렴' },
+  { value: 'openai/gpt-image-2', cpm: 0.07, quality: 'medium', label: 'GPT Image 2 — Medium', sub: '$0.07/장 · 균형' },
+  { value: 'openai/gpt-image-2', cpm: 0.19, quality: 'high',   label: 'GPT Image 2 — High',   sub: '$0.19/장 · 최고 화질·디테일 (추천)', recommended: true },
+  { value: 'fal-ai/flux-pro/v1.1-ultra', cpm: 0.06, label: 'Flux Pro 1.1 Ultra', sub: '$0.06/장 · 사실적' },
+  { value: 'fal-ai/flux/schnell', cpm: 0.003, label: 'Flux Schnell', sub: '$0.003/장 · 매우 저렴 (참고용)' },
+];
+
+const VID_MODELS = [
+  { value: 'fal-ai/kling-video/v3/pro/image-to-video',      cpsOff: 0.112, cpsOn: 0.168, label: 'Kling 3.0 Pro 1080p', sub: '$0.112~0.168/초 · 최고 화질', recommended: true },
+  { value: 'fal-ai/kling-video/v3/standard/image-to-video', cpsOff: 0.056, cpsOn: 0.084, label: 'Kling 3.0 Standard 720p', sub: '$0.056~0.084/초 · 가성비' },
+  { value: 'fal-ai/kling-video/v1.6/pro/image-to-video',    cpsOff: 0.098, cpsOn: 0.098, label: 'Kling 1.6 Pro',       sub: '$0.098/초' },
+  { value: 'fal-ai/kling-video/v1.6/standard/image-to-video', cpsOff: 0.056, cpsOn: 0.056, label: 'Kling 1.6 Standard', sub: '$0.056/초 · 저렴' },
+  { value: 'fal-ai/kling-video/v2.1/pro/image-to-video',    cpsOff: 0.07,  cpsOn: 0.07,  label: 'Kling 2.1 Pro',       sub: '$0.07/초' },
+  { value: 'fal-ai/veo3.1/image-to-video',                  cpsOff: 0.20,  cpsOn: 0.20,  label: 'Veo 3.1 Standard',   sub: '$0.20/초 · 1080p' },
+  { value: 'fal-ai/veo3.1/fast/image-to-video',             cpsOff: 0.10,  cpsOn: 0.10,  label: 'Veo 3.1 Fast',       sub: '$0.10/초 · 720p' },
+];
+
+// 모델 선택 모달 — 사용자가 선택한 모델 정보 반환 (취소 시 null)
+function pickModel(kind) {
+  return new Promise((resolve) => {
+    const list = kind === 'img' ? IMG_MODELS : VID_MODELS;
+    const titleEl = document.getElementById('confirmTitle');
+    const bodyEl = document.getElementById('confirmBody');
+
+    titleEl.textContent = kind === 'img' ? '이미지 모델 선택' : '영상 모델 선택';
+    bodyEl.innerHTML = `
+      <div style="font-size:11px;color:var(--ink3);margin-bottom:12px">생성에 사용할 모델을 선택하세요</div>
+      <div style="display:flex;flex-direction:column;gap:8px;max-height:380px;overflow-y:auto">
+        ${list.map((m, i) => `
+          <div onclick="_pickModelChoice(${i})" style="cursor:pointer;padding:12px 14px;border-radius: 0;border:1px solid var(--line);background:var(--bg2);transition:.15s;display:flex;align-items:center;gap:10px"
+               onmouseover="this.style.borderColor='var(--pink)';this.style.background='rgba(255,107,157,.05)'"
+               onmouseout="this.style.borderColor='var(--line)';this.style.background='var(--bg2)'">
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:700;color:var(--cream);margin-bottom:2px">
+                ${m.label}${m.recommended ? ' <span style="font-size:9px;background:linear-gradient(135deg,#818cf8 0%,#c084fc 50%,#f472b6 100%);color:#fff;padding:2px 7px;border-radius: 0;margin-left:4px;font-weight:800">추천</span>' : ''}
+              </div>
+              <div style="font-size:11px;color:var(--ink3)">${m.sub}</div>
+            </div>
+            <div style="color:var(--pink);font-size:14px">→</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    document.getElementById('confirmModal').style.display = 'flex';
+    document.getElementById('confirmBackdrop').style.display = 'block';
+
+    // 취소 버튼만 보이게
+    const cancelBtn = document.querySelector('#confirmModal button:not(.btn-primary)');
+    const okBtn = document.querySelector('#confirmModal button.btn-primary');
+    if (cancelBtn) { cancelBtn.style.display = ''; cancelBtn.textContent = '취소'; }
+    if (okBtn) okBtn.style.display = 'none';
+
+    window._pickModelChoice = (i) => {
+      document.getElementById('confirmModal').style.display = 'none';
+      document.getElementById('confirmBackdrop').style.display = 'none';
+      if (okBtn) { okBtn.style.display = ''; okBtn.textContent = '확인'; }
+      // hidden select 동기화 (기존 로직 호환)
+      const sel = document.getElementById(kind === 'img' ? 'imgModel' : 'vidModel');
+      if (sel) {
+        for (const opt of sel.options) {
+          if (opt.value === list[i].value && (
+            (list[i].quality && opt.dataset.quality === list[i].quality) ||
+            (!list[i].quality && !opt.dataset.quality)
+          )) {
+            opt.selected = true;
+            break;
+          }
+        }
+      }
+      resolve(list[i]);
+    };
+
+    _confirmResolve = () => {
+      window._pickModelChoice = null;
+      if (okBtn) { okBtn.style.display = ''; okBtn.textContent = '확인'; }
+      resolve(null);
+    };
+  });
+}
+
+function showAngleInfo(label) {
+  const desc = ANGLE_DESCRIPTIONS[label];
+  if (!desc) return;
+  const imgKey = ANGLE_IMG_KEYS[label];
+  const imgSrc = imgKey ? ANGLE_IMAGES[imgKey] : '';
+
+  const titleEl = document.getElementById('confirmTitle');
+  const bodyEl = document.getElementById('confirmBody');
+  titleEl.textContent = label;
+  bodyEl.innerHTML = `
+    ${imgSrc ? `<img src="${imgSrc}" style="width:100%;border-radius: 0;margin-bottom:12px;background:#fff">` : ''}
+    <div style="margin-bottom:10px">
+      <div style="font-size:10px;color:var(--ink3);font-weight:700;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">설명</div>
+      <div style="font-size:13px;color:var(--cream);line-height:1.6">${escHtml(desc.ko)}</div>
+    </div>
+    <div>
+      <div style="font-size:10px;color:var(--ink3);font-weight:700;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">언제 쓰면 좋은지</div>
+      <div style="font-size:12px;color:var(--ink2);line-height:1.7">${escHtml(desc.use)}</div>
+    </div>
+  `;
+  // 확인 버튼만 보이게 — 취소 버튼 숨기기
+  document.getElementById('confirmModal').style.display = 'flex';
+  document.getElementById('confirmBackdrop').style.display = 'block';
+  // 취소 버튼 숨기기
+  const cancelBtn = document.querySelector('#confirmModal button:not(.btn-primary)');
+  if (cancelBtn) cancelBtn.style.display = 'none';
+  const okBtn = document.querySelector('#confirmModal button.btn-primary');
+  if (okBtn) {
+    okBtn.textContent = '닫기';
+    okBtn.style.flex = '1';
   }
+  _confirmResolve = () => {
+    if (cancelBtn) cancelBtn.style.display = '';
+    if (okBtn) okBtn.textContent = '확인';
+  };
+}
+
+function showAngleHelp() {
+  const titleEl = document.getElementById('confirmTitle');
+  const bodyEl = document.getElementById('confirmBody');
+  titleEl.textContent = '카메라 앵글 선택 가이드';
+  bodyEl.innerHTML = `
+    <div style="font-size:12px;line-height:1.8;color:var(--ink2)">
+      <p style="margin-bottom:10px">씬을 구성하는 <strong style="color:var(--cream)">4개의 카메라 앵글</strong>과 각 컷별 자유로운 설명을 설정하세요.</p>
+      <ul style="margin-left:14px;margin-bottom:10px">
+        <li><strong style="color:var(--cream)">CUT 카드(좌측)</strong>를 클릭하면 팝업이 열리고 28가지 앵글 중 선택할 수 있습니다.</li>
+        <li><strong style="color:var(--cream)">설명란(우측)</strong>에는 원하는 콘티・명장・감정 등을 자유롭게 입력할 수 있습니다 (선택 사항).</li>
+        <li>씬을 선택하면 자동으로 추천 앵글 4개가 채워집니다. 언제든 다른 앵글로 변경 가능합니다.</li>
+      </ul>
+      <p style="font-size:11px;color:var(--ink3);padding:8px;background:var(--bg2);border-radius:5px">💡 팁: 카메라 앵글은 <strong style="color:var(--cream)">영상의 시점</strong>을 결정하고, 설명은 그 컷의 <strong style="color:var(--cream)">콘텐트・감정・행동</strong>을 더해주는 제어 입력창입니다.</p>
+    </div>
+  `;
+  document.getElementById('confirmModal').style.display = 'flex';
+  document.getElementById('confirmBackdrop').style.display = 'block';
+  const cancelBtn = document.querySelector('#confirmModal button:not(.btn-primary)');
+  if (cancelBtn) cancelBtn.style.display = 'none';
+  const okBtn = document.querySelector('#confirmModal button.btn-primary');
+  if (okBtn) { okBtn.textContent = '닫기'; okBtn.style.flex = '1'; }
+  _confirmResolve = () => {
+    if (cancelBtn) cancelBtn.style.display = '';
+    if (okBtn) okBtn.textContent = '확인';
+  };
+}
+
+function initAnglePicker() {
+  const picker = document.getElementById('anglePicker');
+  picker.innerHTML = ANGLE_CATS.map(cat => `
+    <div style="margin-bottom:14px">
+      <div style="font-size:10px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;padding:0 4px">${escHtml(cat.cat)}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px">
+      ${cat.items.map(item => {
+        const imgKey = ANGLE_IMG_KEYS[item.label];
+        const imgSrc = imgKey ? ANGLE_IMAGES[imgKey] : '';
+        const desc = ANGLE_DESCRIPTIONS[item.label];
+        const tipText = desc ? `${desc.ko}\n\n[언제 쓰면 좋은지]\n${desc.use}` : item.tip;
+        return `
+        <div class="angle-card" data-angle="${escHtml(item.label)}" onclick="toggleAngle('${escHtml(item.label).replace(/'/g, "\\'")}', this)" style="position:relative;background:var(--bg3);border:2px solid var(--line);border-radius: 0;overflow:hidden;cursor:pointer;transition:.15s">
+          <div class="angle-num-badge" style="display:none;position:absolute;top:4px;left:4px;width:18px;height:18px;border-radius:50%;color:#000;font-size:10px;font-weight:800;align-items:center;justify-content:center;z-index:3"></div>
+          <div onclick="event.stopPropagation();showAngleInfo('${escHtml(item.label).replace(/'/g, "\\'")}')" style="position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.65);color:var(--cream);font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:3" title="설명 보기">?</div>
+          ${imgSrc ? `<img src="${imgSrc}" style="width:100%;aspect-ratio:1.4/1;object-fit:cover;display:block;background:#fff">` : `<div style="width:100%;aspect-ratio:1.4/1;background:var(--bg4)"></div>`}
+          <div style="padding:5px 6px;font-size:9px;font-weight:700;color:var(--ink2);text-align:center;line-height:1.3;min-height:30px;display:flex;align-items:center;justify-content:center">${escHtml(item.label)}</div>
+        </div>
+        `;
+      }).join('')}
+      </div>
+    </div>
+  `).join('');
+  refreshAnglePicker();
+}
+
+function toggleAngle(label, el) {
+  const idx = S.angles.indexOf(label);
+  if (idx !== -1) {
+    S.angles.splice(idx, 1);
+  } else {
+    if (S.angles.length >= 4) { toast('앵글은 4개까지만 선택 가능합니다'); return; }
+    S.angles.push(label);
+  }
+  refreshAnglePicker();
+  renderAngleSlots();
+  updatePromptPreview();
+}
+
+function refreshAnglePicker() {
+  const colors = ['#c8a04a','#3a70c0','#3e9660','#c03040'];
+  document.querySelectorAll('.angle-card').forEach(el => {
+    const label = el.dataset.angle;
+    const idx = S.angles.indexOf(label);
+    const badge = el.querySelector('.angle-num-badge');
+    if (idx !== -1) {
+      el.style.borderColor = colors[idx];
+      el.style.background = `${colors[idx]}22`;
+      badge.style.display = 'flex';
+      badge.style.background = colors[idx];
+      badge.textContent = idx + 1;
+    } else {
+      el.style.borderColor = 'var(--line)';
+      el.style.background = 'var(--bg3)';
+      badge.style.display = 'none';
+    }
+  });
+}
+
+function renderAngleSlots() {
+  const colors = ['var(--gold)','var(--blue)','var(--green)','var(--red)'];
+  const colorNames = ['골드','블루','그린','레드'];
+  const wrap = document.getElementById('angleSlots');
+  if (!wrap) return;
+  // S.cutDescriptions 안전 명시
+  if (!Array.isArray(S.cutDescriptions) || S.cutDescriptions.length !== 4) {
+    S.cutDescriptions = ['','','',''];
+  }
+  let html = '';
+  for (let i = 0; i < 4; i++) {
+    const angle = S.angles[i] || '';
+    const angleKo = angle && ANGLE_DESCRIPTIONS[angle] ? ANGLE_DESCRIPTIONS[angle].ko : '';
+    const desc = S.cutDescriptions[i] || '';
+    const color = colors[i];
+    html += `
+      <div style="display:flex;gap:8px;align-items:stretch">
+        <!-- 앵글 카드 (클릭 시 모달) -->
+        <div onclick="openAnglePickerModal(${i})" style="flex:0 0 140px;cursor:pointer;padding:10px 8px;border-radius: 0;border:1.5px solid ${angle ? color : 'var(--line)'};background:${angle ? `rgba(${i===0?'255,184,77':i===1?'96,165,250':i===2?'74,222,128':'255,85,119'},0.08)` : 'var(--bg3)'};text-align:center;transition:.15s;display:flex;flex-direction:column;justify-content:center" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'" title="클릭하여 앵글 선택">
+          <div style="font-size:11px;font-weight:800;color:${color};letter-spacing:1px">CUT ${i+1}</div>
+          ${angle ? `
+            <div style="font-size:10px;font-weight:700;color:var(--cream);margin-top:4px;line-height:1.2">${escHtml(angle)}</div>
+            <div style="font-size:9px;color:var(--ink3);margin-top:2px">${escHtml(angleKo)}</div>
+          ` : `
+            <div style="font-size:10px;color:var(--ink3);margin-top:6px">클릭하여 선택</div>
+          `}
+        </div>
+        <!-- 설명 textarea -->
+        <textarea
+          id="cutDesc${i}"
+          oninput="updateCutDescription(${i}, this.value)"
+          placeholder="컷 ${i+1} 설명 입력 (원하는 콘티・명장・감정 등) — 선택"
+          style="flex:1;min-height:64px;background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:8px 10px;color:var(--ink);font-size:11px;font-family:inherit;line-height:1.5;resize:vertical"
+        >${escHtml(desc)}</textarea>
+      </div>
+    `;
+  }
+  wrap.innerHTML = html;
+}
+
+function updateCutDescription(idx, value) {
+  if (!Array.isArray(S.cutDescriptions) || S.cutDescriptions.length !== 4) {
+    S.cutDescriptions = ['','','',''];
+  }
+  S.cutDescriptions[idx] = value || '';
+  if (typeof updatePromptPreview === 'function') updatePromptPreview();
+}
+
+// 앵글 선택 팝업 모달 열기
+let _anglePickerCutIdx = -1;
+function openAnglePickerModal(cutIdx) {
+  _anglePickerCutIdx = cutIdx;
+  const modal = document.getElementById('anglePickerModal');
+  if (!modal) {
+    console.error('[AnglePicker] modal not found');
+    return;
+  }
+  const colors = ['var(--gold)','var(--blue)','var(--green)','var(--red)'];
+  const rgbs = ['255,184,77','96,165,250','74,222,128','255,85,119'];
+  const lbl = document.getElementById('anglePickerCutLabel');
+  if (lbl) {
+    lbl.textContent = `CUT ${cutIdx + 1}`;
+    lbl.style.color = colors[cutIdx];
+  }
+  // ANGLE_CATS 구조: [{cat:'카테고리', items:[{label:'앵글명', tip:'설명'}, ...]}, ...]
+  const list = document.getElementById('anglePickerModalList');
+  if (!list) { console.error('[AnglePicker] list element not found'); return; }
+  let html = '';
+  if (typeof ANGLE_CATS !== 'undefined' && Array.isArray(ANGLE_CATS)) {
+    ANGLE_CATS.forEach(cat => {
+      const catName = cat.cat || cat.name || '';
+      const items = cat.items || cat.angles || [];
+      html += `<div style="margin-bottom:14px">
+        <div style="font-size:10px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">${escHtml(catName)}</div>`;
+      items.forEach(item => {
+        // item은 string일수도, {label, tip} 객체일수도 있음
+        const angle = (typeof item === 'string') ? item : (item.label || '');
+        if (!angle) return;
+        const meta = ANGLE_DESCRIPTIONS[angle] || {};
+        const ko = meta.ko || (typeof item === 'object' ? item.tip : '') || '';
+        const use = meta.use || '';
+        const isSelected = S.angles[cutIdx] === angle;
+        const safeAngle = angle.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        html += `
+          <div onclick="selectAngleForCut('${safeAngle}')"
+               style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-radius: 0;border:1px solid ${isSelected ? colors[cutIdx] : 'var(--line)'};background:${isSelected ? `rgba(${rgbs[cutIdx]},0.1)` : 'var(--bg3)'};margin-bottom:5px;cursor:pointer;transition:.12s"
+               onmouseover="this.style.background='var(--bg4)'"
+               onmouseout="this.style.background='${isSelected ? `rgba(${rgbs[cutIdx]},0.1)` : 'var(--bg3)'}'">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;font-weight:700;color:var(--cream)">${escHtml(angle)}</div>
+              <div style="font-size:10px;color:var(--ink2);margin-top:2px">${escHtml(ko)}</div>
+              ${use ? `<div style="font-size:9px;color:var(--ink3);margin-top:2px;font-style:italic">${escHtml(use)}</div>` : ''}
+            </div>
+            ${isSelected ? `<div style="flex:0 0 auto;font-size:18px;color:${colors[cutIdx]}">✓</div>` : ''}
+          </div>
+        `;
+      });
+      html += '</div>';
+    });
+  } else {
+    // 폴백 — ANGLE_DESCRIPTIONS 전체 렌더
+    Object.keys(ANGLE_DESCRIPTIONS).forEach(angle => {
+      const meta = ANGLE_DESCRIPTIONS[angle];
+      const isSelected = S.angles[cutIdx] === angle;
+      const safeAngle = angle.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      html += `
+        <div onclick="selectAngleForCut('${safeAngle}')" style="padding:8px 12px;border-radius: 0;border:1px solid ${isSelected ? colors[cutIdx] : 'var(--line)'};background:${isSelected ? `rgba(${rgbs[cutIdx]},0.1)` : 'var(--bg3)'};margin-bottom:5px;cursor:pointer">
+          <div style="font-size:12px;font-weight:700;color:var(--cream)">${escHtml(angle)}</div>
+          <div style="font-size:10px;color:var(--ink2);margin-top:2px">${escHtml(meta.ko)}</div>
+          <div style="font-size:9px;color:var(--ink3);margin-top:2px;font-style:italic">${escHtml(meta.use)}</div>
+        </div>
+      `;
+    });
+  }
+  list.innerHTML = html;
+  modal.style.display = 'flex';
+}
+
+function closeAnglePickerModal() {
+  const modal = document.getElementById('anglePickerModal');
+  if (modal) modal.style.display = 'none';
+  _anglePickerCutIdx = -1;
+}
+
+function selectAngleForCut(angleName) {
+  if (_anglePickerCutIdx < 0 || _anglePickerCutIdx > 3) return;
+  if (!Array.isArray(S.angles)) S.angles = ['','','',''];
+  while (S.angles.length < 4) S.angles.push('');
+  S.angles[_anglePickerCutIdx] = angleName;
+  closeAnglePickerModal();
+  renderAngleSlots();
+  if (typeof updatePromptPreview === 'function') updatePromptPreview();
+}
+
+function resetAngles() {
+  S.angles = [...SCENES[S.scene].angles];
+  renderAngleSlots();
+  if (typeof updatePromptPreview === 'function') updatePromptPreview();
+}
+
+// 레거시 함수 — 호출 안되지만 no-op으로 유지 (다른 도구난 삭제될 수 있으니있)
+function toggleCustomAngle() { /* 제거됨 — 팝업 적용으로 이주 */ }
+
+// 동기 버전 — 미리보기 / 즉시 표시용 (한글 그대로)
+function buildImagePrompt() {
+  const sc = SCENES[S.scene];
+  let charDesc = '';
+  if (S.avatars.length) {
+    charDesc = S.avatars.map(av => {
+      const parts = [av.gender, av.age, av.body];
+      if (av.hair) parts.push(av.hair);
+      if (av.extra) parts.push(av.extra);
+      if (av.outfit && av.outfit.trim()) parts.push(av.outfit.trim());
+      return av.name + ': ' + parts.join(', ');
+    }).join(' | ');
+  }
+  const loc = getCombinedLocation();
+  const bgDesc = [S.season, S.timeofday, S.weather, loc].filter(Boolean).join(', ');
+  let personDesc = '';
+  if (S.personCount > 0) {
+    personDesc = `${S.personCount} person${S.personCount>1?'s':''} in the scene`;
+    if (S.passerby) personDesc += `, with ${S.passerbyDensity}`;
+  }
+  const angleDesc = S.angles.filter(Boolean).map((a,i) => { const d = (S.cutDescriptions && S.cutDescriptions[i] || '').trim(); return `Panel ${i+1}: ${a}${d ? ' (' + d + ')' : ''}`;}).join(' | ');
+  const extra = document.getElementById('extraPrompt')?.value.trim() || '';
+
+  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Each panel shows the SAME Korean drama scene from a DIFFERENT camera angle.
+${charDesc ? 'CHARACTERS: ' + charDesc + '.' : ''}
+VISUAL STYLE: ${sc.style}.
+TIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.
+ENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}
+CAMERA ANGLES: ${angleDesc}.${extra ? '\nADDITIONAL: ' + extra + '.' : ''}
+WARDROBE: All characters wear clothing appropriate for ${S.season} weather and ${loc}. Outfits should match the season, weather, and environment naturally.
+All 4 panels share identical characters, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.`.trim();
+}
+
+// async 버전 — 실제 API 전송용 (한글 → 영어 번역)
+async function buildImagePromptForApi() {
+  const sc = SCENES[S.scene];
+  const loc = getCombinedLocation();
+  const extra = document.getElementById('extraPrompt')?.value.trim() || '';
+
+  // 한글 필드들 번역
+  log('info', '한글 필드 영어 번역 중...');
+  const locEn = await translateKoToEn(loc);
+  const extraEn = extra ? await translateKoToEn(extra) : '';
+
+  // 아바타 필드 번역
+  let charDesc = '';
+  if (S.avatars.length) {
+    const translatedAvs = await Promise.all(S.avatars.map(async av => ({
+      name: await translateKoToEn(av.name),
+      gender: av.gender,
+      age: av.age,
+      body: av.body,
+      hair: av.hair ? await translateKoToEn(av.hair) : '',
+      extra: av.extra ? await translateKoToEn(av.extra) : '',
+      outfit: av.outfit ? await translateKoToEn(av.outfit) : '',
+    })));
+    charDesc = translatedAvs.map(av => {
+      const parts = [av.gender, av.age, av.body];
+      if (av.hair) parts.push(av.hair);
+      if (av.extra) parts.push(av.extra);
+      if (av.outfit && av.outfit.trim()) parts.push(av.outfit.trim());
+      return av.name + ': ' + parts.join(', ');
+    }).join(' | ');
+  }
+
+  const bgDesc = [S.season, S.timeofday, S.weather, locEn].filter(Boolean).join(', ');
+  let personDesc = '';
+  if (S.personCount > 0) {
+    personDesc = `${S.personCount} person${S.personCount>1?'s':''} in the scene`;
+    if (S.passerby) personDesc += `, with ${S.passerbyDensity}`;
+  }
+  const angleDesc = S.angles.filter(Boolean).map((a,i) => { const d = (S.cutDescriptions && S.cutDescriptions[i] || '').trim(); return `Panel ${i+1}: ${a}${d ? ' (' + d + ')' : ''}`;}).join(' | ');
+
+  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Each panel shows the SAME Korean drama scene from a DIFFERENT camera angle.
+${charDesc ? 'CHARACTERS: ' + charDesc + '.' : ''}
+VISUAL STYLE: ${sc.style}.
+TIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.
+ENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}
+CAMERA ANGLES: ${angleDesc}.${extraEn ? '\nADDITIONAL: ' + extraEn + '.' : ''}
+WARDROBE: All characters wear clothing appropriate for ${S.season} weather and ${locEn}. Outfits should match the season, weather, and environment naturally.
+All 4 panels share identical characters, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.`.trim();
+}
+
+function updatePromptPreview() {
+  const el = document.getElementById('promptPreview');
+  if (el) el.textContent = buildImagePrompt();
+}
+
+async function goToStep2() {
+  // 통합된 tryGoStep으로 라우팅 (검증 + 팝업 일원화)
+  await tryGoStep(2);
+}
+
+// ════════════════════════════════════════════════════════════
+//  STEP 2: 4컷 이미지 생성
+// ════════════════════════════════════════════════════════════
+async function generateImage() {
+  const falKey = document.getElementById('falKey').value.trim();
+  if (!falKey) { toast('❌ fal.ai API 키를 입력해주세요'); return; }
+
+  // 이미지 모델 인라인 선택
+  const picked = await pickModel('img');
+  if (!picked) return;
+
+  // 선택 후 확인 팝업
+  const confirmOk = await showConfirm(
+    '이 모델로 4컷 생성',
+    `<div style="padding:8px 0">
+       <div style="font-size:14px;font-weight:700;color:var(--cream);margin-bottom:6px">${picked.label}</div>
+       <div style="font-size:12px;color:var(--ink2);margin-bottom:14px">${picked.sub}</div>
+       <div style="font-size:13px;color:var(--ink2)">해당 AI로 4컷 이미지를 생성하시겠습니까?</div>
+     </div>`
+  );
+  if (!confirmOk) return;
+
+  const model = picked.value;
+  const btn = document.getElementById('genImgBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> 생성 중...';
+
+  // 아바타 중 이미지 있는 것들만 레퍼런스로
+  const refImgs = S.avatars.filter(av => av.imgUrl).map(av => av.imgUrl);
+  // 이전 컷 이어서 만들기 체크 — 있으면 fal storage에 업로드 후 refImgs에 추가
+  if (S.continueRefDataUrl) {
+    try {
+      // 아직 업로드 안 된 경우에만 업로드
+      if (!S.continueRefPubUrl) {
+        const blob = dataURLtoBlob(S.continueRefDataUrl);
+        S.continueRefPubUrl = await uploadToFalStorage(falKey, blob, 'continue_ref.jpg');
+        log('info', '이전 컷 레퍼런스 업로드 완료');
+      }
+      refImgs.push(S.continueRefPubUrl);
+    } catch (e) {
+      log('warn', '이전 컷 레퍼런스 업로드 실패 — 아바타만 사용: ' + e.message);
+    }
+  }
+  const useRef = refImgs.length > 0;
+
+  document.getElementById('quad').innerHTML = `
+    <div style="grid-column:1/-1;grid-row:1/-1;display:flex;align-items:center;justify-content:center;background:#0a0a0c;flex-direction:column;gap:10px">
+      <div class="spin" style="width:28px;height:28px;border-width:3px"></div>
+      <div style="font-size:11px;color:var(--ink2)">한글 필드 번역 중...</div>
+    </div>`;
+
+  let prompt;
+  try {
+    prompt = await buildImagePromptForApi();
+  } catch(e) {
+    log('err', '프롬프트 빌드 실패: ' + e.message);
+    prompt = buildImagePrompt();
+  }
+
+  log('info', `이미지 생성 시작 — ${model}${useRef ? ' (아바타 ' + refImgs.length + '개 레퍼런스)' : ''}`);
+  log('info', `프롬프트: ${prompt.slice(0,80)}...`);
+
+  document.getElementById('quad').innerHTML = `
+    <div style="grid-column:1/-1;grid-row:1/-1;display:flex;align-items:center;justify-content:center;background:#0a0a0c;flex-direction:column;gap:10px">
+      <div class="spin" style="width:28px;height:28px;border-width:3px"></div>
+      <div style="font-size:11px;color:var(--ink2)">4컷 이미지 생성 중...</div>
+    </div>`;
+
+  try {
+    const url = useRef
+      ? await callFalImageWithRef(falKey, model, prompt, getGridSize(), refImgs)
+        : await callFalImage(falKey, model, prompt, getGridSize());
+    S.gridPubUrl = url;
+
+    // 이미지 로드 & 표시
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    await new Promise((res, rej) => { img.onload=res; img.onerror=rej; img.src=url; });
+
+    // canvas로 4컷 분할
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    S.gridDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+
+    const hw = Math.floor(img.naturalWidth/2), hh = Math.floor(img.naturalHeight/2);
+    const positions = [[0,0],[hw,0],[0,hh],[hw,hh]];
+    for (let i=0; i<4; i++) {
+      const cc = document.createElement('canvas');
+      cc.width=hw; cc.height=hh;
+      const cx = cc.getContext('2d');
+      cx.drawImage(img, positions[i][0], positions[i][1], hw, hh, 0, 0, hw, hh);
+      S.cutDataUrls[i] = cc.toDataURL('image/jpeg', 0.92);
+    }
+
+    // quad 렌더
+    renderQuad();
+    document.getElementById('cutCtrlWrap').style.display = '';
+    renderCutControls();
+
+    // 비용 추가
+    const sel = document.getElementById('imgModel');
+    const cpm = parseFloat(sel.options[sel.selectedIndex]?.dataset?.cpm) || 0.07;
+    addImgCost(cpm);
+
+    log('ok', '4컷 이미지 생성 완료');
+    toast('✅ 이미지 생성 완료!');
+  } catch(e) {
+    log('err', '이미지 생성 실패: ' + e.message);
+    toast('❌ ' + e.message);
+    document.getElementById('quad').innerHTML = `<div style="grid-column:1/-1;grid-row:1/-1;display:flex;align-items:center;justify-content:center;color:var(--red);font-size:12px">생성 실패. 다시 시도해주세요.</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🎨 4컷 이미지 생성';
+  }
+}
+
+function renderQuad() {
+  const colors = ['#c8a04a','#3a70c0','#3e9660','#c03040'];
+  const quad = document.getElementById('quad');
+  if (!S.cutDataUrls[0]) return;
+  quad.innerHTML = S.cutDataUrls.map((url, i) => `
+    <div class="qcell" style="${!S.cutApproval[i] ? 'opacity:.4' : ''}">
+      ${url ? `<img src="${url}">` : '<div style="background:#111;width:100%;height:100%"></div>'}
+      <div class="q-badge" style="background:rgba(0,0,0,.75);border:1px solid ${colors[i]}40;color:${colors[i]}">${S.angles[i] || '컷'+(i+1)}</div>
+      <div class="q-num" style="background:${colors[i]}cc">컷${i+1}</div>
+      ${url ? `<div onclick="downloadImage(S.cutDataUrls[${i}], 'korart_cut${i+1}_${Date.now()}.jpg')" style="position:absolute;bottom:6px;right:6px;font-size:11px;padding:4px 8px;border-radius: 0;background:rgba(0,0,0,.7);color:#fff;cursor:pointer;border:1px solid rgba(255,255,255,.2)" title="이 컷 저장">💾</div>` : ''}
+      ${!S.cutApproval[i] ? '<div style="position:absolute;top:6px;right:6px;font-size:9px;padding:2px 6px;border-radius: 0;background:rgba(192,48,64,.8);color:#fff">제외</div>' : ''}
+    </div>
+  `).join('');
+}
+
+function renderCutControls() {
+  const grid = document.getElementById('cutCtrlGrid');
+  const colors = ['#c8a04a','#3a70c0','#3e9660','#c03040'];
+  grid.innerHTML = S.cutDataUrls.map((url, i) => `
+    <div style="background:var(--bg2);border:1px solid ${S.cutApproval[i] ? colors[i]+'60' : 'var(--line)'};border-radius: 0;padding:10px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        ${url ? `<img src="${url}" style="width:48px;height:32px;object-fit:cover;border-radius: 0;border:1px solid var(--line)">` : ''}
+        <div>
+          <div style="font-size:11px;font-weight:700;color:${colors[i]}">컷${i+1}</div>
+          <div style="font-size:9px;color:var(--ink3)">${S.angles[i]||''}</div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:4px">
+          <div onclick="setCutApproval(${i},true)" style="cursor:pointer;padding:3px 8px;border-radius: 0;font-size:10px;font-weight:700;border:1px solid ${S.cutApproval[i]?'var(--green)':'var(--line)'};background:${S.cutApproval[i]?'rgba(62,150,96,.15)':'var(--bg3)'};color:${S.cutApproval[i]?'var(--green)':'var(--ink3)'}">✓</div>
+          <div onclick="setCutApproval(${i},false)" style="cursor:pointer;padding:3px 8px;border-radius: 0;font-size:10px;font-weight:700;border:1px solid ${!S.cutApproval[i]?'var(--red)':'var(--line)'};background:${!S.cutApproval[i]?'rgba(192,48,64,.12)':'var(--bg3)'};color:${!S.cutApproval[i]?'var(--red)':'var(--ink3)'}">✕</div>
+        </div>
+      </div>
+      <!-- 영상 설정 (승인된 컷만) -->
+      ${S.cutApproval[i] ? `
+      <div style="border-top:1px solid var(--line)'${S.cutApproval[i] ? '' : ';opacity:.5'};padding-top:8px;margin-top:4px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+          <label style="font-size:10px;color:var(--ink3)">영상 길이</label>
+          <select onchange="S.cutDurations[${i}]=parseInt(this.value)" style="background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:3px 6px;color:var(--ink);font-size:11px">
+            ${[3,4,5,6,7,8,9,10,11,12,13,14,15].map(n=>`<option value="${n}" ${S.cutDurations[i]===n?'selected':''}>${n}초</option>`).join('')}
+          </select>
+          <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--ink3);margin-left:auto;cursor:pointer">
+            <input type="checkbox" ${S.cutAudio[i]?'checked':''} onchange="S.cutAudio[${i}]=this.checked"> 오디오
+          </label>
+        </div>
+      </div>
+      ` : ''}
+    </div>
+  `).join('');
+  updateGoVidBtn();
+}
+
+function setCutApproval(i, v) {
+  S.cutApproval[i] = v;
+  renderQuad();
+  renderCutControls();
+}
+
+function updateGoVidBtn() {
+  const approved = S.cutApproval.filter(Boolean).length;
+  const btn = document.getElementById('goVidBtn');
+  if (btn) {
+    btn.disabled = approved === 0;
+    btn.textContent = approved > 0 ? `🎬 영상 생성으로 → (${approved}컷 선택됨)` : '🎬 영상 생성으로 →';
+  }
+}
+
+async function goToStep3() {
+  const approved = S.cutApproval.map((ok,i)=>ok?i:-1).filter(i=>i>=0);
+  if (!approved.length) { toast('❌ 승인된 컷이 없습니다'); return; }
+
+  // CDN 업로드 (영상 생성에 필요)
+  const falKey = document.getElementById('falKey').value.trim();
+  if (!falKey) { toast('❌ fal.ai API 키를 입력해주세요'); return; }
+
+  toast('⏳ 컷 이미지 업로드 중...');
+  for (const i of approved) {
+    if (!S.cutPubUrls[i] && S.cutDataUrls[i]) {
+      try {
+        log('info', `컷${i+1} CDN 업로드 중...`);
+        const blob = dataURLtoBlob(S.cutDataUrls[i]);
+        S.cutPubUrls[i] = await uploadToFalStorage(falKey, blob, `cut_${i}.jpg`);
+      if (typeof saveSession === 'function') saveSession();
+        log('ok', `컷${i+1} 업로드 완료: ${S.cutPubUrls[i].slice(0,50)}`);
+      } catch(e) {
+        log('warn', `컷${i+1} 업로드 실패: ${e.message}`);
+      }
+    }
+  }
+
+  goStep(5);
+  renderVidCards();
+}
+
+// ════════════════════════════════════════════════════════════
+//  STEP 3: 컷별 영상 생성
+// ════════════════════════════════════════════════════════════
+// Kling 영상 생성 시 차단할 요소 (negative_prompt)
+const KLING_NEGATIVE_PROMPT = [
+  // 유명인/실존 인물 차단
+  'celebrity', 'famous person', 'real actor', 'movie star', 'public figure',
+  'recognizable person', 'real-world person', 'identifiable celebrity',
+  // 추가 인물/행인 차단
+  'extra people', 'background extras', 'crowd', 'bystanders', 'passersby',
+  'additional characters', 'random people appearing', 'people walking by',
+  'unexpected character entering frame', 'new person appearing',
+  // 얼굴 변형/왜곡 차단
+  'face morphing', 'changing face', 'distorted face', 'face swap',
+  'different person', 'face replacement', 'multiple faces blending',
+  // 일반적인 품질 문제
+  'blurry', 'low quality', 'distorted', 'deformed', 'extra limbs',
+  'duplicated person', 'cloned faces', 'mismatched features',
+].join(', ');
+
+function buildVidPrompt(i) {
+  // 영상 프롬프트 — 510자 cap (Kling API 한계 절대 준수)
+  //
+  // 자릿수 분해 (가장 무거운 케이스: 1920년 경성 + romance 4명, 이름 평균 7자×4):
+  //   "Korean drama. "(14)
+  //   + era 한글(24)             ex) "1920년대 경성, 일제강점기, 모던보이 모던걸"
+  //   + ". "(2)
+  //   + scene.vidStyle(40)       ex) "warm golden hour, romantic, soft bokeh"
+  //   + ". "(2)
+  //   + ctx 한글+장소영문(27)    ex) "봄, 황혼, 맑음, Han River park"
+  //   + ". Camera: "(10)
+  //   + angle(21)                ex) "Medium Close-up (MCU)"
+  //   + ". "(2)
+  //   + charLock 원본형식(~155)  ex) "EXACTLY 4 original fictional characters (A and B and C and D),
+  //                                   fictional characters only. Faces MUST match reference photos exactly."
+  //   = ~297자 고정부
+  // 510자 cap 안에서 자유 입력(컷 설명+감정) ~213자 여유
+
+  const sc = SCENES[S.scene];
+  const loc = getCombinedLocation();
+
+  // 컷별 출연 필터
+  const cutsForAv = (av) => {
+    const libId = av._libId || av.id;
+    return S.avatarCuts && Array.isArray(S.avatarCuts[libId]) ? S.avatarCuts[libId] : [0,1,2,3];
+  };
+  const cutAvatars = S.avatars.filter(av => cutsForAv(av).includes(i));
+  const charCount = cutAvatars.length;
+
+  // 캐릭터 일관성 락 — 원본 형식 (이름·인원수 자동, 강한 명시)
+  const charNames = cutAvatars.map(av => av.name).join(' and ') || 'no one';
+  const charLock = charCount > 0
+    ? `EXACTLY ${charCount} original fictional character${charCount>1?'s':''} (${charNames}), fictional characters only. Faces MUST match reference photos exactly.`
+    : 'No people, no characters visible.';
+
+  const cam = S.angles[i] || 'cinematic';
+
+  // 시대 키워드 (한글)
+  const eraKw = ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern;
+
+  // 씬 분위기 (영상용 짧은 버전)
+  const sceneStyle = (sc && (sc.vidStyle || sc.style)) || '';
+
+  // 컨텍스트 — 한국어 계절/시간/날씨 + 영문 장소
+  const ctxParts = [S.season, S.timeofday, S.weather].filter(Boolean);
+  const locShort = (loc || '').slice(0, 60);
+  if (locShort) ctxParts.push(locShort);
+  const ctx = ctxParts.join(', ');
+
+  // 골격 조립
+  let p = `Korean drama. ${eraKw}. ${sceneStyle}.`;
+  if (ctx) p += ` ${ctx}.`;
+  p += ` Camera: ${cam}. ${charLock}`;
+
+  // 컷별 설명
+  const cutDesc = (S.cutDescriptions && S.cutDescriptions[i] || '').trim();
+  if (cutDesc) p += ` ${cutDesc}.`;
+
+  // 컷별 감정
+  const emotion = (S.cutEmotions && S.cutEmotions[i] || '').trim();
+  if (emotion) p += ` Emotion: ${emotion}.`;
+
+  // 510자 안전 캡 — Kling API 한계 절대 준수
+  if (p.length > 510) p = p.slice(0, 507) + '...';
+  return p;
 }
 // 대사 글자 수 카운터 업데이트 (초당 4글자 기준)
 function updateScriptCounter(i) {
