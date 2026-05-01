@@ -1758,21 +1758,9 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <div class="segs" id="locationSegs" style="flex-wrap:wrap"><!-- 동적 렌더링 --></div>
 
         <!-- 이동 수단 펼침 패널 -->
-        <div id="vehiclePanel" style="display:none;margin-top:8px;padding:10px 12px;background:var(--bg3);border:1px solid var(--line);border-radius:8px">
+        <div id="vehiclePanel" style="display:none;margin-top:8px;padding:10px 12px;background:var(--bg3);border:1px solid var(--line);border-radius:0">
           <div style="font-size:10px;color:var(--ink3);margin-bottom:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase">이동 수단</div>
-          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
-            <div class="seg vehicle-seg" id="vehicle-boat" onclick="selVehicle('boat')">배</div>
-            <label style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--ink2);cursor:pointer;padding:4px 8px;border-radius: 0;background:var(--bg2);border:1px solid var(--line);user-select:none">
-              <input type="checkbox" id="boatLux" onchange="updateVehicleSel('boat')" style="margin:0">고급
-            </label>
-            <div class="seg vehicle-seg" id="vehicle-car" onclick="selVehicle('car')">자동차</div>
-            <label style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--ink2);cursor:pointer;padding:4px 8px;border-radius: 0;background:var(--bg2);border:1px solid var(--line);user-select:none">
-              <input type="checkbox" id="carLux" onchange="updateVehicleSel('car')" style="margin:0">고급
-            </label>
-            <div class="seg vehicle-seg" id="vehicle-subway" onclick="selVehicle('subway')">지하철</div>
-            <div class="seg vehicle-seg" id="vehicle-bus" onclick="selVehicle('bus')">버스</div>
-            <div class="seg vehicle-seg" id="vehicle-plane" onclick="selVehicle('plane')">비행기</div>
-          </div>
+          <div id="vehiclePanelInner" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><!-- 동적 렌더링 --></div>
         </div>
 
         <input id="locCustomInput" placeholder="수식어 또는 단독 장소 입력: 예) 고급진 / 낡은 / 어두운 (또는 단독으로: rooftop at night)" style="display:none;margin-top:6px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:6px 8px;color:var(--ink);font-size:12px">
@@ -2471,6 +2459,69 @@ const LOCATIONS_BY_ERA = {
     { ko: '만화방',       en: 'indoor retro Korean comic book cafe, shelves of manga' },
   ],
 };
+
+// === 시대별 이동 수단 옵션 ===
+const VEHICLES_BY_ERA = {
+  modern: [
+    { id: 'car',     ko: '자동차',   en: 'inside a regular passenger car interior',
+      hasLux: true, luxEn: 'inside a luxury car with premium leather interior, modern dashboard' },
+    { id: 'subway',  ko: '지하철',   en: 'inside a subway train, public transit interior' },
+    { id: 'bus',     ko: '버스',     en: 'inside a city bus interior with seats' },
+    { id: 'plane',   ko: '비행기',   en: 'inside an airplane cabin, passenger seats and aisle' },
+    { id: 'boat',    ko: '배',       en: 'on a small fishing boat',
+      hasLux: true, luxEn: 'inside a luxury yacht with premium interior, rich wooden details' },
+    { id: 'bike',    ko: '자전거',   en: 'riding a bicycle on a city street' },
+    { id: 'motor',   ko: '오토바이', en: 'riding a motorcycle on a road' },
+  ],
+  historical: [
+    { id: 'horse',   ko: '말',       en: 'riding a horse, traditional Joseon era horseback' },
+    { id: 'cart',    ko: '마차',     en: 'inside a traditional Korean wooden cart pulled by ox' },
+    { id: 'gama',    ko: '가마',     en: 'inside a traditional Korean palanquin gama, royal sedan chair',
+      hasLux: true, luxEn: 'inside an ornate royal Korean palanquin gama with golden decorations' },
+    { id: 'boat',    ko: '나룻배',   en: 'on a small traditional Korean wooden river boat' },
+    { id: 'walk',    ko: '도보',     en: 'walking on a traditional Korean village path' },
+  ],
+  gyeongseong: [
+    { id: 'rickshaw', ko: '인력거',  en: '1920s Korean rickshaw, traditional human-pulled cart' },
+    { id: 'tram',     ko: '전차',    en: 'inside a 1920s Gyeongseong tram, vintage streetcar' },
+    { id: 'car',      ko: '자동차',  en: 'inside a 1920s vintage Korean car, early automobile interior',
+      hasLux: true, luxEn: 'inside a 1920s luxury vintage automobile with chauffeur, leather seats' },
+    { id: 'train',    ko: '기차',    en: 'inside a 1920s Gyeongseong steam train carriage, vintage rail interior' },
+    { id: 'bike',     ko: '자전거',  en: 'riding a vintage 1920s bicycle on Gyeongseong street' },
+  ],
+  retro: [
+    { id: 'car',      ko: '자동차',  en: 'inside a vintage retro Korean car interior',
+      hasLux: true, luxEn: 'inside a retro luxury Korean car with leather seats, vintage dashboard' },
+    { id: 'subway',   ko: '지하철',  en: 'inside a retro Korean subway train, vintage public transit' },
+    { id: 'bus',      ko: '버스',    en: 'inside a retro Korean bus, old fashioned bus interior' },
+    { id: 'plane',    ko: '비행기',  en: 'inside a retro airplane cabin' },
+    { id: 'bike',     ko: '자전거',  en: 'riding a retro Korean bicycle' },
+    { id: 'motor',    ko: '오토바이', en: 'riding a vintage Korean motorcycle' },
+  ],
+};
+
+function getVehiclesForCurrentEra() {
+  const eraKey = S.era || 'modern';
+  if (VEHICLES_BY_ERA[eraKey]) return VEHICLES_BY_ERA[eraKey];
+  const group = (ERAS[eraKey] && ERAS[eraKey].group) || 'modern';
+  return VEHICLES_BY_ERA[group] || VEHICLES_BY_ERA.modern;
+}
+
+function renderVehicleOptions() {
+  const wrap = document.getElementById('vehiclePanelInner');
+  if (!wrap) return;
+  const vehs = getVehiclesForCurrentEra();
+  let html = '';
+  for (const v of vehs) {
+    html += '<div class="seg vehicle-seg" id="vehicle-' + v.id + '" onclick="selVehicle(\'' + v.id + '\')">' + v.ko + '</div>';
+    if (v.hasLux) {
+      html += '<label style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--ink2);cursor:pointer;padding:4px 8px;border-radius:0;background:var(--bg2);border:1px solid var(--line);user-select:none">';
+      html += '<input type="checkbox" id="' + v.id + 'Lux" onchange="updateVehicleSel(\'' + v.id + '\')" style="margin:0">고급';
+      html += '</label>';
+    }
+  }
+  wrap.innerHTML = html;
+}
 
 function getLocationsForCurrentEra() {
   const eraKey = S.era || 'modern';
@@ -4286,7 +4337,9 @@ function selectEra(key) {
   // 시대 변경 시 장소 옵션 재렌더 + 현재 선택 초기화
   if (typeof renderLocationOptions === 'function') {
     S.location = '';
+    S.vehicle = '';
     renderLocationOptions();
+    if (typeof renderVehicleOptions === 'function') renderVehicleOptions();
     if (typeof updatePromptPreview === 'function') updatePromptPreview();
   }
 }
@@ -4399,6 +4452,7 @@ function selScene(key, el) {
 function restoreSceneUI() {
   // 시대별 장소 옵션 렌더
   if (typeof renderLocationOptions === 'function') renderLocationOptions();
+  if (typeof renderVehicleOptions === 'function') renderVehicleOptions();
 
   // 계절/시간/날씨/장소 segs 동기화
   const syncSeg = (containerSel, key) => {
@@ -4526,19 +4580,17 @@ function selVehicle(vehicle) {
 
   document.getElementById('vehicleToggleBtn').classList.add('active');
 
-  let val;
-  const isLux = (vehicle === 'boat' && document.getElementById('boatLux').checked) ||
-                (vehicle === 'car'  && document.getElementById('carLux').checked);
-
-  switch(vehicle) {
-    case 'boat':   val = isLux ? 'inside a luxury yacht with premium interior, rich wooden details' : 'on a small wooden fishing boat'; break;
-    case 'car':    val = isLux ? 'inside a luxury car with premium leather interior, modern dashboard' : 'inside a regular passenger car interior'; break;
-    case 'subway': val = 'inside a subway train, public transit interior'; break;
-    case 'bus':    val = 'inside a city bus interior with seats'; break;
-    case 'plane':  val = 'inside an airplane cabin, passenger seats and aisle'; break;
-    default: val = '';
+  // 데이터 기반: 현재 시대의 vehicles에서 id 매칭
+  const vehs = (typeof getVehiclesForCurrentEra === 'function') ? getVehiclesForCurrentEra() : [];
+  const v = vehs.find(x => x.id === vehicle);
+  let val = '';
+  if (v) {
+    const luxBox = v.hasLux ? document.getElementById(v.id + 'Lux') : null;
+    const isLux = luxBox && luxBox.checked;
+    val = (isLux && v.luxEn) ? v.luxEn : v.en;
   }
 
+  S.vehicle = vehicle;
   S.location = val;
   S.locCustom = false;
   const locInput = document.getElementById('locCustomInput');
@@ -4550,7 +4602,7 @@ function updateVehicleSel(vehicle) {
   const target = document.getElementById('vehicle-' + vehicle);
   if (target && target.classList.contains('active')) {
     selVehicle(vehicle);
-    toast(vehicle === 'boat' ? '🚤 배 옵션 갱신' : '🚗 자동차 옵션 갱신');
+    toast('이동수단 옵션 갱신');
   }
 }
 
