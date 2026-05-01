@@ -1684,13 +1684,13 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <!-- 선택된 씬 표시 -->
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:14px 18px;background:var(--bg2);border:1px solid var(--line);border-radius:0">
       <div style="display:flex;flex-direction:column;gap:4px">
-        <span style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;font-family:'JetBrains Mono',monospace">선택된 씬</span>
+        <span style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700">선택된 씬</span>
         <span id="selectedSceneLabel" style="font-size:18px;font-weight:800;color:var(--pink);letter-spacing:-.02em">로맨스</span>
       </div>
       <div style="width:1px;height:32px;background:var(--line)"></div>
       <div style="display:flex;flex-direction:column;gap:4px">
-        <span style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;font-family:'JetBrains Mono',monospace">시대 배경</span>
-        <span id="selectedEraLabel" style="font-size:14px;font-weight:700;color:var(--cream);letter-spacing:-.01em">현대 한국</span>
+        <span style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700">시대 배경</span>
+        <span id="selectedEraLabel" style="font-size:14px;font-weight:700;color:var(--cream);letter-spacing:-.01em">현대극</span>
       </div>
       <div style="margin-left:auto;display:flex;gap:6px">
         <button class="btn btn-sm" onclick="saveSceneDetailToCloud()" title="씬 상세 설정을 클라우드에 저장" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">+ 클라우드 저장</button>
@@ -3177,7 +3177,7 @@ function updateScenePanelHeader(sub) {
     if (selLabel) selLabel.textContent = label;
     const eraLabel = document.getElementById('selectedEraLabel');
     if (eraLabel) {
-      const eraName = (typeof ERAS !== 'undefined' && ERAS[S.era]) ? ERAS[S.era].name : '현대 한국';
+      const eraName = (typeof ERAS !== 'undefined' && ERAS[S.era]) ? ERAS[S.era].ko : '현대극';
       eraLabel.textContent = eraName;
     }
   }
@@ -4435,6 +4435,11 @@ function selectEra(key) {
     }
     if (typeof renderStep1Avatars === 'function') renderStep1Avatars();
     if (typeof updatePromptPreview === 'function') updatePromptPreview();
+  }
+  // 4단계 박스의 시대 라벨 즉시 갱신
+  const __eraLabel = document.getElementById('selectedEraLabel');
+  if (__eraLabel && ERAS[key]) {
+    __eraLabel.textContent = ERAS[key].ko;
   }
 }
 
