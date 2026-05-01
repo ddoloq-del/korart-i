@@ -3103,6 +3103,7 @@ function showConfirm(title, body) {
   document.getElementById('confirmTitle').textContent = title;
   document.getElementById('confirmBody').innerHTML = body;
   document.getElementById('confirmModal').style.display = 'flex';
+  document.getElementById('confirmModal').style.zIndex = '99999';
   document.getElementById('confirmBackdrop').style.display = 'block';
   return new Promise(res => { _confirmResolve = res; });
 }
@@ -3338,12 +3339,18 @@ async function tryGoStep(n) {
     if (m.length) allMissing.push(...m.map(x => `[${STEP_LABELS[s]}] ${x}`));
   }
   if (allMissing.length > 0) {
-    const ok = await showConfirm(
-      '아직 설정이 안된 부분이 있습니다',
-      `다음 항목이 비어 있거나 미완료 상태입니다:<br><br>
-       <strong style="color:var(--pink)">${allMissing.join(', ')}</strong><br><br>
-       이대로 적용 없이 진행할까요?`
-    );
+    let ok = false;
+    try {
+      ok = await showConfirm(
+        '아직 설정이 안된 부분이 있습니다',
+        `다음 항목이 비어 있거나 미완료 상태입니다:<br><br>
+         <strong style="color:var(--pink)">${allMissing.join(', ')}</strong><br><br>
+         이대로 적용 없이 진행할까요?`
+      );
+    } catch (e) {
+      console.error('[tryGoStep] showConfirm 실패:', e);
+      ok = window.confirm('다음 항목이 비어있습니다:\n\n' + allMissing.join(', ') + '\n\n이대로 진행할까요?');
+    }
     if (!ok) return;
   }
   goStep(n);
