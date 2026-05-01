@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>마이페이지 — Korart</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+
+<style>
+:root {
+  --bg:    #020617;
+  --bg2:   #0f172a;
+  --bg3:   #1e293b;
+  --bg4:   #334155;
+  --line:  #1e293b;
+  --line2: #334155;
+  --ink:   #f1f5f9;
+  --ink2:  #94a3b8;
+  --ink3:  #64748b;
+  --cream: #f1f5f9;
+  --pink:  #6366f1;
+  --pink2: #4f46e5;
+  --coral: #a78bfa;
+  --gold:  #a78bfa;
+  --gold2: #8b5cf6;
+  --green: #4ade80;
+  --red:   #ef4444;
+  --blue:  #60a5fa;
+  --teal:  #5eead4;
+  font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.5;
+}
+
+/* ── Topbar ── */
+.topbar {
+  border-bottom: 1px solid var(--line);
+  padding: 14px 32px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: rgba(2, 6, 23, 0.85);
+  backdrop-filter: blur(8px);
+}
+.brand {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.brand-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--pink);
+  box-shadow: 0 0 12px var(--pink);
+}
+.brand-text { color: var(--ink); }
+.brand-sub {
+  font-size: 11px;
+  color: var(--ink3);
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.user-greeting {
+  font-size: 13px;
+  color: var(--ink2);
+}
+.user-greeting strong {
+  color: var(--cream);
+  font-weight: 700;
+}
+
+.btn {
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  color: var(--ink);
+  padding: 8px 14px;
+  border-radius: 0;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: .15s;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+}
+.btn:hover { background: var(--bg4); border-color: var(--pink); }
+.btn-primary {
+  background: var(--pink);
+  border-color: var(--pink);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--pink2); border-color: var(--pink2); }
+.btn-ghost { background: transparent; border-color: var(--line); }
+.btn-ghost:hover { background: var(--bg3); }
+.btn-sm { padding: 6px 10px; font-size: 12px; }
+
+/* ── Main wrap ── */
+.wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 32px 80px;
+}
+
+/* ── Hero greeting ── */
+.hero {
+  margin-bottom: 56px;
+}
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pink);
+  font-weight: 600;
+  margin-bottom: 18px;
+  padding: 9px 18px;
+  border: 1px solid rgba(99, 102, 241, 0.45);
+  background: rgba(2, 6, 23, 0.6);
+}
+.hero-eyebrow::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(74, 222, 128, .8);
+}
+.hero h1 {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 800;
+  letter-spacing: -.025em;
+  line-height: 1.15;
+  margin-bottom: 12px;
+}
+.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #f472b6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+}
+.hero p {
+  font-size: 16px;
+  color: var(--ink2);
+  max-width: 560px;
+}
+
+/* ── Two big action buttons ── */
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 64px;
+}
+.action-card {
+  position: relative;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  padding: 32px 28px;
+  cursor: pointer;
+  transition: .2s;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 180px;
+  overflow: hidden;
+}
+.action-card:hover {
+  border-color: var(--pink);
+  background: var(--bg3);
+  transform: translateY(-2px);
+}
+.action-card::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 60%);
+  pointer-events: none;
+  transition: .3s;
+}
+.action-card:hover::before {
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, transparent 60%);
+}
+.action-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+.action-card .action-cat {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+  color: var(--ink3);
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+.action-card h3 {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  color: var(--cream);
+  margin-top: 4px;
+}
+.action-card p {
+  font-size: 13px;
+  color: var(--ink2);
+  line-height: 1.5;
+}
+.action-card .arrow {
+  margin-top: auto;
+  font-size: 20px;
+  color: var(--pink);
+  font-weight: 700;
+}
+
+/* ── Asset section ── */
+.asset-section {
+  display: none;
+}
+.asset-section.active {
+  display: block;
+}
+.asset-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.asset-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  color: var(--cream);
+}
+
+/* tabs */
+.asset-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  overflow-x: auto;
+}
+.asset-tab {
+  padding: 12px 18px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink3);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  white-space: nowrap;
+  transition: .15s;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  font-family: inherit;
+  letter-spacing: -.01em;
+}
+.asset-tab:hover { color: var(--ink2); }
+.asset-tab.active {
+  color: var(--cream);
+  font-weight: 700;
+  border-bottom-color: var(--pink);
+}
+.asset-tab .count {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink3);
+  margin-left: 6px;
+}
+.asset-tab.active .count { color: var(--pink); }
+
+/* asset grid */
+.asset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+.asset-card {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  transition: .15s;
+  position: relative;
+}
+.asset-card:hover {
+  border-color: var(--pink);
+}
+.asset-card-thumb {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: var(--bg3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  color: var(--ink3);
+  overflow: hidden;
+  position: relative;
+}
+.asset-card-thumb img,
+.asset-card-thumb video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.asset-card-body {
+  padding: 12px 14px;
+}
+.asset-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cream);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+.asset-card-meta {
+  font-size: 10px;
+  color: var(--ink3);
+}
+.asset-card-actions {
+  display: flex;
+  gap: 4px;
+  padding: 0 12px 12px;
+}
+.asset-card-actions .btn { flex: 1; font-size: 11px; padding: 5px 8px; }
+.asset-card-actions .btn-red {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: var(--red);
+}
+.asset-card-actions .btn-red:hover {
+  background: var(--red);
+  color: #fff;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--ink3);
+}
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+.empty-state p {
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+.empty-state .btn-primary {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--ink3);
+  font-size: 13px;
+}
+.spin {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--line2);
+  border-top-color: var(--pink);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--bg3);
+  color: var(--ink);
+  padding: 12px 20px;
+  border: 1px solid var(--line2);
+  font-size: 13px;
+  z-index: 100;
+  opacity: 0;
+  transition: .2s;
+  pointer-events: none;
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* Modal — preview */
+.preview-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+.preview-modal.active { display: flex; }
+.preview-modal-content {
+  background: var(--bg2);
+  border: 1px solid var(--line2);
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: auto;
+  position: relative;
+}
+.preview-modal-close {
+  position: absolute;
+  top: 12px; right: 16px;
+  background: none;
+  border: none;
+  color: var(--ink3);
+  font-size: 22px;
+  cursor: pointer;
+  z-index: 10;
+}
+.preview-modal-close:hover { color: var(--ink); }
+.preview-modal-body { padding: 32px; }
+.preview-modal-body img,
+.preview-modal-body video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+.preview-modal-info {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--ink2);
+}
+
+/* responsive */
+@media (max-width: 768px) {
+  .wrap { padding: 32px 20px 60px; }
+  .topbar { padding: 12px 20px; }
+  .action-grid { grid-template-columns: 1fr; }
+  .asset-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .topbar-right { gap: 8px; }
+  .user-greeting { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ Topbar ══ -->
+<div class="topbar">
+  <div class="brand" onclick="window.location.href='index.html'" title="홈으로">
+    <span class="brand-dot"></span>
+    <span class="brand-text">Korart</span>
+    <span class="brand-sub">— My Page</span>
+  </div>
+  <div class="topbar-right">
+    <span class="user-greeting" id="userGreeting"></span>
+    <button class="btn btn-sm btn-ghost" onclick="logout()">로그아웃</button>
+  </div>
+</div>
+
+<!-- ══ Main ══ -->
+<div class="wrap">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-eyebrow">My Studio</div>
+    <h1>안녕하세요, <em id="heroNickname">사용자</em>님</h1>
+    <p>새 영상을 만들거나, 지금까지 만든 자료를 둘러보세요.</p>
+  </div>
+
+  <!-- Two big action buttons -->
+  <div class="action-grid">
+    <a class="action-card" href="studio.html">
+      <div class="action-icon">🎬</div>
+      <div>
+        <div class="action-cat">START · CREATE</div>
+        <h3>작업하기</h3>
+      </div>
+      <p>씬을 고르고 4컷부터 영상까지 — 새 K-콘텐츠 영상을 만들어보세요.</p>
+      <div class="arrow">→</div>
+    </a>
+
+    <div class="action-card" onclick="showAssetSection()">
+      <div class="action-icon">🗂️</div>
+      <div>
+        <div class="action-cat">LIBRARY · ARCHIVE</div>
+        <h3>내 자료 보기</h3>
+      </div>
+      <p>지금까지 만들어 클라우드에 저장한 아바타·4컷·영상을 모아볼 수 있어요.</p>
+      <div class="arrow">↓</div>
+    </div>
+  </div>
+
+  <!-- Asset section (initially hidden, toggles by 내 자료 보기 click) -->
+  <div class="asset-section" id="assetSection">
+    <div class="asset-header">
+      <div class="asset-title">내 자료</div>
+      <button class="btn btn-sm btn-ghost" onclick="refreshAllCounts()">새로고침</button>
+    </div>
+
+    <!-- type tabs -->
+    <div class="asset-tabs" id="assetTabs">
+      <button class="asset-tab active" data-type="avatar" onclick="switchAssetTab('avatar')">아바타<span class="count" id="cnt-avatar">0</span></button>
+      <button class="asset-tab" data-type="cuts4" onclick="switchAssetTab('cuts4')">4컷<span class="count" id="cnt-cuts4">0</span></button>
+      <button class="asset-tab" data-type="video" onclick="switchAssetTab('video')">영상<span class="count" id="cnt-video">0</span></button>
+      <button class="asset-tab" data-type="merged_video" onclick="switchAssetTab('merged_video')">통합 영상<span class="count" id="cnt-merged_video">0</span></button>
+      <button class="asset-tab" data-type="scene" onclick="switchAssetTab('scene')">씬 설정<span class="count" id="cnt-scene">0</span></button>
+      <button class="asset-tab" data-type="custom_scene" onclick="switchAssetTab('custom_scene')">나만의 씬<span class="count" id="cnt-custom_scene">0</span></button>
+    </div>
+
+    <!-- asset grid -->
+    <div id="assetContent">
+      <div class="loading"><div class="spin"></div><div style="margin-top:12px">불러오는 중...</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ Preview modal ══ -->
+<div class="preview-modal" id="previewModal" onclick="if(event.target===this)closePreview()">
+  <div class="preview-modal-content">
+    <button class="preview-modal-close" onclick="closePreview()">✕</button>
+    <div class="preview-modal-body" id="previewBody"></div>
+  </div>
+</div>
+
+<!-- ══ Toast ══ -->
+<div class="toast" id="toast"></div>
+
+<!-- ══ Supabase SDK ══ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+// ============================================================
+//  Supabase 초기화
+// ============================================================
+const SUPABASE_URL = 'https://hidtxdvncqrhjaiosiqd.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_LziYVaJBv9sazBKbos5_UQ_1ZVbEOJb';
+const STORAGE_BUCKET = 'korart-assets';
+
+let sb = null;
+let currentUser = null;
+let currentSession = null;
+
+(async function authBootstrap() {
+  if (!window.supabase || !window.supabase.createClient) {
+    console.error('[Auth] Supabase SDK 로드 실패');
+    return;
+  }
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' },
+  });
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      // 비로그인 → index로
+      window.location.href = 'index.html';
+      return;
+    }
+    currentSession = session;
+    currentUser = session.user;
+    onLoginReady();
+  } catch (e) {
+    console.error('[Auth] 세션 체크 오류:', e);
+    window.location.href = 'index.html';
+  }
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT' || !session) {
+      window.location.href = 'index.html';
+    } else {
+      currentSession = session;
+      currentUser = session.user;
+    }
+  });
+})();
+
+// ============================================================
+//  로그인 상태 준비된 후
+// ============================================================
+async function onLoginReady() {
+  // 닉네임 표시 — profiles 테이블에서 가져오거나 user metadata에서
+  let nickname = '사용자';
+  try {
+    const { data: profile } = await sb
+      .from('profiles')
+      .select('nickname')
+      .eq('id', currentUser.id)
+      .single();
+    if (profile && profile.nickname) {
+      nickname = profile.nickname;
+    } else if (currentUser.user_metadata?.full_name) {
+      nickname = currentUser.user_metadata.full_name;
+    } else if (currentUser.email) {
+      nickname = currentUser.email.split('@')[0];
+    }
+  } catch (_) {
+    if (currentUser.user_metadata?.full_name) {
+      nickname = currentUser.user_metadata.full_name;
+    } else if (currentUser.email) {
+      nickname = currentUser.email.split('@')[0];
+    }
+  }
+
+  document.getElementById('userGreeting').innerHTML = `<strong>${escapeHtml(nickname)}</strong>님`;
+  document.getElementById('heroNickname').textContent = nickname;
+
+  // 카운트 업데이트
+  refreshAllCounts();
+}
+
+// ============================================================
+//  자산 카운트
+// ============================================================
+async function refreshAllCounts() {
+  const types = ['avatar', 'cuts4', 'video', 'merged_video', 'scene', 'custom_scene'];
+  for (const type of types) {
+    try {
+      const { count } = await sb
+        .from('user_assets')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', currentUser.id)
+        .eq('asset_type', type);
+      const el = document.getElementById('cnt-' + type);
+      if (el) el.textContent = count || 0;
+    } catch (e) {
+      console.warn('count error:', type, e);
+    }
+  }
+}
+
+// ============================================================
+//  자산 보기 영역 토글
+// ============================================================
+function showAssetSection() {
+  const section = document.getElementById('assetSection');
+  section.classList.add('active');
+  // 첫 탭 자동 로드
+  loadAssetType('avatar');
+  // 스크롤
+  setTimeout(() => {
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
+}
+
+function switchAssetTab(type) {
+  document.querySelectorAll('.asset-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.type === type);
+  });
+  loadAssetType(type);
+}
+
+let _currentType = 'avatar';
+
+async function loadAssetType(type) {
+  _currentType = type;
+  const container = document.getElementById('assetContent');
+  container.innerHTML = '<div class="loading"><div class="spin"></div><div style="margin-top:12px">불러오는 중...</div></div>';
+
+  try {
+    const { data, error } = await sb
+      .from('user_assets')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .eq('asset_type', type)
+      .order('created_at', { ascending: false })
+      .limit(100);
+    if (error) throw error;
+    renderAssetList(data || [], type);
+  } catch (e) {
+    container.innerHTML = `<div class="loading" style="color:var(--red)">불러오기 실패: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+function renderAssetList(items, type) {
+  const container = document.getElementById('assetContent');
+  if (!items.length) {
+    const labels = {
+      avatar: '저장된 아바타가 없어요',
+      cuts4: '저장된 4컷이 없어요',
+      video: '저장된 영상이 없어요',
+      merged_video: '통합 영상이 없어요',
+      scene: '저장된 씬 설정이 없어요',
+      custom_scene: '나만의 씬이 없어요',
+    };
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">🗂️</div>
+        <p>${labels[type] || '항목이 없어요'}</p>
+        <a href="studio.html" class="btn btn-primary">스튜디오로 가서 만들기</a>
+      </div>
+    `;
+    return;
+  }
+
+  const isVideo = type === 'video' || type === 'merged_video';
+  const isImage = type === 'avatar' || type === 'cuts4';
+
+  let html = '<div class="asset-grid">';
+  for (const item of items) {
+    const date = new Date(item.created_at).toLocaleDateString('ko-KR');
+    const sizeKb = item.file_size ? `${(item.file_size / 1024).toFixed(0)} KB` : '';
+
+    let thumbHtml = '';
+    const thumb = item.thumbnail_url || (isImage ? item.asset_url : '');
+    if (thumb) {
+      thumbHtml = `<img src="${escapeAttr(thumb)}" alt="" loading="lazy">`;
+    } else if (isVideo) {
+      thumbHtml = '🎬';
+    } else if (type === 'scene' || type === 'custom_scene') {
+      thumbHtml = '🎭';
+    } else {
+      thumbHtml = '📄';
+    }
+
+    html += `
+      <div class="asset-card">
+        <div class="asset-card-thumb" onclick="openPreview('${escapeAttr(item.id)}')">
+          ${thumbHtml}
+        </div>
+        <div class="asset-card-body">
+          <div class="asset-card-title">${escapeHtml(item.title || '제목 없음')}</div>
+          <div class="asset-card-meta">${date}${sizeKb ? ' · ' + sizeKb : ''}</div>
+        </div>
+        <div class="asset-card-actions">
+          <button class="btn btn-sm" onclick="openPreview('${escapeAttr(item.id)}')">보기</button>
+          ${item.asset_url ? `<button class="btn btn-sm" onclick="downloadAsset('${escapeAttr(item.asset_url)}', '${escapeAttr(item.title || 'asset')}')">저장</button>` : ''}
+          <button class="btn btn-sm btn-red" onclick="deleteAsset('${escapeAttr(item.id)}', this)">삭제</button>
+        </div>
+      </div>
+    `;
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// ============================================================
+//  Preview modal
+// ============================================================
+let _itemsCache = {};
+
+async function openPreview(itemId) {
+  // 다시 fetch (캐시 없음)
+  try {
+    const { data: item, error } = await sb
+      .from('user_assets')
+      .select('*')
+      .eq('id', itemId)
+      .single();
+    if (error) throw error;
+
+    const isVideo = item.asset_type === 'video' || item.asset_type === 'merged_video';
+    const body = document.getElementById('previewBody');
+    let inner = '';
+    if (item.asset_url) {
+      if (isVideo) {
+        inner = `<video controls autoplay src="${escapeAttr(item.asset_url)}" style="max-height:70vh"></video>`;
+      } else {
+        inner = `<img src="${escapeAttr(item.asset_url)}" alt="" style="max-height:70vh">`;
+      }
+    } else {
+      inner = '<div style="text-align:center;color:var(--ink3);padding:60px">미리보기 없음 (메타데이터만 저장된 항목)</div>';
+    }
+    inner += `
+      <div class="preview-modal-info">
+        <div style="font-size:14px;font-weight:700;color:var(--cream);margin-bottom:4px">${escapeHtml(item.title || '제목 없음')}</div>
+        <div>${new Date(item.created_at).toLocaleString('ko-KR')}${item.file_size ? ' · ' + (item.file_size/1024).toFixed(0) + ' KB' : ''}</div>
+      </div>
+    `;
+    body.innerHTML = inner;
+    document.getElementById('previewModal').classList.add('active');
+  } catch (e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+function closePreview() {
+  document.getElementById('previewModal').classList.remove('active');
+  document.getElementById('previewBody').innerHTML = '';
+}
+
+// ============================================================
+//  Download
+// ============================================================
+async function downloadAsset(url, name) {
+  try {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast('✅ 다운로드 시작');
+  } catch (e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+// ============================================================
+//  Delete
+// ============================================================
+async function deleteAsset(itemId, btn) {
+  if (!confirm('정말 삭제할까요? 되돌릴 수 없어요.')) return;
+  try {
+    btn.disabled = true;
+    btn.textContent = '...';
+    // DB row 가져와서 storage path 알아내기
+    const { data: item } = await sb
+      .from('user_assets')
+      .select('*')
+      .eq('id', itemId)
+      .single();
+
+    // Storage 파일 삭제 (asset_url에서 path 추출)
+    if (item && item.asset_url) {
+      try {
+        // Supabase public URL: ../storage/v1/object/public/<bucket>/<path>
+        const m = item.asset_url.match(/\/storage\/v1\/object\/(?:public|sign)\/[^/]+\/(.+?)(?:\?|$)/);
+        if (m && m[1]) {
+          await sb.storage.from(STORAGE_BUCKET).remove([decodeURIComponent(m[1])]);
+        }
+      } catch (e) {
+        console.warn('storage 삭제 실패 (DB만 삭제):', e);
+      }
+    }
+
+    // DB row 삭제
+    const { error } = await sb
+      .from('user_assets')
+      .delete()
+      .eq('id', itemId);
+    if (error) throw error;
+
+    toast('✅ 삭제 완료');
+    loadAssetType(_currentType);
+    refreshAllCounts();
+  } catch (e) {
+    toast('❌ 삭제 실패: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = '삭제';
+  }
+}
+
+// ============================================================
+//  Logout
+// ============================================================
+async function logout() {
+  if (!confirm('로그아웃 하시겠어요?')) return;
+  try {
+    await sb.auth.signOut();
+    window.location.href = 'index.html';
+  } catch (e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+// ============================================================
+//  Helpers
+// ============================================================
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+function escapeAttr(str) {
+  if (str == null) return '';
+  return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+let _toastTimer = null;
+function toast(msg, ms) {
+  ms = ms || 2000;
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+// ESC로 모달 닫기
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && document.getElementById('previewModal').classList.contains('active')) {
+    closePreview();
+  }
+});
+</script>
+
+</body>
+</html>
