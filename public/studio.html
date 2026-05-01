@@ -1755,20 +1755,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <!-- 장소 -->
       <div class="field">
         <label>장소 유형</label>
-        <div class="segs" style="flex-wrap:wrap">
-          <div class="seg" onclick="selOpt(this,'location','outdoor urban city street')">야외(도시)</div>
-          <div class="seg" onclick="selOpt(this,'location','outdoor rural countryside')">야외(시골)</div>
-          <div class="seg" onclick="selOpt(this,'location','indoor home living room')">실내(집)</div>
-          <div class="seg" onclick="selOpt(this,'location','indoor cafe restaurant')">실내(카페)</div>
-          <div class="seg" onclick="selOpt(this,'location','indoor office workspace')">실내(사무실)</div>
-          <div class="seg" onclick="selOpt(this,'location','hospital interior, hospital corridor')">병원</div>
-          <div class="seg" onclick="selOpt(this,'location','movie theater interior, cinema')">영화관</div>
-          <div class="seg" onclick="selOpt(this,'location','school classroom or hallway')">학교</div>
-          <div class="seg" onclick="selOpt(this,'location','mountain landscape, mountain hiking trail')">산</div>
-          <div class="seg" onclick="selOpt(this,'location','public restroom interior, clean bathroom')">화장실</div>
-          <div class="seg" id="vehicleToggleBtn" onclick="toggleVehiclePanel()">이동 수단 ▾</div>
-          <div class="seg" id="locCustomBtn" onclick="toggleLocCustom()">개인설정</div>
-        </div>
+        <div class="segs" id="locationSegs" style="flex-wrap:wrap"><!-- 동적 렌더링 --></div>
 
         <!-- 이동 수단 펼침 패널 -->
         <div id="vehiclePanel" style="display:none;margin-top:8px;padding:10px 12px;background:var(--bg3);border:1px solid var(--line);border-radius:8px">
@@ -2433,6 +2420,81 @@ const ERA_KEYWORDS = {
   retro_90s:   '1990년대 한국 레트로',
   retro_2000s: '2000년대 초 한국',
 };
+
+// === 시대별 장소 옵션 ===
+const LOCATIONS_BY_ERA = {
+  modern: [
+    { ko: '야외(도시)',   en: 'outdoor urban city street' },
+    { ko: '야외(시골)',   en: 'outdoor rural countryside' },
+    { ko: '실내(집)',     en: 'indoor home living room' },
+    { ko: '실내(카페)',   en: 'indoor cafe restaurant' },
+    { ko: '실내(사무실)', en: 'indoor office workspace' },
+    { ko: '병원',         en: 'hospital interior, hospital corridor' },
+    { ko: '영화관',       en: 'movie theater interior, cinema' },
+    { ko: '학교',         en: 'school classroom or hallway' },
+    { ko: '산',           en: 'mountain landscape, mountain hiking trail' },
+    { ko: '화장실',       en: 'public restroom interior, clean bathroom' },
+  ],
+  historical: [
+    { ko: '야외(시내)',   en: 'outdoor Joseon dynasty marketplace, traditional Korean village street' },
+    { ko: '야외(들·숲)',  en: 'outdoor traditional Korean countryside, rural landscape with mountains' },
+    { ko: '실내(한옥)',   en: 'indoor traditional Korean hanok house, paper sliding doors, wooden floor' },
+    { ko: '주막',         en: 'indoor Joseon era jumak tavern, wooden tables, traditional Korean inn' },
+    { ko: '실내(궁궐)',   en: 'indoor Joseon royal palace interior, ornate columns, traditional Korean architecture' },
+    { ko: '실내(집무실)', en: 'indoor Joseon era government office, traditional desk, scrolls' },
+    { ko: '실내(서당)',   en: 'indoor traditional Korean village school, wooden benches, books' },
+    { ko: '실내(절)',     en: 'indoor traditional Korean Buddhist temple, wooden Buddha hall' },
+    { ko: '산·강',        en: 'traditional Korean mountain or river landscape, ink painting style nature' },
+    { ko: '마당·우물',    en: 'outdoor hanok courtyard with traditional well, stone walls' },
+  ],
+  gyeongseong: [
+    { ko: '경성 거리',    en: '1920s Gyeongseong city street, modern boy and modern girl era, mixed Korean-Japanese architecture' },
+    { ko: '한강·공원',    en: '1920s Gyeongseong outdoor park or Han river, colonial era leisure' },
+    { ko: '한옥집',       en: 'indoor 1920s Korean hanok with modern furniture mix, colonial era home' },
+    { ko: '다방',         en: 'indoor 1920s Korean dabang cafe, vintage gramophone, modernist atmosphere' },
+    { ko: '관청·사무실',  en: 'indoor 1920s colonial era office or government building, vintage desks' },
+    { ko: '영화관',       en: 'indoor 1920s Gyeongseong movie theater, vintage cinema' },
+    { ko: '백화점',       en: 'indoor 1920s Hwashin department store, early modern shopping' },
+    { ko: '경성 학교',    en: 'indoor 1920s Korean school during Japanese colonial era' },
+    { ko: '골목길',       en: 'narrow 1920s Gyeongseong alleyway, colonial era backstreet' },
+  ],
+  retro: [
+    { ko: '야외(도시)',   en: 'outdoor retro Korean city street, vintage signs and shops' },
+    { ko: '야외(시골)',   en: 'outdoor retro Korean countryside, vintage rural landscape' },
+    { ko: '실내(집)',     en: 'indoor retro Korean home, vintage furniture, old TV' },
+    { ko: '다방·카페',    en: 'indoor retro Korean cafe or dabang, vintage interior' },
+    { ko: '사무실',       en: 'indoor retro Korean office, old computer monitors, vintage decor' },
+    { ko: '학교',         en: 'indoor retro Korean school classroom, old wooden desks' },
+    { ko: '노래방',       en: 'indoor retro Korean noraebang karaoke, neon lights' },
+    { ko: 'PC방',         en: 'indoor retro Korean PC bang, rows of CRT monitors' },
+    { ko: '비디오방',     en: 'indoor retro Korean video room, VHS tapes, CRT TV' },
+    { ko: '만화방',       en: 'indoor retro Korean comic book cafe, shelves of manga' },
+  ],
+};
+
+function getLocationsForCurrentEra() {
+  const eraKey = S.era || 'modern';
+  if (LOCATIONS_BY_ERA[eraKey]) return LOCATIONS_BY_ERA[eraKey];
+  const group = (ERAS[eraKey] && ERAS[eraKey].group) || 'modern';
+  return LOCATIONS_BY_ERA[group] || LOCATIONS_BY_ERA.modern;
+}
+
+function renderLocationOptions() {
+  const wrap = document.getElementById('locationSegs');
+  if (!wrap) return;
+  const locs = getLocationsForCurrentEra();
+  const currentLoc = S.location || '';
+  let html = '';
+  for (const loc of locs) {
+    const isActive = currentLoc === loc.en;
+    const enEsc = loc.en.replace(/'/g, "\\'");
+    html += '<div class="seg' + (isActive ? ' active' : '') + '" onclick="selOpt(this,\'location\',\'' + enEsc + '\')">' + loc.ko + '</div>';
+  }
+  // 이동 수단 + 개인설정 버튼은 항상 마지막
+  html += '<div class="seg" id="vehicleToggleBtn" onclick="toggleVehiclePanel()">\uC774\uB3D9 \uC218\uB2E8 \u25BE</div>';
+  html += '<div class="seg" id="locCustomBtn" onclick="toggleLocCustom()">\uAC1C\uC778\uC124\uC815</div>';
+  wrap.innerHTML = html;
+}
 const ANGLE_DESCRIPTIONS = {
   'Single Shot':            { ko: '인물 1인 단독 샷', use: '한 사람의 행동·표정에만 집중시키고 싶을 때' },
   'Close-up (CU)':          { ko: '얼굴 전체 강조, 감정 표현', use: '인물의 감정 변화를 극적으로 표현할 때' },
@@ -4220,6 +4282,13 @@ function selectEra(key) {
   renderEraChips();
   if (typeof updatePromptPreview === 'function') updatePromptPreview();
   toast(`시대: ${ERAS[key].ko}`, 800);
+
+  // 시대 변경 시 장소 옵션 재렌더 + 현재 선택 초기화
+  if (typeof renderLocationOptions === 'function') {
+    S.location = '';
+    renderLocationOptions();
+    if (typeof updatePromptPreview === 'function') updatePromptPreview();
+  }
 }
 
 // ════════════════════════════════════════════════════════════
@@ -4328,6 +4397,9 @@ function selScene(key, el) {
 }
 
 function restoreSceneUI() {
+  // 시대별 장소 옵션 렌더
+  if (typeof renderLocationOptions === 'function') renderLocationOptions();
+
   // 계절/시간/날씨/장소 segs 동기화
   const syncSeg = (containerSel, key) => {
     const segs = document.querySelectorAll(containerSel);
