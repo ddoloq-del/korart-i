@@ -1682,9 +1682,16 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <!-- 세부 설정 화면 (Sub-step B) -->
     <div id="sceneStepB" style="display:none">
     <!-- 선택된 씬 표시 -->
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding:10px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:10px">
-      <span style="font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700">선택된 씬</span>
-      <span id="selectedSceneLabel" style="font-size:14px;font-weight:700;color:var(--pink)">로맨스</span>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:14px 18px;background:var(--bg2);border:1px solid var(--line);border-radius:0">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;font-family:'JetBrains Mono',monospace">선택된 씬</span>
+        <span id="selectedSceneLabel" style="font-size:18px;font-weight:800;color:var(--pink);letter-spacing:-.02em">로맨스</span>
+      </div>
+      <div style="width:1px;height:32px;background:var(--line)"></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;font-family:'JetBrains Mono',monospace">시대 배경</span>
+        <span id="selectedEraLabel" style="font-size:14px;font-weight:700;color:var(--cream);letter-spacing:-.01em">현대 한국</span>
+      </div>
       <div style="margin-left:auto;display:flex;gap:6px">
         <button class="btn btn-sm" onclick="saveSceneDetailToCloud()" title="씬 상세 설정을 클라우드에 저장" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">+ 클라우드 저장</button>
         <button class="btn btn-sm btn-ghost" onclick="openSceneDetailPicker()" title="저장된 씬 상세 불러오기">클라우드 불러오기</button>
@@ -3004,8 +3011,16 @@ function updateScenePanelHeader(sub) {
     const label = sc?.name || S.scene || '';
     if (numEl) numEl.textContent = '04';
     if (cat) cat.textContent = `K-DRAMA / SCENE DETAIL · ${label.toUpperCase()}`;
-    if (title) title.innerHTML = '씬을 <span class="accent">완성</span>해볼까요?';
-    if (sub_el) sub_el.textContent = '배경, 인원, 카메라 앵글까지 — 디테일을 채워주세요.';
+    if (title) title.innerHTML = '디테일을 <span class="accent">완성</span>해주세요';
+    if (sub_el) sub_el.textContent = '계절·시간대·날씨·장소·카메라 앵글까지 정교하게 설정하세요.';
+    // 선택된 씬/시대 박스 라벨 자동 갱신
+    const selLabel = document.getElementById('selectedSceneLabel');
+    if (selLabel) selLabel.textContent = label;
+    const eraLabel = document.getElementById('selectedEraLabel');
+    if (eraLabel) {
+      const eraName = (typeof ERAS !== 'undefined' && ERAS[S.era]) ? ERAS[S.era].name : '현대 한국';
+      eraLabel.textContent = eraName;
+    }
   }
 }
 
