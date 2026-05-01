@@ -2234,7 +2234,7 @@ document.querySelectorAll('.showcase, .how, .gallery, .compare, .pricing, .faq, 
     try {
       const { error } = await sb.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: window.location.origin + '/studio.html' }
+        options: { redirectTo: window.location.origin + '/mypage.html' }
       });
       if (error) {
         showError('Google 로그인 실패: ' + error.message);
