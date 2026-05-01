@@ -1784,17 +1784,12 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <input id="locCustomInput" placeholder="수식어 또는 단독 장소 입력: 예) 고급진 / 낡은 / 어두운 (또는 단독으로: rooftop at night)" style="display:none;margin-top:6px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:6px 8px;color:var(--ink);font-size:12px">
       </div>
 
-      <!-- 행인 포함 -->
+      <!-- 행인 (선택) -->
       <div class="field">
-        <label>행인</label>
-        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);cursor:pointer;padding:10px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:8px">
-          <input type="checkbox" id="passerbyCheck" onchange="updatePasserby()" style="cursor:pointer"> 배경에 행인 포함
-        </label>
-        <div id="passerbyDensity" style="display:none;margin-top:6px">
-          <div class="segs">
-            <div class="seg" onclick="selOpt(this,'passerbyDensity','a few passersby')">소수</div>
-            <div class="seg" onclick="selOpt(this,'passerbyDensity','many passersby, crowded')">다수</div>
-          </div>
+        <label>행인 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span></label>
+        <div class="segs">
+          <div class="seg" onclick="selPasserby(this,'a few passersby')">소수</div>
+          <div class="seg" onclick="selPasserby(this,'many passersby, crowded')">다수</div>
         </div>
       </div>
 
@@ -4547,10 +4542,30 @@ function setPersonCount(n, el) {
   updatePromptPreview();
 }
 
-function updatePasserby() {
-  S.passerby = document.getElementById('passerbyCheck').checked;
-  document.getElementById('passerbyDensity').style.display = S.passerby ? '' : 'none';
+function selPasserby(el, density) {
+  // segs 클릭 — 한 번 더 누르면 해제
+  const wasActive = el.classList.contains('active');
+  el.parentElement.querySelectorAll('.seg').forEach(s => s.classList.remove('active'));
+  if (wasActive) {
+    S.passerby = false;
+    S.passerbyDensity = '';
+  } else {
+    el.classList.add('active');
+    S.passerby = true;
+    S.passerbyDensity = density;
+  }
   updatePromptPreview();
+}
+
+function updatePasserby() {
+  // 호환용 — 체크박스가 사라졌으니 안전 처리
+  const cb = document.getElementById('passerbyCheck');
+  if (cb) {
+    S.passerby = cb.checked;
+    const dn = document.getElementById('passerbyDensity');
+    if (dn) dn.style.display = S.passerby ? '' : 'none';
+    updatePromptPreview();
+  }
 }
 
 // ── Angle picker ──
