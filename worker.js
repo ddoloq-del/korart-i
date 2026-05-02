@@ -162,49 +162,6 @@ export default {
       }
 
       // ─────────────────────────────────────────
-      // /api/debug — JWT 검증 디버그 (임시)
-      // ─────────────────────────────────────────
-      if (url.pathname === '/api/debug') {
-        const auth = request.headers.get('Authorization') || '';
-        const m = auth.match(/^Bearer\s+(.+)$/);
-        const debug = {
-          received_auth_header: auth ? auth.substring(0, 30) + '...' : '(없음)',
-          jwt_extracted: !!m,
-          jwt_length: m ? m[1].length : 0,
-          supabase_url: env.SUPABASE_URL ? env.SUPABASE_URL.substring(0, 40) + '...' : '(없음)',
-          service_key_set: !!env.SUPABASE_SERVICE_KEY,
-          service_key_length: env.SUPABASE_SERVICE_KEY ? env.SUPABASE_SERVICE_KEY.length : 0,
-        };
-        if (!m) return j({ debug, step: 'no_bearer' });
-        const jwt = m[1];
-
-        // Step 1: SUPABASE_URL이 끝슬래시 있는지
-        let supaUrl = env.SUPABASE_URL || '';
-        debug.supabase_url_full = supaUrl;
-        debug.has_trailing_slash = supaUrl.endsWith('/');
-        if (supaUrl.endsWith('/')) supaUrl = supaUrl.slice(0, -1);
-
-        // Step 2: /auth/v1/user 호출
-        const userUrl = supaUrl + '/auth/v1/user';
-        debug.user_url = userUrl;
-        try {
-          const r = await fetch(userUrl, {
-            headers: {
-              'Authorization': 'Bearer ' + jwt,
-              'apikey': env.SUPABASE_SERVICE_KEY,
-            },
-          });
-          debug.supabase_status = r.status;
-          const text = await r.text();
-          debug.supabase_body = text.substring(0, 500);
-          return j({ debug, step: 'done' });
-        } catch (e) {
-          debug.fetch_error = e.message;
-          return j({ debug, step: 'fetch_failed' });
-        }
-      }
-
-      // ─────────────────────────────────────────
       // /api/me — 현재 사용자 포인트 잔액 조회
       // ─────────────────────────────────────────
       if (url.pathname === '/api/me') {
