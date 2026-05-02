@@ -3764,6 +3764,11 @@ function updateVidCost() {}
 // logical step (0-5) → 실제 panel 매핑
 // 0 → panelRatio (비율), 1 → panel0 (아바타), 2 → panel1+stepA (아바타·씬), 3 → panel1+stepB (씬 상세), 4 → panel2 (4컷), 5 → panel3 (영상)
 function goStep(n) {
+  // 이미지 모드: step 5 차단 (안전장치)
+  if (_IS_IMG_MODE && n >= 5) {
+    toast('이미지 모드는 4컷까지만');
+    return;
+  }
   const STEP_PANEL_ID = ['panelRatio', 'panel0', 'panel1', 'panel1', 'panel2', 'panel3'];
   const targetId = STEP_PANEL_ID[n];
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('show', p.id === targetId));
@@ -3772,6 +3777,8 @@ function goStep(n) {
 
   // 4컷 패널 진입 시 quad CSS aspect-ratio 적용
   if (n === 4) {
+    // 이미지 모드 UI 갱신 (영상 버튼 -> 완료 버튼)
+    if (typeof _applyImageModeUI === 'function') _applyImageModeUI();
     const quad = document.getElementById('quad');
     if (quad) quad.style.aspectRatio = getQuadCssAspect();
     // 화질 select를 S.imgQuality와 동기화 + 힌트 갱신
@@ -3867,7 +3874,18 @@ function updateScenePanelHeader(sub) {
 }
 
 // 4단계 인디케이터를 모든 panel에 동일하게 렌더
-const STEP_LABELS = ['비율', '아바타', '씬 선택', '씬 상세', '4컷', '영상'];
+// 작업 모드 — URL 파라미터 ?mode=image 또는 ?mode=video (기본 video)
+const _MODE = (new URLSearchParams(location.search)).get('mode') === 'image' ? 'image' : 'video';
+// 이미지 모드는 5단계 (영상 제외), 영상 모드는 6단계
+const _IS_IMG_MODE = (_MODE === 'image');
+const STEP_LABELS = _IS_IMG_MODE
+  ? ['비율', '아바타', '씬 선택', '씬 상세', '4컷']
+  : ['비율', '아바타', '씬 선택', '씬 상세', '4컷', '영상'];
+const _MAX_STEPS = STEP_LABELS.length;  // 5 또는 6
+// 이미지 모드 진입 시 페이지 타이틀 즉시 변경
+if (_IS_IMG_MODE) {
+  document.title = 'Korart-i 스튜디오 (이미지 모드) — 4컷 K-콘텐츠 생성';
+}
 
 // 영상 비율 옵션
 const ASPECT_RATIOS = [
@@ -3945,21 +3963,68 @@ async function selectAspectRatio(value) {
   }, 600);
 }
 
+// 이미지 모드 UI 갱신 — 영상 버튼을 '완료'로, 영상으로 가는 버튼들 비활성
+function _applyImageModeUI() {
+  if (!_IS_IMG_MODE) return;
+
+  // panel2 안의 goVidBtn -> '4컷 작업 완료'로
+  const goVidBtn = document.getElementById('goVidBtn');
+  if (goVidBtn) {
+    goVidBtn.onclick = function() { _finishImageMode(); };
+    // updateGoVidBtn에서 라벨을 갱신하므로 여기서는 disabled만 처리
+  }
+
+  // panel2 nav의 '영상 생성으로' 버튼 (씬 상세 panel1 nav)
+  // tryGoStep(5) 호출하는 버튼들 모두 찾아 변경
+  document.querySelectorAll('button[onclick*="tryGoStep(5)"]').forEach(btn => {
+    btn.onclick = function() { _finishImageMode(); };
+    btn.textContent = '✓ 4컷 완료';
+  });
+  // 헤더 패널 카테고리/타이틀에 [이미지 모드] 표시
+  const modeBadge = document.getElementById('imgModeBadge');
+  if (!modeBadge) {
+    const headerEl = document.querySelector('.panel-header');
+    if (headerEl) {
+      const badge = document.createElement('div');
+      badge.id = 'imgModeBadge';
+      badge.style.cssText = 'display:inline-block;padding:2px 8px;background:rgba(94,234,212,.15);border:1px solid var(--teal);color:var(--teal);font-size:9px;font-weight:800;letter-spacing:.05em;margin-bottom:6px';
+      badge.textContent = '이미지 모드 · 4컷까지';
+      headerEl.insertBefore(badge, headerEl.firstChild);
+    }
+  }
+}
+
+// 이미지 모드 작업 완료 — 4컷 결과 보여주고 마이페이지로 가는 옵션 제공
+async function _finishImageMode() {
+  const ok = await showConfirm(
+    '이미지 작업 완료',
+    `<div style="padding:8px 0">
+       <div style="font-size:14px;color:var(--cream);margin-bottom:8px">4컷 그리드 작업이 완료되었습니다.</div>
+       <div style="font-size:12px;color:var(--ink2);margin-bottom:14px">결과를 확인하셨다면 마이페이지로 돌아가시거나, 4컷을 다운로드 받으실 수 있습니다.</div>
+     </div>`,
+    '마이페이지로',
+    '계속 보기'
+  );
+  if (ok) {
+    location.href = '/mypage';
+  }
+}
+
 function renderGlobalSteps(currentStep) {
-  // panelRatio + panel0~3 에서 모두 동일한 6단계 인디케이터
+  // 인디케이터 — 모드에 따라 5단계 (이미지) 또는 6단계 (영상)
   const containers = ['globalStepsR', 'globalSteps0', 'globalSteps1', 'globalSteps2', 'globalSteps3'];
   containers.forEach(id => {
     const wrap = document.getElementById(id);
     if (!wrap) return;
     let inner = '';
-    for (let s = 0; s < 6; s++) {
+    for (let s = 0; s < _MAX_STEPS; s++) {
       const cls = s === currentStep ? 'active' : (s < currentStep ? 'done' : '');
       inner += `
         <div class="step-ind-item ${cls}" onclick="tryGoStep(${s})" style="cursor:pointer">
           <div class="step-ind-num">${s + 1}</div>
           <span>${STEP_LABELS[s]}</span>
         </div>`;
-      if (s < 5) inner += '<div class="step-ind-line ' + (s < currentStep ? 'done' : '') + '"></div>';
+      if (s < _MAX_STEPS - 1) inner += '<div class="step-ind-line ' + (s < currentStep ? 'done' : '') + '"></div>';
     }
     wrap.innerHTML = inner;
   });
@@ -3967,6 +4032,11 @@ function renderGlobalSteps(currentStep) {
 
 // 검증을 거쳐 step 이동 (앞으로 갈 때만 검증, 뒤로는 자유)
 async function tryGoStep(n) {
+  // 이미지 모드: step 5 (영상) 차단
+  if (_IS_IMG_MODE && n >= 5) {
+    toast('이미지 모드는 4컷 그리드까지만 작업합니다');
+    return;
+  }
   const cur = S._currentStep ?? 0;
   if (n === cur) return;
   if (n < cur) { goStep(n); return; }
@@ -7936,7 +8006,11 @@ function updateGoVidBtn() {
   const btn = document.getElementById('goVidBtn');
   if (btn) {
     btn.disabled = approved === 0;
-    btn.textContent = approved > 0 ? `🎬 영상 생성으로 → (${approved}컷 선택됨)` : '🎬 영상 생성으로 →';
+    if (_IS_IMG_MODE) {
+      btn.textContent = approved > 0 ? `✓ 작업 완료 (${approved}컷)` : '✓ 1컷 이상 선택하세요';
+    } else {
+      btn.textContent = approved > 0 ? `🎬 영상 생성으로 → (${approved}컷 선택됨)` : '🎬 영상 생성으로 →';
+    }
   }
 }
 
