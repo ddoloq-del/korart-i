@@ -498,7 +498,17 @@ body {
     <span class="brand-sub">— My Page</span>
   </div>
   <div class="topbar-right">
-    <span class="user-greeting" id="userGreeting"></span>
+    <div id="userPointsBadge" style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:rgba(167,139,250,.12);border:1px solid var(--pink);border-radius:0;font-size:11px">
+      <span style="color:var(--ink3);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase">잔액</span>
+      <span id="userPoints" style="color:var(--pink);font-weight:700">— P</span>
+    </div>
+    <div id="userInfoBox" style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink2)">
+      <img id="userAvatar" src="" alt="" style="display:none;width:24px;height:24px;border-radius:50%;border:1px solid var(--line2)">
+      <div style="display:flex;flex-direction:column;gap:1px;line-height:1.2">
+        <span class="user-greeting" id="userGreeting" style="font-size:12px;color:var(--cream);font-weight:600"></span>
+        <span id="userEmail" style="font-size:10px;color:var(--ink3)"></span>
+      </div>
+    </div>
     <button class="btn btn-sm btn-ghost" onclick="logout()">로그아웃</button>
   </div>
 </div>
@@ -646,11 +656,75 @@ async function onLoginReady() {
     }
   }
 
-  document.getElementById('userGreeting').innerHTML = `<strong>${escapeHtml(nickname)}</strong>님`;
+  document.getElementById('userGreeting').innerHTML = `<strong>${escapeHtml(nickname)}</strong>`;
   document.getElementById('heroNickname').textContent = nickname;
+
+  // 이메일 표시
+  const emailEl = document.getElementById('userEmail');
+  if (emailEl && currentUser.email) {
+    emailEl.textContent = currentUser.email;
+  }
+
+  // Google 아바타 표시
+  const avatarEl = document.getElementById('userAvatar');
+  const meta = currentUser.user_metadata || {};
+  const avatarUrl = meta.avatar_url || meta.picture || '';
+  if (avatarEl && avatarUrl) {
+    avatarEl.src = avatarUrl;
+    avatarEl.style.display = 'inline-block';
+  }
+
+  // 포인트 잔액 표시
+  updatePointsDisplay();
 
   // 카운트 업데이트
   refreshAllCounts();
+}
+
+// ============================================
+// 포인트 잔액 표시 (Worker /api/me)
+// ============================================
+async function getSupabaseJWT() {
+  if (!sb) return null;
+  try {
+    const { data } = await sb.auth.getSession();
+    return data?.session?.access_token || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function fetchMyPoints() {
+  const jwt = await getSupabaseJWT();
+  if (!jwt) { console.warn('[Points] JWT 없음'); return null; }
+  try {
+    const r = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + jwt }});
+    if (!r.ok) {
+      const errText = await r.text();
+      console.warn('[Points] /api/me 실패:', r.status, errText);
+      return null;
+    }
+    return await r.json();
+  } catch (e) {
+    console.error('[Points] 예외:', e);
+    return null;
+  }
+}
+
+async function updatePointsDisplay() {
+  const me = await fetchMyPoints();
+  console.log('[Points] mypage:', me);
+  const el = document.getElementById('userPoints');
+  if (!el) return;
+  if (!me) {
+    el.innerHTML = '<span style="color:var(--ink3);font-size:10px">- P</span>';
+    return;
+  }
+  if (me.unlimited) {
+    el.innerHTML = '\u221E P <span style="font-size:9px;color:var(--ink3);font-weight:500;margin-left:2px">(무제한)</span>';
+  } else {
+    el.innerHTML = me.points.toLocaleString() + ' P';
+  }
 }
 
 // ============================================================
