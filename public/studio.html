@@ -7919,20 +7919,7 @@ function renderCutControls() {
           <div onclick="setCutApproval(${i},false)" style="cursor:pointer;padding:3px 8px;border-radius: 0;font-size:10px;font-weight:700;border:1px solid ${!S.cutApproval[i]?'var(--red)':'var(--line)'};background:${!S.cutApproval[i]?'rgba(192,48,64,.12)':'var(--bg3)'};color:${!S.cutApproval[i]?'var(--red)':'var(--ink3)'}">✕</div>
         </div>
       </div>
-      <!-- 영상 설정 (승인된 컷만) -->
-      ${S.cutApproval[i] ? `
-      <div style="border-top:1px solid var(--line)'${S.cutApproval[i] ? '' : ';opacity:.5'};padding-top:8px;margin-top:4px">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-          <label style="font-size:10px;color:var(--ink3)">영상 길이</label>
-          <select onchange="S.cutDurations[${i}]=parseInt(this.value)" style="background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:3px 6px;color:var(--ink);font-size:11px">
-            ${[3,4,5,6,7,8,9,10,11,12,13,14,15].map(n=>`<option value="${n}" ${S.cutDurations[i]===n?'selected':''}>${n}초</option>`).join('')}
-          </select></div>
-          <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--ink3);margin-left:auto;cursor:pointer">
-            <input type="checkbox" ${S.cutAudio[i]?'checked':''} onchange="S.cutAudio[${i}]=this.checked"> 오디오
-          </label>
-        </div>
-      </div>
-      ` : ''}
+      <!-- 영상 길이/오디오는 6단계 카드에서 설정 (여기서는 컷 선택만) -->
     </div>
   `).join('');
   updateGoVidBtn();
