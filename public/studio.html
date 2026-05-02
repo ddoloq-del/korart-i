@@ -3545,14 +3545,26 @@ function setOutfitFromSelect(libId, val) {
 
 // === 4단계 헤어 드롭다운 (씬에서만 적용 — av.hair 라이브러리는 그대로) ===
 function setSceneHairFromSelect(libId, val) {
+  console.log('[setSceneHairFromSelect] called', { libId, val });
   const cast = S.avatars.find(a => (a._libId || a.id) === libId);
-  if (!cast) return;
+  if (!cast) {
+    console.warn('[setSceneHairFromSelect] cast not found for libId', libId);
+    return;
+  }
   if (val === '__custom__') {
-    cast.sceneHair = ' ';  // custom mode 트리거 (공백)
+    cast.sceneHair = ' ';
+    console.log('[setSceneHairFromSelect] custom mode');
   } else {
     cast.sceneHair = val || '';
+    console.log('[setSceneHairFromSelect] set to', cast.sceneHair);
   }
   renderStep1Avatars();
+  if (val === '__custom__') {
+    setTimeout(() => {
+      const inp = document.getElementById('sceneHairCustom-' + libId);
+      if (inp) inp.focus();
+    }, 50);
+  }
 }
 
 // 헤어 custom input 입력 시 (포커스 유지 — 재렌더 X)
