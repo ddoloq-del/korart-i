@@ -664,6 +664,73 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   flex-shrink: 0;
 }
 
+/* === 아바타 카테고리 탭 === */
+.cat-tabs {
+  display: flex;
+  gap: 0;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  padding: 0;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.cat-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--line);
+  color: var(--ink2);
+  padding: 11px 14px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.cat-tab:last-child {
+  border-right: none;
+}
+.cat-tab:hover:not(.active) {
+  background: var(--bg3);
+  color: var(--ink);
+}
+.cat-tab.active {
+  background: rgba(200,160,74,.12);
+  color: var(--gold);
+  border-bottom: 2px solid var(--gold);
+}
+.cat-tab-count {
+  background: var(--bg3);
+  color: var(--ink3);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 0;
+  letter-spacing: 0;
+}
+.cat-tab.active .cat-tab-count {
+  background: rgba(200,160,74,.25);
+  color: var(--gold);
+}
+.cat-tab-disabled {
+  opacity: 0.55;
+}
+.cat-tab-soon {
+  background: var(--line);
+  color: var(--ink3);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 0;
+  letter-spacing: 0;
+}
+
 .auth-switch-text {
   text-align: center;
   font-size: 13px;
@@ -1698,6 +1765,7 @@ select option:hover {
     </div>
 
     <!-- 저장된 아바타 -->
+    <div id="avLabCatTabs" class="cat-tabs"></div>
     <div style="background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:14px;margin-bottom:14px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px;flex-wrap:wrap">
         <div class="section-head" style="margin:0">📂 아바타 리스트</div>
@@ -1770,6 +1838,7 @@ select option:hover {
         <label style="margin:0;font-size:13px;font-weight:700">등장 아바타 선택하기</label>
         <button class="btn btn-sm btn-ghost" onclick="tryGoStep(1)">+ 아바타 추가</button>
       </div>
+      <div id="step1CatTabs" class="cat-tabs"></div>
       <div id="step1AvatarChips" style="display:flex;flex-wrap:wrap;gap:10px;padding:12px;background:var(--bg2);border:1px solid var(--line);border-radius: 0;min-height:50px"></div>
     </div>
 
@@ -2965,8 +3034,72 @@ const LS_AV_KEY = 'korart_v2_avatar_lib';
 const LS_SC_KEY = 'korart_v2_scene_lib';
 
 function loadAvatarLib() {
-  try { return JSON.parse(localStorage.getItem(LS_AV_KEY) || '[]'); }
-  catch { return []; }
+  try {
+    const arr = JSON.parse(localStorage.getItem(LS_AV_KEY) || '[]');
+    // 자동 마이그레이션: category 없는 옛 아바타는 'person'으로
+    let migrated = false;
+    for (const av of arr) {
+      if (!av.category) { av.category = 'person'; migrated = true; }
+    }
+    if (migrated) {
+      try { localStorage.setItem(LS_AV_KEY, JSON.stringify(arr)); } catch (e) {}
+    }
+    return arr;
+  } catch { return []; }
+}
+
+// ============================================
+// 아바타 카테고리 시스템 (Phase A: person만 동작)
+// ============================================
+const AVATAR_CATEGORIES = [
+  { value: 'person',  label: '사람',     enabled: true  },
+  { value: 'pet',     label: '반려동물', enabled: false },
+  { value: 'product', label: '제품',     enabled: false },
+];
+
+// 현재 선택된 카테고리 (전역, 두 화면 공유)
+if (typeof window.__currentAvatarCat === 'undefined') window.__currentAvatarCat = 'person';
+
+function getCurrentAvatarCat() {
+  return window.__currentAvatarCat || 'person';
+}
+
+function setAvatarCategory(cat) {
+  const def = AVATAR_CATEGORIES.find(c => c.value === cat);
+  if (!def) return;
+  if (!def.enabled) {
+    if (typeof toast === 'function') toast(def.label + ' 카테고리는 준비 중입니다');
+    return;
+  }
+  window.__currentAvatarCat = cat;
+  // 두 화면 모두 다시 렌더
+  renderCatTabs('avLabCatTabs');
+  renderCatTabs('step1CatTabs');
+  if (typeof renderSavedAvatars === 'function') renderSavedAvatars();
+  if (typeof renderStep1Avatars === 'function') renderStep1Avatars();
+}
+
+// 카테고리별 아바타 개수
+function countAvatarsByCat(lib, cat) {
+  return lib.filter(a => (a.category || 'person') === cat).length;
+}
+
+// 카테고리 탭 렌더 (panel0 + panel1 공통)
+function renderCatTabs(containerId) {
+  const wrap = document.getElementById(containerId);
+  if (!wrap) return;
+  const lib = loadAvatarLib();
+  const current = getCurrentAvatarCat();
+  wrap.innerHTML = AVATAR_CATEGORIES.map(c => {
+    const isActive = c.value === current;
+    const count = countAvatarsByCat(lib, c.value);
+    const disabledCls = c.enabled ? '' : ' cat-tab-disabled';
+    const soonBadge = c.enabled ? '' : '<span class="cat-tab-soon">준비중</span>';
+    const countBadge = c.enabled ? '<span class="cat-tab-count">' + count + '</span>' : '';
+    return '<button class="cat-tab' + (isActive ? ' active' : '') + disabledCls + '" onclick="setAvatarCategory(\'' + c.value + '\')">' +
+      '<span>' + c.label + '</span>' + countBadge + soonBadge +
+    '</button>';
+  }).join('');
 }
 function saveAvatarLib(arr) {
   try {
@@ -3597,7 +3730,11 @@ function uncastAvatar(libId) {
 function renderStep1Avatars() {
   const wrap = document.getElementById('step1AvatarChips');
   if (!wrap) return;
-  const lib = loadAvatarLib();
+  // 탭 자동 렌더
+  if (typeof renderCatTabs === 'function') renderCatTabs('step1CatTabs');
+  const fullLib = loadAvatarLib();
+  const cat = getCurrentAvatarCat();
+  const lib = fullLib.filter(a => (a.category || 'person') === cat);
   const inSceneIds = new Set(S.avatars.map(a => a._libId || a.id));
 
   if (!lib.length) {
@@ -4507,8 +4644,12 @@ function saveAvatarToLibFromModal() {
   // 저장 (기존 saveAvatarToLib 활용)
   const editingId = S._editingAvId;
   const lib = loadAvatarLib();
+  // 편집 모드: 기존 category 유지. 새 모드: 현재 탭 category
+  const _existing = editingId ? lib.find(a => a.id === editingId) : null;
+  const _cat = _existing?.category || getCurrentAvatarCat();
   const av = {
     id: editingId || Date.now(),
+    category: _cat,
     name,
     gender: document.getElementById('avGender').value,
     age: document.getElementById('avAge').value,
@@ -4604,8 +4745,12 @@ function saveAvatarToLib() {
   const lib = loadAvatarLib();
   const editingId = S._editingAvId;
 
+  // 편집 모드: 기존 category 유지. 새 모드: 현재 탭 category
+  const _existing = editingId ? lib.find(a => a.id === editingId) : null;
+  const _cat = _existing?.category || getCurrentAvatarCat();
   const av = {
     id: editingId || Date.now(),
+    category: _cat,
     name,
     gender: document.getElementById('avGender').value,
     age: document.getElementById('avAge').value,
@@ -4669,8 +4814,13 @@ function deleteAvatarFromLib(id) {
 }
 
 function renderSavedAvatars() {
-  const lib = loadAvatarLib();
+  const fullLib = loadAvatarLib();
+  const cat = getCurrentAvatarCat();
+  const lib = fullLib.filter(a => (a.category || 'person') === cat);
+  // 탭 자동 렌더
+  if (typeof renderCatTabs === 'function') renderCatTabs('avLabCatTabs');
   const grid = document.getElementById('savedAvGrid');
+  if (!grid) return;
   document.getElementById('savedAvCount').textContent = `${lib.length}명`;
   grid.style.display = 'grid';
   grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(180px, 1fr))';
@@ -7667,6 +7817,8 @@ function openAvatarPicker() {
     const lib = loadAvatarLib();
     const av = {
       id: Date.now(),
+      // 클라우드 메타에 category 있으면 그것, 없으면 현재 탭
+      category: md.category || getCurrentAvatarCat(),
       name: md.name || item.title,
       gender: md.gender || '',
       age: md.age || '',
