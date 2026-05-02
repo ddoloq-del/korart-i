@@ -1702,12 +1702,11 @@ select option:hover {
 
   <!-- ══ STEP 0: 아바타 ══ -->
   <select id="imgModel" style="display:none">
-  <option value="openai/gpt-image-2" data-cpm="0.006" data-quality="low">GPT Image 2 Low</option>
-  <option value="openai/gpt-image-2" data-cpm="0.053" data-quality="medium" selected>GPT Image 2 Medium</option>
-  <option value="openai/gpt-image-2" data-cpm="0.211" data-quality="high">GPT Image 2 High</option>
-  <option value="fal-ai/flux-pro/v1.1-ultra" data-cpm="0.06">Flux Pro Ultra</option>
-  <option value="fal-ai/flux/schnell" data-cpm="0.00476">Flux Schnell</option>
-  <option value="fal-ai/flux-pro" data-cpm="0.05">Flux Pro</option>
+  <option value="openai/gpt-image-2/edit" data-cpm="0.017" data-quality="low">GPT Image 2 Edit Low</option>
+  <option value="openai/gpt-image-2/edit" data-cpm="0.053" data-quality="medium" selected>GPT Image 2 Edit Medium</option>
+  <option value="openai/gpt-image-2/edit" data-cpm="0.158" data-quality="high">GPT Image 2 Edit High</option>
+  <option value="fal-ai/nano-banana-pro/edit" data-cpm="0.15">나노바나나 프로</option>
+  <option value="fal-ai/nano-banana-2/edit" data-cpm="0.08">나노바나나 2</option>
 </select>
 <select id="vidModel" style="display:none">
   <option value="fal-ai/kling-video/v3/standard/image-to-video" data-cps-off="0.084" data-cps-on="0.126" data-points-off="3.5" data-points-on="5.3" data-durations="3,4,5,6,7,8,9,10,11,12,13,14,15" data-min-dur="3" data-max-dur="15" data-label="Kling 3.0 Standard" data-sub="720p" data-audio-fixed="false" data-audio-included="true" data-resolution="720p">Kling 3.0 Standard 720p</option>
@@ -6185,12 +6184,57 @@ function updatePasserby() {
 //  모델 선택 모달 (이미지/영상 생성 시마다 호출)
 // ════════════════════════════════════════════════════════════
 const IMG_MODELS = [
-  { value: 'openai/gpt-image-2', cpm: 0.04, quality: 'low',    label: 'GPT Image 2 — Low',    sub: '$0.04/장 · 빠름·저렴' },
-  { value: 'openai/gpt-image-2', cpm: 0.07, quality: 'medium', label: 'GPT Image 2 — Medium', sub: '$0.07/장 · 균형' },
-  { value: 'openai/gpt-image-2', cpm: 0.19, quality: 'high',   label: 'GPT Image 2 — High',   sub: '$0.19/장 · 최고 화질·디테일 (추천)', recommended: true },
-  { value: 'fal-ai/flux-pro/v1.1-ultra', cpm: 0.06, label: 'Flux Pro 1.1 Ultra', sub: '$0.06/장 · 사실적' },
-  { value: 'fal-ai/flux/schnell', cpm: 0.003, label: 'Flux Schnell', sub: '$0.003/장 · 매우 저렴 (참고용)' },
+  {
+    value: 'openai/gpt-image-2/edit',
+    quality: 'low',
+    label: 'GPT Image 2 Edit Low',
+    sub: '저렴 · 빠름',
+    cpm: 0.017,
+  },
+  {
+    value: 'openai/gpt-image-2/edit',
+    quality: 'medium',
+    label: 'GPT Image 2 Edit Medium',
+    sub: '균형',
+    cpm: 0.053,
+  },
+  {
+    value: 'openai/gpt-image-2/edit',
+    quality: 'high',
+    label: 'GPT Image 2 Edit High',
+    sub: '최고 화질',
+    cpm: 0.158,
+  },
+  {
+    value: 'fal-ai/nano-banana-pro/edit',
+    label: '나노바나나 프로',
+    sub: 'Gemini 3 Pro · 고품질',
+    cpm: 0.15,
+    recommended: true,
+  },
+  {
+    value: 'fal-ai/nano-banana-2/edit',
+    label: '나노바나나 2',
+    sub: '가성비 · 빠름',
+    cpm: 0.08,
+  },
 ];
+
+// 비율별 GPT Image 2 사이즈 매핑 (가격표 기준)
+const GPT_IMG_SIZE_MAP = {
+  '16:9': { width: 1920, height: 1080 },
+  '9:16': { width: 1080, height: 1920 },
+  '1:1':  { width: 1024, height: 1024 },
+};
+
+// GPT Image 2 Edit 가격 매트릭스 (사이즈 + quality)
+// 1024x1024는 가격표에 명시, 1920x1080/1080x1920은 동일 가격으로 처리
+const GPT_IMG_PRICING = {
+  '1920x1080': { low: 0.017, medium: 0.053, high: 0.158 },
+  '1080x1920': { low: 0.017, medium: 0.053, high: 0.158 },
+  '1024x1024': { low: 0.015, medium: 0.061, high: 0.219 },
+};
+
 
 const VID_MODELS = [
   // Kling 3.0 Standard 720p — 권장 가성비
@@ -6304,19 +6348,32 @@ function pickModel(kind) {
     bodyEl.innerHTML = `
       <div style="font-size:11px;color:var(--ink3);margin-bottom:12px">생성에 사용할 모델을 선택하세요</div>
       <div style="display:flex;flex-direction:column;gap:8px;max-height:380px;overflow-y:auto">
-        ${list.map((m, i) => `
+        ${list.map((m, i) => {
+          // P 가격 계산 (이미지: cpm × 42, 영상: 첫 해상도 기준)
+          let priceTag = '';
+          if (kind === 'img' && m.cpm) {
+            const pts = Math.round(m.cpm * 42 * 10) / 10;
+            priceTag = pts + ' P/장';
+          } else if (kind === 'vid' && m.resolutions && m.resolutions[0]) {
+            const r = m.resolutions[0];
+            priceTag = (r.cpsOff !== r.cpsOn)
+              ? r.pointsOff + '~' + r.pointsOn + ' P/초'
+              : r.pointsOff + ' P/초';
+          }
+          return `
           <div onclick="_pickModelChoice(${i})" style="cursor:pointer;padding:12px 14px;border-radius: 0;border:1px solid var(--line);background:var(--bg2);transition:.15s;display:flex;align-items:center;gap:10px"
                onmouseover="this.style.borderColor='var(--pink)';this.style.background='rgba(255,107,157,.05)'"
                onmouseout="this.style.borderColor='var(--line)';this.style.background='var(--bg2)'">
             <div style="flex:1">
               <div style="font-size:13px;font-weight:700;color:var(--cream);margin-bottom:2px">
-                ${m.label}${m.recommended ? ' <span style="font-size:9px;background:linear-gradient(135deg,#818cf8 0%,#c084fc 50%,#f472b6 100%);color:#fff;padding:2px 7px;border-radius: 0;margin-left:4px;font-weight:800">추천</span>' : ''}
+                ${m.label}${m.recommended ? ' <span style=\"font-size:9px;background:linear-gradient(135deg,#818cf8 0%,#c084fc 50%,#f472b6 100%);color:#fff;padding:2px 7px;border-radius: 0;margin-left:4px;font-weight:800\">추천</span>' : ''}
               </div>
-              <div style="font-size:11px;color:var(--ink3)">${m.sub}</div>
+              <div style="font-size:11px;color:var(--ink3)">${m.sub}${priceTag ? ' · <span style=\"color:var(--gold);font-weight:700\">' + priceTag + '</span>' : ''}</div>
             </div>
             <div style="color:var(--pink);font-size:14px">→</div>
           </div>
-        `).join('')}
+          `;
+        }).join('')}
       </div>
     `;
 
@@ -7592,7 +7649,7 @@ function getVidModelOptions(i) {
     const priceTag = r ? ((r.cpsOff !== r.cpsOn)
       ? r.pointsOff + '~' + r.pointsOn + 'P/초'
       : r.pointsOff + 'P/초') : (m.pointsOff + 'P/초');
-    return '<option value="' + key + '" ' + sel + '>' + m.label + ' · ' + priceTag + (m.recommended ? ' ⭐' : '') + '</option>';
+    return '<option value="' + key + '" ' + sel + '>' + m.label + ' · ' + priceTag + (m.recommended ? ' [추천]' : '') + '</option>';
   }).join('');
 }
 
@@ -8148,11 +8205,19 @@ function getQuadCssAspect() {
   return `${ar.gridSize.width}/${ar.gridSize.height}`;
 }
 
-async function callFalImage(key, model, prompt, size) {
-  const [w, h] = size.split('x').map(Number);
+async function callFalImage(key, model, prompt, size, refImageUrl) {
+  // GPT Image 2 Edit / 나노바나나는 사이즈를 비율 기준으로 매핑
+  let [w, h] = size.split('x').map(Number);
   const isGpt = model.includes('gpt-image');
+  const isNanoBanana = model.includes('nano-banana');
   const isFluxUltra = model.includes('flux-pro/v1.1-ultra');
   const isFlux = model.includes('flux');
+  // GPT Image 2: 1920x1080 / 1080x1920 / 1024x1024 사이즈로 강제 매핑
+  if (isGpt) {
+    const ar = (typeof S !== 'undefined' && S.aspectRatio) ? S.aspectRatio : '16:9';
+    const m = (typeof GPT_IMG_SIZE_MAP !== 'undefined') ? GPT_IMG_SIZE_MAP[ar] : null;
+    if (m) { w = m.width; h = m.height; }
+  }
 
   // 사용자가 선택한 quality 가져오기 (GPT Image 2: low/medium/high)
   let qualityVal = 'medium';
@@ -8174,13 +8239,22 @@ async function callFalImage(key, model, prompt, size) {
 
   let body;
   if (isGpt) {
-    // GPT Image 2: image_size (w, h) — 3:1 cap, 16의 배수, 655K-8.3M pixels
-    body = { prompt, image_size: { width: w, height: h }, quality: qualityVal, output_format: 'png' };
+    // GPT Image 2 Edit: prompt + image_size + quality + image_urls (참고 이미지 배열)
+    body = {
+      prompt,
+      image_size: { width: w, height: h },
+      quality: qualityVal,
+      output_format: 'png',
+    };
+    // refImageUrl 있으면 image_urls 배열로 전달 (Edit 모델은 필수)
+    if (refImageUrl) body.image_urls = [refImageUrl];
+  } else if (isNanoBanana) {
+    // 나노바나나 프로/2 Edit: prompt + aspect_ratio + image_urls
+    body = { prompt, aspect_ratio: ratio, output_format: 'png' };
+    if (refImageUrl) body.image_urls = [refImageUrl];
   } else if (isFluxUltra) {
-    // Flux Pro Ultra: aspect_ratio 문자열 (공식 권장)
     body = { prompt, aspect_ratio: ratio, output_format: 'jpeg', safety_tolerance: '5' };
   } else if (isFlux) {
-    // Flux Pro / Schnell: image_size (w, h)
     body = { prompt, image_size: { width: w, height: h }, num_inference_steps: 28, guidance_scale: 3.5 };
   } else {
     body = { prompt, image_size: { width: w, height: h }, num_inference_steps: 28, guidance_scale: 3.5 };
@@ -8281,20 +8355,45 @@ ${prompt}`;
   log('info', `GPT Image 2 Edit 레퍼런스 생성 (아바타 ${publicUrls.length}명, ${w}x${h})`);
   publicUrls.forEach((u, i) => log('info', `  Image${i+1}: ${u.slice(0, 70)}`));
 
-  // 사용자 quality 선택 반영
+  // 모델 endpoint 결정 — 사용자가 IMG_MODELS에서 선택한 모델 사용
   const sel = document.getElementById('imgModel');
-  const userQuality = sel?.options[sel.selectedIndex]?.dataset?.quality || 'medium';
+  const selOpt = sel?.options[sel.selectedIndex];
+  const userQuality = selOpt?.dataset?.quality || 'medium';
+  // model 인자가 있으면 그걸 우선, 아니면 select 값 사용
+  const useModel = model || sel?.value || 'openai/gpt-image-2/edit';
+  const isGptEdit = useModel.includes('gpt-image');
+  const isNanoBanana = useModel.includes('nano-banana');
 
-  const body = {
-    prompt: editPrompt,
-    image_urls: publicUrls,
-    image_size: editSize,
-    quality: userQuality,
-    output_format: 'png',
-  };
-  log('info', `quality: ${userQuality}`);
+  // 비율 결정 (나노바나나용)
+  let aspectRatio = '16:9';
+  if (w === h) aspectRatio = '1:1';
+  else if (w / h < 1) aspectRatio = '9:16';
 
-  const r = await fetch('/fal-sync/openai/gpt-image-2/edit', {
+  let body;
+  if (isGptEdit) {
+    body = {
+      prompt: editPrompt,
+      image_urls: publicUrls,
+      image_size: editSize,
+      quality: userQuality,
+      output_format: 'png',
+    };
+    log('info', `GPT Image 2 Edit · quality: ${userQuality}`);
+  } else if (isNanoBanana) {
+    // 나노바나나 프로/2 Edit: prompt + image_urls + aspect_ratio
+    body = {
+      prompt: editPrompt,
+      image_urls: publicUrls,
+      aspect_ratio: aspectRatio,
+      output_format: 'png',
+    };
+    log('info', `${useModel} · aspect_ratio: ${aspectRatio}`);
+  } else {
+    // 폴백 — 일반 이미지 모델
+    return await callFalImage(key, useModel, editPrompt, size);
+  }
+
+  const r = await fetch('/fal-sync/' + useModel, {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + (await getSupabaseJWT()), 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -8302,8 +8401,8 @@ ${prompt}`;
 
   if (!r.ok) {
     const errText = await r.text();
-    log('warn', `GPT Image 2 Edit 실패 (${r.status}) → 일반 폴백: ${errText.slice(0, 150)}`);
-    return await callFalImage(key, 'openai/gpt-image-2', editPrompt, size);
+    log('warn', `${useModel} 실패 (${r.status}) → 일반 폴백: ${errText.slice(0, 150)}`);
+    return await callFalImage(key, useModel, editPrompt, size);
   }
 
   const d = await r.json();
