@@ -1567,13 +1567,17 @@ select option:hover {
     <span class="brand-text">Korart</span>
     <span class="brand-sub">— Studio</span>
   </div>
-  <div style="margin-left:auto;display:flex;align-items:center;gap:12px;display:none">
-    <input type="password" id="falKey" placeholder="fal.ai API key" style="background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:7px 12px;color:var(--ink);font-size:12px;width:240px;font-family:inherit">
+  <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+    <input type="password" id="falKey" placeholder="fal.ai API key" style="display:none">
+    <div id="userPointsBadge" style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:rgba(200,160,74,.10);border:1px solid var(--gold);border-radius:0;font-size:11px">
+      <span style="color:var(--ink3);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase">잔액</span>
+      <span id="userPoints" style="color:var(--gold);font-weight:700">— P</span>
+    </div>
     <div id="authNavSlot"><!-- KorartiAuth가 렌더링 --></div>
   </div>
   <!-- cost-badge 숨김: 내부 함수(updateCost 등)가 참조하는 ID 때문에 hidden 원소만 유지 -->
   <div style="display:none">
-    <span style="color:var(--ink3);font-size:9px;margin-right:4px">잔액</span><span id="userPoints" style="margin-right:12px;font-size:11px"></span><span style="color:var(--ink3);font-size:9px;margin-right:4px">사용</span><span id="costTotal">0 P</span><span id="costImg">0 P</span><span id="costVid">0 P</span>
+    <span id="costTotal">0 P</span><span id="costImg">0 P</span><span id="costVid">0 P</span>
   </div>
 </div>
 
@@ -2256,6 +2260,24 @@ async function updatePointsDisplay() {
   } else {
     el.innerHTML = '<span style="color:var(--gold);font-weight:700">' + me.points.toLocaleString() + ' P</span>';
   }
+}
+
+// DOMContentLoaded 또는 sb 준비되면 자동 호출
+function _triggerPointsDisplay(retries) {
+  retries = retries || 0;
+  if (retries > 20) return;  // 최대 10초 대기
+  if (typeof sb !== 'undefined' && sb && typeof currentUser !== 'undefined' && currentUser) {
+    updatePointsDisplay();
+    return;
+  }
+  // sb 또는 currentUser 아직 준비 안 됨 — 500ms 후 재시도
+  setTimeout(() => _triggerPointsDisplay(retries + 1), 500);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => setTimeout(() => _triggerPointsDisplay(), 200));
+} else {
+  setTimeout(() => _triggerPointsDisplay(), 200);
 }
 
 // 홈 이동 — 로그인 상태에 따라 mypage 또는 index
