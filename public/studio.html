@@ -1573,7 +1573,7 @@ select option:hover {
   </div>
   <!-- cost-badge 숨김: 내부 함수(updateCost 등)가 참조하는 ID 때문에 hidden 원소만 유지 -->
   <div style="display:none">
-    <span id="costTotal">$0.000</span><span id="costImg">$0.000</span><span id="costVid">$0.000</span>
+    <span id="costTotal">0 P</span><span id="costImg">0 P</span><span id="costVid">0 P</span>
   </div>
 </div>
 
@@ -1584,21 +1584,25 @@ select option:hover {
 
   <!-- ══ STEP 0: 아바타 ══ -->
   <select id="imgModel" style="display:none">
-  <option value="openai/gpt-image-2" data-cpm="0.04" data-quality="low">GPT Image 2 Low</option>
-  <option value="openai/gpt-image-2" data-cpm="0.07" data-quality="medium" selected>GPT Image 2 Medium</option>
-  <option value="openai/gpt-image-2" data-cpm="0.19" data-quality="high">GPT Image 2 High</option>
+  <option value="openai/gpt-image-2" data-cpm="0.006" data-quality="low">GPT Image 2 Low</option>
+  <option value="openai/gpt-image-2" data-cpm="0.053" data-quality="medium" selected>GPT Image 2 Medium</option>
+  <option value="openai/gpt-image-2" data-cpm="0.211" data-quality="high">GPT Image 2 High</option>
   <option value="fal-ai/flux-pro/v1.1-ultra" data-cpm="0.06">Flux Pro Ultra</option>
   <option value="fal-ai/flux/schnell" data-cpm="0.003">Flux Schnell</option>
   <option value="fal-ai/flux-pro" data-cpm="0.05">Flux Pro</option>
 </select>
 <select id="vidModel" style="display:none">
-  <option value="fal-ai/kling-video/v3/pro/image-to-video" data-cps-off="0.112" data-cps-on="0.168">Kling 3.0 Pro 1080p</option>
-  <option value="fal-ai/kling-video/v3/standard/image-to-video" data-cps-off="0.056" data-cps-on="0.084">Kling 3.0 Standard 720p</option>
-  <option value="fal-ai/kling-video/v1.6/pro/image-to-video" data-cps-off="0.098" data-cps-on="0.098">Kling 1.6 Pro</option>
-  <option value="fal-ai/kling-video/v1.6/standard/image-to-video" data-cps-off="0.056" data-cps-on="0.056">Kling 1.6 Standard</option>
-  <option value="fal-ai/kling-video/v2.1/pro/image-to-video" data-cps-off="0.07" data-cps-on="0.07">Kling 2.1 Pro</option>
-  <option value="fal-ai/veo3.1/image-to-video" data-cps-off="0.20" data-cps-on="0.20">Veo 3.1 Standard</option>
-  <option value="fal-ai/veo3.1/fast/image-to-video" data-cps-off="0.10" data-cps-on="0.10">Veo 3.1 Fast</option>
+  <option value="fal-ai/veo3.1/lite/image-to-video" data-cps-off="0.05" data-cps-on="0.08" data-points-off="65" data-points-on="104" data-min-dur="4" data-max-dur="8" data-label="Veo 3.1 Lite (1080p)" data-sub="가장 저렴 · 사운드 포함 가능">Veo 3.1 Lite (1080p)</option>
+  <option value="fal-ai/kling-video/v1.6/standard/image-to-video" data-cps-off="0.045" data-cps-on="0.045" data-points-off="59" data-points-on="59" data-min-dur="5" data-max-dur="10" data-label="Kling 1.6 Standard" data-sub="저렴 · 720p · 오디오 없음" data-audio-fixed="true" data-audio-included="false">Kling 1.6 Standard</option>
+  <option value="fal-ai/kling-video/v2.6/pro/image-to-video" data-cps-off="0.07" data-cps-on="0.14" data-points-off="91" data-points-on="182" data-min-dur="5" data-max-dur="10" data-label="Kling 2.6 Pro" data-sub="균형 · 1080p · 사운드 포함 가능">Kling 2.6 Pro</option>
+  <option value="fal-ai/kling-video/v3/standard/image-to-video" data-cps-off="0.084" data-cps-on="0.126" data-points-off="109" data-points-on="164" data-min-dur="3" data-max-dur="15" data-label="Kling 3.0 Standard" data-sub="권장 · 1080p · 사운드 포함 가능">Kling 3.0 Standard</option>
+  <option value="fal-ai/veo3.1/fast/image-to-video" data-cps-off="0.1" data-cps-on="0.15" data-points-off="130" data-points-on="195" data-min-dur="4" data-max-dur="8" data-label="Veo 3.1 Fast (1080p)" data-sub="빠름 · 사운드 포함 가능">Veo 3.1 Fast (1080p)</option>
+  <option value="fal-ai/kling-video/v3/pro/image-to-video" data-cps-off="0.112" data-cps-on="0.168" data-points-off="146" data-points-on="218" data-min-dur="3" data-max-dur="15" data-label="Kling 3.0 Pro" data-sub="고급 · 1080p · 사운드 포함 가능">Kling 3.0 Pro</option>
+  <option value="alibaba/happy-horse/image-to-video" data-cps-off="0.14" data-cps-on="0.14" data-points-off="182" data-points-on="182" data-min-dur="5" data-max-dur="10" data-label="HappyHorse 720p" data-sub="Arena 1위 · 사운드 + 립싱크 포함" data-audio-fixed="true" data-audio-included="true" data-resolution="720p">HappyHorse 720p</option>
+  <option value="alibaba/happy-horse/image-to-video" data-cps-off="0.28" data-cps-on="0.28" data-points-off="364" data-points-on="364" data-min-dur="5" data-max-dur="10" data-label="HappyHorse 1080p" data-sub="최고 품질 · 사운드 + 립싱크 포함" data-audio-fixed="true" data-audio-included="true" data-resolution="1080p">HappyHorse 1080p</option>
+  <option value="fal-ai/veo3.1/image-to-video" data-cps-off="0.2" data-cps-on="0.4" data-points-off="260" data-points-on="520" data-min-dur="4" data-max-dur="8" data-label="Veo 3.1 Standard (1080p)" data-sub="구글 · 사운드 포함 가능 · 최고 사실감">Veo 3.1 Standard (1080p)</option>
+  <option value="bytedance/seedance-2.0/fast/image-to-video" data-cps-off="0.2419" data-cps-on="0.2419" data-points-off="314" data-points-on="314" data-min-dur="4" data-max-dur="15" data-label="Seedance 2.0 Fast (720p)" data-sub="ByteDance · 사운드 + 멀티샷 포함" data-audio-fixed="true" data-audio-included="true">Seedance 2.0 Fast (720p)</option>
+  <option value="bytedance/seedance-2.0/image-to-video" data-cps-off="0.3024" data-cps-on="0.3024" data-points-off="393" data-points-on="393" data-min-dur="4" data-max-dur="15" data-label="Seedance 2.0 Standard" data-sub="ByteDance 최고급 · 사운드 + 멀티샷 포함" data-audio-fixed="true" data-audio-included="true">Seedance 2.0 Standard</option>
 </select>
 
   <!-- ══ STEP 0 (NEW): 비율 선택 ══ -->
@@ -2217,7 +2221,8 @@ function _serializeSession() {
     cutPubUrls: safeCutPubUrls,        // dataURL 제외
     // cutDataUrls는 저장 안 함 (5MB 제한)
     cutApproval: S.cutApproval,
-    cutDurations: S.cutDurations,
+    cutDurations: S.cutDurations,
+    vidModelSel: ['', '', '', ''],
     cutAudio: S.cutAudio,
     cutDescriptions: S.cutDescriptions,
     cutEmotions: S.cutEmotions,
@@ -3134,9 +3139,11 @@ function addVidCost(c) {
 }
 function updateCostDisplay() {
   const total = S.sessionImgCost + S.sessionVidCost;
-  document.getElementById('costTotal').textContent = '$' + total.toFixed(3);
-  document.getElementById('costImg').textContent = '$' + S.sessionImgCost.toFixed(3);
-  document.getElementById('costVid').textContent = '$' + S.sessionVidCost.toFixed(3);
+  // 1포인트 = USD * 1300 (마진 30% 포함)
+  const usd2pt = (usd) => Math.round(usd * 1300);
+  document.getElementById('costTotal').textContent = usd2pt(total) + ' P';
+  document.getElementById('costImg').textContent = usd2pt(S.sessionImgCost) + ' P';
+  document.getElementById('costVid').textContent = usd2pt(S.sessionVidCost) + ' P';
 }
 function resetCost() {
   S.sessionImgCost = 0; S.sessionVidCost = 0; updateCostDisplay();
@@ -6102,16 +6109,31 @@ function renderVidCards() {
           </div>
           <div style="font-size:9px;color:var(--ink3);margin-top:3px">최대 <strong style="color:var(--cream)">초당 4글자</strong>까지 음성 생성 (영상 길이 × 4자 = 최대 글자 수)</div>
         </div>
-        <!-- 설정 -->
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
-          <div style="display:inline-flex;align-items:center;gap:6px;padding:5px 8px;background:var(--bg3);border:1px solid var(--gold);border-radius:0"><span style="font-size:9px;color:var(--gold);font-weight:700;letter-spacing:.05em;text-transform:uppercase">시간</span><select id="vidDur${i}" onchange="S.cutDurations[${i}]=parseInt(this.value);updateScriptCounter(${i})" style="background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:3px 6px;color:var(--ink);font-size:11px;font-family:inherit;cursor:pointer" ${!hasCut ? 'disabled' : ''}>
-            ${[3,4,5,6,7,8,9,10,11,12,13,14,15].map(n=>`<option value="${n}" ${S.cutDurations[i]===n?'selected':''}>${n}초</option>`).join('')}
+        <!-- 설정 (모델 → 시간 → 오디오 → 비용) -->
+        <!-- 1) AI 모델 선택 -->
+        <div style="margin-bottom:10px;padding:8px 10px;background:rgba(200,160,74,.08);border:1px solid var(--gold);border-radius:0">
+          <label style="font-size:9px;color:var(--gold);font-weight:700;letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px">AI 모델 선택</label>
+          <select id="vidModelSel${i}" onchange="onVidModelChange(${i})" ${!hasCut ? 'disabled' : ''} style="width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:6px 8px;color:var(--ink);font-size:11px;font-family:inherit;cursor:pointer">
+            <option value="">— 모델을 선택해주세요 —</option>
+            ${getVidModelOptions(i)}
           </select>
-          <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink2);cursor:${hasCut?'pointer':'not-allowed'};opacity:${hasCut?1:0.5}">
-            <input type="checkbox" id="vidAudio${i}" ${S.cutAudio[i]?'checked':''} style="accent-color:var(--gold)" ${!hasCut ? 'disabled' : ''}> 오디오
-          </label>
-          <div id="vidCostEst${i}" style="font-size:10px;color:var(--ink3);margin-left:auto"></div>
+          <div id="vidModelSub${i}" style="font-size:9px;color:var(--ink3);margin-top:4px"></div>
         </div>
+
+        <!-- 2) 시간 + 오디오 (모델에 따라 옵션 변화) -->
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+          <div style="display:inline-flex;align-items:center;gap:6px;padding:5px 8px;background:var(--bg3);border:1px solid var(--gold);border-radius:0">
+            <span style="font-size:9px;color:var(--gold);font-weight:700;letter-spacing:.05em;text-transform:uppercase">시간</span>
+            <select id="vidDur${i}" onchange="onVidDurChange(${i})" disabled style="background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:3px 6px;color:var(--ink);font-size:11px;font-family:inherit;cursor:pointer">
+              <option value="">선택</option>
+            </select>
+          </div>
+          <label id="vidAudioLabel${i}" style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink2);cursor:not-allowed;opacity:0.5;padding:5px 8px;background:var(--bg3);border:1px solid var(--line);border-radius:0">
+            <input type="checkbox" id="vidAudio${i}" disabled onchange="onVidAudioChange(${i})" style="accent-color:var(--gold)"> <span id="vidAudioText${i}">오디오</span>
+          </label>
+          <div id="vidCostEst${i}" style="font-size:11px;color:var(--gold);font-weight:700;margin-left:auto"></div>
+        </div>
+
         <!-- 생성 버튼 -->
         <button class="btn btn-primary btn-full" id="vidGenBtn${i}" onclick="generateCutVideo(${i})" ${!hasCut ? 'disabled title="4컷 이미지가 없으면 AI 생성 불가 — 대신 아래 불러오기 사용"' : ''}>컷${i+1} 영상 생성</button>
         <!-- 상태 / 결과 -->
@@ -6151,49 +6173,262 @@ function renderVidCards() {
   for (let idx = 0; idx < 4; idx++) {
     if (typeof updateScriptCounter === 'function') updateScriptCounter(idx);
   }
+
+  // 각 카드 모델 선택 복원 + 비용 갱신
+  for (let idx = 0; idx < 4; idx++) {
+    if (S.vidModelSel && S.vidModelSel[idx]) {
+      const sel = document.getElementById('vidModelSel' + idx);
+      if (sel) sel.value = S.vidModelSel[idx];
+      onVidModelChange(idx);
+    }
+  }
 }
+
+// === Step 6 (영상 생성) — 헬퍼 함수 ===
+
+// vidModel select(전역, 숨겨진)에서 옵션 데이터 추출
+function getAllVidModels() {
+  const sel = document.getElementById('vidModel');
+  if (!sel) return [];
+  return Array.from(sel.options).map(opt => ({
+    value: opt.value,
+    label: opt.dataset.label || opt.textContent,
+    sub: opt.dataset.sub || '',
+    cpsOff: parseFloat(opt.dataset.cpsOff || 0),
+    cpsOn: parseFloat(opt.dataset.cpsOn || 0),
+    pointsOff: parseInt(opt.dataset.pointsOff || 0),
+    pointsOn: parseInt(opt.dataset.pointsOn || 0),
+    minDur: parseInt(opt.dataset.minDur || 5),
+    maxDur: parseInt(opt.dataset.maxDur || 10),
+    audioFixed: opt.dataset.audioFixed === 'true',
+    audioIncluded: opt.dataset.audioIncluded === 'true',
+    resolution: opt.dataset.resolution || '',
+  }));
+}
+
+// 카드별 모델 select option HTML 생성 (renderVidCards 안에서 호출)
+function getVidModelOptions(i) {
+  const list = getAllVidModels();
+  const cur = (S.vidModelSel && S.vidModelSel[i]) || '';
+  return list.map((m, idx) => {
+    const key = m.value + '|' + m.label;
+    const sel = (cur === key) ? 'selected' : '';
+    const audioTag = m.audioFixed && m.audioIncluded ? ' (오디오 포함)' :
+                     m.audioFixed && !m.audioIncluded ? ' (오디오 없음)' : '';
+    return '<option value="' + key + '" ' + sel + '>' + m.label + ' · ' + m.pointsOff + 'P/초' + audioTag + '</option>';
+  }).join('');
+}
+
+// 카드별 선택된 모델 정보 반환 (선택 안 했으면 null)
+function getSelectedVidModel(i) {
+  const key = (S.vidModelSel && S.vidModelSel[i]) || '';
+  if (!key) return null;
+  const list = getAllVidModels();
+  return list.find(m => (m.value + '|' + m.label) === key) || null;
+}
+
+// 모델 변경 — duration 옵션 동적 채우기, 오디오 활성화/비활성, 첫값=최소duration
+function onVidModelChange(i) {
+  const sel = document.getElementById('vidModelSel' + i);
+  if (!sel) return;
+  const key = sel.value;
+  if (!S.vidModelSel) S.vidModelSel = ['', '', '', ''];
+  S.vidModelSel[i] = key;
+
+  const m = getSelectedVidModel(i);
+  const subEl = document.getElementById('vidModelSub' + i);
+  const durSel = document.getElementById('vidDur' + i);
+  const audioBox = document.getElementById('vidAudio' + i);
+  const audioLabel = document.getElementById('vidAudioLabel' + i);
+
+  if (!m) {
+    if (subEl) subEl.textContent = '모델을 선택하면 시간과 오디오 옵션이 활성화됩니다';
+    if (durSel) { durSel.disabled = true; durSel.innerHTML = '<option value="">선택</option>'; }
+    if (audioBox) { audioBox.disabled = true; audioBox.checked = false; }
+    if (audioLabel) { audioLabel.style.opacity = '0.5'; audioLabel.style.cursor = 'not-allowed'; }
+    updateVidCostEst(i);
+    return;
+  }
+
+  // 모델 sub 표시
+  if (subEl) {
+    let info = m.sub;
+    if (m.resolution) info += ' · ' + m.resolution;
+    info += ' · ' + m.minDur + '\u201C-\u201D' + m.maxDur + '초';
+    subEl.textContent = info;
+  }
+
+  // duration 옵션 채우기 (min~max), 첫값 = min
+  if (durSel) {
+    durSel.disabled = false;
+    const opts = [];
+    for (let d = m.minDur; d <= m.maxDur; d++) {
+      opts.push('<option value="' + d + '">' + d + '초</option>');
+    }
+    durSel.innerHTML = opts.join('');
+    durSel.value = String(m.minDur);  // 최소 duration 자동 세팅
+    S.cutDurations[i] = m.minDur;
+  }
+
+  // 오디오: audioFixed면 토글 막기 (모델이 오디오 포함/제외 고정)
+  if (audioBox && audioLabel) {
+    if (m.audioFixed) {
+      audioBox.disabled = true;
+      audioBox.checked = m.audioIncluded;
+      S.cutAudio[i] = m.audioIncluded;
+      audioLabel.style.opacity = '0.7';
+      audioLabel.style.cursor = 'not-allowed';
+    } else {
+      audioBox.disabled = false;
+      audioLabel.style.opacity = '1';
+      audioLabel.style.cursor = 'pointer';
+    }
+  }
+
+  // 오디오 라벨 텍스트 갱신 (+N P 표시)
+  updateVidAudioLabel(i);
+  updateVidCostEst(i);
+  if (typeof updateScriptCounter === 'function') updateScriptCounter(i);
+}
+
+// 오디오 라벨 텍스트 갱신 — 토글 가능하면 '오디오 (+N P/초)', 고정이면 '오디오 포함' 또는 '오디오 없음'
+function updateVidAudioLabel(i) {
+  const m = getSelectedVidModel(i);
+  const txt = document.getElementById('vidAudioText' + i);
+  if (!txt) return;
+  if (!m) { txt.textContent = '오디오'; return; }
+  if (m.audioFixed) {
+    txt.textContent = m.audioIncluded ? '오디오 포함' : '오디오 없음';
+  } else {
+    const diff = m.pointsOn - m.pointsOff;
+    txt.textContent = diff > 0 ? '오디오 (+' + diff + ' P/초)' : '오디오';
+  }
+}
+
+function onVidDurChange(i) {
+  const sel = document.getElementById('vidDur' + i);
+  if (sel) S.cutDurations[i] = parseInt(sel.value) || 5;
+  updateVidCostEst(i);
+  if (typeof updateScriptCounter === 'function') updateScriptCounter(i);
+}
+
+function onVidAudioChange(i) {
+  const box = document.getElementById('vidAudio' + i);
+  if (box) S.cutAudio[i] = box.checked;
+  updateVidCostEst(i);
+}
+
+// 카드별 예상 비용(포인트) 계산 + 표시
+function calcVidPoints(i) {
+  const m = getSelectedVidModel(i);
+  if (!m) return { points: 0, cps: 0, dur: 0, audio: false };
+  const dur = parseInt(document.getElementById('vidDur' + i)?.value || S.cutDurations[i] || m.minDur);
+  const audio = m.audioFixed ? m.audioIncluded : !!(document.getElementById('vidAudio' + i)?.checked);
+  const pts = audio ? m.pointsOn : m.pointsOff;
+  const cps = audio ? m.cpsOn : m.cpsOff;
+  return { points: pts * dur, cps, dur, audio, model: m };
+}
+
+function updateVidCostEst(i) {
+  const el = document.getElementById('vidCostEst' + i);
+  if (!el) return;
+  const r = calcVidPoints(i);
+  if (r.points <= 0) { el.textContent = ''; return; }
+  el.textContent = r.points + ' P 예상';
+}
+
+// 모든 카드 cost 갱신 (renderVidCards 끝에서 호출)
+function refreshAllVidCosts() {
+  for (let i = 0; i < 4; i++) {
+    if (S.vidModelSel && S.vidModelSel[i]) {
+      onVidModelChange(i);
+    } else {
+      updateVidCostEst(i);
+    }
+  }
+}
+
 
 async function generateCutVideo(i) {
   const falKey = document.getElementById('falKey').value.trim();
   if (!falKey) { toast('❌ fal.ai API 키를 입력해주세요'); return; }
 
-  // 영상 모델 인라인 선택 (컷마다)
-  const pickedV = await pickModel('vid');
-  if (!pickedV) return;
+  // 카드 자체에서 모델 선택값 가져오기
+  const pickedV = getSelectedVidModel(i);
+  if (!pickedV) {
+    toast('먼저 AI 모델을 선택해주세요');
+    const sel = document.getElementById('vidModelSel' + i);
+    if (sel) sel.focus();
+    return;
+  }
 
   // 설정값 파싱
-  const dur = parseInt(document.getElementById(`vidDur${i}`)?.value || S.cutDurations[i]);
-  const audio = document.getElementById(`vidAudio${i}`)?.checked ?? false;
-  const cps = audio ? (pickedV.cpsOn || pickedV.cpsOff || 0.1) : (pickedV.cpsOff || 0.1);
+  const dur = parseInt(document.getElementById('vidDur' + i)?.value || S.cutDurations[i] || pickedV.minDur);
+  const audio = pickedV.audioFixed ? pickedV.audioIncluded : !!(document.getElementById('vidAudio' + i)?.checked);
+  const pts = audio ? pickedV.pointsOn : pickedV.pointsOff;
+  const cps = audio ? pickedV.cpsOn : pickedV.cpsOff;
+  const totalPts = pts * dur;
   const estCost = (cps * dur).toFixed(3);
 
-  // 선택 후 확인 팝업 (한 번만)
+  // 추가 옵션 정보 (대사, 추가 디테일)
+  const extra = document.getElementById('vidExtra' + i)?.value.trim() || '';
+  const speakerEl = document.getElementById('vidSpeaker' + i);
+  const emotionEl = document.getElementById('vidEmotion' + i);
+  const scriptEl = document.getElementById('vidScript' + i);
+  const speaker = speakerEl ? speakerEl.value : '';
+  const emotion = emotionEl ? emotionEl.value : '';
+  const script = scriptEl ? scriptEl.value.trim() : '';
+
+  // 확인 모달 — 모든 옵션 표시
+  const audioLabel = pickedV.audioFixed
+    ? (pickedV.audioIncluded ? '포함 (모델 고정)' : '없음 (모델 고정)')
+    : (audio ? 'ON (+' + (pickedV.pointsOn - pickedV.pointsOff) + ' P/초)' : 'OFF');
+
+  const scriptLine = script
+    ? '<div style="font-size:11px;color:var(--ink2);margin-top:4px">\u00b7 대사: <b>' + escHtml(script) + '</b>' + (speaker ? ' (' + speaker + ')' : '') + (emotion ? ' [' + emotion + ']' : '') + '</div>'
+    : '';
+  const extraLine = extra
+    ? '<div style="font-size:11px;color:var(--ink2);margin-top:4px">\u00b7 추가: <b>' + escHtml(extra) + '</b></div>'
+    : '';
+  const angleLine = S.angles[i]
+    ? '<div style="font-size:11px;color:var(--ink2);margin-top:4px">\u00b7 앵글: <b>' + S.angles[i] + '</b></div>'
+    : '';
+
   const confirmOk = await showConfirm(
-    `컷 ${i+1} 영상 생성`,
-    `<div style="padding:8px 0">
-       <div style="font-size:14px;font-weight:700;color:var(--cream);margin-bottom:6px">${pickedV.label}</div>
-       <div style="font-size:12px;color:var(--ink2);margin-bottom:14px">${pickedV.sub}</div>
-       <div style="font-size:13px;color:var(--ink2)">앵글: <b>${S.angles[i]||'cinematic'}</b> · 길이: <b>${dur}초</b> · 오디오: <b>${audio ? 'ON' : 'OFF'}</b><br>예상 비용 ~${estCost}</div>
-     </div>`
+    '컷 ' + (i+1) + ' 영상 생성 — 모든 옵션을 확인하세요',
+    '<div style="padding:6px 0">' +
+      '<div style="font-size:14px;font-weight:700;color:var(--gold);margin-bottom:4px">' + pickedV.label + '</div>' +
+      '<div style="font-size:11px;color:var(--ink3);margin-bottom:12px">' + pickedV.sub + '</div>' +
+      '<div style="border-top:1px solid var(--line);padding-top:10px;margin-bottom:10px">' +
+        '<div style="font-size:12px;color:var(--ink2)">\u00b7 영상 시간: <b style="color:var(--cream)">' + dur + '초</b></div>' +
+        '<div style="font-size:12px;color:var(--ink2);margin-top:4px">\u00b7 오디오: <b style="color:var(--cream)">' + audioLabel + '</b></div>' +
+        angleLine + extraLine + scriptLine +
+      '</div>' +
+      '<div style="border-top:1px solid var(--line);padding-top:10px;background:rgba(200,160,74,.08);padding:10px;margin:0 -8px">' +
+        '<div style="font-size:12px;color:var(--ink3)">예상 비용</div>' +
+        '<div style="font-size:20px;font-weight:800;color:var(--gold);margin-top:2px">' + totalPts + ' P' +
+          ' <span style="font-size:11px;color:var(--ink3);font-weight:500">(~$' + estCost + ')</span></div>' +
+      '</div>' +
+    '</div>'
   );
   if (!confirmOk) return;
 
   const model = pickedV.value;
   let prompt = buildVidPrompt(i);
   // ADDITIONAL DETAIL 추가 전에 길이 체크 (추가하면 510 넘을 수 있으므로)
-  const extra = document.getElementById(`vidExtra${i}`)?.value.trim();
-  if (extra) {
+  const extraOld = document.getElementById(`vidExtra${i}`)?.value.trim();
+  if (extraOld) {
     const room = 510 - prompt.length - 22;  // "\n\nADDITIONAL DETAIL: " = 22자
     if (room > 0) {
-      const trimmed = extra.length > room ? extra.slice(0, room - 3) + '...' : extra;
+      const trimmed = extraOld.length > room ? extraOld.slice(0, room - 3) + '...' : extraOld;
       prompt += `\n\nADDITIONAL DETAIL: ${trimmed}`;
     } else {
       log('warn', '기본 프롬프트가 길어 ADDITIONAL DETAIL이 추가되지 않습니다');
     }
   }
-  const script = document.getElementById(`vidScript${i}`)?.value.trim() || '';
-  const speaker = document.getElementById(`vidSpeaker${i}`)?.value || '';
-  const emotion = document.getElementById(`vidEmotion${i}`)?.value || '';
+  // script already declared above
+  // speaker already declared above
+  // emotion already declared above
 
   // 대사 글자 수 체크 (초당 4글자)
   if (script) {
