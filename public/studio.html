@@ -3458,30 +3458,49 @@ function renderStep1Avatars() {
           </div>
         </div>
         ${isCast ? `
-          <div style="padding:6px 8px 8px;border-top:1px solid rgba(200,160,74,.25);background:rgba(0,0,0,.18)">
-            <div style="font-size:9px;color:var(--ink3);margin-bottom:4px;font-weight:600">의상</div>
-            <div style="display:flex;flex-wrap:wrap;gap:3px">
-              ${outfitOptions.map(o => {
-                 const enEsc = o.en.replace(/'/g, "\\'");
-                 const luxEnEsc = o.luxEn ? o.luxEn.replace(/'/g, "\\'") : "";
-                 const isStdActive = outfit === o.en;
-                 const isLuxActive = o.luxEn && outfit === o.luxEn;
-                 const isAnyActive = isStdActive || isLuxActive;
-                 const luxBoxId = `outfitLux-${av.id}-${o.ko.replace(/[^\w]/g,"")}`;
-                 let html = `<div onclick="setAvatarOutfitWithLux(${av.id}, '${enEsc}', '${luxEnEsc}', '${luxBoxId}', this)" class="outfit-seg ${isAnyActive ? 'active' : ''}" style="font-size:9px;padding:3px 6px;border-radius:0;cursor:pointer;background:${isAnyActive ? 'var(--gold)' : 'var(--bg3)'};color:${isAnyActive ? '#000' : 'var(--ink2)'};border:1px solid ${isAnyActive ? 'var(--gold)' : 'var(--line)'};font-weight:${isAnyActive ? '700' : '500'}">${o.ko}</div>`;
-                 if (o.luxEn) {
-                   html += `<label style="display:inline-flex;align-items:center;gap:2px;font-size:9px;cursor:pointer;padding:2px 5px;border-radius:0;background:var(--bg3);border:1px solid ${isLuxActive ? 'var(--gold)' : 'var(--line)'};user-select:none;font-weight:${isLuxActive ? '700' : '500'};color:${isLuxActive ? 'var(--gold)' : 'var(--ink2)'}"><input type="checkbox" id="${luxBoxId}" ${isLuxActive ? 'checked' : ''} onchange="toggleOutfitLux(${av.id}, '${enEsc}', '${luxEnEsc}', this)" style="margin:0;width:9px;height:9px">고급</label>`;
-                 }
-                 return html;
-               }).join('')}
-              <div onclick="toggleAvatarOutfitCustom(${av.id})"
-                   class="outfit-seg ${isCustomOutfit ? 'active' : ''}"
-                   style="font-size:9px;padding:3px 6px;border-radius: 0;cursor:pointer;background:${isCustomOutfit ? 'var(--pink)' : 'var(--bg3)'};color:${isCustomOutfit ? '#fff' : 'var(--ink2)'};border:1px solid ${isCustomOutfit ? 'var(--pink)' : 'var(--line)'};font-weight:${isCustomOutfit ? '700' : '500'}">개인설정</div>
+          <div style="padding:8px 10px 10px;border-top:1px solid rgba(200,160,74,.25);background:rgba(0,0,0,.18)">
+            <!-- 의상 드롭다운 -->
+            <div style="margin-bottom:8px">
+              <label style="font-size:9px;color:${(outfit && outfit.trim()) ? 'var(--gold)' : 'var(--ink3)'};font-weight:700;letter-spacing:.05em;display:block;margin-bottom:3px">
+                의상${(outfit && outfit.trim()) ? ' ✓' : ''}
+              </label>
+              <select onchange="setOutfitFromSelect(${av.id}, this.value)"
+                      style="width:100%;background:${(outfit && outfit.trim()) ? 'rgba(200,160,74,.18)' : 'var(--bg3)'};border:1px solid ${(outfit && outfit.trim()) ? 'var(--gold)' : 'var(--line)'};border-radius:0;padding:6px 8px;color:var(--ink);font-size:11px;font-family:inherit;cursor:pointer">
+                <option value="">— 선택 안 함 —</option>
+                ${outfitOptions.map(o => {
+                  const stdSel = (outfit === o.en) ? 'selected' : '';
+                  const luxSel = (o.luxEn && outfit === o.luxEn) ? 'selected' : '';
+                  let h = '<option value="' + escHtml(o.en) + '" ' + stdSel + '>' + o.ko + '</option>';
+                  if (o.luxEn) {
+                    h += '<option value="' + escHtml(o.luxEn) + '" ' + luxSel + '>' + o.ko + ' (고급)</option>';
+                  }
+                  return h;
+                }).join('')}
+                <option value="__custom__" ${isCustomOutfit ? 'selected' : ''}>직접 입력...</option>
+              </select>
+              <input id="outfitCustom-${av.id}" placeholder="직접 입력 (예: red dress)"
+                     value="${isCustomOutfit ? escHtml(outfit) : ''}"
+                     oninput="updateAvatarOutfitCustom(${av.id}, this.value)"
+                     style="display:${isCustomOutfit ? 'block' : 'none'};margin-top:5px;width:100%;background:var(--bg3);border:1px solid var(--gold);border-radius:0;padding:4px 6px;color:var(--ink);font-size:10px;box-sizing:border-box">
             </div>
-            <input id="outfitCustom-${av.id}" placeholder="직접 입력 (예: red dress)"
-                   value="${isCustomOutfit ? escHtml(outfit) : ''}"
-                   oninput="updateAvatarOutfitCustom(${av.id}, this.value)"
-                   style="display:${isCustomOutfit ? 'block' : 'none'};margin-top:5px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:4px 6px;color:var(--ink);font-size:10px;box-sizing:border-box">
+
+            <!-- 헤어스타일 드롭다운 (씬에서 변경 — 시대 맞게) -->
+            <div>
+              <label style="font-size:9px;color:${(av.sceneHair && av.sceneHair.trim()) ? 'var(--gold)' : 'var(--ink3)'};font-weight:700;letter-spacing:.05em;display:block;margin-bottom:3px">
+                헤어스타일${(av.sceneHair && av.sceneHair.trim()) ? ' ✓' : ''}
+              </label>
+              <select onchange="setSceneHairFromSelect(${av.id}, this.value)"
+                      style="width:100%;background:${(av.sceneHair && av.sceneHair.trim()) ? 'rgba(200,160,74,.18)' : 'var(--bg3)'};border:1px solid ${(av.sceneHair && av.sceneHair.trim()) ? 'var(--gold)' : 'var(--line)'};border-radius:0;padding:6px 8px;color:var(--ink);font-size:11px;font-family:inherit;cursor:pointer">
+                <option value="">— 원본 유지 —</option>
+                ${getSceneHairOptions(av.gender).map(h => {
+                  const sel = (av.sceneHair === h.en) ? 'selected' : '';
+                  const eraTag = h.era === 'historical' ? '[사극] ' :
+                                 h.era === 'gyeongseong' ? '[경성] ' :
+                                 h.era === 'retro' ? '[레트로] ' : '';
+                  return '<option value="' + escHtml(h.en) + '" ' + sel + '>' + eraTag + h.ko + '</option>';
+                }).join('')}
+              </select>
+            </div>
           </div>
         ` : ''}
       </div>
@@ -3500,6 +3519,35 @@ function setAvatarOutfit(libId, outfitEn, el) {
     cast.outfit = outfitEn;
   }
   renderStep1Avatars();
+}
+
+// === 4단계 의상 드롭다운 전용 ===
+function setOutfitFromSelect(libId, val) {
+  const cast = S.avatars.find(a => (a._libId || a.id) === libId);
+  if (!cast) return;
+  if (val === '__custom__') {
+    cast.outfit = ' ';  // custom mode 트리거 (공백)
+  } else {
+    cast.outfit = val;
+  }
+  renderStep1Avatars();
+}
+
+// === 4단계 헤어 드롭다운 (씬에서만 적용 — av.hair 라이브러리는 그대로) ===
+function setSceneHairFromSelect(libId, val) {
+  const cast = S.avatars.find(a => (a._libId || a.id) === libId);
+  if (!cast) return;
+  cast.sceneHair = val || '';
+  renderStep1Avatars();
+}
+
+// === 시대 맞춤 헤어 옵션 (4단계 씬에서) ===
+// 현재 시대 그룹 + modern (옵션 다양성)
+function getSceneHairOptions(gender) {
+  const list = HAIR_STYLES[gender] || HAIR_STYLES['Korean man'];
+  const eraKey = S.era || 'modern';
+  const group = (typeof ERAS !== 'undefined' && ERAS[eraKey] && ERAS[eraKey].group) || 'modern';
+  return list.filter(h => h.era === group || h.era === 'modern');
 }
 
 // 시대별 의상 — 표준 옵션 클릭 (고급 체크박스 상태도 고려)
@@ -5294,7 +5342,13 @@ function buildImagePrompt() {
   if (S.avatars.length) {
     charDesc = S.avatars.map(av => {
       const parts = [av.gender, av.age, av.body];
-      if (av.hair) parts.push(av.hair);
+      if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
+      else if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
+      else if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
+      else if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
+      else if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
+      else if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
+      else if (av.hair) parts.push(av.hair);
       if (av.skin) parts.push(av.skin);
       if (av.extra) parts.push(av.extra);
       if (av.outfit && av.outfit.trim()) parts.push(av.outfit.trim());
@@ -5784,7 +5838,7 @@ function renderCutControls() {
           <label style="font-size:10px;color:var(--ink3)">영상 길이</label>
           <select onchange="S.cutDurations[${i}]=parseInt(this.value)" style="background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:3px 6px;color:var(--ink);font-size:11px">
             ${[3,4,5,6,7,8,9,10,11,12,13,14,15].map(n=>`<option value="${n}" ${S.cutDurations[i]===n?'selected':''}>${n}초</option>`).join('')}
-          </select>
+          </select></div>
           <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--ink3);margin-left:auto;cursor:pointer">
             <input type="checkbox" ${S.cutAudio[i]?'checked':''} onchange="S.cutAudio[${i}]=this.checked"> 오디오
           </label>
@@ -6012,7 +6066,7 @@ function renderVidCards() {
         </div>
         <!-- 설정 -->
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
-          <select id="vidDur${i}" onchange="S.cutDurations[${i}]=parseInt(this.value);updateScriptCounter(${i})" style="background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:4px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
+          <div style="display:inline-flex;align-items:center;gap:6px;padding:5px 8px;background:var(--bg3);border:1px solid var(--gold);border-radius:0"><span style="font-size:9px;color:var(--gold);font-weight:700;letter-spacing:.05em;text-transform:uppercase">시간</span><select id="vidDur${i}" onchange="S.cutDurations[${i}]=parseInt(this.value);updateScriptCounter(${i})" style="background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:3px 6px;color:var(--ink);font-size:11px;font-family:inherit;cursor:pointer" ${!hasCut ? 'disabled' : ''}>
             ${[3,4,5,6,7,8,9,10,11,12,13,14,15].map(n=>`<option value="${n}" ${S.cutDurations[i]===n?'selected':''}>${n}초</option>`).join('')}
           </select>
           <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink2);cursor:${hasCut?'pointer':'not-allowed'};opacity:${hasCut?1:0.5}">
@@ -6359,7 +6413,8 @@ async function callFalImageWithRef(key, model, prompt, size, refImageUrls) {
     if (av.body)   parts.push(av.body.split(',')[0]);
     if (av.height) parts.push(av.height);
     if (av.look)   parts.push(av.look.split(',')[0]);
-    if (hairEn)    parts.push(hairEn);
+    if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
+    else if (hairEn) parts.push(hairEn);
     if (av.skin)   parts.push(av.skin);
     if (extraEn)   parts.push(extraEn);
     const desc = parts.length ? ` (${parts.join(', ')})` : '';
@@ -6385,10 +6440,10 @@ Each reference image is a CHARACTER REFERENCE SHEET — a single image divided i
 Use ALL 6 angles in the reference sheet to understand the character's full 3D facial structure. When generating new panels at any camera angle, the face MUST stay consistent with the angles shown in the reference sheet.
 
 IMPORTANT INSTRUCTIONS:
-- Preserve from each reference: face, eyes, hairstyle, glasses, earrings, and any other facial accessories EXACTLY as shown across ALL 6 reference angles.
-- DO NOT preserve the clothing/outfit from the reference (the reference sheet uses neutral studio wear).
+- Preserve from each reference: face, eyes, glasses, earrings, and any other facial accessories EXACTLY as shown across ALL 6 reference angles.
+- DO NOT preserve the clothing/outfit OR hairstyle from the reference (the reference sheet uses neutral studio wear and a default hairstyle). The hairstyle described in the scene below takes priority over the reference.
 - Replace clothing with outfits appropriate for the scene's season, weather, and location described below.
-- The face, hair, and accessories must look IDENTICAL to the reference in EVERY panel of the new generated image, regardless of camera angle.
+- The face, eyes, and accessories must look IDENTICAL to the reference in EVERY panel of the new generated image, regardless of camera angle. The hairstyle and clothing follow the scene description, NOT the reference.
 
 ${prompt}`;
 
