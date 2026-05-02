@@ -8733,6 +8733,66 @@ function getQuadCssAspect() {
   return `${ar.gridSize.width}/${ar.gridSize.height}`;
 }
 
+// fal queue 방식으로 이미지 생성 — 524 타임아웃 방지
+// /fal-proxy POST -> IN_QUEUE -> /fal-proxy-abs 폴링 -> COMPLETED -> 결과 fetch
+async function _falImageQueue(model, body, statusEl) {
+  const jwt = await getSupabaseJWT();
+  // 1단계: queue 제출
+  const submitRes = await fetch('/fal-proxy/' + model, {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + jwt, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!submitRes.ok) {
+    const errText = await submitRes.text();
+    throw new Error('fal.ai ' + submitRes.status + ': ' + errText.slice(0, 300));
+  }
+  let d = await submitRes.json();
+  // queue 응답이면 폴링
+  if (d && (d.status === 'IN_QUEUE' || d.status === 'IN_PROGRESS')) {
+    log('info', '이미지 queue 진입 → 폴링 (request_id: ' + (d.request_id || '?') + ')');
+    const statusUrl = d.status_url;
+    const responseUrl = d.response_url;
+    if (!statusUrl || !responseUrl) throw new Error('queue URL 없음');
+    const maxWait = 5 * 60 * 1000;  // 5분
+    const startTime = Date.now();
+    let pollCount = 0;
+    while (Date.now() - startTime < maxWait) {
+      await new Promise(rs => setTimeout(rs, 3000));
+      pollCount++;
+      try {
+        const sr = await fetch('/fal-proxy-abs?url=' + encodeURIComponent(statusUrl), {
+          headers: { 'Authorization': 'Bearer ' + jwt },
+        });
+        if (!sr.ok) { log('warn', '폴링 ' + pollCount + ' 실패 (' + sr.status + ')'); continue; }
+        const sd = await sr.json();
+        if (statusEl && pollCount % 5 === 0) {
+          statusEl.innerHTML = '<div class="spin" style="width:28px;height:28px;border-width:3px"></div><div style="font-size:11px;color:var(--ink2)">처리 중... ' + Math.floor((Date.now() - startTime) / 1000) + '초 경과</div>';
+        }
+        if (sd.status === 'COMPLETED') {
+          log('ok', '폴링 완료 (' + pollCount + '회)');
+          const rr = await fetch('/fal-proxy-abs?url=' + encodeURIComponent(responseUrl), {
+            headers: { 'Authorization': 'Bearer ' + jwt },
+          });
+          if (!rr.ok) throw new Error('결과 fetch 실패: ' + rr.status);
+          d = await rr.json();
+          break;
+        }
+        if (sd.status === 'FAILED' || sd.status === 'ERROR') {
+          throw new Error('fal 처리 실패: ' + JSON.stringify(sd).slice(0, 300));
+        }
+      } catch (e) {
+        if (e.message && e.message.includes('fal 처리 실패')) throw e;
+        log('warn', '폴링 ' + pollCount + ' 에러: ' + e.message);
+      }
+    }
+    if (d && (d.status === 'IN_QUEUE' || d.status === 'IN_PROGRESS')) {
+      throw new Error('폴링 타임아웃 (5분 초과)');
+    }
+  }
+  return d;
+}
+
 async function callFalImage(key, model, prompt, size, refImageUrl) {
   // GPT Image 2 Edit / 나노바나나는 사이즈를 비율 기준으로 매핑
   let [w, h] = size.split('x').map(Number);
@@ -8794,16 +8854,9 @@ async function callFalImage(key, model, prompt, size, refImageUrl) {
     body = { prompt, image_size: { width: w, height: h }, num_inference_steps: 28, guidance_scale: 3.5 };
   }
 
-  const r = await fetch('/fal-sync/' + model, {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + (await getSupabaseJWT()), 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  if (!r.ok) {
-    const e = await r.text();
-    throw new Error(`fal.ai ${r.status}: ${e.slice(0, 200)}`);
-  }
-  const d = await r.json();
+  // queue 방식으로 호출 (524 타임아웃 방지)
+  const statusEl = document.getElementById('quad');
+  const d = await _falImageQueue(model, body, statusEl);
   const url = d?.images?.[0]?.url || d?.image?.url || d?.url;
   if (!url) throw new Error('이미지 URL 없음: ' + JSON.stringify(d).slice(0, 200));
   return url;
@@ -8941,19 +8994,9 @@ ${prompt}`;
     throw new Error('지원하지 않는 모델: ' + useModel);
   }
 
-  const r = await fetch('/fal-sync/' + useModel, {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + (await getSupabaseJWT()), 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-
-  if (!r.ok) {
-    const errText = await r.text();
-    log('err', `${useModel} 실패 (${r.status}): ${errText.slice(0, 300)}`);
-    throw new Error(`fal.ai ${r.status}: ${errText.slice(0, 200)}`);
-  }
-
-  const d = await r.json();
+  // queue 방식으로 호출 (524 타임아웃 방지) — 특히 GPT Edit High + 다중 input 시 필수
+  const statusEl = document.getElementById('quad');
+  const d = await _falImageQueue(useModel, body, statusEl);
   const url = d?.images?.[0]?.url || d?.image?.url || d?.url;
   if (!url) throw new Error('GPT Image 2 Edit URL 없음: ' + JSON.stringify(d).slice(0, 200));
   return url;
