@@ -2152,12 +2152,23 @@ select option:hover {
 
     <!-- ============= 사람 카테고리 입력 폼 ============= -->
     <div id="avPersonFields">
+    <!-- 인종 (선택, 기본은 한국인) -->
+    <div class="field">
+      <label>인종 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택, 기본은 한국인)</span></label>
+      <div class="segs" id="avRaceSegs">
+        <div class="seg" onclick="selRace(this,'korean')">한국인</div>
+        <div class="seg" onclick="selRace(this,'caucasian')">백인</div>
+        <div class="seg" onclick="selRace(this,'black')">흑인</div>
+      </div>
+      <input type="hidden" id="avRace" value="korean">
+    </div>
+
     <!-- 성별 -->
     <div class="field">
       <label>성별</label>
       <div class="segs" id="avGenderSegs">
-        <div class="seg" onclick="selSeg(this,'avGender','Korean man')">남성</div>
-        <div class="seg" onclick="selSeg(this,'avGender','Korean woman')">여성</div>
+        <div class="seg" onclick="selGender(this,'man')">남성</div>
+        <div class="seg" onclick="selGender(this,'woman')">여성</div>
       </div>
       <input type="hidden" id="avGender" value="">
     </div>
@@ -2166,6 +2177,8 @@ select option:hover {
     <div class="field">
       <label>나이대</label>
       <div class="segs" id="avAgeSegs">
+        <div class="seg" onclick="selSeg(this,'avAge','baby, around 1 year old')">아기</div>
+        <div class="seg" onclick="selSeg(this,'avAge','child, around 7 years old')">어린이</div>
         <div class="seg" onclick="selSeg(this,'avAge','teenager, around 15 years old')">10대</div>
         <div class="seg" onclick="selSeg(this,'avAge','in their 20s')">20대</div>
         <div class="seg" onclick="selSeg(this,'avAge','in their 30s')">30대</div>
@@ -2490,7 +2503,7 @@ select option:hover {
           <button class="btn btn-sm" onclick="clearAvatarImage()" id="avClearBtn" style="display:none">제거</button>
           <input type="file" id="avImgUpload" accept="image/*" style="display:none" onchange="uploadAvatarImage(event)">
         </div>
-        <div style="font-size:9px;color:var(--ink3);margin-top:6px">AI 생성은 다각도 시트 (3×2 그리드, 6개 각도) — GPT Image 2 Medium · 1536×1024 · ~$0.10/장</div>
+        <div style="font-size:9px;color:var(--ink3);margin-top:6px">AI 생성은 다각도 시트 (3×2 그리드, 6개 각도)</div>
         <input type="hidden" id="avImgUrl" value="">
       </div>
     </div>
@@ -2511,7 +2524,7 @@ select option:hover {
         <div id="avRefImgStatus" style="font-size:10px;color:var(--gold);margin-top:6px;display:none"></div>
       </div>
       <input type="hidden" id="avRefImgUrl" value="">
-      <div style="font-size:9px;color:var(--ink3);margin-top:6px">JPG/PNG/WEBP · 최대 5MB · fal.ai CDN에 업로드</div>
+      <div style="font-size:9px;color:var(--ink3);margin-top:6px">JPG/PNG/WEBP · 최대 5MB</div>
     </div>
 
     <!-- 저장 버튼 -->
@@ -4391,6 +4404,46 @@ function removeAvatarFromScene(id) {
 // ════════════════════════════════════════════════════════════
 //  STEP 0: AVATAR
 // ════════════════════════════════════════════════════════════
+// 인종 선택 — race에 따라 gender 라벨 동적 갱신
+function selRace(el, race) {
+  const par = el.parentElement;
+  par.querySelectorAll('.seg').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  const hidden = document.getElementById('avRace');
+  if (hidden) hidden.value = race;
+  // 현재 성별이 선택돼있으면 race + gender 조합으로 라벨 갱신
+  const genderHidden = document.getElementById('avGender');
+  if (genderHidden && genderHidden.value) {
+    const gen = genderHidden.value.toLowerCase().includes('woman') ? 'woman' : 'man';
+    genderHidden.value = _buildGenderLabel(race, gen);
+  }
+}
+
+// 성별 선택 — 현재 race와 조합해 라벨 생성
+function selGender(el, gen) {
+  const par = el.parentElement;
+  par.querySelectorAll('.seg').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  const race = (document.getElementById('avRace')?.value) || 'korean';
+  const hidden = document.getElementById('avGender');
+  if (hidden) hidden.value = _buildGenderLabel(race, gen);
+}
+
+// 옛 데이터(race 필드 없음)에서 gender 라벨로 race 유추
+function _inferRaceFromGender(gender) {
+  if (!gender) return 'korean';
+  const g = gender.toLowerCase();
+  if (g.includes('caucasian') || g.includes('white')) return 'caucasian';
+  if (g.includes('black') || g.includes('african')) return 'black';
+  return 'korean';
+}
+
+// race + gender → 영문 라벨 (프롬프트에 그대로 들어감)
+function _buildGenderLabel(race, gen) {
+  const racePrefix = { korean: 'Korean', caucasian: 'Caucasian', black: 'Black' }[race] || 'Korean';
+  return racePrefix + ' ' + gen;
+}
+
 function selSeg(el, hiddenId, val) {
   const wasActive = el.classList.contains('active');
   el.closest('.segs, .field').querySelectorAll('.seg').forEach(s => s.classList.remove('active'));
@@ -4788,6 +4841,7 @@ async function generateAvatarImage() {
 
   const name = document.getElementById('avName').value.trim() || (_isPet ? 'pet' : _isProduct ? 'product' : 'Korean character');
   const gender = document.getElementById('avGender').value || 'Korean person';
+  const race = document.getElementById('avRace')?.value || 'korean';
   const age = document.getElementById('avAge').value;
   const body = document.getElementById('avBody').value;
   const height = document.getElementById('avHeight').value;
@@ -5100,6 +5154,8 @@ function openAvatarModal(editId) {
   // 폼 초기화 — 모든 값 비우기 (설정 안 하면 랜덤)
   document.getElementById('avName').value = '';
   document.getElementById('avGender').value = '';
+  // race는 기본 'korean'으로 초기화 + 첫 번째 seg(한국인) active
+  if (document.getElementById('avRace')) document.getElementById('avRace').value = 'korean';
   document.getElementById('avAge').value = '';
   document.getElementById('avBody').value = '';
   document.getElementById('avHeight').value = '';
@@ -5125,6 +5181,9 @@ function openAvatarModal(editId) {
 
   // 모든 segs active 해제
   document.querySelectorAll('#avModal .segs .seg').forEach(s => s.classList.remove('active'));
+  // race 첫 seg(한국인) 기본 활성화
+  const _firstRaceSeg = document.querySelector('#avRaceSegs .seg');
+  if (_firstRaceSeg) _firstRaceSeg.classList.add('active');
 
   refreshHairList();
   updateAvHairSelected();
@@ -5135,7 +5194,23 @@ function openAvatarModal(editId) {
     const av = lib.find(a => a.id === editId);
     if (av) {
       document.getElementById('avName').value = av.name;
-      setSegByValue('avGenderSegs', 'avGender', av.gender);
+      // race 복원 (저장 안 됐으면 기본 korean)
+      const _editRace = av.race || _inferRaceFromGender(av.gender) || 'korean';
+      if (document.getElementById('avRace')) document.getElementById('avRace').value = _editRace;
+      document.querySelectorAll('#avRaceSegs .seg').forEach(s => s.classList.remove('active'));
+      const _raceSeg = document.querySelector(`#avRaceSegs .seg[onclick*="'${_editRace}'"]`);
+      if (_raceSeg) _raceSeg.classList.add('active');
+      // gender — 새 selGender 방식: race + man/woman 조합으로 라벨 빌드
+      // 기존 av.gender ('Korean man', 'Caucasian woman' 등) 그대로 hidden에 저장하고
+      // segs는 man/woman 선택만 표시
+      document.getElementById('avGender').value = av.gender || '';
+      document.querySelectorAll('#avGenderSegs .seg').forEach(s => s.classList.remove('active'));
+      if (av.gender) {
+        const _isWoman = av.gender.toLowerCase().includes('woman');
+        const _idx = _isWoman ? 1 : 0;
+        const _segs = document.querySelectorAll('#avGenderSegs .seg');
+        if (_segs[_idx]) _segs[_idx].classList.add('active');
+      }
       setSegByValue('avAgeSegs', 'avAge', av.age);
       // body
       document.querySelectorAll('.seg').forEach(s => {
@@ -5582,6 +5657,7 @@ async function saveAvatarToLibFromModalWithCloud() {
   const av = {
     id: S._editingAvId || Date.now(),
     name,
+    race: document.getElementById('avRace')?.value || 'korean',
     gender: document.getElementById('avGender').value,
     age: document.getElementById('avAge').value,
     body: document.getElementById('avBody').value,
