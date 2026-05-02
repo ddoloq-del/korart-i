@@ -1567,13 +1567,13 @@ select option:hover {
     <span class="brand-text">Korart</span>
     <span class="brand-sub">— Studio</span>
   </div>
-  <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+  <div style="margin-left:auto;display:flex;align-items:center;gap:12px;display:none">
     <input type="password" id="falKey" placeholder="fal.ai API key" style="background:var(--bg3);border:1px solid var(--line);border-radius: 0;padding:7px 12px;color:var(--ink);font-size:12px;width:240px;font-family:inherit">
     <div id="authNavSlot"><!-- KorartiAuth가 렌더링 --></div>
   </div>
   <!-- cost-badge 숨김: 내부 함수(updateCost 등)가 참조하는 ID 때문에 hidden 원소만 유지 -->
   <div style="display:none">
-    <span id="costTotal">0 P</span><span id="costImg">0 P</span><span id="costVid">0 P</span>
+    <span style="color:var(--ink3);font-size:9px;margin-right:4px">잔액</span><span id="userPoints" style="margin-right:12px;font-size:11px"></span><span style="color:var(--ink3);font-size:9px;margin-right:4px">사용</span><span id="costTotal">0 P</span><span id="costImg">0 P</span><span id="costVid">0 P</span>
   </div>
 </div>
 
@@ -2168,8 +2168,95 @@ let currentSession = null;
     currentUser = session?.user || null;
     window.__currentUser = currentUser;
     window.__currentSession = currentSession;
+    if (currentUser && typeof updatePointsDisplay === 'function') updatePointsDisplay();
   });
-})();
+}
+)();
+
+// ============================================
+// Worker API 헬퍼 — Supabase JWT를 Bearer로 사용
+// ============================================
+async function getSupabaseJWT() {
+  // sb는 supabase client (전역). currentUser가 있어야 함
+  if (!sb) return null;
+  try {
+    const { data } = await sb.auth.getSession();
+    return data?.session?.access_token || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+// /fal-proxy 경유로 fal API 호출 (POST/GET 양쪽 처리)
+// estimatedPoints: 클라이언트에서 추정한 포인트 (0이면 차감 X)
+async function callWorkerFal(endpointPath, opts = {}) {
+  const jwt = await getSupabaseJWT();
+  if (!jwt) {
+    throw new Error('로그인이 필요합니다');
+  }
+  const headers = {
+    'Authorization': 'Bearer ' + jwt,
+    'Content-Type': 'application/json',
+    ...(opts.headers || {}),
+  };
+  if (opts.estimatedPoints && opts.estimatedPoints > 0) {
+    headers['X-Estimated-Points'] = String(opts.estimatedPoints);
+  }
+  const url = '/fal-proxy/' + endpointPath;
+  const r = await fetch(url, {
+    method: opts.method || 'POST',
+    headers,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  // 포인트 부족 처리
+  if (r.status === 402) {
+    const data = await r.json();
+    throw new Error('포인트 부족 (' + data.balance + ' / 필요 ' + data.required + ')');
+  }
+  if (r.status === 401) {
+    throw new Error('로그인이 필요합니다');
+  }
+  return r;
+}
+
+// /fal-proxy-abs (queue submit 응답의 status_url/response_url 직접 호출)
+async function callWorkerFalAbs(absUrl, opts = {}) {
+  const jwt = await getSupabaseJWT();
+  if (!jwt) throw new Error('로그인이 필요합니다');
+  const headers = {
+    'Authorization': 'Bearer ' + jwt,
+    ...(opts.headers || {}),
+  };
+  if (opts.body) headers['Content-Type'] = 'application/json';
+  const r = await fetch('/fal-proxy-abs?url=' + encodeURIComponent(absUrl), {
+    method: opts.method || 'GET',
+    headers,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  return r;
+}
+
+// 사용자 포인트 조회
+async function fetchMyPoints() {
+  const jwt = await getSupabaseJWT();
+  if (!jwt) return null;
+  const r = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + jwt }});
+  if (!r.ok) return null;
+  return await r.json();
+}
+
+// 포인트 잔액 UI 갱신
+async function updatePointsDisplay() {
+  const me = await fetchMyPoints();
+  const el = document.getElementById('userPoints');
+  if (!el) return;
+  if (!me) { el.textContent = ''; return; }
+  if (me.unlimited) {
+    el.innerHTML = '<span style="color:var(--gold);font-weight:700">∞ P</span> <span style="font-size:9px;color:var(--ink3)">(무제한)</span>';
+  } else {
+    el.innerHTML = '<span style="color:var(--gold);font-weight:700">' + me.points.toLocaleString() + ' P</span>';
+  }
+}
 
 // 홈 이동 — 로그인 상태에 따라 mypage 또는 index
 function goHome() {
@@ -6549,9 +6636,9 @@ async function generateCutVideo(i) {
     status.textContent = `fal.ai 요청 중 (${dur}초 예상)...`;
     log('info', `body: ${JSON.stringify(body).slice(0,200)}`);
 
-    const r = await fetch(`https://fal.run/${model}`, {
+    const r = await fetch('/fal-proxy/' + model, {
       method: 'POST',
-      headers: { 'Authorization': 'Key ' + falKey, 'Content-Type': 'application/json' },
+      headers: { 'Authorization': 'Bearer ' + (await getSupabaseJWT()), 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
 
@@ -6628,9 +6715,9 @@ async function callFalImage(key, model, prompt, size) {
     ? { prompt, image_size: { width: w, height: h }, quality: qualityVal, output_format: 'png' }
     : { prompt, image_size: { width: w, height: h }, num_inference_steps: 28, guidance_scale: 3.5 };
 
-  const r = await fetch(`https://fal.run/${model}`, {
+  const r = await fetch('/fal-proxy/' + model, {
     method: 'POST',
-    headers: { 'Authorization': 'Key ' + key, 'Content-Type': 'application/json' },
+    headers: { 'Authorization': 'Bearer ' + (await getSupabaseJWT()), 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
   if (!r.ok) {
@@ -6736,9 +6823,9 @@ ${prompt}`;
   };
   log('info', `quality: ${userQuality}`);
 
-  const r = await fetch('https://fal.run/openai/gpt-image-2/edit', {
+  const r = await fetch('/fal-proxy/openai/gpt-image-2/edit', {
     method: 'POST',
-    headers: { 'Authorization': 'Key ' + key, 'Content-Type': 'application/json' },
+    headers: { 'Authorization': 'Bearer ' + (await getSupabaseJWT()), 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
 
@@ -6768,7 +6855,7 @@ async function uploadToFalStorage(key, blob, filename, contentTypeOverride) {
   const base64 = btoa(binary);
   const r = await fetch('/fal-upload', {
     method: 'POST',
-    headers: { 'Authorization': 'Key ' + key, 'Content-Type': 'application/json' },
+    headers: { 'Authorization': 'Bearer ' + (await getSupabaseJWT()), 'Content-Type': 'application/json' },
     body: JSON.stringify({ base64, fileName: filename, contentType: ct }),
   });
   if (!r.ok) {
@@ -7740,10 +7827,10 @@ async function mergeVideos() {
     statusEl.textContent = '서버에서 영상 통합 중...';
     log('info', 'fal-ai/ffmpeg-api/merge-videos POST 요청');
 
-    const submitRes = await fetch('https://queue.fal.run/fal-ai/ffmpeg-api/merge-videos', {
+    const submitRes = await fetch('/fal-proxy/fal-ai/ffmpeg-api/merge-videos', {
       method: 'POST',
       headers: {
-        'Authorization': `Key ${falKey}`,
+        'Authorization': 'Bearer ' + (await getSupabaseJWT()),
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

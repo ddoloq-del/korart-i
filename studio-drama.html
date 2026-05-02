@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>KorArt Pipeline v2</title>
+<!-- Supabase JS SDK v2 (인증 체크용) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Pretendard:wght@300;400;500;600;700;800;900&display=swap');
 :root {
@@ -239,8 +241,6 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .badge-green{background:rgba(62,150,96,.12);border:1px solid rgba(62,150,96,.3);color:var(--green)}
 .prompt-preview{background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:8px 10px;font-family:'Menlo',monospace;font-size:10px;color:var(--ink2);line-height:1.6;white-space:pre-wrap;word-break:break-all;max-height:80px;overflow-y:auto}
 </style>
-<!-- FFmpeg.wasm — 영상 통합 (concat copy) -->
-<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.js" crossorigin="anonymous"></script>
 </head>
 <body>
 <div class="wrap">
@@ -329,9 +329,12 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 
     <!-- 저장된 아바타 -->
     <div style="background:var(--bg3);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px;flex-wrap:wrap">
         <div class="section-head" style="margin:0">📂 아바타 리스트</div>
-        <span style="font-size:10px;color:var(--ink3)" id="savedAvCount">0개</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span style="font-size:10px;color:var(--ink3)" id="savedAvCount">0개</span>
+          <button class="btn btn-sm" onclick="openAvatarPicker()" title="클라우드 아바타 불러오기" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">☁️ 클라우드 불러오기</button>
+        </div>
       </div>
       <div id="savedAvGrid" style="display:flex;flex-wrap:wrap;gap:6px;min-height:30px"></div>
     </div>
@@ -358,7 +361,8 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <div class="field">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <label style="margin:0;font-size:14px;font-weight:700">씬 분위기를 선택하세요</label>
-          <button class="btn btn-sm btn-ghost" onclick="saveSceneToLib()">현재 설정 저장</button>
+          <button class="btn btn-sm" onclick="openMyCustomSceneModal()" title="나만의 씬 분위기 만들기" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">+ 나만의 씬 분위기 만들기</button>
+          <button class="btn btn-sm btn-ghost" onclick="openScenePicker()" title="클라우드에 저장한 나만의 씬 분위기 불러오기">클라우드 불러오기</button>
         </div>
         <div class="scene-grid" id="sceneGrid" style="grid-template-columns:repeat(4,1fr);gap:12px"></div>
       </div>
@@ -370,13 +374,17 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding:10px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:10px">
       <span style="font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700">선택된 씬</span>
       <span id="selectedSceneLabel" style="font-size:14px;font-weight:700;color:var(--pink)">로맨스</span>
-      <button class="btn btn-sm btn-ghost" style="margin-left:auto" onclick="backToSceneStepA()">분위기 다시 고르기</button>
+      <div style="margin-left:auto;display:flex;gap:6px">
+        <button class="btn btn-sm" onclick="saveSceneDetailToCloud()" title="씬 상세 설정을 클라우드에 저장" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">+ 클라우드 저장</button>
+        <button class="btn btn-sm btn-ghost" onclick="openSceneDetailPicker()" title="저장된 씬 상세 불러오기">클라우드 불러오기</button>
+        <button class="btn btn-sm btn-ghost" onclick="backToSceneStepA()">분위기 다시 고르기</button>
+      </div>
     </div>
 
     <!-- 등장 아바타 선택하기 (씬 상세에 위치) -->
     <div class="field" style="margin-bottom:24px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <label style="margin:0;font-size:13px;font-weight:700">🎭 등장 아바타 선택하기</label>
+        <label style="margin:0;font-size:13px;font-weight:700">등장 아바타 선택하기</label>
         <button class="btn btn-sm btn-ghost" onclick="tryGoStep(1)">+ 아바타 추가</button>
       </div>
       <div id="step1AvatarChips" style="display:flex;flex-wrap:wrap;gap:10px;padding:12px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;min-height:50px"></div>
@@ -390,7 +398,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <div class="field">
         <label>계절</label>
         <div class="segs">
-          <div class="seg active" onclick="selOpt(this,'season','spring')">봄</div>
+          <div class="seg" onclick="selOpt(this,'season','spring')">봄</div>
           <div class="seg" onclick="selOpt(this,'season','summer')">여름</div>
           <div class="seg" onclick="selOpt(this,'season','autumn')">가을</div>
           <div class="seg" onclick="selOpt(this,'season','winter')">겨울</div>
@@ -403,7 +411,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <div class="segs">
           <div class="seg" onclick="selOpt(this,'timeofday','before dawn, 3-5am')">새벽</div>
           <div class="seg" onclick="selOpt(this,'timeofday','morning')">아침</div>
-          <div class="seg active" onclick="selOpt(this,'timeofday','daytime, midday')">낮</div>
+          <div class="seg" onclick="selOpt(this,'timeofday','daytime, midday')">낮</div>
           <div class="seg" onclick="selOpt(this,'timeofday','golden hour, dusk')">황혼</div>
           <div class="seg" onclick="selOpt(this,'timeofday','nighttime')">밤</div>
           <div class="seg" onclick="selOpt(this,'timeofday','late night, midnight')">심야</div>
@@ -414,7 +422,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       <div class="field">
         <label>날씨</label>
         <div class="segs">
-          <div class="seg active" onclick="selOpt(this,'weather','clear sky')">맑음</div>
+          <div class="seg" onclick="selOpt(this,'weather','clear sky')">맑음</div>
           <div class="seg" onclick="selOpt(this,'weather','cloudy, overcast')">흐림</div>
           <div class="seg" onclick="selOpt(this,'weather','light rain, drizzle')">비</div>
           <div class="seg" onclick="selOpt(this,'weather','heavy rain, pouring')">폭우</div>
@@ -435,44 +443,41 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
           <div class="seg" onclick="selOpt(this,'location','indoor home living room')">실내(집)</div>
           <div class="seg" onclick="selOpt(this,'location','indoor cafe restaurant')">실내(카페)</div>
           <div class="seg" onclick="selOpt(this,'location','indoor office workspace')">실내(사무실)</div>
-          <div class="seg" onclick="selOpt(this,'location','hospital interior, hospital corridor')">🏥 병원</div>
-          <div class="seg" onclick="selOpt(this,'location','movie theater interior, cinema')">🎬 영화관</div>
-          <div class="seg" onclick="selOpt(this,'location','school classroom or hallway')">🏫 학교</div>
-          <div class="seg" onclick="selOpt(this,'location','mountain landscape, mountain hiking trail')">⛰️ 산</div>
-          <div class="seg" onclick="selOpt(this,'location','public restroom interior, clean bathroom')">🚻 화장실</div>
-          <div class="seg" id="vehicleToggleBtn" onclick="toggleVehiclePanel()">🚗 이동 수단 ▾</div>
-          <div class="seg" id="locCustomBtn" onclick="toggleLocCustom()">개인설정 ✏️</div>
+          <div class="seg" onclick="selOpt(this,'location','hospital interior, hospital corridor')">병원</div>
+          <div class="seg" onclick="selOpt(this,'location','movie theater interior, cinema')">영화관</div>
+          <div class="seg" onclick="selOpt(this,'location','school classroom or hallway')">학교</div>
+          <div class="seg" onclick="selOpt(this,'location','mountain landscape, mountain hiking trail')">산</div>
+          <div class="seg" onclick="selOpt(this,'location','public restroom interior, clean bathroom')">화장실</div>
+          <div class="seg" id="vehicleToggleBtn" onclick="toggleVehiclePanel()">이동 수단 ▾</div>
+          <div class="seg" id="locCustomBtn" onclick="toggleLocCustom()">개인설정</div>
         </div>
 
         <!-- 이동 수단 펼침 패널 -->
         <div id="vehiclePanel" style="display:none;margin-top:8px;padding:10px 12px;background:var(--bg3);border:1px solid var(--line);border-radius:8px">
           <div style="font-size:10px;color:var(--ink3);margin-bottom:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase">이동 수단</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
-            <div class="seg vehicle-seg" id="vehicle-boat" onclick="selVehicle('boat')">🚤 배</div>
+            <div class="seg vehicle-seg" id="vehicle-boat" onclick="selVehicle('boat')">배</div>
             <label style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--ink2);cursor:pointer;padding:4px 8px;border-radius:4px;background:var(--bg2);border:1px solid var(--line);user-select:none">
               <input type="checkbox" id="boatLux" onchange="updateVehicleSel('boat')" style="margin:0">고급
             </label>
-            <div class="seg vehicle-seg" id="vehicle-car" onclick="selVehicle('car')">🚗 자동차</div>
+            <div class="seg vehicle-seg" id="vehicle-car" onclick="selVehicle('car')">자동차</div>
             <label style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--ink2);cursor:pointer;padding:4px 8px;border-radius:4px;background:var(--bg2);border:1px solid var(--line);user-select:none">
               <input type="checkbox" id="carLux" onchange="updateVehicleSel('car')" style="margin:0">고급
             </label>
-            <div class="seg vehicle-seg" id="vehicle-subway" onclick="selVehicle('subway')">🚇 지하철</div>
-            <div class="seg vehicle-seg" id="vehicle-bus" onclick="selVehicle('bus')">🚌 버스</div>
-            <div class="seg vehicle-seg" id="vehicle-plane" onclick="selVehicle('plane')">✈️ 비행기</div>
+            <div class="seg vehicle-seg" id="vehicle-subway" onclick="selVehicle('subway')">지하철</div>
+            <div class="seg vehicle-seg" id="vehicle-bus" onclick="selVehicle('bus')">버스</div>
+            <div class="seg vehicle-seg" id="vehicle-plane" onclick="selVehicle('plane')">비행기</div>
           </div>
         </div>
 
         <input id="locCustomInput" placeholder="수식어 또는 단독 장소 입력: 예) 고급진 / 낡은 / 어두운 (또는 단독으로: rooftop at night)" style="display:none;margin-top:6px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:4px;padding:6px 8px;color:var(--ink);font-size:12px">
       </div>
-    </div>
 
-    <!-- 우측 -->
-    <div>
-      <!-- 인원수 -->
+      <!-- 등장 인원 -->
       <div class="field">
         <label>등장 인원</label>
         <div class="segs" id="personCountSegs">
-          <div class="seg active" onclick="setPersonCount(0,this)">없음</div>
+          <div class="seg" onclick="setPersonCount(0,this)">없음</div>
           <div class="seg" onclick="setPersonCount(1,this)">1명</div>
           <div class="seg" onclick="setPersonCount(2,this)">2명</div>
           <div class="seg" onclick="setPersonCount(3,this)">3명</div>
@@ -486,36 +491,59 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
           </label>
           <div id="passerbyDensity" style="display:none;margin-top:4px">
             <div class="segs">
-              <div class="seg active" onclick="selOpt(this,'passerbyDensity','a few passersby')">소수</div>
+              <div class="seg" onclick="selOpt(this,'passerbyDensity','a few passersby')">소수</div>
               <div class="seg" onclick="selOpt(this,'passerbyDensity','many passersby, crowded')">다수</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 앵글 선택 -->
-      <div class="field">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <!-- 이전 컷 이어서 만들기 -->
+      <div class="field" id="continueRefField">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
           <label style="margin:0;display:flex;align-items:center;gap:6px">
-            카메라 앵글 (4개 순서대로 선택)
-            <span onclick="showAngleHelp()" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--bg4);color:var(--ink2);font-size:11px;font-weight:700;cursor:pointer">?</span>
+            이전 컷 이어서 만들기 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span>
           </label>
-          <div style="display:flex;gap:4px">
-            <button class="btn btn-sm" onclick="resetAngles()">리셋</button>
-            <button class="btn btn-sm" id="customAngleBtn" onclick="toggleCustomAngle()">개인설정</button>
+          <button class="btn btn-sm btn-ghost" id="continueRefClearBtn" onclick="clearContinueRef()" style="display:none">제거</button>
+        </div>
+        <div style="font-size:10px;color:var(--ink3);margin-bottom:6px;line-height:1.5">이전에 만든 컷이나 그리드 이미지를 첨부하면 배경·마감·조명 통일성을 유지하며 이어서 생성합니다.</div>
+        <div style="display:flex;gap:6px;align-items:flex-start">
+          <div id="continueRefPreview" style="width:120px;aspect-ratio:16/9;background:var(--bg3);border:1px dashed var(--line2);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:24px;flex-shrink:0;overflow:hidden"></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px;align-items:flex-start">
+            <button class="btn btn-sm" onclick="document.getElementById('continueRefUpload').click()" style="width:auto;padding:6px 14px;white-space:nowrap">파일 업로드</button>
+            <div style="font-size:9px;color:var(--ink3);line-height:1.4">이전에 다운로드한 <strong>4컷 그리드</strong> 또는 <strong>단일 컷</strong> 이미지를 올려주세요.</div>
+            <input type="file" id="continueRefUpload" accept="image/*" style="display:none" onchange="uploadContinueRef(event)">
           </div>
         </div>
-        <!-- 선택된 앵글 표시 -->
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;margin-bottom:8px">
-          <div id="angleSlot0" style="padding:5px 6px;border-radius:4px;border:1px solid var(--line);background:var(--bg3);min-height:38px;font-size:9px;color:var(--ink3);text-align:center">컷1<br><span style="color:var(--gold);font-size:8px">미선택</span></div>
-          <div id="angleSlot1" style="padding:5px 6px;border-radius:4px;border:1px solid var(--line);background:var(--bg3);min-height:38px;font-size:9px;color:var(--ink3);text-align:center">컷2<br><span style="color:var(--blue);font-size:8px">미선택</span></div>
-          <div id="angleSlot2" style="padding:5px 6px;border-radius:4px;border:1px solid var(--line);background:var(--bg3);min-height:38px;font-size:9px;color:var(--ink3);text-align:center">컷3<br><span style="color:var(--green);font-size:8px">미선택</span></div>
-          <div id="angleSlot3" style="padding:5px 6px;border-radius:4px;border:1px solid var(--line);background:var(--bg3);min-height:38px;font-size:9px;color:var(--ink3);text-align:center">컷4<br><span style="color:var(--red);font-size:8px">미선택</span></div>
+      </div>
+    </div>
+
+    <!-- 우측 -->
+    <div>
+      <!-- 앵글 선택 + 컷별 설명 (세로 레이아웃) -->
+      <div class="field">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <label style="margin:0;display:flex;align-items:center;gap:6px">
+            카메라 앵글 + 컷별 설명
+            <span onclick="showAngleHelp()" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--bg4);color:var(--ink2);font-size:11px;font-weight:700;cursor:pointer">?</span>
+          </label>
         </div>
-        <!-- 앵글 리스트 (개인설정 모드일 때만 표시, 기본은 씬 기본값) -->
-        <div id="anglePickerWrap" style="display:none;max-height:300px;overflow-y:auto;border:1px solid var(--line);border-radius:6px;background:var(--bg2);padding:8px">
-          <!-- 카테고리별 앵글 목록 - JS로 렌더 -->
-          <div id="anglePicker"></div>
+        <!-- 컷1~컷4 세로 슬롯 (각 슬롯 = 앵글 카드 + 설명 textarea) -->
+        <div id="angleSlots" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+
+      <!-- 앵글 선택 팝업 모달 -->
+      <div id="anglePickerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto" onclick="if(event.target===this)closeAnglePickerModal()">
+        <div style="background:var(--bg2);border:1px solid var(--line2);border-radius:14px;width:100%;max-width:620px;padding:22px;margin:auto">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div>
+              <div id="anglePickerCutLabel" style="font-size:11px;color:var(--pink);letter-spacing:2px;font-weight:700;text-transform:uppercase">CUT 1</div>
+              <div style="font-size:18px;font-weight:800;color:var(--cream);margin-top:4px">앵글 선택</div>
+            </div>
+            <button onclick="closeAnglePickerModal()" style="background:none;border:none;color:var(--ink3);font-size:22px;cursor:pointer;padding:4px 10px">닫기</button>
+          </div>
+          <div style="font-size:11px;color:var(--ink3);margin-bottom:12px">원하는 앵글을 클릭하세요.</div>
+          <div id="anglePickerModalList" style="max-height:60vh;overflow-y:auto"></div>
         </div>
       </div>
 
@@ -524,26 +552,6 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <label>추가 프롬프트 (선택)</label>
         <textarea id="extraPrompt" rows="2" placeholder="예: there is a bouquet of red roses on the table, neon signs reflecting on wet pavement"></textarea>
       </div>
-
-      <!-- 이전 컷 이어서 만들기 -->
-      <div class="field" id="continueRefField">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
-          <label style="margin:0;display:flex;align-items:center;gap:6px">
-            🔗 이전 컷 이어서 만들기 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span>
-          </label>
-          <button class="btn btn-sm btn-ghost" id="continueRefClearBtn" onclick="clearContinueRef()" style="display:none">제거</button>
-        </div>
-        <div style="font-size:10px;color:var(--ink3);margin-bottom:6px;line-height:1.5">이전에 만든 컷이나 그리드 이미지를 첨부하면 배경·마감·조명 통일성을 유지하며 이어서 생성합니다.</div>
-        <div style="display:flex;gap:6px;align-items:flex-start">
-          <div id="continueRefPreview" style="width:120px;aspect-ratio:16/9;background:var(--bg3);border:1px dashed var(--line2);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:24px;flex-shrink:0;overflow:hidden">🖼️</div>
-          <div style="flex:1;display:flex;flex-direction:column;gap:6px">
-            <button class="btn btn-sm" onclick="document.getElementById('continueRefUpload').click()">파일 업로드</button>
-            <div style="font-size:9px;color:var(--ink3);line-height:1.4">이전에 다운로드한 <strong>4컷 그리드</strong> 또는 <strong>단일 컷</strong> 이미지를 올려주세요.</div>
-            <input type="file" id="continueRefUpload" accept="image/*" style="display:none" onchange="uploadContinueRef(event)">
-          </div>
-        </div>
-      </div>
-
 
     </div>
     </div><!-- grid end -->
@@ -586,8 +594,9 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <button class="btn btn-primary" id="genImgBtn" onclick="generateImage()">4컷 생성</button>
         <button class="btn btn-sm" onclick="generateImage()" title="재생성">재생성</button>
         <div style="flex:1"></div>
-        <button class="btn btn-sm" onclick="downloadGrid()" title="현재 4컷을 한 장 이미지로 저장">4컷 저장</button>
-        <button class="btn btn-sm" onclick="document.getElementById('quadLoadInput').click()" title="이전에 저장한 4컷 이미지 불러오기">불러오기</button>
+        <button class="btn btn-sm" onclick="downloadGrid()" title="현재 4컷을 한 장 이미지로 저장">💾 로컬저장</button>
+        <button class="btn btn-sm" onclick="saveCuts4ToCloud()" title="클라우드에 저장" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">☁️ 클라우드</button>
+        <button class="btn btn-sm" onclick="openCuts4Picker()" title="저장한 4컷 불러오기">불러오기</button>
         <input type="file" id="quadLoadInput" accept="image/*" style="display:none" onchange="loadQuadFromFile(event)">
       </div>
 
@@ -624,10 +633,14 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
         <div class="section-head" style="margin:0">영상 통합</div>
         <button class="btn btn-sm btn-ghost" onclick="resetMerge()" title="통합 결과만 초기화">단계 초기화</button>
       </div>
-      <div style="font-size:11px;color:var(--ink2);margin-bottom:10px">생성한 영상을 순서대로 이어붙입니다. (빠른 concat 방식 — 5~15초 소요)</div>
+      <div style="font-size:11px;color:var(--ink2);margin-bottom:10px">생성한 영상을 순서대로 이어붙입니다. (fal-ai 서버 처리 — 5~10초 소요)</div>
       <div id="mergeStatus" style="font-size:11px;color:var(--ink3);margin-bottom:8px"></div>
       <div id="mergeResult" style="margin-bottom:10px"></div>
-      <button class="btn btn-primary btn-full" id="mergeBtn" onclick="mergeVideos()" disabled>영상 통합</button>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-primary" id="mergeBtn" onclick="mergeVideos()" disabled style="flex:1">영상 통합</button>
+        <button class="btn" onclick="saveMergedVideoToCloud()" title="통합 영상 클라우드 저장" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">☁️ 클라우드 저장</button>
+        <button class="btn btn-sm" onclick="openMergedVideoPicker()" title="저장한 통합 영상 불러오기">불러오기</button>
+      </div>
     </div>
 
   </div>
@@ -774,7 +787,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
     <!-- 저장 버튼 -->
     <div style="display:flex;gap:8px">
       <button class="btn" onclick="closeAvatarModal()" style="flex:1">취소</button>
-      <button class="btn btn-primary" onclick="saveAvatarToLibFromModal()" style="flex:2">저장</button>
+      <button class="btn btn-primary" onclick="saveAvatarToLibFromModalWithCloud()" style="flex:2">저장 (+ 클라우드)</button>
     </div>
   </div>
 </div>
@@ -793,6 +806,270 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 <div id="confirmBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99"></div>
 
 <script>
+// AUTH GATE — 로그인 필수 (비로그인 시 /studio로 이동)
+const SUPABASE_URL = 'https://hidtxdvncqrhjaiosiqd.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_LziYVaJBv9sazBKbos5_UQ_1ZVbEOJb';
+
+let sb = null;
+let currentUser = null;
+let currentSession = null;
+
+// 일찍 세션 체크
+(async function authGate() {
+  if (!window.supabase || !window.supabase.createClient) {
+    console.error('[Auth] Supabase SDK 로드 실패');
+    return;
+  }
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' },
+  });
+  window.__sb = sb;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      console.warn('[Auth] 로그인 필수 — /studio로 이동');
+      alert('🔒 로그인이 필요한 페이지입니다. 메인 페이지에서 로그인을 진행해주세요.');
+      window.location.href = '/studio';
+      return;
+    }
+    currentSession = session;
+    currentUser = session.user;
+    window.__currentUser = currentUser;
+    console.log('[Auth] 로그인 확인:', currentUser.email, currentUser.id);
+  } catch (e) {
+    console.error('[Auth] 세션 체크 오류:', e);
+    alert('인증 오류가 발생했습니다. 다시 로그인해주세요.');
+    window.location.href = '/studio';
+  }
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT' || !session) {
+      console.warn('[Auth] 로그아웃 감지 — /studio로 이동');
+      window.location.href = '/studio';
+    } else {
+      currentSession = session;
+      currentUser = session.user;
+      window.__currentUser = currentUser;
+    }
+  });
+})();
+
+function getCurrentUserId() {
+  return currentUser?.id || null;
+}
+
+// ============================================================
+//  자동 세션 저장/복구 — 새로고침·탭 닫아도 작업 유지 (localStorage)
+// ============================================================
+const SESSION_KEY = 'korart_v2_session';
+let _sessionSaveTimer = null;
+
+// dataURL·차단할 필드는 제외하고 S의 핵심 값만 일련으로 저장
+function _serializeSession() {
+  if (!S) return null;
+  // dataURL이 아닌 URL만 저장 (5MB 제한 회피)
+  const safeCutPubUrls = (S.cutPubUrls || []).map(u => (u && !u.startsWith?.('data:')) ? u : null);
+  return {
+    aspectRatio: S.aspectRatio,
+    avatars: (S.avatars || []).map(av => {
+      const copy = { ...av };
+      if (copy.imgUrl && copy.imgUrl.startsWith?.('data:')) copy.imgUrl = '';
+      return copy;
+    }),
+    avatarCuts: S.avatarCuts || {},
+    scene: S.scene,
+    season: S.season,
+    timeofday: S.timeofday,
+    weather: S.weather,
+    location: S.location,
+    locCustom: S.locCustom,
+    locCustomValue: document.getElementById('locCustomInput')?.value || '',
+    vehicle: S.vehicle,
+    personCount: S.personCount,
+    passerby: S.passerby,
+    passerbyDensity: S.passerbyDensity,
+    angles: S.angles,
+    customAngleMode: S.customAngleMode,
+    cutPubUrls: safeCutPubUrls,        // dataURL 제외
+    // cutDataUrls는 저장 안 함 (5MB 제한)
+    cutApproval: S.cutApproval,
+    cutDurations: S.cutDurations,
+    cutAudio: S.cutAudio,
+    cutDescriptions: S.cutDescriptions,
+    cutEmotions: S.cutEmotions,
+    cutPrompts: S.cutPrompts,
+    vidUrls: S.vidUrls,                // fal.ai CDN URL (잘 저장됨)
+    extraPrompt: document.getElementById('extraPrompt')?.value || '',
+    sessionImgCost: S.sessionImgCost,
+    sessionVidCost: S.sessionVidCost,
+    _currentStep: S._currentStep,
+    _savedAt: Date.now(),
+  };
+}
+
+function _saveSessionNow() {
+  return; // 새로고침 초기화 — 자동저장 비활성화
+  try {
+    const data = _serializeSession();
+    if (!data) return;
+    const serialized = JSON.stringify(data);
+    if (serialized.length > 4_500_000) {
+      console.warn('[Session] 용량 4.5MB 초과 — 업데이트 안함');
+      return;
+    }
+    localStorage.setItem(SESSION_KEY, serialized);
+  } catch (e) {
+    console.warn('[Session] 저장 실패:', e.message);
+  }
+}
+
+// debounced 저장 — 몇 초 동안 연속 호출되면 마지막 1회만 어고
+function saveSession() {
+  if (_sessionSaveTimer) clearTimeout(_sessionSaveTimer);
+  _sessionSaveTimer = setTimeout(_saveSessionNow, 800);
+}
+window.saveSession = saveSession;
+
+// 페이지 이탈/숨김 시 즉시 저장
+window.addEventListener('beforeunload', _saveSessionNow);
+window.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') _saveSessionNow();
+});
+
+function loadSession() {
+  return null; // 새로고침 초기화 — 복원 비활성화
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    // 7일 이상 오래된 세션은 무시
+    if (data._savedAt && Date.now() - data._savedAt > 7 * 24 * 60 * 60 * 1000) {
+      console.warn('[Session] 7일 이상 오래된 세션 — 무시');
+      return null;
+    }
+    return data;
+  } catch (e) {
+    console.warn('[Session] 로드 실패:', e.message);
+    return null;
+  }
+}
+
+// S 객체에 데이터 부어넣기 + UI 동기화
+function restoreSession(data) {
+  if (!data || !S) return;
+  const fields = ['aspectRatio','avatars','avatarCuts','scene','season','timeofday','weather','location','locCustom','vehicle','personCount','passerby','passerbyDensity','angles','customAngleMode','cutPubUrls','cutApproval','cutDurations','cutAudio','cutDescriptions','cutEmotions','cutPrompts','vidUrls','sessionImgCost','sessionVidCost'];
+  for (const f of fields) {
+    if (data[f] !== undefined) S[f] = data[f];
+  }
+  // step 복구
+  if (typeof data._currentStep === 'number') S._currentStep = data._currentStep;
+
+  // UI 동기화 (단계별)
+  setTimeout(() => {
+    // 0단계: 비율
+    if (data.aspectRatio) {
+      document.querySelectorAll('[onclick*="selRatio"]').forEach(el => {
+        if (el.getAttribute('onclick')?.includes(`'${data.aspectRatio}'`)) {
+          el.click?.();
+        }
+      });
+    }
+    // 2단계: 아바타 레더
+    if (typeof renderSavedAvatars === 'function') renderSavedAvatars();
+    // 3단계: 씀
+    if (typeof renderScenes === 'function') renderScenes();
+    // 4단계: 아바타 chip + segs 동기화
+    if (typeof renderStep1Avatars === 'function') renderStep1Avatars();
+    if (typeof restoreSceneUI === 'function') restoreSceneUI();
+    if (typeof renderAngleSlots === 'function') renderAngleSlots();
+    // extraPrompt 복원
+    const ep = document.getElementById('extraPrompt');
+    if (ep && typeof data.extraPrompt === 'string') ep.value = data.extraPrompt;
+    const lc = document.getElementById('locCustomInput');
+    if (lc && typeof data.locCustomValue === 'string') lc.value = data.locCustomValue;
+    // 5단계: 4컷 레더 (cutDataUrls는 없으니 cutPubUrls에서 불러옷)
+    if (typeof renderQuad === 'function') renderQuad();
+    // 6단계: 영상 카드 다시 그리고 vidUrls 복구
+    if (typeof renderVidCards === 'function') renderVidCards();
+    if (typeof updatePromptPreview === 'function') updatePromptPreview();
+    if (typeof updateMergeBtn === 'function') updateMergeBtn();
+  }, 200);
+}
+
+// 페이지 로드 시 복구 시도 (Auth 완료 후)
+function tryRestoreSessionOnLoad() {
+  try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
+  return; // 새로고침 초기화
+  const data = loadSession();
+  if (!data) return;
+  const ageHours = data._savedAt ? Math.round((Date.now() - data._savedAt) / 3600000) : 0;
+  const ageStr = ageHours < 1 ? '방금' : (ageHours < 24 ? `${ageHours}시간 전` : `${Math.round(ageHours/24)}일 전`);
+
+  // 완료된 세션 없으면 스킵
+  const hasContent = (data.avatars?.length > 0) || (data.cutPubUrls?.some(Boolean)) || (data.vidUrls?.some(Boolean)) || data.scene;
+  if (!hasContent) return;
+
+  restoreSession(data);
+  setTimeout(() => {
+    if (typeof toast === 'function') {
+      toast(`🔄 ${ageStr} 작업을 복구했어요`);
+    }
+  }, 500);
+}
+
+// 4종 주요 함수 hook — S 변경 시 자동 저장
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    tryRestoreSessionOnLoad();
+    // 단계 이동 후에도 저장 — goStep wrapper
+    if (typeof goStep === 'function' && !goStep._sessionWrapped) {
+      const orig = goStep;
+      goStep = function(n) {
+        const r = orig.apply(this, arguments);
+        saveSession();
+        return r;
+      };
+      goStep._sessionWrapped = true;
+      window.goStep = goStep;
+    }
+    // 주요 이벤트 자동 후킹 (변경 자동 저장)
+    const wrapFn = (fnName) => {
+      const fn = window[fnName];
+      if (typeof fn !== 'function' || fn._sessionWrapped) return;
+      window[fnName] = function() {
+        const r = fn.apply(this, arguments);
+        saveSession();
+        return r;
+      };
+      window[fnName]._sessionWrapped = true;
+    };
+    ['selScene','selOpt','selVehicle','setPersonCount','selectAngleForCut',
+     'updateCutDescription','setAspectRatio','addAvatarToScene','removeAvatarFromScene',
+     'toggleLocCustom','updatePasserby','setOutfit'].forEach(wrapFn);
+
+    // input/textarea 이벤트도 광용 리스너 (extraPrompt 등)
+    document.addEventListener('input', (e) => {
+      const id = e.target.id || '';
+      if (id === 'extraPrompt' || id === 'locCustomInput' || id.startsWith('vidScript') ||
+          id.startsWith('vidDur') || id.startsWith('cutDesc')) {
+        saveSession();
+      }
+    });
+    document.addEventListener('change', (e) => {
+      const id = e.target.id || '';
+      if (id.startsWith('vidEmotion') || id.startsWith('vidSpeaker') || id.startsWith('vidAudio') ||
+          id === 'passerbyCheck') {
+        saveSession();
+      }
+    });
+  }, 1500);  // 아바타/씀 레더링 후
+});
+function getCurrentUserEmail() {
+  return currentUser?.email || null;
+}
+function getAccessToken() {
+  return currentSession?.access_token || null;
+}
+
 // ════════════════════════════════════════════════════════════
 //  DATA
 // ════════════════════════════════════════════════════════════
@@ -802,7 +1079,7 @@ const SCENES = {
   tension:  {name:'긴장',   style:'high contrast dramatic shadows, intense cold tones, sharp cinematic focus',
              angles:['Over-the-Shoulder (OTS)','Extreme Close-up (ECU)','Dutch Angle','Point of View (POV)']},
   breakup:  {name:'이별',   style:'melancholic rainy atmosphere, blue-gray tones, emotional soft lighting',
-             angles:['Wide Shot','Medium Close-up (MCU)','Close-up (CU)','Low Angle']},
+             angles:['Wide Shot','Medium Close-up (MCU)','Close-up (CU)','Rack Focus']},
   climax:   {name:'감정 절정',style:'extreme emotional expression, dramatic lighting, high contrast tears',
              angles:['Extreme Close-up (ECU)','Close-up (CU)','Low Angle','Zoom-in']},
   suspense: {name:'서스펜스',style:'dark ominous atmosphere, heavy shadows, noir desaturated tones',
@@ -810,9 +1087,31 @@ const SCENES = {
   mellow:   {name:'막장',   style:'melodramatic exaggerated emotion, theatrical lighting, vivid colors',
              angles:['Two Shot','Close-up (CU)','Low Angle','Zoom-in']},
   action:   {name:'액션',   style:'dynamic motion blur, high contrast, sharp cinematic action, dramatic angles',
-             angles:['Low Angle','Wide Shot','Extreme Close-up (ECU)','Point of View (POV)']},
+             angles:['Low Angle','Wide Shot','Extreme Close-up (ECU)','Dolly Zoom']},
   slice:    {name:'일상',   style:'natural warm tones, candid daily life, soft comfortable lighting',
              angles:['Full Shot (FS)','Medium Close-up (MCU)','Two Shot','Eye-Level Shot']},
+  commercial:{name:'광고', style:'clean bright commercial lighting, vibrant product focus, polished cinematic style, premium aesthetic',
+             angles:['Macro Shot','Medium Close-up (MCU)','Establishing Shot','Rack Focus']},
+  vlog:     {name:'개인방송', style:'casual selfie-style lighting, warm friendly tone, intimate handheld feel, vlog aesthetic',
+             angles:['Eye-Level Shot','Medium Close-up (MCU)','Point of View (POV)','Single Shot']},
+  flashback:{name:'회상', style:'nostalgic warm fading tones, soft dreamy haze, vintage film grain, soft focus',
+             angles:['Shallow Depth of Field','Wide Shot','Medium Close-up (MCU)','Slow Motion']},
+  confession:{name:'고백', style:'intimate soft lighting, intense emotional warmth, trembling intensity, golden glow',
+             angles:['Extreme Close-up (ECU)','Close-up (CU)','Two Shot','Eye-Level Shot']},
+  horror:   {name:'공포', style:'dark unsettling atmosphere, deep shadows, eerie cold tones, suspenseful framing',
+             angles:['Dutch Angle','Extreme Close-up (ECU)','Point of View (POV)','Worm\'s Eye View']},
+  foodie:   {name:'먹방', style:'appetizing food close-up lighting, warm tasty colors, mouth-watering visual, ASMR-friendly framing',
+             angles:['Bird\'s Eye View','Macro Shot','Medium Close-up (MCU)','Extreme Close-up (ECU)']},
+  travel:   {name:'풍경', style:'breathtaking scenic landscape, vast natural beauty, golden hour lighting, cinematic travel aesthetic',
+             angles:['Wide Shot','Establishing Shot','Drone Shot','Bird\'s Eye View']},
+  fitness:  {name:'운동', style:'energetic dynamic motion, sweat-drenched intensity, sharp athletic focus, gym aesthetic',
+             angles:['Low Angle','Full Shot (FS)','Extreme Close-up (ECU)','Tracking Shot']},
+  dance:    {name:'댄스', style:'rhythmic K-pop choreography, vibrant studio lighting, dynamic synchronized movement',
+             angles:['Wide Shot','Full Shot (FS)','Low Angle','Crane Shot']},
+  interview:{name:'인터뷰', style:'professional documentary lighting, natural setting, focused conversation, talking-head style',
+             angles:['Bust Shot','Medium Close-up (MCU)','Dirty Single','Over-the-Shoulder (OTS)']},
+  mv:       {name:'뮤직비디오', style:'stylized music video aesthetic, dramatic lighting, rhythmic visual flow, cinematic look',
+             angles:['Wide Shot','Crane Shot','Extreme Close-up (ECU)','Slow Motion']},
 };
 
 
@@ -843,6 +1142,9 @@ const ANGLE_DESCRIPTIONS = {
   "Bird's Eye View":        { ko: '천장에서 수직으로 내려다보는 샷', use: '음식 세팅, 감각적 인테리어 공간 표현 시' },
   'Dolly Zoom':             { ko: '다가가며 줌은 빠지는 기법', use: '충격, 환각, 심리적 동요를 극대화할 때' },
   'Point of Interest':      { ko: '특정 사물에 시선이 머무는 샷', use: '핸드폰, 편지 등 중요한 물건을 강조할 때' },
+  'Drone Shot':             { ko: '드론으로 위에서 광활하게 촬영', use: '풍경·여행·도시 전경의 스케일을 보여줄 때' },
+  'Tracking Shot':          { ko: '인물·물체를 따라가며 촬영', use: '운동·달리기·역동적 움직임을 자연스럽게 담을 때' },
+  'Crane Shot':             { ko: '크레인으로 부드럽게 상승/하강 이동', use: '댄스·뮤직비디오·웅장한 전환에 시각적 임팩트를 줄 때' },
 };
 
 const ANGLE_IMG_KEYS = {
@@ -949,7 +1251,33 @@ function loadAvatarLib() {
   catch { return []; }
 }
 function saveAvatarLib(arr) {
-  localStorage.setItem(LS_AV_KEY, JSON.stringify(arr));
+  try {
+    localStorage.setItem(LS_AV_KEY, JSON.stringify(arr));
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22) {
+      // 용량 초과 — dataURL을 URL으로 제거 후 재시도
+      console.warn('[saveAvatarLib] localStorage 용량 초과 — dataURL 제거 후 재시도');
+      const cleaned = arr.map(av => {
+        if (av.imgUrl && av.imgUrl.startsWith('data:')) {
+          return { ...av, imgUrl: '', _imgUrlMissing: true };  // dataURL 제거
+        }
+        return av;
+      });
+      try {
+        localStorage.setItem(LS_AV_KEY, JSON.stringify(cleaned));
+        if (typeof toast === 'function') {
+          toast('⚠️ 용량 한도 초과 — 일부 이미지는 클라우드에서 불러와주세요');
+        }
+      } catch (e2) {
+        console.error('[saveAvatarLib] 최종 실패:', e2);
+        if (typeof toast === 'function') {
+          toast('❌ 로컬 저장 실패 — ☁️ 클라우드만 사용해주세요');
+        }
+      }
+    } else {
+      throw e;
+    }
+  }
 }
 function loadSceneLib() {
   try { return JSON.parse(localStorage.getItem(LS_SC_KEY) || '[]'); }
@@ -965,11 +1293,12 @@ function saveSceneLib(arr) {
 const S = {
   aspectRatio: '',  // 16:9, 9:16, 1:1
   avatars: [],
+  avatarCuts: {},  // libId → 출연 컷 인덱스 배열 [0,1,2,3] (기본: 모든 컷 출연)
   scene: 'romance',
-  season: 'spring',
-  timeofday: 'daytime, midday',
-  weather: 'clear sky',
-  location: 'indoor cafe restaurant',
+  season: '',
+  timeofday: '',
+  weather: '',
+  location: '',
   locCustom: false,
   personCount: 0,
   passerby: false,
@@ -984,7 +1313,13 @@ const S = {
   cutPubUrls:  [null,null,null,null],  // 각 컷 CDN URL
   cutApproval: [true,true,true,true],
   cutDurations:[5,5,5,5],
-  cutAudio:    [false,false,false,false],
+  cutAudio:    [true,true,true,true],
+
+  // 각 컷별 사용자 설명 (쯤트/명장/감정 등 자유 입력)
+  cutDescriptions: ['','','',''],
+
+  // 각 컷별 감정 (드롭다운 선택: angry/shouting/calm/sad/funny/excited/...)
+  cutEmotions: ['','','',''],
 
   vidUrls: [null,null,null,null],  // 생성된 영상 URLs
 
@@ -1281,6 +1616,12 @@ function goStep(n) {
     if (quad) quad.style.aspectRatio = getQuadCssAspect();
   }
 
+  // 영상 패널 진입 시 컷 카드 렌더링 (4컷 없이 도달해도 빈 슬롯 표시 + 불러오기 가능)
+  if (n === 5) {
+    if (typeof renderVidCards === 'function') renderVidCards();
+    if (typeof updateMergeBtn === 'function') updateMergeBtn();
+  }
+
   // panel1 안의 sub-step 토글 (step 2 = sceneStepA, step 3 = sceneStepB)
   if (n === 2) {
     document.getElementById('sceneStepA').style.display = 'block';
@@ -1481,11 +1822,8 @@ function validateStep(step) {
     if (!S.location)  missing.push('장소');
     if (S.angles.filter(Boolean).length < 4) missing.push('카메라 앵글 4개');
   } else if (step === 4) {
-    // 4: 4컷 — 이미지 생성 + 1개 이상 승인
-    const hasGrid = S.cutDataUrls.some(u => u);
-    const hasApproved = S.cutApproval.filter(Boolean).length > 0;
-    if (!hasGrid) missing.push('4컷 이미지 생성');
-    else if (!hasApproved) missing.push('승인된 컷 (1개 이상)');
+    // 4: 4컷 — 스킵 허용 (4컷 이미지 없어도 6단계에서 영상 불러오기 가능)
+    // 최소 하나라도 승인된 컷이 있으면 잠금 해제. 아무것도 없으면 (다 안 만들어도) 그대로 통과 — 6단계에서 영상만 불러와서 통합 가능
   }
   return missing;
 }
@@ -1529,10 +1867,22 @@ function renderStep1Avatars() {
     ];
     const outfitMatch = outfitOptions.find(o => o.en === outfit);
     const isCustomOutfit = outfit && !outfitMatch;
+    // 출연 컷 뱃지 — S.avatarCuts 기반
+    let cutBadge = '';
+    if (isCast) {
+      const cuts = (S.avatarCuts && Array.isArray(S.avatarCuts[av.id])) ? S.avatarCuts[av.id] : [0,1,2,3];
+      if (cuts.length === 4) {
+        cutBadge = '전체';
+      } else if (cuts.length === 0) {
+        cutBadge = '미출연';
+      } else {
+        cutBadge = '컷' + cuts.slice().sort((a,b)=>a-b).map(n=>n+1).join('·');
+      }
+    }
     return `
       <div style="background:${isCast?'rgba(200,160,74,.12)':'var(--bg2)'};border:2px solid ${isCast?'var(--gold)':'var(--line)'};border-radius:8px;overflow:hidden;transition:.15s;position:relative">
-        ${isCast ? '<div style="position:absolute;top:5px;right:5px;background:var(--gold);color:#000;font-size:9px;font-weight:800;padding:2px 6px;border-radius:3px;z-index:2">출연중</div>' : ''}
-        <div onclick="toggleSceneAvatar(${av.id})" style="cursor:pointer">
+        ${isCast ? `<div style="position:absolute;top:5px;right:5px;background:var(--gold);color:#000;font-size:9px;font-weight:800;padding:2px 6px;border-radius:3px;z-index:2">${cutBadge}</div>` : ''}
+        <div onclick="openAvatarCutPicker(${av.id})" style="cursor:pointer">
           ${av.imgUrl
             ? `<img src="${av.imgUrl}" style="width:100%;aspect-ratio:1;object-fit:cover;object-position:left top;display:block;background:#f0f0f0">`
             : `<div style="width:100%;aspect-ratio:1;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--ink3)">👤</div>`}
@@ -1552,7 +1902,7 @@ function renderStep1Avatars() {
               `).join('')}
               <div onclick="toggleAvatarOutfitCustom(${av.id})"
                    class="outfit-seg ${isCustomOutfit ? 'active' : ''}"
-                   style="font-size:9px;padding:3px 6px;border-radius:3px;cursor:pointer;background:${isCustomOutfit ? 'var(--pink)' : 'var(--bg3)'};color:${isCustomOutfit ? '#fff' : 'var(--ink2)'};border:1px solid ${isCustomOutfit ? 'var(--pink)' : 'var(--line)'};font-weight:${isCustomOutfit ? '700' : '500'}">개인설정 ✏️</div>
+                   style="font-size:9px;padding:3px 6px;border-radius:3px;cursor:pointer;background:${isCustomOutfit ? 'var(--pink)' : 'var(--bg3)'};color:${isCustomOutfit ? '#fff' : 'var(--ink2)'};border:1px solid ${isCustomOutfit ? 'var(--pink)' : 'var(--line)'};font-weight:${isCustomOutfit ? '700' : '500'}">개인설정</div>
             </div>
             <input id="outfitCustom-${av.id}" placeholder="직접 입력 (예: red dress)"
                    value="${isCustomOutfit ? escHtml(outfit) : ''}"
@@ -1609,21 +1959,118 @@ function updateAvatarOutfitCustom(libId, value) {
   // 재렌더 안 함 (포커스 유지)
 }
 
-// 씬에 추가/제외 토글
+// 씬에 추가/제외 토글 (legacy — 호환용)
 function toggleSceneAvatar(libId) {
+  openAvatarCutPicker(libId);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  컷별 출연 선택 — 아바타 카드 클릭 시 컷(0~3) 체크박스 팝업
+// ─────────────────────────────────────────────────────────────
+let _avatarCutPickerLibId = null;
+let _avatarCutPickerSelection = [];   // 0~3 인덱스
+let _avatarCutPickerWasNew = false;   // 신규 추가였는지 (취소 시 롤백용)
+
+function openAvatarCutPicker(libId) {
   const lib = loadAvatarLib();
   const av = lib.find(a => a.id === libId);
   if (!av) return;
-  // 이미 출연 중이면 제외
-  const existIdx = S.avatars.findIndex(a => (a._libId || a.id) === libId);
-  if (existIdx !== -1) {
-    S.avatars.splice(existIdx, 1);
-    toast(`✕ ${av.name} 출연 취소`);
-  } else {
+
+  // S.avatars에 없으면 먼저 추가
+  let cast = S.avatars.find(a => (a._libId || a.id) === libId);
+  _avatarCutPickerWasNew = false;
+  if (!cast) {
     if (S.avatars.length >= 4) { toast('최대 4명까지 출연 가능'); return; }
-    S.avatars.push({ ...av, _libId: av.id, id: Date.now() + Math.random() });
-    toast(`✓ ${av.name} 출연`);
+    cast = { ...av, _libId: av.id, id: Date.now() + Math.random() };
+    S.avatars.push(cast);
+    _avatarCutPickerWasNew = true;
   }
+
+  if (!S.avatarCuts) S.avatarCuts = {};
+  // 기존 선택 없으면 모든 컷 출연이 기본
+  const existing = S.avatarCuts[libId];
+  _avatarCutPickerSelection = Array.isArray(existing) && existing.length
+    ? existing.slice()
+    : [0, 1, 2, 3];
+  _avatarCutPickerLibId = libId;
+
+  const nameEl = document.getElementById('avatarCutPickerName');
+  if (nameEl) nameEl.textContent = `${av.name} — 어느 컷에 출연?`;
+  renderAvatarCutPickerGrid();
+
+  const modal = document.getElementById('avatarCutPickerModal');
+  if (modal) modal.style.display = 'flex';
+}
+
+function renderAvatarCutPickerGrid() {
+  const grid = document.getElementById('avatarCutPickerGrid');
+  if (!grid) return;
+  let html = '';
+  for (let i = 0; i < 4; i++) {
+    const on = _avatarCutPickerSelection.includes(i);
+    html += `
+      <div onclick="toggleAvatarCutPick(${i})"
+           style="cursor:pointer;padding:14px 8px;border-radius:8px;border:2px solid ${on ? 'var(--gold)' : 'var(--line)'};background:${on ? 'rgba(200,160,74,.14)' : 'var(--bg3)'};text-align:center;transition:.15s;user-select:none">
+        <div style="font-size:18px;font-weight:800;color:${on ? 'var(--gold)' : 'var(--ink2)'}">${on ? '☑' : '☐'} 컷${i+1}</div>
+      </div>
+    `;
+  }
+  grid.innerHTML = html;
+}
+
+function toggleAvatarCutPick(i) {
+  const idx = _avatarCutPickerSelection.indexOf(i);
+  if (idx === -1) _avatarCutPickerSelection.push(i);
+  else _avatarCutPickerSelection.splice(idx, 1);
+  renderAvatarCutPickerGrid();
+}
+
+function selectAllAvatarCuts() {
+  _avatarCutPickerSelection = [0, 1, 2, 3];
+  renderAvatarCutPickerGrid();
+}
+
+function confirmAvatarCuts() {
+  const libId = _avatarCutPickerLibId;
+  if (libId == null) { closeAvatarCutPicker(); return; }
+  if (!S.avatarCuts) S.avatarCuts = {};
+
+  if (_avatarCutPickerSelection.length === 0) {
+    // 선택 없음 → 출연 취소
+    S.avatars = S.avatars.filter(a => (a._libId || a.id) !== libId);
+    delete S.avatarCuts[libId];
+    const lib = loadAvatarLib();
+    const av = lib.find(a => a.id === libId);
+    toast(`✕ ${av?.name || ''} 출연 취소`);
+  } else {
+    _avatarCutPickerSelection.sort((a, b) => a - b);
+    S.avatarCuts[libId] = _avatarCutPickerSelection.slice();
+    const lib = loadAvatarLib();
+    const av = lib.find(a => a.id === libId);
+    const cutsTxt = _avatarCutPickerSelection.map(n => n + 1).join('·');
+    toast(`✓ ${av?.name || ''} 컷${cutsTxt} 출연`);
+  }
+
+  closeAvatarCutPicker();
+  renderStep1Avatars();
+  if (typeof saveSession === 'function') saveSession();
+}
+
+function closeAvatarCutPicker() {
+  const modal = document.getElementById('avatarCutPickerModal');
+  if (modal) modal.style.display = 'none';
+  // 신규 추가했는데 그냥 닫기로 종료한 경우는 confirmAvatarCuts 경유로만 처리
+  _avatarCutPickerLibId = null;
+  _avatarCutPickerWasNew = false;
+}
+
+// 백드롭 클릭 시 — 신규 추가였다면 롤백
+function cancelAvatarCutPicker() {
+  if (_avatarCutPickerWasNew && _avatarCutPickerLibId != null) {
+    const libId = _avatarCutPickerLibId;
+    S.avatars = S.avatars.filter(a => (a._libId || a.id) !== libId);
+  }
+  closeAvatarCutPicker();
   renderStep1Avatars();
 }
 
@@ -1869,7 +2316,7 @@ function clearContinueRef() {
   S.continueRefPubUrl = null;
   const preview = document.getElementById('continueRefPreview');
   if (preview) {
-    preview.innerHTML = '🖼️';
+    preview.innerHTML = '';
     preview.style.border = '1px dashed var(--line2)';
   }
   const clearBtn = document.getElementById('continueRefClearBtn');
@@ -2163,6 +2610,58 @@ function saveAvatarToLibFromModal() {
   renderSavedAvatars();
 }
 
+// 로컬 저장 + 클라우드 동시 저장 (저장 버튼 클릭 시 메인)
+async function saveAvatarToLibFromModalWithCloud() {
+  const name = document.getElementById('avName').value.trim();
+  if (!name) { toast('이름을 입력하세요'); return; }
+  // 현재 아바타 정보 캡처
+  const tags = [];
+  document.querySelectorAll('#avExtraSegs .seg.active').forEach(s => tags.push(s.dataset.extra));
+  const customExtra = document.getElementById('avExtraCustom').value.trim();
+  if (customExtra) tags.push(customExtra);
+  document.getElementById('avExtra').value = tags.join(', ');
+
+  // ⚠️ dataURL이면 먼저 fal에 업로드해서 URL로 변환 (localStorage 용량 보호)
+  let imgUrl = document.getElementById('avImgUrl').value || '';
+  if (imgUrl.startsWith('data:')) {
+    const falKey = document.getElementById('falKey')?.value.trim();
+    if (falKey) {
+      try {
+        toast('☁️ 이미지 업로드 중...');
+        const r = await fetch(imgUrl);
+        const blob = await r.blob();
+        const cdnUrl = await uploadToFalStorage(falKey, blob, `avatar_${Date.now()}.png`, blob.type || 'image/png');
+        imgUrl = cdnUrl;
+        document.getElementById('avImgUrl').value = cdnUrl;
+        log('ok', `[Avatar] dataURL → fal CDN URL로 변환: ${cdnUrl.slice(0, 60)}`);
+      } catch (e) {
+        log('warn', '[Avatar] dataURL 업로드 실패 (로컬에는 이미지 없이 저장됨): ' + e.message);
+        // 실패해도 계속 진행 — 로컬 용량 보호는 saveAvatarLib에서 처리됨
+      }
+    }
+  }
+
+  const av = {
+    id: S._editingAvId || Date.now(),
+    name,
+    gender: document.getElementById('avGender').value,
+    age: document.getElementById('avAge').value,
+    body: document.getElementById('avBody').value,
+    height: document.getElementById('avHeight').value,
+    look: document.getElementById('avLook').value,
+    hair: document.getElementById('avHair').value.trim(),
+    style: '',
+    extra: document.getElementById('avExtra').value.trim(),
+    imgUrl: imgUrl,
+  };
+  // 1단계: 로컬 저장 (이제 imgUrl은 URL이므로 용량 안전)
+  saveAvatarToLibFromModal();
+  // 2단계: 클라우드 저장 (로그인 있으면)
+  if (currentUser && av.imgUrl && !av.imgUrl.startsWith('data:')) {
+    await saveAvatarToCloud(av);
+  }
+}
+
 function saveAvatarToLib() {
   const name = document.getElementById('avName').value.trim();
   if (!name) { toast('이름을 입력하세요'); return; }
@@ -2313,27 +2812,36 @@ function renderScenes() {
   const grid = document.getElementById('sceneGrid');
   // 기본 8개 씬
   const defaults = [
-    {key:'romance',  emoji:'💕', name:'로맨스'},
-    {key:'tension',  emoji:'⚡', name:'긴장'},
-    {key:'breakup',  emoji:'💔', name:'이별'},
-    {key:'climax',   emoji:'😭', name:'감정 절정'},
-    {key:'suspense', emoji:'🌑', name:'서스펜스'},
-    {key:'mellow',   emoji:'🌧', name:'막장'},
-    {key:'action',   emoji:'💥', name:'액션'},
-    {key:'slice',    emoji:'☕', name:'일상'},
+    {key:'romance',    name:'로맨스'},
+    {key:'tension',    name:'긴장'},
+    {key:'breakup',    name:'이별'},
+    {key:'climax',     name:'감정 절정'},
+    {key:'suspense',   name:'서스펜스'},
+    {key:'mellow',     name:'막장'},
+    {key:'action',     name:'액션'},
+    {key:'slice',      name:'일상'},
+    {key:'commercial', name:'광고'},
+    {key:'vlog',       name:'개인방송'},
+    {key:'flashback',  name:'회상'},
+    {key:'confession', name:'고백'},
+    {key:'horror',     name:'공포'},
+    {key:'foodie',     name:'먹방'},
+    {key:'travel',     name:'풍경'},
+    {key:'fitness',    name:'운동'},
+    {key:'dance',      name:'댄스'},
+    {key:'interview',  name:'인터뷰'},
+    {key:'mv',         name:'뮤직비디오'},
   ];
   const customs = loadSceneLib();
   let html = defaults.map(s => `
     <div class="scene-card${S.scene===s.key?' active':''}" onclick="selScene('${s.key}',this)">
-      <div class="scene-emoji">${s.emoji}</div>
-      <div class="scene-name">${s.name}</div>
+      <div class="scene-name" style="font-size:13px;font-weight:700;padding:14px 8px;text-align:center">${s.name}</div>
     </div>
   `).join('');
   html += customs.map(s => `
     <div class="scene-card${S.scene===('custom_'+s.id)?' active':''}" style="position:relative" onclick="selScene('custom_${s.id}',this)">
       <div onclick="event.stopPropagation();deleteSceneFromLib(${s.id})" style="position:absolute;top:4px;right:4px;width:16px;height:16px;border-radius:50%;background:rgba(192,48,64,.2);border:1px solid var(--red);color:var(--red);font-size:9px;display:flex;align-items:center;justify-content:center;cursor:pointer">✕</div>
-      <div class="scene-emoji">${s.emoji||'🎬'}</div>
-      <div class="scene-name">${escHtml(s.name)}</div>
+      <div class="scene-name" style="font-size:13px;font-weight:700;padding:14px 8px;text-align:center">${escHtml(s.name)}</div>
     </div>
   `).join('');
   grid.innerHTML = html;
@@ -2377,6 +2885,10 @@ function selScene(key, el) {
   }
   renderAngleSlots();
   updatePromptPreview();
+  // 씀 선택 시 자동으로 4단계(씀 상세)로 이동 — 검증 우회 (goStep 직접)
+  setTimeout(() => {
+    if (typeof goStep === 'function') goStep(2);
+  }, 300);
 }
 
 function restoreSceneUI() {
@@ -2476,9 +2988,21 @@ function toggleVehiclePanel() {
 }
 
 function selVehicle(vehicle) {
-  document.querySelectorAll('.vehicle-seg').forEach(s => s.classList.remove('active'));
   const target = document.getElementById('vehicle-' + vehicle);
-  if (target) target.classList.add('active');
+  if (!target) return;
+
+  // 이미 활성화된 이동수단을 다시 누르면 해제 (토글)
+  if (target.classList.contains('active')) {
+    target.classList.remove('active');
+    document.getElementById('vehicleToggleBtn').classList.remove('active');
+    S.vehicle = '';
+    S.location = '';
+    if (typeof updatePromptPreview === 'function') updatePromptPreview();
+    return;
+  }
+
+  document.querySelectorAll('.vehicle-seg').forEach(s => s.classList.remove('active'));
+  target.classList.add('active');
 
   // 일반 location segs 해제
   document.querySelectorAll('.field').forEach(f => {
@@ -2715,14 +3239,13 @@ function showAngleHelp() {
   titleEl.textContent = '카메라 앵글 선택 가이드';
   bodyEl.innerHTML = `
     <div style="font-size:12px;line-height:1.8;color:var(--ink2)">
-      <p style="margin-bottom:10px">씬을 구성하는 <strong style="color:var(--cream)">4개의 카메라 앵글</strong>을 순서대로 클릭하세요.</p>
+      <p style="margin-bottom:10px">씬을 구성하는 <strong style="color:var(--cream)">4개의 카메라 앵글</strong>과 각 컷별 자유로운 설명을 설정하세요.</p>
       <ul style="margin-left:14px;margin-bottom:10px">
-        <li>각 카드의 <strong style="color:var(--gold)">?</strong> 마크를 클릭하면 한글 설명과 사용 시점을 볼 수 있습니다.</li>
-        <li>씬을 선택하면 자동으로 추천 앵글 4개가 채워집니다.</li>
-        <li><strong style="color:var(--cream)">개인설정</strong>을 누르면 직접 4개를 고를 수 있습니다.</li>
-        <li><strong style="color:var(--cream)">↺ 리셋</strong>을 누르면 씬의 추천 앵글로 돌아갑니다.</li>
+        <li><strong style="color:var(--cream)">CUT 카드(좌측)</strong>를 클릭하면 팝업이 열리고 28가지 앵글 중 선택할 수 있습니다.</li>
+        <li><strong style="color:var(--cream)">설명란(우측)</strong>에는 원하는 콘티・명장・감정 등을 자유롭게 입력할 수 있습니다 (선택 사항).</li>
+        <li>씬을 선택하면 자동으로 추천 앵글 4개가 채워집니다. 언제든 다른 앵글로 변경 가능합니다.</li>
       </ul>
-      <p style="font-size:11px;color:var(--ink3);padding:8px;background:var(--bg2);border-radius:5px">💡 팁: 첫 컷은 와이드샷으로 분위기 잡고, 마지막 컷은 클로즈업으로 감정을 강조하면 영상이 자연스러워집니다.</p>
+      <p style="font-size:11px;color:var(--ink3);padding:8px;background:var(--bg2);border-radius:5px">💡 팁: 카메라 앵글은 <strong style="color:var(--cream)">영상의 시점</strong>을 결정하고, 설명은 그 컷의 <strong style="color:var(--cream)">콘텐트・감정・행동</strong>을 더해주는 제어 입력창입니다.</p>
     </div>
   `;
   document.getElementById('confirmModal').style.display = 'flex';
@@ -2798,44 +3321,146 @@ function refreshAnglePicker() {
 
 function renderAngleSlots() {
   const colors = ['var(--gold)','var(--blue)','var(--green)','var(--red)'];
-  for (let i = 0; i < 4; i++) {
-    const slot = document.getElementById(`angleSlot${i}`);
-    if (S.angles[i]) {
-      slot.innerHTML = `<span style="font-size:8px;font-weight:800;color:${colors[i]}">컷${i+1}</span><br><span style="font-size:8px;color:var(--ink2);line-height:1.3">${S.angles[i]}</span>`;
-      slot.style.borderColor = colors[i].replace('var(','').replace(')','');
-    } else {
-      slot.innerHTML = `컷${i+1}<br><span style="color:${colors[i]};font-size:8px">미선택</span>`;
-      slot.style.borderColor = 'var(--line)';
-    }
+  const colorNames = ['골드','블루','그린','레드'];
+  const wrap = document.getElementById('angleSlots');
+  if (!wrap) return;
+  // S.cutDescriptions 안전 명시
+  if (!Array.isArray(S.cutDescriptions) || S.cutDescriptions.length !== 4) {
+    S.cutDescriptions = ['','','',''];
   }
+  let html = '';
+  for (let i = 0; i < 4; i++) {
+    const angle = S.angles[i] || '';
+    const angleKo = angle && ANGLE_DESCRIPTIONS[angle] ? ANGLE_DESCRIPTIONS[angle].ko : '';
+    const desc = S.cutDescriptions[i] || '';
+    const color = colors[i];
+    html += `
+      <div style="display:flex;gap:8px;align-items:stretch">
+        <!-- 앵글 카드 (클릭 시 모달) -->
+        <div onclick="openAnglePickerModal(${i})" style="flex:0 0 140px;cursor:pointer;padding:10px 8px;border-radius:6px;border:1.5px solid ${angle ? color : 'var(--line)'};background:${angle ? `rgba(${i===0?'255,184,77':i===1?'96,165,250':i===2?'74,222,128':'255,85,119'},0.08)` : 'var(--bg3)'};text-align:center;transition:.15s;display:flex;flex-direction:column;justify-content:center" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'" title="클릭하여 앵글 선택">
+          <div style="font-size:11px;font-weight:800;color:${color};letter-spacing:1px">CUT ${i+1}</div>
+          ${angle ? `
+            <div style="font-size:10px;font-weight:700;color:var(--cream);margin-top:4px;line-height:1.2">${escHtml(angle)}</div>
+            <div style="font-size:9px;color:var(--ink3);margin-top:2px">${escHtml(angleKo)}</div>
+          ` : `
+            <div style="font-size:10px;color:var(--ink3);margin-top:6px">클릭하여 선택</div>
+          `}
+        </div>
+        <!-- 설명 textarea -->
+        <textarea
+          id="cutDesc${i}"
+          oninput="updateCutDescription(${i}, this.value)"
+          placeholder="컷 ${i+1} 설명 입력 (원하는 콘티・명장・감정 등) — 선택"
+          style="flex:1;min-height:64px;background:var(--bg3);border:1px solid var(--line);border-radius:6px;padding:8px 10px;color:var(--ink);font-size:11px;font-family:inherit;line-height:1.5;resize:vertical"
+        >${escHtml(desc)}</textarea>
+      </div>
+    `;
+  }
+  wrap.innerHTML = html;
+}
+
+function updateCutDescription(idx, value) {
+  if (!Array.isArray(S.cutDescriptions) || S.cutDescriptions.length !== 4) {
+    S.cutDescriptions = ['','','',''];
+  }
+  S.cutDescriptions[idx] = value || '';
+  if (typeof updatePromptPreview === 'function') updatePromptPreview();
+}
+
+// 앵글 선택 팝업 모달 열기
+let _anglePickerCutIdx = -1;
+function openAnglePickerModal(cutIdx) {
+  _anglePickerCutIdx = cutIdx;
+  const modal = document.getElementById('anglePickerModal');
+  if (!modal) {
+    console.error('[AnglePicker] modal not found');
+    return;
+  }
+  const colors = ['var(--gold)','var(--blue)','var(--green)','var(--red)'];
+  const rgbs = ['255,184,77','96,165,250','74,222,128','255,85,119'];
+  const lbl = document.getElementById('anglePickerCutLabel');
+  if (lbl) {
+    lbl.textContent = `CUT ${cutIdx + 1}`;
+    lbl.style.color = colors[cutIdx];
+  }
+  // ANGLE_CATS 구조: [{cat:'카테고리', items:[{label:'앵글명', tip:'설명'}, ...]}, ...]
+  const list = document.getElementById('anglePickerModalList');
+  if (!list) { console.error('[AnglePicker] list element not found'); return; }
+  let html = '';
+  if (typeof ANGLE_CATS !== 'undefined' && Array.isArray(ANGLE_CATS)) {
+    ANGLE_CATS.forEach(cat => {
+      const catName = cat.cat || cat.name || '';
+      const items = cat.items || cat.angles || [];
+      html += `<div style="margin-bottom:14px">
+        <div style="font-size:10px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">${escHtml(catName)}</div>`;
+      items.forEach(item => {
+        // item은 string일수도, {label, tip} 객체일수도 있음
+        const angle = (typeof item === 'string') ? item : (item.label || '');
+        if (!angle) return;
+        const meta = ANGLE_DESCRIPTIONS[angle] || {};
+        const ko = meta.ko || (typeof item === 'object' ? item.tip : '') || '';
+        const use = meta.use || '';
+        const isSelected = S.angles[cutIdx] === angle;
+        const safeAngle = angle.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        html += `
+          <div onclick="selectAngleForCut('${safeAngle}')"
+               style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-radius:6px;border:1px solid ${isSelected ? colors[cutIdx] : 'var(--line)'};background:${isSelected ? `rgba(${rgbs[cutIdx]},0.1)` : 'var(--bg3)'};margin-bottom:5px;cursor:pointer;transition:.12s"
+               onmouseover="this.style.background='var(--bg4)'"
+               onmouseout="this.style.background='${isSelected ? `rgba(${rgbs[cutIdx]},0.1)` : 'var(--bg3)'}'">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;font-weight:700;color:var(--cream)">${escHtml(angle)}</div>
+              <div style="font-size:10px;color:var(--ink2);margin-top:2px">${escHtml(ko)}</div>
+              ${use ? `<div style="font-size:9px;color:var(--ink3);margin-top:2px;font-style:italic">${escHtml(use)}</div>` : ''}
+            </div>
+            ${isSelected ? `<div style="flex:0 0 auto;font-size:18px;color:${colors[cutIdx]}">✓</div>` : ''}
+          </div>
+        `;
+      });
+      html += '</div>';
+    });
+  } else {
+    // 폴백 — ANGLE_DESCRIPTIONS 전체 렌더
+    Object.keys(ANGLE_DESCRIPTIONS).forEach(angle => {
+      const meta = ANGLE_DESCRIPTIONS[angle];
+      const isSelected = S.angles[cutIdx] === angle;
+      const safeAngle = angle.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      html += `
+        <div onclick="selectAngleForCut('${safeAngle}')" style="padding:8px 12px;border-radius:6px;border:1px solid ${isSelected ? colors[cutIdx] : 'var(--line)'};background:${isSelected ? `rgba(${rgbs[cutIdx]},0.1)` : 'var(--bg3)'};margin-bottom:5px;cursor:pointer">
+          <div style="font-size:12px;font-weight:700;color:var(--cream)">${escHtml(angle)}</div>
+          <div style="font-size:10px;color:var(--ink2);margin-top:2px">${escHtml(meta.ko)}</div>
+          <div style="font-size:9px;color:var(--ink3);margin-top:2px;font-style:italic">${escHtml(meta.use)}</div>
+        </div>
+      `;
+    });
+  }
+  list.innerHTML = html;
+  modal.style.display = 'flex';
+}
+
+function closeAnglePickerModal() {
+  const modal = document.getElementById('anglePickerModal');
+  if (modal) modal.style.display = 'none';
+  _anglePickerCutIdx = -1;
+}
+
+function selectAngleForCut(angleName) {
+  if (_anglePickerCutIdx < 0 || _anglePickerCutIdx > 3) return;
+  if (!Array.isArray(S.angles)) S.angles = ['','','',''];
+  while (S.angles.length < 4) S.angles.push('');
+  S.angles[_anglePickerCutIdx] = angleName;
+  closeAnglePickerModal();
+  renderAngleSlots();
+  if (typeof updatePromptPreview === 'function') updatePromptPreview();
 }
 
 function resetAngles() {
   S.angles = [...SCENES[S.scene].angles];
-  S.customAngleMode = false;
-  document.getElementById('customAngleBtn').classList.remove('active');
-  document.getElementById('anglePickerWrap').style.display = 'none';
-  refreshAnglePicker();
   renderAngleSlots();
-  updatePromptPreview();
+  if (typeof updatePromptPreview === 'function') updatePromptPreview();
 }
 
-function toggleCustomAngle() {
-  S.customAngleMode = !S.customAngleMode;
-  const btn = document.getElementById('customAngleBtn');
-  const wrap = document.getElementById('anglePickerWrap');
-  btn.classList.toggle('active', S.customAngleMode);
-  wrap.style.display = S.customAngleMode ? '' : 'none';
-  if (S.customAngleMode) {
-    initAnglePicker();
-    S.angles = [];
-    renderAngleSlots();
-  } else {
-    S.angles = [...SCENES[S.scene].angles];
-    renderAngleSlots();
-  }
-  updatePromptPreview();
-}
+// 레거시 함수 — 호출 안되지만 no-op으로 유지 (다른 도구난 삭제될 수 있으니있)
+function toggleCustomAngle() { /* 제거됨 — 팝업 적용으로 이주 */ }
 
 // 동기 버전 — 미리보기 / 즉시 표시용 (한글 그대로)
 function buildImagePrompt() {
@@ -2857,7 +3482,7 @@ function buildImagePrompt() {
     personDesc = `${S.personCount} person${S.personCount>1?'s':''} in the scene`;
     if (S.passerby) personDesc += `, with ${S.passerbyDensity}`;
   }
-  const angleDesc = S.angles.filter(Boolean).map((a,i) => `Panel ${i+1}: ${a}`).join(' | ');
+  const angleDesc = S.angles.filter(Boolean).map((a,i) => { const d = (S.cutDescriptions && S.cutDescriptions[i] || '').trim(); return `Panel ${i+1}: ${a}${d ? ' (' + d + ')' : ''}`;}).join(' | ');
   const extra = document.getElementById('extraPrompt')?.value.trim() || '';
 
   return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Each panel shows the SAME Korean drama scene from a DIFFERENT camera angle.
@@ -2907,7 +3532,7 @@ async function buildImagePromptForApi() {
     personDesc = `${S.personCount} person${S.personCount>1?'s':''} in the scene`;
     if (S.passerby) personDesc += `, with ${S.passerbyDensity}`;
   }
-  const angleDesc = S.angles.filter(Boolean).map((a,i) => `Panel ${i+1}: ${a}`).join(' | ');
+  const angleDesc = S.angles.filter(Boolean).map((a,i) => { const d = (S.cutDescriptions && S.cutDescriptions[i] || '').trim(); return `Panel ${i+1}: ${a}${d ? ' (' + d + ')' : ''}`;}).join(' | ');
 
   return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Each panel shows the SAME Korean drama scene from a DIFFERENT camera angle.
 ${charDesc ? 'CHARACTERS: ' + charDesc + '.' : ''}
@@ -3126,6 +3751,7 @@ async function goToStep3() {
         log('info', `컷${i+1} CDN 업로드 중...`);
         const blob = dataURLtoBlob(S.cutDataUrls[i]);
         S.cutPubUrls[i] = await uploadToFalStorage(falKey, blob, `cut_${i}.jpg`);
+      if (typeof saveSession === 'function') saveSession();
         log('ok', `컷${i+1} 업로드 완료: ${S.cutPubUrls[i].slice(0,50)}`);
       } catch(e) {
         log('warn', `컷${i+1} 업로드 실패: ${e.message}`);
@@ -3140,30 +3766,88 @@ async function goToStep3() {
 // ════════════════════════════════════════════════════════════
 //  STEP 3: 컷별 영상 생성
 // ════════════════════════════════════════════════════════════
+// Kling 영상 생성 시 차단할 요소 (negative_prompt)
+const KLING_NEGATIVE_PROMPT = [
+  // 유명인/실존 인물 차단
+  'celebrity', 'famous person', 'real actor', 'movie star', 'public figure',
+  'recognizable person', 'real-world person', 'identifiable celebrity',
+  // 추가 인물/행인 차단
+  'extra people', 'background extras', 'crowd', 'bystanders', 'passersby',
+  'additional characters', 'random people appearing', 'people walking by',
+  'unexpected character entering frame', 'new person appearing',
+  // 얼굴 변형/왜곡 차단
+  'face morphing', 'changing face', 'distorted face', 'face swap',
+  'different person', 'face replacement', 'multiple faces blending',
+  // 일반적인 품질 문제
+  'blurry', 'low quality', 'distorted', 'deformed', 'extra limbs',
+  'duplicated person', 'cloned faces', 'mismatched features',
+].join(', ');
+
 function buildVidPrompt(i) {
   const sc = SCENES[S.scene];
   const loc = getCombinedLocation();
 
-  // 캐릭터 정보 - 간결하게 (이름만, 세부은 레퍼런스 이미지에서)
-  let charCount = S.avatars.length;
-  let charNames = S.avatars.map(av => av.name).join(' and ') || 'no one';
+  // 캐릭터 정보 - 컷별 출연 필터 적용
+  const cutsForAv = (av) => {
+    const libId = av._libId || av.id;
+    return S.avatarCuts && Array.isArray(S.avatarCuts[libId]) ? S.avatarCuts[libId] : [0,1,2,3];
+  };
+  const cutAvatars = S.avatars.filter(av => cutsForAv(av).includes(i));
+  const charCount = cutAvatars.length;
+  const charNames = cutAvatars.map(av => av.name).join(' and ') || 'no one';
 
   // 캡션 압축
   const charLock = charCount > 0
-    ? `${charCount} character${charCount>1?'s':''} (${charNames}), same faces as reference. No extras, no crowd.`
-    : 'no people in scene.';
+    ? `EXACTLY ${charCount} original fictional character${charCount>1?'s':''} (${charNames}), fictional characters only. Faces MUST match reference photos exactly.`
+    : 'No people, no characters visible.';
 
   // 장면 압축 — SCENES style은 장문이므로 앞 80자만
-  const sceneStyle = (sc.style || '').slice(0, 80);
+  const sceneStyle = (sc.style || '').slice(0, 40);
   const sceneLoc = (loc || '').slice(0, 80);
   const cam = S.angles[i] || 'cinematic';
 
-  // 최종 조립 — 타겟 ~340자
-  let p = `Korean drama. ${sceneStyle}. ${S.season}, ${S.timeofday}, ${S.weather}, ${sceneLoc}. Camera: ${cam}. ${charLock} Cinematic.`;
+  // 세팅 조립 — 비어있는 값은 높은 제거
+  const ctx = [S.season, S.timeofday, S.weather, sceneLoc].filter(Boolean).join(', ');
+  let p = `Korean drama. ${sceneStyle}.${ctx ? ' ' + ctx + '.' : ''} Camera: ${cam}. ${charLock} Cinematic.`;
 
-  // 512 커팅 (대사·설명 추가 공간 확보 → 380자)
-  if (p.length > 380) p = p.slice(0, 377) + '...';
+  // 컷별 설명 (S.cutDescriptions[i]) 통합 — 있을 때만 추가
+  // 컷별 설명 추가
+  const cutDesc = (S.cutDescriptions && S.cutDescriptions[i] || '').trim();
+  if (cutDesc) {
+    const room = 510 - p.length - 16;
+    if (room > 0) {
+      const trimmed = cutDesc.length > room ? cutDesc.slice(0, room - 3) + '...' : cutDesc;
+      p += `\n\nSCENE NOTE: ${trimmed}`;
+    }
+  }
+
+  // 510자 안전 커팅 (charLock이 길어졌으므로 공간 여유 느스)
+  if (p.length > 510) p = p.slice(0, 507) + '...';
   return p;
+}
+
+// 대사 글자 수 카운터 업데이트 (초당 4글자 기준)
+function updateScriptCounter(i) {
+  const scriptEl = document.getElementById(`vidScript${i}`);
+  const counterEl = document.getElementById(`vidScriptCounter${i}`);
+  if (!counterEl) return;
+  const dur = parseInt(document.getElementById(`vidDur${i}`)?.value) || S.cutDurations[i] || 5;
+  const max = dur * 4;
+  const current = scriptEl ? scriptEl.value.length : 0;
+  counterEl.textContent = `${current} / ${max}자 (${dur}초)`;
+  if (current > max) {
+    counterEl.style.color = 'var(--red)';
+    counterEl.style.fontWeight = '800';
+    if (scriptEl) scriptEl.style.borderColor = 'var(--red)';
+  } else if (current > max * 0.85) {
+    counterEl.style.color = 'var(--gold)';
+    counterEl.style.fontWeight = '700';
+    if (scriptEl) scriptEl.style.borderColor = 'var(--gold)';
+  } else {
+    counterEl.style.color = 'var(--ink3)';
+    counterEl.style.fontWeight = '600';
+    if (scriptEl) scriptEl.style.borderColor = 'var(--line)';
+  }
 }
 
 function renderVidCards() {
@@ -3171,62 +3855,112 @@ function renderVidCards() {
   const colors = ['#c8a04a','#3a70c0','#3e9660','#c03040'];
   const grid = document.getElementById('cutVidGrid');
 
-  grid.innerHTML = approved.map(i => `
+  // 4컷 이미지가 아예 없으면 승인 대신 4개 전체 슬롯 표시 — 불러오기만 가능
+  const hasAnyCut = S.cutDataUrls.some(u => u);
+  const indicesToShow = hasAnyCut ? approved : [0, 1, 2, 3];
+
+  grid.innerHTML = indicesToShow.map(i => {
+    const hasCut = !!S.cutDataUrls[i];
+    return `
     <div class="cut-vid-card" id="vidCard${i}">
       <div class="cut-vid-header">
-        ${S.cutDataUrls[i] ? `<img class="cut-vid-thumb" src="${S.cutDataUrls[i]}">` : ''}
+        ${hasCut ? `<img class="cut-vid-thumb" src="${S.cutDataUrls[i]}">` : `<div class="cut-vid-thumb" style="background:var(--bg4);display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:10px">이미지 없음</div>`}
         <div>
-          <div class="cut-vid-title" style="color:${colors[i]}">컷${i+1} — ${S.angles[i]||''}</div>
-          <div style="font-size:9px;color:var(--ink3)">${S.cutDurations[i]}초 · 오디오 ${S.cutAudio[i]?'ON':'OFF'}</div>
+          <div class="cut-vid-title" style="color:${colors[i]}">컷${i+1}${S.angles[i] ? ` — ${S.angles[i]}` : ''}</div>
+          <div style="font-size:9px;color:var(--ink3)">${S.cutDurations[i]}초 · 오디오 ${S.cutAudio[i]?'ON':'OFF'}${!hasCut ? ' · 영상 불러오기만 가능' : ''}</div>
         </div>
       </div>
       <div class="cut-vid-body">
         <!-- 추가 개인설정 (영상에 더할 디테일) -->
         <div style="margin-bottom:8px">
           <label style="font-size:10px;color:var(--ink3);display:block;margin-bottom:3px">추가 개인설정 <span style="color:var(--ink3);font-weight:400">(선택)</span></label>
-          <input id="vidExtra${i}" placeholder="예: 비가 점점 거세진다 / 카메라가 천천히 줌인 / 표정이 점차 굳어진다" style="width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px">
+          <input id="vidExtra${i}" placeholder="예: 비가 점점 거세진다 / 카메라가 천천히 줌인 / 표정이 점차 굳어진다" style="width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
           <div style="font-size:9px;color:var(--ink3);margin-top:3px">기본 영상 프롬프트는 자동 생성되며, 입력한 내용은 추가 디테일로 합쳐집니다</div>
         </div>
-        <!-- 대사 (화자 + 대사) -->
+        <!-- 대사 (화자 + 감정 + 대사) -->
         <div style="margin-bottom:8px">
-          <label style="font-size:10px;color:var(--ink3);display:block;margin-bottom:4px">대사 (선택 · Kling 3.0만)</label>
-          <div style="display:flex;gap:6px">
-            <select id="vidSpeaker${i}" style="background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px;width:120px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:6px">
+            <label style="font-size:10px;color:var(--ink3);margin:0">대사 (선택 · Kling 3.0만)</label>
+            <span id="vidScriptCounter${i}" style="font-size:9px;color:var(--ink3);font-weight:600">0 / ${(S.cutDurations[i]||5)*4}자 (${S.cutDurations[i]||5}초)</span>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <select id="vidSpeaker${i}" style="background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px;width:120px" ${!hasCut ? 'disabled' : ''}>
               <option value="">화자 선택</option>
               <option value="woman">여자</option>
               <option value="man">남자</option>
               <option value="narrator-woman">나레이션 (여자)</option>
               <option value="narrator-man">나레이션 (남자)</option>
             </select>
-            <input id="vidScript${i}" placeholder='대사만 입력 (예: 나는 널 잊을 수 없어)' style="flex:1;background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px">
+            <select id="vidEmotion${i}" onchange="S.cutEmotions[${i}]=this.value" style="background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px;width:120px" ${!hasCut ? 'disabled' : ''}>
+              <option value="">감정 선택</option>
+              <option value="angry" ${S.cutEmotions[i]==='angry'?'selected':''}>화남 😠</option>
+              <option value="shouting" ${S.cutEmotions[i]==='shouting'?'selected':''}>소리침 📢</option>
+              <option value="sad" ${S.cutEmotions[i]==='sad'?'selected':''}>슬픔 😢</option>
+              <option value="crying" ${S.cutEmotions[i]==='crying'?'selected':''}>울음 😭</option>
+              <option value="calm" ${S.cutEmotions[i]==='calm'?'selected':''}>평온 😌</option>
+              <option value="happy" ${S.cutEmotions[i]==='happy'?'selected':''}>행복 😊</option>
+              <option value="excited" ${S.cutEmotions[i]==='excited'?'selected':''}>신남 🤩</option>
+              <option value="funny" ${S.cutEmotions[i]==='funny'?'selected':''}>웃김 😆</option>
+              <option value="surprised" ${S.cutEmotions[i]==='surprised'?'selected':''}>놀람 😲</option>
+              <option value="scared" ${S.cutEmotions[i]==='scared'?'selected':''}>두려움 😨</option>
+              <option value="shy" ${S.cutEmotions[i]==='shy'?'selected':''}>수줌음 😊</option>
+              <option value="longing" ${S.cutEmotions[i]==='longing'?'selected':''}>그리움 🥺</option>
+              <option value="serious" ${S.cutEmotions[i]==='serious'?'selected':''}>진지 😐</option>
+              <option value="romantic" ${S.cutEmotions[i]==='romantic'?'selected':''}>로맨틱 😍</option>
+            </select>
+            <input id="vidScript${i}" oninput="updateScriptCounter(${i})" placeholder='대사만 입력 (예: 나는 널 잊을 수 없어)' style="flex:1;min-width:160px;background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:5px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
           </div>
-          <div style="font-size:9px;color:var(--ink3);margin-top:3px">화자가 선정되면 영상에 자막처럼 보이지 않게 자동 처리됩니다</div>
+          <div style="font-size:9px;color:var(--ink3);margin-top:3px">최대 <strong style="color:var(--cream)">초당 4글자</strong>까지 음성 생성 (영상 길이 × 4자 = 최대 글자 수)</div>
         </div>
         <!-- 설정 -->
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
-          <select id="vidDur${i}" style="background:var(--bg3);border:1px solid var(--line);border-radius:4px;padding:4px 8px;color:var(--ink);font-size:11px">
+          <select id="vidDur${i}" onchange="S.cutDurations[${i}]=parseInt(this.value);updateScriptCounter(${i})" style="background:var(--bg3);border:1px solid var(--line);border-radius:4px;padding:4px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
             ${[3,4,5,6,7,8,9,10,11,12,13,14,15].map(n=>`<option value="${n}" ${S.cutDurations[i]===n?'selected':''}>${n}초</option>`).join('')}
           </select>
-          <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink2);cursor:pointer">
-            <input type="checkbox" id="vidAudio${i}" ${S.cutAudio[i]?'checked':''} style="accent-color:var(--gold)"> 오디오
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink2);cursor:${hasCut?'pointer':'not-allowed'};opacity:${hasCut?1:0.5}">
+            <input type="checkbox" id="vidAudio${i}" ${S.cutAudio[i]?'checked':''} style="accent-color:var(--gold)" ${!hasCut ? 'disabled' : ''}> 오디오
           </label>
           <div id="vidCostEst${i}" style="font-size:10px;color:var(--ink3);margin-left:auto"></div>
         </div>
         <!-- 생성 버튼 -->
-        <button class="btn btn-primary btn-full" id="vidGenBtn${i}" onclick="generateCutVideo(${i})">컷${i+1} 영상 생성</button>
+        <button class="btn btn-primary btn-full" id="vidGenBtn${i}" onclick="generateCutVideo(${i})" ${!hasCut ? 'disabled title="4컷 이미지가 없으면 AI 생성 불가 — 대신 아래 불러오기 사용"' : ''}>컷${i+1} 영상 생성</button>
         <!-- 상태 / 결과 -->
         <div id="vidStatus${i}" class="cut-vid-status"></div>
         <video id="vidPlayer${i}" class="cut-vid-video" controls loop style="display:none"></video>
         <div id="vidActions${i}" style="display:none;margin-top:6px;display:none"></div>
-        <div style="display:flex;gap:6px;margin-top:6px">
-          <button class="btn btn-sm" id="vidSaveBtn${i}" onclick="downloadVideo(S.vidUrls[${i}],'cut${i+1}_video.mp4')" style="flex:1;display:none">저장</button>
-          <button class="btn btn-sm" onclick="document.getElementById('vidLoadInput${i}').click()" title="이전에 저장한 컷${i+1} 영상 불러오기" style="flex:1">불러오기</button>
+        <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+          <button class="btn btn-sm" id="vidSaveBtn${i}" onclick="downloadVideo(S.vidUrls[${i}],'cut${i+1}_video.mp4')" style="flex:1;display:none">💾 로컬</button>
+          <button class="btn btn-sm" onclick="saveVideoToCloud(${i})" title="클라우드 저장" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">☁️ 클라우드</button>
+          <button class="btn btn-sm" onclick="openVideoPicker(${i})" title="저장한 영상 불러오기" style="flex:1">불러오기</button>
           <input type="file" id="vidLoadInput${i}" accept="video/*" style="display:none" onchange="loadCutVideoFromFile(event, ${i})">
         </div>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 
+  // 이미 생성된 영상 복원 — vidUrls에 저장된 영상이 있으면 플레이어에 다시 주입
+  for (let idx = 0; idx < 4; idx++) {
+    const url = S.vidUrls?.[idx];
+    if (!url) continue;
+    const player = document.getElementById(`vidPlayer${idx}`);
+    const saveBtn = document.getElementById(`vidSaveBtn${idx}`);
+    const status = document.getElementById(`vidStatus${idx}`);
+    if (player) {
+      player.src = url;
+      player.style.display = 'block';
+    }
+    if (saveBtn) saveBtn.style.display = 'inline-flex';
+    if (status) {
+      status.textContent = '✅ 생성 완료!';
+      status.style.color = 'var(--green)';
+    }
+  }
+
+  // 각 컷의 대사 글자 수 카운터 초기화
+  for (let idx = 0; idx < 4; idx++) {
+    if (typeof updateScriptCounter === 'function') updateScriptCounter(idx);
+  }
 }
 
 async function generateCutVideo(i) {
@@ -3269,6 +4003,34 @@ async function generateCutVideo(i) {
   }
   const script = document.getElementById(`vidScript${i}`)?.value.trim() || '';
   const speaker = document.getElementById(`vidSpeaker${i}`)?.value || '';
+  const emotion = document.getElementById(`vidEmotion${i}`)?.value || '';
+
+  // 대사 글자 수 체크 (초당 4글자)
+  if (script) {
+    const maxChars = dur * 4;
+    if (script.length > maxChars) {
+      const proceed = confirm(`⚠️ 대사가 권장 길이를 초과합니다.\n\n현재: ${script.length}자\n최대: ${maxChars}자 (${dur}초 × 4)\n\n음성이 끊기거나 발음이 부자연스러울 수 있습니다. 계속할까요?`);
+      if (!proceed) return;
+    }
+  }
+
+  // 감정 영어 지시문 매핑
+  const emotionMap = {
+    angry: 'angry expression, furrowed brow, intense gaze',
+    shouting: 'shouting loudly, mouth wide open, intense emotion',
+    sad: 'sad expression, downcast eyes, melancholic mood',
+    crying: 'crying with tears, emotional breakdown',
+    calm: 'calm peaceful expression, serene mood',
+    happy: 'happy smiling expression, joyful mood',
+    excited: 'excited energetic expression, bright eyes, enthusiastic',
+    funny: 'comedic playful expression, light-hearted mood',
+    surprised: 'surprised expression, wide eyes, shocked',
+    scared: 'fearful expression, tense, anxious mood',
+    shy: 'shy bashful expression, blushing, timid',
+    longing: 'longing wistful expression, yearning gaze',
+    serious: 'serious focused expression, contemplative',
+    romantic: 'romantic tender expression, loving gaze',
+  };
 
   // Kling v3 15초 체크
   if (model.includes('v3') && dur > 15) {
@@ -3289,8 +4051,15 @@ async function generateCutVideo(i) {
 
   try {
     let finalPrompt = prompt;
+
+    // 감정 지시문 추가 (대사보다 먼저 추가 — 일반 자세/표정을 명시)
+    if (emotion && emotionMap[emotion]) {
+      finalPrompt += ` ${emotionMap[emotion]}.`;
+      log('info', `감정: ${emotion}`);
+    }
+
     if (script) {
-      // 화자별로 영어 지시문 + 한국어 대사 따옴표로 분리 (압축)
+      // 화자별로 영어 지시문 + 한국어 대사 따올표로 분리 (압축)
       let speakerLabel = '';
       if (speaker === 'woman') {
         speakerLabel = 'Woman speaks Korean line, lips visible';
@@ -3320,10 +4089,12 @@ async function generateCutVideo(i) {
         multi_prompt: [{
           prompt: finalPrompt,
           duration: String(dur),
+          negative_prompt: KLING_NEGATIVE_PROMPT,
         }],
         start_image_url: imgUrl,
         aspect_ratio: getVideoAspectRatio(),
         generate_audio: audio,
+        negative_prompt: KLING_NEGATIVE_PROMPT,
       };
     } else {
       // 기타: prompt 단수 + image_url + duration
@@ -3332,6 +4103,7 @@ async function generateCutVideo(i) {
         image_url: imgUrl,
         duration: String(dur),
         aspect_ratio: getVideoAspectRatio(),
+        negative_prompt: KLING_NEGATIVE_PROMPT,
       };
     }
 
@@ -3354,6 +4126,7 @@ async function generateCutVideo(i) {
     if (!videoUrl) throw new Error('영상 URL 없음: ' + JSON.stringify(d).slice(0,200));
 
     S.vidUrls[i] = videoUrl;
+    if (typeof saveSession === 'function') saveSession();
 
     const player = document.getElementById(`vidPlayer${i}`);
     player.src = videoUrl;
@@ -3540,18 +4313,891 @@ ${prompt}`;
   return url;
 }
 
-async function uploadToFalStorage(key, blob, filename) {
-  const r = await fetch('https://fal.run/fal-ai/storage/upload/initiate', {
+async function uploadToFalStorage(key, blob, filename, contentTypeOverride) {
+  const ct = contentTypeOverride || blob.type || 'image/jpeg';
+  // 워커 프록시 사용 (rest.fal.ai 의 올바른 storage initiate 호출)
+  // base64 인코딩 → 워커 /fal-upload 에 POST → 워커가 initiate + PUT 공서
+  const arrayBuffer = await blob.arrayBuffer();
+  const bytes = new Uint8Array(arrayBuffer);
+  let binary = '';
+  const chunkSize = 8192;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+  }
+  const base64 = btoa(binary);
+  const r = await fetch('/fal-upload', {
     method: 'POST',
     headers: { 'Authorization': 'Key ' + key, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ file_name: filename, content_type: blob.type || 'image/jpeg' }),
+    body: JSON.stringify({ base64, fileName: filename, contentType: ct }),
   });
-  if (!r.ok) throw new Error('storage initiate 실패: ' + r.status);
-  const { upload_url, file_url } = await r.json();
-  const up = await fetch(upload_url, { method: 'PUT', body: blob, headers: { 'Content-Type': blob.type || 'image/jpeg' } });
-  if (!up.ok) throw new Error('storage PUT 실패: ' + up.status);
-  return file_url;
+  if (!r.ok) {
+    const errText = await r.text();
+    throw new Error('fal-upload 실패 ' + r.status + ': ' + errText.slice(0, 200));
+  }
+  const { url } = await r.json();
+  return url;
 }
+
+// ============================================================
+//  KorartAssets — Supabase 기반 자산 저장/조회/삭제 모듈
+// ============================================================
+const KorartAssets = {
+  STORAGE_BUCKET: 'korart-assets',
+
+  // 자산 업로드 — URL 또는 dataURL을 Supabase Storage에 저장
+  // params: { type, title, sourceUrl?, sourceBlob?, thumbnail?, metadata, fileExt }
+  async upload(params) {
+    if (!sb || !currentUser) {
+      throw new Error('로그인이 필요합니다');
+    }
+    const { type, title, sourceUrl, sourceBlob, thumbnailUrl, metadata = {}, fileExt = 'bin' } = params;
+    const userId = currentUser.id;
+    const ts = Date.now();
+
+    let mainBlob = sourceBlob;
+    let mainPath = null;
+    let mainPublicUrl = null;
+    let fileSize = 0;
+
+    // 1) sourceUrl이 있으면 fetch해서 blob으로
+    if (sourceUrl && !sourceBlob) {
+      log('info', `[Assets] 자산 다운로드: ${sourceUrl.slice(0, 60)}...`);
+      const r = await fetch(sourceUrl);
+      if (!r.ok) throw new Error(`원본 fetch 실패: ${r.status}`);
+      mainBlob = await r.blob();
+    }
+
+    // 2) 매인 파일이 있으면 storage에 업로드
+    if (mainBlob) {
+      mainPath = `${userId}/${type}/${ts}.${fileExt}`;
+      fileSize = mainBlob.size;
+      log('info', `[Assets] storage 업로드: ${mainPath} (${(fileSize/1024).toFixed(1)}KB)`);
+      const { error: upErr } = await sb.storage.from(this.STORAGE_BUCKET).upload(mainPath, mainBlob, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: mainBlob.type || 'application/octet-stream',
+      });
+      if (upErr) throw new Error('Storage 업로드 실패: ' + upErr.message);
+      const { data: pub } = sb.storage.from(this.STORAGE_BUCKET).getPublicUrl(mainPath);
+      mainPublicUrl = pub.publicUrl;
+    }
+
+    // 3) 썸네일이 다르면 따로 업로드 (dataURL도 지원)
+    let thumbPath = null;
+    let thumbPublicUrl = null;
+    if (thumbnailUrl && thumbnailUrl !== mainPublicUrl) {
+      try {
+        let thumbBlob;
+        if (thumbnailUrl.startsWith('data:')) {
+          // dataURL → blob
+          const r = await fetch(thumbnailUrl);
+          thumbBlob = await r.blob();
+        } else {
+          const r = await fetch(thumbnailUrl);
+          thumbBlob = await r.blob();
+        }
+        const thumbExt = (thumbBlob.type.split('/')[1] || 'jpg').split(';')[0];
+        thumbPath = `${userId}/${type}/thumb_${ts}.${thumbExt}`;
+        const { error: thErr } = await sb.storage.from(this.STORAGE_BUCKET).upload(thumbPath, thumbBlob, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: thumbBlob.type || 'image/jpeg',
+        });
+        if (!thErr) {
+          const { data: pub2 } = sb.storage.from(this.STORAGE_BUCKET).getPublicUrl(thumbPath);
+          thumbPublicUrl = pub2.publicUrl;
+        }
+      } catch (e) {
+        log('warn', '[Assets] 썸네일 업로드 실패 (무시): ' + e.message);
+      }
+    }
+
+    // 4) DB에 메타데이터 insert
+    const insertRow = {
+      user_id: userId,
+      asset_type: type,
+      title: title || `${type}_${new Date().toLocaleString('ko-KR')}`,
+      thumbnail_url: thumbPublicUrl || mainPublicUrl,
+      asset_url: mainPublicUrl,
+      storage_path: mainPath,
+      metadata,
+      file_size: fileSize,
+    };
+    const { data: row, error: dbErr } = await sb
+      .from('user_assets')
+      .insert(insertRow)
+      .select()
+      .single();
+    if (dbErr) {
+      // 업로드 성공했으나 DB insert 실패 — storage 정리
+      if (mainPath) await sb.storage.from(this.STORAGE_BUCKET).remove([mainPath]).catch(()=>{});
+      if (thumbPath) await sb.storage.from(this.STORAGE_BUCKET).remove([thumbPath]).catch(()=>{});
+      throw new Error('DB 저장 실패: ' + dbErr.message);
+    }
+    log('ok', `[Assets] 저장 완료 (id: ${row.id})`);
+    return row;
+  },
+
+  // 세션처럼 파일 없이 메타데이터만 저장
+  async saveSceneSettings(title, metadata) {
+    if (!sb || !currentUser) throw new Error('로그인이 필요합니다');
+    const { data: row, error } = await sb.from('user_assets').insert({
+      user_id: currentUser.id,
+      asset_type: 'scene',
+      title: title || `씬 ${new Date().toLocaleString('ko-KR')}`,
+      metadata,
+      file_size: 0,
+    }).select().single();
+    if (error) throw new Error('씬 저장 실패: ' + error.message);
+    return row;
+  },
+
+  // 타입별 리스트 조회
+  async list(type, limit = 50) {
+    if (!sb || !currentUser) throw new Error('로그인이 필요합니다');
+    const { data, error } = await sb
+      .from('user_assets')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .eq('asset_type', type)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    if (error) throw new Error('리스트 조회 실패: ' + error.message);
+    return data || [];
+  },
+
+  // 자산 삭제 (파일 + DB row)
+  async delete(assetId) {
+    if (!sb || !currentUser) throw new Error('로그인이 필요합니다');
+    // 1. row 조회
+    const { data: row, error: selErr } = await sb
+      .from('user_assets').select('*').eq('id', assetId).single();
+    if (selErr) throw new Error('자산 조회 실패: ' + selErr.message);
+    // 2. storage 파일 삭제
+    const pathsToDelete = [];
+    if (row.storage_path) pathsToDelete.push(row.storage_path);
+    if (pathsToDelete.length) {
+      await sb.storage.from(this.STORAGE_BUCKET).remove(pathsToDelete).catch(e => {
+        log('warn', '[Assets] 파일 삭제 오류 (무시): ' + e.message);
+      });
+    }
+    // 3. DB row 삭제
+    const { error: delErr } = await sb.from('user_assets').delete().eq('id', assetId);
+    if (delErr) throw new Error('DB 삭제 실패: ' + delErr.message);
+    log('ok', `[Assets] 삭제 완료 (id: ${assetId})`);
+    return true;
+  },
+};
+window.KorartAssets = KorartAssets;
+
+// ============================================================
+//  자산 픽어모달 — 저장 리스트 + "로컬에서 추가" 버튼
+// ============================================================
+let _assetPickerState = {
+  type: null,
+  onSelect: null,
+  onLocalAdd: null,
+};
+
+async function openAssetPicker(type, onSelect, onLocalAdd) {
+  if (!currentUser) {
+    toast('❌ 로그인이 필요합니다');
+    return;
+  }
+  _assetPickerState = { type, onSelect, onLocalAdd };
+
+  // 모달 렌더
+  let modal = document.getElementById('assetPickerModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'assetPickerModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto';
+    modal.innerHTML = `
+      <div style="background:var(--bg2);border:1px solid var(--line2);border-radius:14px;width:100%;max-width:680px;padding:24px;position:relative;margin:auto">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+          <div>
+            <div style="font-size:11px;color:var(--pink);letter-spacing:2px;font-weight:700;text-transform:uppercase" id="assetPickerCat">ASSETS</div>
+            <div style="font-size:20px;font-weight:800;color:var(--cream);margin-top:4px" id="assetPickerTitle">내 저장 목록</div>
+          </div>
+          <button onclick="closeAssetPicker()" style="background:none;border:none;color:var(--ink3);font-size:22px;cursor:pointer;padding:4px 10px">닫기</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <button class="btn btn-sm btn-primary" onclick="_assetPickerLocalAdd()" id="assetPickerLocalBtn">📁 로컬에서 추가하기</button>
+          <div style="flex:1"></div>
+          <button class="btn btn-sm" onclick="_assetPickerRefresh()">새로고침</button>
+        </div>
+        <div id="assetPickerGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;min-height:200px;max-height:60vh;overflow-y:auto"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modal.onclick = (e) => { if (e.target === modal) closeAssetPicker(); };
+  }
+  modal.style.display = 'flex';
+
+  // 제목 설정
+  const titles = {
+    avatar: { cat: 'AVATAR', title: '저장된 아바타' },
+    cuts4: { cat: '4-CUT', title: '저장된 4컷' },
+    video: { cat: 'VIDEO', title: '저장된 영상' },
+    scene: { cat: 'SCENE', title: '저장된 씬 설정' },
+    merged_video: { cat: 'MERGED', title: '저장된 통합 영상' },
+  };
+  const t = titles[type] || { cat: 'ASSET', title: '저장된 자산' };
+  document.getElementById('assetPickerCat').textContent = t.cat;
+  document.getElementById('assetPickerTitle').textContent = t.title;
+  document.getElementById('assetPickerLocalBtn').style.display = onLocalAdd ? 'inline-flex' : 'none';
+
+  await _assetPickerRefresh();
+}
+
+async function _assetPickerRefresh() {
+  const grid = document.getElementById('assetPickerGrid');
+  const type = _assetPickerState.type;
+  if (!grid || !type) return;
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink3)">불러오는 중...</div>';
+  try {
+    const list = await KorartAssets.list(type);
+    if (list.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink3);font-size:12px">저장된 항목이 없습니다</div>';
+      return;
+    }
+    grid.innerHTML = list.map(item => {
+      const date = new Date(item.created_at).toLocaleDateString('ko-KR');
+      const sizeKb = item.file_size ? `${(item.file_size/1024).toFixed(0)}KB` : '';
+      const isVideo = type === 'video' || type === 'merged_video';
+      const thumb = item.thumbnail_url || (isVideo ? '' : item.asset_url) || '';
+      const previewHtml = thumb
+        ? `<img src="${thumb}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px;background:#0a0a0c">`
+        : (isVideo
+          ? `<div style="width:100%;aspect-ratio:16/9;background:var(--bg4);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:32px">🎬</div>`
+          : `<div style="width:100%;aspect-ratio:16/9;background:var(--bg4);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:32px">📄</div>`);
+      return `
+        <div class="asset-card" data-id="${item.id}" style="background:var(--bg3);border:1px solid var(--line);border-radius:8px;padding:8px;cursor:pointer;transition:.15s;position:relative" onmouseover="this.style.borderColor='var(--pink)'" onmouseout="this.style.borderColor='var(--line)'">
+          ${previewHtml}
+          <div style="font-size:11px;font-weight:700;color:var(--cream);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(item.title || '제목 없음')}</div>
+          <div style="font-size:9px;color:var(--ink3);margin-top:2px">${date} ${sizeKb}</div>
+          <div style="display:flex;gap:4px;margin-top:8px">
+            <button class="btn btn-sm btn-primary" style="flex:1;font-size:10px;padding:4px 6px" onclick="event.stopPropagation();_assetPickerSelect('${item.id}')">불러오기</button>
+            <button class="btn btn-sm btn-red" style="font-size:10px;padding:4px 8px" onclick="event.stopPropagation();_assetPickerDelete('${item.id}', this)" title="삭제">삭제</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (e) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--red);font-size:12px">오류: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function _assetPickerSelect(id) {
+  try {
+    const list = await KorartAssets.list(_assetPickerState.type);
+    const item = list.find(x => x.id === id);
+    if (!item) { toast('항목을 찾을 수 없습니다'); return; }
+    if (_assetPickerState.onSelect) {
+      await _assetPickerState.onSelect(item);
+    }
+    closeAssetPicker();
+  } catch (e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+async function _assetPickerDelete(id, btnEl) {
+  if (!confirm('이 항목을 삭제할까요? (되돌릴 수 없습니다)')) return;
+  try {
+    btnEl.textContent = '...';
+    btnEl.disabled = true;
+    await KorartAssets.delete(id);
+    toast('🗑️ 삭제됨');
+    await _assetPickerRefresh();
+  } catch (e) {
+    toast('❌ ' + e.message);
+    btnEl.textContent = '삭제';
+    btnEl.disabled = false;
+  }
+}
+
+function _assetPickerLocalAdd() {
+  if (_assetPickerState.onLocalAdd) {
+    _assetPickerState.onLocalAdd();
+  }
+  closeAssetPicker();
+}
+
+function closeAssetPicker() {
+  const modal = document.getElementById('assetPickerModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[c]);
+}
+
+// ============================================================
+//  각 타입별 저장 헬퍼 — 해당 버튼에 onclick으로 연결
+// ============================================================
+async function saveAvatarToCloud(av) {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  if (!av) { toast('❌ 아바타 정보 없음'); return; }
+  try {
+    toast('☁️ 클라우드 업로드 중...');
+    await KorartAssets.upload({
+      type: 'avatar',
+      title: av.name,
+      sourceUrl: av.imgUrl,
+      thumbnailUrl: av.imgUrl,
+      metadata: {
+        name: av.name, gender: av.gender, age: av.age, body: av.body,
+        hair: av.hair, style: av.style, extra: av.extra, imgUrl: av.imgUrl,
+      },
+      fileExt: 'png',
+    });
+    toast(`✅ "${av.name}" 클라우드 저장됨`);
+  } catch (e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+async function saveCuts4ToCloud() {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  if (!S.cutDataUrls || !S.cutDataUrls.some(Boolean)) { toast('❌ 저장할 4컷이 없습니다'); return; }
+  const title = prompt('4컷 제목 (선택):', `4컷 ${new Date().toLocaleDateString('ko-KR')}`);
+  if (title === null) return;
+  try {
+    toast('☁️ 업로드 중...');
+    // 그리드 이미지 생성 (캠버스)
+    const gridBlob = await _make4CutGridBlob();
+    await KorartAssets.upload({
+      type: 'cuts4',
+      title: title || `4컷 ${new Date().toLocaleString('ko-KR')}`,
+      sourceBlob: gridBlob,
+      metadata: {
+        cuts: S.cutDataUrls.filter(Boolean),
+        cutPubUrls: S.cutPubUrls || [],
+        ratio: S.ratio,
+        scene: S.scene,
+        prompts: S.cutPrompts || [],
+      },
+      fileExt: 'jpg',
+    });
+    toast('✅ 4컷 클라우드 저장됨');
+  } catch (e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+async function saveVideoToCloud(idx) {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  const url = S.vidUrls?.[idx];
+  if (!url) { toast('❌ 저장할 영상이 없습니다'); return; }
+  try {
+    toast('☁️ 업로드 중... (수십초 소요)');
+    await KorartAssets.upload({
+      type: 'video',
+      title: `컷 ${idx + 1} 영상 — ${new Date().toLocaleString('ko-KR')}`,
+      sourceUrl: url,
+      thumbnailUrl: S.cutDataUrls?.[idx] || null,
+      metadata: {
+        cutIndex: idx,
+        prompt: S.cutPrompts?.[idx] || '',
+        ratio: S.ratio,
+      },
+      fileExt: 'mp4',
+    });
+    toast('✅ 영상 클라우드 저장됨');
+  } catch (e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+async function saveMergedVideoToCloud() {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  if (!_mergedVideoUrl) { toast('❌ 저장할 통합 영상이 없습니다'); return; }
+  const title = prompt('통합 영상 제목 (선택):', `통합 영상 ${new Date().toLocaleDateString('ko-KR')}`);
+  if (title === null) return;
+  try {
+    toast('☁️ 업로드 중...');
+    await KorartAssets.upload({
+      type: 'merged_video',
+      title: title || `통합 영상 ${new Date().toLocaleString('ko-KR')}`,
+      sourceUrl: _mergedVideoUrl,
+      thumbnailUrl: S.cutDataUrls?.[0] || null,
+      metadata: {
+        sourceCount: (S.vidUrls || []).filter(Boolean).length,
+        ratio: S.ratio,
+      },
+      fileExt: 'mp4',
+    });
+    toast('✅ 통합 영상 클라우드 저장됨');
+  } catch (e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+async function saveSceneToCloud() {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  const title = prompt('씬 설정 제목:', `씬 ${new Date().toLocaleDateString('ko-KR')}`);
+  if (title === null) return;
+  try {
+    await KorartAssets.saveSceneSettings(title || '씬 설정', {
+      scene: S.scene,
+      season: S.season,
+      timeofday: S.timeofday,
+      weather: S.weather,
+      location: S.location,
+      locCustom: S.locCustom,
+      vehicle: S.vehicle,
+      personCount: S.personCount,
+      passerby: S.passerby,
+      passerbyDensity: S.passerbyDensity,
+      angles: S.angles,
+      cutDescriptions: S.cutDescriptions,
+      extraPrompt: document.getElementById('extraPrompt')?.value || '',
+    });
+    toast(`✅ 씬 설정 "${title}" 저장됨`);
+  } catch (e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+// =================================================================
+//  나만의 씬 분위기 만들기 (3단계) — 독자적인 씬 분위기 생성
+// =================================================================
+function openMyCustomSceneModal() {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  let modal = document.getElementById('myCustomSceneModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'myCustomSceneModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:30px 20px;overflow-y:auto';
+    modal.onclick = (e) => { if (e.target === modal) closeMyCustomSceneModal(); };
+    modal.innerHTML = `
+      <div style="background:var(--bg2);border:1px solid var(--line2);border-radius:14px;width:100%;max-width:640px;padding:24px;margin:auto">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+          <div>
+            <div style="font-size:11px;color:var(--pink);letter-spacing:2px;font-weight:700;text-transform:uppercase">CUSTOM SCENE</div>
+            <div style="font-size:20px;font-weight:800;color:var(--cream);margin-top:4px">나만의 씬 분위기 만들기</div>
+          </div>
+          <button onclick="closeMyCustomSceneModal()" style="background:none;border:none;color:var(--ink3);font-size:22px;cursor:pointer;padding:4px 10px">닫기</button>
+        </div>
+
+        <div style="font-size:11px;color:var(--ink3);margin-bottom:18px;line-height:1.6">
+          원하는 씬 분위기를 직접 만들고 클라우드에 저장해두세요. 저장한 씬은 일반 씬과 동일하게 사용할 수 있습니다.
+        </div>
+
+        <div style="margin-bottom:14px">
+          <label style="display:block;font-size:11px;color:var(--ink2);margin-bottom:5px;font-weight:700">씬 이름 (한국어 권장)</label>
+          <input id="customSceneName" placeholder="예: 도시 룩터, 명산수설, 고양이 카페" maxlength="20" style="width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:6px;padding:8px 10px;color:var(--ink);font-size:13px">
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+            <label style="font-size:11px;color:var(--ink2);font-weight:700;margin:0">씬 프롬프트 (영어 권장)</label>
+            <span id="customSceneStyleCounter" style="font-size:9px;color:var(--ink3);font-weight:600">0 / 200자</span>
+          </div>
+          <textarea id="customSceneStyle" oninput="updateCustomSceneStyleCounter()" maxlength="200" rows="3" placeholder="예: bright neon city night lighting, vibrant cyberpunk colors, cinematic urban aesthetic" style="width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:6px;padding:8px 10px;color:var(--ink);font-size:12px;font-family:inherit;line-height:1.5;resize:vertical"></textarea>
+          <div style="font-size:9px;color:var(--ink3);margin-top:3px;line-height:1.5">소프트·조명·컬러·분위기 등을 영어 키워드로 설명하세요. 권장: 80~150자.</div>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <label style="display:block;font-size:11px;color:var(--ink2);margin-bottom:6px;font-weight:700">이 씬의 추천 앵글 4개</label>
+          <div id="customSceneAnglesGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:6px"></div>
+          <div style="font-size:9px;color:var(--ink3);line-height:1.5">각 컷을 클릭하여 앵글을 선택하세요. (4개 모두 선택 필요)</div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:18px">
+          <button class="btn" onclick="closeMyCustomSceneModal()" style="flex:1">취소</button>
+          <button class="btn btn-primary" onclick="saveMyCustomSceneToCloud()" style="flex:2">+ 클라우드에 저장</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+  S._customSceneAngles = ['','','',''];
+  renderCustomSceneAnglesGrid();
+  document.getElementById('customSceneName').value = '';
+  document.getElementById('customSceneStyle').value = '';
+  updateCustomSceneStyleCounter();
+  modal.style.display = 'flex';
+}
+
+function closeMyCustomSceneModal() {
+  const modal = document.getElementById('myCustomSceneModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function updateCustomSceneStyleCounter() {
+  const el = document.getElementById('customSceneStyle');
+  const counter = document.getElementById('customSceneStyleCounter');
+  if (!el || !counter) return;
+  const len = el.value.length;
+  counter.textContent = `${len} / 200자`;
+  counter.style.color = len > 180 ? 'var(--gold)' : 'var(--ink3)';
+}
+
+function renderCustomSceneAnglesGrid() {
+  const grid = document.getElementById('customSceneAnglesGrid');
+  if (!grid) return;
+  const colors = ['var(--gold)','var(--blue)','var(--green)','var(--red)'];
+  let html = '';
+  for (let i = 0; i < 4; i++) {
+    const angle = S._customSceneAngles[i] || '';
+    html += `
+      <div onclick="openCustomSceneAnglePicker(${i})" style="cursor:pointer;padding:10px 6px;border-radius:6px;border:1.5px solid ${angle ? colors[i] : 'var(--line)'};background:${angle ? 'rgba(94,234,212,.06)' : 'var(--bg3)'};text-align:center;transition:.15s">
+        <div style="font-size:10px;font-weight:800;color:${colors[i]};letter-spacing:1px">CUT ${i+1}</div>
+        <div style="font-size:9px;font-weight:700;color:var(--cream);margin-top:4px;line-height:1.2">${angle ? escHtml(angle) : '클릭하여 선택'}</div>
+      </div>
+    `;
+  }
+  grid.innerHTML = html;
+}
+
+let _customSceneAnglePickerIdx = -1;
+function openCustomSceneAnglePicker(idx) {
+  _customSceneAnglePickerIdx = idx;
+  // 장세한 anglePickerModal 재사용 — 우선 body로 이동 (panel 에 가려있는 문제 해결)
+  let modal = document.getElementById('anglePickerModal');
+  if (!modal) {
+    console.error('[CustomScene] anglePickerModal not found');
+    return;
+  }
+  // body 이동 (panel 안에 있으면 panel1 활성화 시 안 보입)
+  if (modal.parentElement && modal.parentElement.tagName !== 'BODY') {
+    document.body.appendChild(modal);
+  }
+  const colors = ['var(--gold)','var(--blue)','var(--green)','var(--red)'];
+  const lbl = document.getElementById('anglePickerCutLabel');
+  if (lbl) {
+    lbl.textContent = `CUSTOM CUT ${idx + 1}`;
+    lbl.style.color = colors[idx];
+  }
+  const list = document.getElementById('anglePickerModalList');
+  if (!list) return;
+  let html = '';
+  if (Array.isArray(ANGLE_CATS)) {
+    ANGLE_CATS.forEach(cat => {
+      const catName = cat.cat || cat.name || '';
+      const items = cat.items || cat.angles || [];
+      html += `<div style="margin-bottom:14px"><div style="font-size:10px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">${escHtml(catName)}</div>`;
+      items.forEach(item => {
+        const angle = (typeof item === 'string') ? item : (item.label || '');
+        if (!angle) return;
+        const meta = ANGLE_DESCRIPTIONS[angle] || {};
+        const ko = meta.ko || '';
+        const isSelected = S._customSceneAngles[idx] === angle;
+        const safe = angle.replace(/'/g, "\\'");
+        html += `<div onclick="selectCustomSceneAngle('${safe}')" style="padding:8px 12px;border-radius:6px;border:1px solid ${isSelected?colors[idx]:'var(--line)'};background:${isSelected?'var(--bg4)':'var(--bg3)'};margin-bottom:5px;cursor:pointer">
+          <div style="font-size:12px;font-weight:700;color:var(--cream)">${escHtml(angle)}</div>
+          <div style="font-size:10px;color:var(--ink2);margin-top:2px">${escHtml(ko)}</div>
+        </div>`;
+      });
+      html += '</div>';
+    });
+  }
+  list.innerHTML = html;
+  modal.style.display = 'flex';
+}
+
+function selectCustomSceneAngle(angle) {
+  if (_customSceneAnglePickerIdx < 0) return;
+  S._customSceneAngles[_customSceneAnglePickerIdx] = angle;
+  renderCustomSceneAnglesGrid();
+  closeAnglePickerModal();
+  _customSceneAnglePickerIdx = -1;
+}
+
+async function saveMyCustomSceneToCloud() {
+  const name = document.getElementById('customSceneName').value.trim();
+  const style = document.getElementById('customSceneStyle').value.trim();
+  if (!name) { toast('❌ 씬 이름을 입력해주세요'); return; }
+  if (!style) { toast('❌ 씬 프롬프트를 입력해주세요'); return; }
+  if (style.length > 200) { toast('❌ 프롬프트는 200자 이내'); return; }
+  if (S._customSceneAngles.some(a => !a)) { toast('❌ 4개 앵글을 모두 선택해주세요'); return; }
+  try {
+    if (!sb || !currentUser) throw new Error('로그인이 필요합니다');
+    const { error } = await sb.from('user_assets').insert({
+      user_id: currentUser.id,
+      asset_type: 'custom_scene',
+      title: name,
+      metadata: {
+        name,
+        style,
+        angles: S._customSceneAngles.slice(),
+      },
+      file_size: 0,
+    });
+    if (error) throw new Error(error.message);
+    toast(`✅ "${name}" 나만의 씬 저장됨`);
+    closeMyCustomSceneModal();
+    renderScenes();
+  } catch (e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+// =================================================================
+//  씬 상세 클라우드 저장/불러오기 (4단계)
+// =================================================================
+async function saveSceneDetailToCloud() {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  const defaultTitle = `씬 상세 ${new Date().toLocaleString('ko-KR')}`;
+  const title = prompt('씬 상세 설정 제목:', defaultTitle);
+  if (title === null) return;
+  try {
+    await KorartAssets.saveSceneSettings(title || defaultTitle, {
+      scene: S.scene,
+      season: S.season,
+      timeofday: S.timeofday,
+      weather: S.weather,
+      location: S.location,
+      locCustom: S.locCustom,
+      vehicle: S.vehicle,
+      personCount: S.personCount,
+      passerby: S.passerby,
+      passerbyDensity: S.passerbyDensity,
+      angles: S.angles,
+      cutDescriptions: S.cutDescriptions,
+      extraPrompt: document.getElementById('extraPrompt')?.value || '',
+    });
+    toast(`✅ 씬 상세 "${title || defaultTitle}" 저장됨`);
+  } catch (e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+function openSceneDetailPicker() {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  openAssetPicker('scene', async (item) => {
+    const md = item.metadata || {};
+    if (md.scene) S.scene = md.scene;
+    if (md.season) S.season = md.season;
+    if (md.timeofday) S.timeofday = md.timeofday;
+    if (md.weather) S.weather = md.weather;
+    if (md.location) S.location = md.location;
+    if (md.locCustom !== undefined) S.locCustom = md.locCustom;
+    if (md.vehicle) S.vehicle = md.vehicle;
+    if (md.personCount !== undefined) S.personCount = md.personCount;
+    if (md.passerby !== undefined) S.passerby = md.passerby;
+    if (md.passerbyDensity) S.passerbyDensity = md.passerbyDensity;
+    if (Array.isArray(md.angles)) S.angles = md.angles;
+    if (Array.isArray(md.cutDescriptions) && md.cutDescriptions.length === 4) {
+      S.cutDescriptions = md.cutDescriptions.slice();
+    }
+    const ep = document.getElementById('extraPrompt');
+    if (ep && md.extraPrompt !== undefined) ep.value = md.extraPrompt;
+    if (typeof renderScenes === 'function') renderScenes();
+    if (typeof renderAngleSlots === 'function') renderAngleSlots();
+    if (typeof updatePromptPreview === 'function') updatePromptPreview();
+    toast(`✅ 씬 상세 "${item.title}" 불러옴`);
+  }, null);
+}
+
+// 4컷 그리드 이미지 생성 (저장용 jpg)
+async function _make4CutGridBlob() {
+  const cuts = (S.cutDataUrls || []).filter(Boolean);
+  if (cuts.length === 0) throw new Error('4컷 이미지 없음');
+  // 철번째 이미지 크기 기준
+  const img0 = await new Promise((res, rej) => {
+    const im = new Image();
+    im.onload = () => res(im);
+    im.onerror = rej;
+    im.src = cuts[0];
+  });
+  const w = img0.naturalWidth, h = img0.naturalHeight;
+  const canvas = document.createElement('canvas');
+  canvas.width = w * 2;
+  canvas.height = h * 2;
+  const ctx = canvas.getContext('2d');
+  for (let i = 0; i < 4 && i < cuts.length; i++) {
+    if (!cuts[i]) continue;
+    const im = await new Promise((res, rej) => {
+      const x = new Image();
+      x.onload = () => res(x);
+      x.onerror = rej;
+      x.src = cuts[i];
+    });
+    const x = (i % 2) * w;
+    const y = Math.floor(i / 2) * h;
+    ctx.drawImage(im, x, y, w, h);
+  }
+  return await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.85));
+}
+
+// ============================================================
+//  각 타입별 픽어 함수 — 불러오기 버튼 클릭 시 호출
+// ============================================================
+function openAvatarPicker() {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  openAssetPicker('avatar', async (item) => {
+    // 메타데이터로 로컬 아바타 라이브러리에 추가
+    const md = item.metadata || {};
+    const lib = loadAvatarLib();
+    const av = {
+      id: Date.now(),
+      name: md.name || item.title,
+      gender: md.gender || '',
+      age: md.age || '',
+      body: md.body || '',
+      hair: md.hair || '',
+      style: md.style || '',
+      extra: md.extra || '',
+      imgUrl: item.asset_url || md.imgUrl || '',
+    };
+    // 이름 중복 처리
+    const dup = lib.findIndex(a => a.name === av.name);
+    if (dup !== -1) {
+      if (!confirm(`"${av.name}" 이름이 이미 로컬에 있습니다. 덮어쓸까요?`)) return;
+      av.id = lib[dup].id;
+      lib[dup] = av;
+    } else {
+      lib.push(av);
+    }
+    saveAvatarLib(lib);
+    renderSavedAvatars();
+    toast(`✅ "${av.name}" 로컬로 불러옴`);
+  }, null);  // 아바타는 로컬 추가 버튼 따로 있으므로 null
+}
+
+function openCuts4Picker() {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  openAssetPicker('cuts4', async (item) => {
+    // 클라우드 4컷 로드 → 그리드 이미지를 4개로 쪼개기
+    const url = item.asset_url;
+    if (!url) { toast('❌ 이미지 URL 없음'); return; }
+    try {
+      // 메타에 개별 cuts 배열이 있으면 그걸 우선 사용
+      const md = item.metadata || {};
+      if (Array.isArray(md.cuts) && md.cuts.length === 4) {
+        S.cutDataUrls = md.cuts.slice();
+        S.cutPubUrls = md.cutPubUrls || ['','','',''];
+        S.cutApproval = [true, true, true, true];
+        S.scene = md.scene || S.scene;
+        S.ratio = md.ratio || S.ratio;
+        renderQuad();
+        toast('✅ 4컷 불러온');
+        return;
+      }
+      // 그리드 이미지를 쪼개기
+      const img = await new Promise((res, rej) => {
+        const x = new Image();
+        x.crossOrigin = 'anonymous';
+        x.onload = () => res(x);
+        x.onerror = rej;
+        x.src = url;
+      });
+      const w = img.naturalWidth / 2, h = img.naturalHeight / 2;
+      const dataUrls = [];
+      for (let i = 0; i < 4; i++) {
+        const cv = document.createElement('canvas');
+        cv.width = w; cv.height = h;
+        const ctx = cv.getContext('2d');
+        const sx = (i % 2) * w, sy = Math.floor(i / 2) * h;
+        ctx.drawImage(img, sx, sy, w, h, 0, 0, w, h);
+        dataUrls.push(cv.toDataURL('image/jpeg', 0.9));
+      }
+      S.cutDataUrls = dataUrls;
+      S.cutPubUrls = ['','','',''];
+      S.cutApproval = [true, true, true, true];
+      renderQuad();
+      toast('✅ 4컷 불러온 (그리드 이미지에서 자동 쪼개)');
+    } catch (e) {
+      toast('❌ 불러오기 실패: ' + e.message);
+    }
+  }, () => {
+    // "로컬에서 추가" 버튼
+    document.getElementById('quadLoadInput').click();
+  });
+}
+
+function openScenePicker() {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  // 'custom_scene' 자산 타입에서 클라우드 씬 분위기 찾아 로드
+  openAssetPicker('custom_scene', async (item) => {
+    const md = item.metadata || {};
+    if (!md.style || !Array.isArray(md.angles)) { toast('❌ 잘못된 씬 설정'); return; }
+    // SCENES에 임시 등록 (custom_<id> 키로)
+    const customKey = `custom_${item.id}`;
+    SCENES[customKey] = { name: md.name || item.title, style: md.style, angles: md.angles.slice() };
+    S.scene = customKey;
+    S.angles = md.angles.slice();
+    if (typeof renderScenes === 'function') renderScenes();
+    if (typeof renderAngleSlots === 'function') renderAngleSlots();
+    if (typeof updatePromptPreview === 'function') updatePromptPreview();
+    toast(`✅ "${md.name || item.title}" 나만의 씬 불러옴`);
+    return;
+    // (이하 기존 코드 — 도달 X)
+    // S에 씬 설정 적용
+    if (md.scene) S.scene = md.scene;
+    if (md.season) S.season = md.season;
+    if (md.timeofday) S.timeofday = md.timeofday;
+    if (md.weather) S.weather = md.weather;
+    if (md.location) S.location = md.location;
+    if (md.locCustom !== undefined) S.locCustom = md.locCustom;
+    if (md.vehicle) S.vehicle = md.vehicle;
+    if (md.personCount !== undefined) S.personCount = md.personCount;
+    if (md.passerby !== undefined) S.passerby = md.passerby;
+    if (md.passerbyDensity) S.passerbyDensity = md.passerbyDensity;
+    if (Array.isArray(md.angles)) S.angles = md.angles;
+    if (Array.isArray(md.cutDescriptions) && md.cutDescriptions.length === 4) {
+      S.cutDescriptions = md.cutDescriptions.slice();
+    }
+    const ep = document.getElementById('extraPrompt');
+    if (ep && md.extraPrompt !== undefined) ep.value = md.extraPrompt;
+    // UI 재렌더
+    if (typeof renderScenes === 'function') renderScenes();
+    if (typeof renderAngleSlots === 'function') renderAngleSlots();
+    if (typeof updatePromptPreview === 'function') updatePromptPreview();
+    toast(`✅ 씬 설정 "${item.title}" 불러옴`);
+  }, null);
+}
+
+function openVideoPicker(idx) {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  openAssetPicker('video', async (item) => {
+    const url = item.asset_url;
+    if (!url) { toast('❌ 영상 URL 없음'); return; }
+    S.vidUrls[idx] = url;
+    // 영상 카드 UI 업데이트
+    const player = document.getElementById(`vidPlayer${idx}`);
+    const saveBtn = document.getElementById(`vidSaveBtn${idx}`);
+    if (player) {
+      player.src = url;
+      player.style.display = 'block';
+    }
+    if (saveBtn) saveBtn.style.display = 'inline-flex';
+    if (typeof updateMergeBtn === 'function') updateMergeBtn();
+    toast(`✅ 컷 ${idx + 1} 영상 불러온`);
+  }, () => {
+    document.getElementById(`vidLoadInput${idx}`).click();
+  });
+}
+
+function openMergedVideoPicker() {
+  if (!currentUser) { toast('❌ 로그인 필요'); return; }
+  openAssetPicker('merged_video', async (item) => {
+    const url = item.asset_url;
+    if (!url) { toast('❌ 영상 URL 없음'); return; }
+    _mergedVideoUrl = url;
+    _mergedVideoSize = item.file_size || 0;
+    const resultEl = document.getElementById('mergeResult');
+    if (resultEl) {
+      resultEl.innerHTML = `
+        <video controls src="${url}" style="width:100%;border-radius:6px;display:block;margin-bottom:8px"></video>
+        <button class="btn btn-primary btn-full" onclick="downloadMergedVideo()">통합 영상 저장</button>
+      `;
+    }
+    const statusEl = document.getElementById('mergeStatus');
+    if (statusEl) {
+      statusEl.textContent = `✅ 클라우드에서 불러온 — ${item.title}`;
+      statusEl.style.color = 'var(--green)';
+    }
+    toast(`✅ 통합 영상 "${item.title}" 불러온`);
+  }, null);
+}
+
 
 function downloadVideo(url, filename) {
   const a = document.createElement('a');
@@ -3574,27 +5220,10 @@ renderRatioGrid();
 document.getElementById('extraPrompt')?.addEventListener('input', updatePromptPreview);
 document.getElementById('locCustomInput')?.addEventListener('input', updatePromptPreview);
 
-// ==================== 영상 통합 (ffmpeg concat copy 방식) ====================
+// ==================== 영상 통합 (fal-ai/ffmpeg-api/merge-videos 서버 처리) ====================
 
-let _ffmpegInst = null;
-let _mergedBlob = null;
-
-// FFmpeg 인스턴스 로드 (최소 1회)
-async function _loadFFmpeg() {
-  if (_ffmpegInst) return _ffmpegInst;
-  if (!window.FFmpegWASM) {
-    throw new Error('FFmpeg 라이브러리가 로드되지 않았습니다');
-  }
-  const { FFmpeg } = window.FFmpegWASM;
-  const ff = new FFmpeg();
-  ff.on('log', ({ message }) => console.log('[ffmpeg]', message));
-  await ff.load({
-    coreURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.4/dist/umd/ffmpeg-core.js',
-    wasmURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.4/dist/umd/ffmpeg-core.wasm',
-  });
-  _ffmpegInst = ff;
-  return ff;
-}
+let _mergedVideoUrl = null;  // fal CDN 될 통합 영상 URL
+let _mergedVideoSize = 0;
 
 // 영상 통합 버튼 활성화 여부 업데이트
 function updateMergeBtn() {
@@ -3609,11 +5238,27 @@ function updateMergeBtn() {
   }
 }
 
-// 영상 통합 메인 함수 (concat copy 방식 — 재인코딩 X, 5~15초 소요)
+// blob URL을 fal storage에 업로드하고 CDN URL 반환
+async function _uploadVideoBlobToFal(falKey, blobUrl, idx) {
+  // blob URL → Blob 객체
+  const resp = await fetch(blobUrl);
+  const blob = await resp.blob();
+  // uploadToFalStorage 는 image용이지만 contentType만 올바르면 video도 동작
+  const filename = `merge_input_${idx}_${Date.now()}.mp4`;
+  return await uploadToFalStorage(falKey, blob, filename, 'video/mp4');
+}
+
+// 영상 통합 메인 함수 (fal.ai 서버의 ffmpeg API 사용 — 5~10초 소요)
 async function mergeVideos() {
   const validClips = (S.vidUrls || []).filter(Boolean);
   if (validClips.length < 2) {
     toast('2개 이상의 컷 영상이 필요합니다');
+    return;
+  }
+
+  const falKey = document.getElementById('falKey')?.value.trim();
+  if (!falKey) {
+    toast('❌ fal.ai API 키를 입력해주세요');
     return;
   }
 
@@ -3626,62 +5271,122 @@ async function mergeVideos() {
   btn.innerHTML = '<div class="spin"></div> 처리 중...';
 
   try {
-    statusEl.textContent = 'FFmpeg 로딩 중...';
-    log('info', '영상 통합 시작 (concat copy 방식)');
+    const t0 = performance.now();
+    log('info', `영상 통합 시작 (fal-ai/ffmpeg-api, ${validClips.length}개 클립)`);
 
-    const ff = await _loadFFmpeg();
-    const { fetchFile } = window.FFmpegWASM;
-
-    // 각 영상 파일 쓰기
-    const inputFiles = [];
+    // 1단계: blob URL은 fal storage에 업로드, https URL은 그대로 사용
+    const videoUrls = [];
     for (let i = 0; i < validClips.length; i++) {
-      statusEl.textContent = `영상 ${i + 1}/${validClips.length} 다운로드 중...`;
-      const data = await fetchFile(validClips[i]);
-      const filename = `in${i}.mp4`;
-      await ff.writeFile(filename, data);
-      inputFiles.push(filename);
-      log('info', `${filename} 쓰기 완료 (${(data.byteLength/1024/1024).toFixed(2)}MB)`);
+      const url = validClips[i];
+      if (url.startsWith('blob:')) {
+        statusEl.textContent = `로컬 영상 ${i + 1}/${validClips.length} fal에 업로드 중...`;
+        log('info', `영상 ${i+1} blob → fal storage 업로드 중`);
+        const cdnUrl = await _uploadVideoBlobToFal(falKey, url, i);
+        videoUrls.push(cdnUrl);
+        log('ok', `영상 ${i+1} 업로드 완료: ${cdnUrl.slice(0, 60)}`);
+      } else if (url.startsWith('http')) {
+        videoUrls.push(url);
+        log('info', `영상 ${i+1} fal CDN URL 그대로 사용`);
+      } else {
+        throw new Error(`영상 ${i+1}: 알 수 없는 URL 형식 (${url.slice(0, 30)}...)`);
+      }
     }
 
-    // concat list 생성
-    const concatList = inputFiles.map(f => `file '${f}'`).join('\n');
-    await ff.writeFile('concat.txt', concatList);
+    const t1 = performance.now();
+    log('info', `입력 URL 준비 완료 (${((t1-t0)/1000).toFixed(1)}초)`);
 
-    statusEl.textContent = '영상 이어붙이는 중...';
-    log('info', 'concat 실행 중...');
+    // 2단계: fal-ai/ffmpeg-api/merge-videos 호출
+    statusEl.textContent = '서버에서 영상 통합 중...';
+    log('info', 'fal-ai/ffmpeg-api/merge-videos POST 요청');
 
-    // 재인코딩 없이 빠르게 합치기
-    await ff.exec([
-      '-f', 'concat',
-      '-safe', '0',
-      '-i', 'concat.txt',
-      '-c', 'copy',
-      'merged.mp4'
-    ]);
+    const submitRes = await fetch('https://queue.fal.run/fal-ai/ffmpeg-api/merge-videos', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Key ${falKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        video_urls: videoUrls,
+      }),
+    });
 
-    statusEl.textContent = '결과 읽기 중...';
-    const outData = await ff.readFile('merged.mp4');
-    _mergedBlob = new Blob([outData.buffer], { type: 'video/mp4' });
-    const blobUrl = URL.createObjectURL(_mergedBlob);
+    if (!submitRes.ok) {
+      const errText = await submitRes.text();
+      throw new Error(`fal API 오류 ${submitRes.status}: ${errText.slice(0, 200)}`);
+    }
+
+    const submitData = await submitRes.json();
+    log('info', `submit 응답: ${JSON.stringify(submitData).slice(0, 200)}`);
+
+    // queue 방식 — status_url을 polling
+    const statusUrl = submitData.status_url;
+    const responseUrl = submitData.response_url;
+    if (!statusUrl || !responseUrl) {
+      throw new Error('fal queue 응답에 status_url/response_url 없음');
+    }
+
+    // 3단계: 완료될 때까지 polling (최대 60초)
+    let attempts = 0;
+    const maxAttempts = 30;  // 2초마다 체크, 최대 60초
+    while (attempts < maxAttempts) {
+      await new Promise(r => setTimeout(r, 2000));
+      attempts++;
+      statusEl.textContent = `서버 처리 중... (${attempts * 2}초 경과)`;
+
+      const statusRes = await fetch(statusUrl, {
+        headers: { 'Authorization': `Key ${falKey}` },
+      });
+      if (!statusRes.ok) {
+        log('warn', `status 체크 오류 ${statusRes.status}`);
+        continue;
+      }
+      const statusData = await statusRes.json();
+      log('info', `status: ${statusData.status} (시도 ${attempts})`);
+
+      if (statusData.status === 'COMPLETED') break;
+      if (statusData.status === 'FAILED' || statusData.status === 'ERROR') {
+        throw new Error(`fal 처리 실패: ${JSON.stringify(statusData).slice(0, 200)}`);
+      }
+    }
+    if (attempts >= maxAttempts) {
+      throw new Error('서버 응답 시간 초과 (60초)');
+    }
+
+    // 4단계: 결과 받기
+    const resultRes = await fetch(responseUrl, {
+      headers: { 'Authorization': `Key ${falKey}` },
+    });
+    if (!resultRes.ok) {
+      throw new Error(`결과 조회 오류 ${resultRes.status}`);
+    }
+    const resultData = await resultRes.json();
+    log('info', `result: ${JSON.stringify(resultData).slice(0, 300)}`);
+
+    // 응답 스샼마: { video: { url: 'https://...', file_size, content_type } }
+    const mergedUrl = resultData.video?.url || resultData.url;
+    const mergedSize = resultData.video?.file_size || 0;
+    if (!mergedUrl) {
+      throw new Error(`응답에 영상 URL 없음: ${JSON.stringify(resultData).slice(0, 200)}`);
+    }
+
+    _mergedVideoUrl = mergedUrl;
+    _mergedVideoSize = mergedSize;
+
+    const t2 = performance.now();
+    const totalSec = ((t2-t0)/1000).toFixed(1);
+    const sizeMB = mergedSize ? (mergedSize/1024/1024).toFixed(2) : '?';
 
     // 결과 표시
     if (resultEl) {
       resultEl.innerHTML = `
-        <video controls src="${blobUrl}" style="width:100%;border-radius:6px;display:block;margin-bottom:8px"></video>
+        <video controls src="${mergedUrl}" style="width:100%;border-radius:6px;display:block;margin-bottom:8px"></video>
         <button class="btn btn-primary btn-full" onclick="downloadMergedVideo()">통합 영상 저장</button>
       `;
     }
-    statusEl.textContent = `✅ 완료 — ${(outData.byteLength/1024/1024).toFixed(2)}MB`;
+    statusEl.textContent = `✅ 완료 — ${sizeMB}MB (${totalSec}초)`;
     statusEl.style.color = 'var(--green)';
-    log('ok', `영상 통합 완료 (${validClips.length}개 → 1개)`);
+    log('ok', `영상 통합 완료 (${validClips.length}개 → 1개, ${totalSec}초)`);
     toast('✅ 영상 통합 완료!');
-
-    // 이전 임시 파일 정리
-    try {
-      for (const f of inputFiles) await ff.deleteFile(f);
-      await ff.deleteFile('concat.txt');
-      await ff.deleteFile('merged.mp4');
-    } catch(e) { /* ignore */ }
 
   } catch (e) {
     console.error('[mergeVideos]', e);
@@ -3696,17 +5401,28 @@ async function mergeVideos() {
   }
 }
 
-function downloadMergedVideo() {
-  if (!_mergedBlob) { toast('저장할 영상이 없습니다'); return; }
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(_mergedBlob);
-  a.download = 'korart_merged_' + Date.now() + '.mp4';
-  a.click();
-  log('info', '통합 영상 다운로드');
+async function downloadMergedVideo() {
+  if (!_mergedVideoUrl) { toast('저장할 영상이 없습니다'); return; }
+  try {
+    // CDN URL 에서 파일 받아서 다운로드 (사용자 PC에 저장)
+    const r = await fetch(_mergedVideoUrl);
+    const blob = await r.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'korart_merged_' + Date.now() + '.mp4';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    log('info', '통합 영상 다운로드 완료');
+  } catch(e) {
+    log('err', '다운로드 실패: ' + e.message);
+    // 폴백: 새 탭 열기
+    window.open(_mergedVideoUrl, '_blank');
+  }
 }
 
 function resetMerge() {
-  _mergedBlob = null;
+  _mergedVideoUrl = null;
+  _mergedVideoSize = 0;
   const resultEl = document.getElementById('mergeResult');
   if (resultEl) resultEl.innerHTML = '';
   const statusEl = document.getElementById('mergeStatus');
@@ -3716,5 +5432,18 @@ function resetMerge() {
 }
 
 </script>
+
+<!-- 아바타 컷별 출연 선택 팝업 -->
+<div id="avatarCutPickerModal" onclick="if(event.target===this)cancelAvatarCutPicker()" style="position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:9999">
+  <div style="background:var(--bg2);border:1px solid var(--line2);border-radius:12px;padding:20px;width:300px;max-width:90vw">
+    <div style="font-size:13px;font-weight:800;color:var(--cream);margin-bottom:14px" id="avatarCutPickerName">출연 컷 선택</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px" id="avatarCutPickerGrid"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-sm btn-ghost" onclick="selectAllAvatarCuts()" style="flex:1">전체선택</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmAvatarCuts()" style="flex:2">완료</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
