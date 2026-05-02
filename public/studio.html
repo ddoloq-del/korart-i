@@ -6775,15 +6775,32 @@ function getQuadCssAspect() {
 async function callFalImage(key, model, prompt, size) {
   const [w, h] = size.split('x').map(Number);
   const isGpt = model.includes('gpt-image');
-  // 사용자가 선택한 quality 가져오기 (low/medium/high)
+  const isFluxUltra = model.includes('flux-pro/v1.1-ultra');
+  const isFlux = model.includes('flux');
+
+  // 사용자가 선택한 quality 가져오기 (GPT Image 2: low/medium/high)
   let qualityVal = 'medium';
   if (isGpt) {
     const sel = document.getElementById('imgModel');
     qualityVal = sel?.options[sel.selectedIndex]?.dataset?.quality || 'medium';
   }
-  const body = isGpt
-    ? { prompt, image_size: { width: w, height: h }, quality: qualityVal, output_format: 'png' }
-    : { prompt, image_size: { width: w, height: h }, num_inference_steps: 28, guidance_scale: 3.5 };
+
+  // 비율 매핑 (Flux 모델용 aspect_ratio 문자열)
+  const ratio = (w === h) ? '1:1' : (w > h) ? '16:9' : '9:16';
+
+  let body;
+  if (isGpt) {
+    // GPT Image 2: image_size (w, h) — 3:1 cap, 16의 배수, 655K-8.3M pixels
+    body = { prompt, image_size: { width: w, height: h }, quality: qualityVal, output_format: 'png' };
+  } else if (isFluxUltra) {
+    // Flux Pro Ultra: aspect_ratio 문자열 (공식 권장)
+    body = { prompt, aspect_ratio: ratio, output_format: 'jpeg', safety_tolerance: '5' };
+  } else if (isFlux) {
+    // Flux Pro / Schnell: image_size (w, h)
+    body = { prompt, image_size: { width: w, height: h }, num_inference_steps: 28, guidance_scale: 3.5 };
+  } else {
+    body = { prompt, image_size: { width: w, height: h }, num_inference_steps: 28, guidance_scale: 3.5 };
+  }
 
   const r = await fetch('/fal-sync/' + model, {
     method: 'POST',
