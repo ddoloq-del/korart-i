@@ -6200,19 +6200,119 @@ const IMG_MODELS = [
 ];
 
 const VID_MODELS = [
-  { value: 'fal-ai/veo3.1/lite/image-to-video',             cpsOff: 0.03,  cpsOn: 0.05,  resolution: '720p',  label: 'Veo 3.1 Lite 720p',         sub: '$0.03~0.05/초 · 가성비 · 사운드 옵션' },
-  { value: 'fal-ai/veo3.1/lite/image-to-video',             cpsOff: 0.05,  cpsOn: 0.08,  resolution: '1080p', label: 'Veo 3.1 Lite 1080p',        sub: '$0.05~0.08/초 · 가성비 HD · 사운드 옵션' },
-  { value: 'fal-ai/kling-video/v1.6/standard/image-to-video', cpsOff: 0.056, cpsOn: 0.056, resolution: '720p',  label: 'Kling 1.6 Standard 720p',   sub: '$0.056/초 · 저렴 · 오디오 없음' },
-  { value: 'fal-ai/kling-video/v2.6/pro/image-to-video',    cpsOff: 0.07,  cpsOn: 0.14,  resolution: '1080p', label: 'Kling 2.6 Pro 1080p',       sub: '$0.07~0.14/초 · 균형 · 사운드 옵션' },
-  { value: 'fal-ai/kling-video/v3/standard/image-to-video', cpsOff: 0.084, cpsOn: 0.126, resolution: '1080p', label: 'Kling 3.0 Standard 1080p',  sub: '$0.084~0.126/초 · 권장 가성비', recommended: true },
-  { value: 'fal-ai/kling-video/v3/pro/image-to-video',      cpsOff: 0.112, cpsOn: 0.168, resolution: '1080p', label: 'Kling 3.0 Pro 1080p',       sub: '$0.112~0.168/초 · 최고 화질' },
-  { value: 'fal-ai/veo3.1/fast/image-to-video',             cpsOff: 0.10,  cpsOn: 0.15,  resolution: '1080p', label: 'Veo 3.1 Fast 1080p',        sub: '$0.10~0.15/초 · 빠름 · 사운드 옵션' },
-  { value: 'alibaba/happy-horse/image-to-video',            cpsOff: 0.14,  cpsOn: 0.14,  resolution: '720p',  label: 'HappyHorse 720p',           sub: '$0.14/초 · Arena 1위' },
-  { value: 'fal-ai/veo3.1/image-to-video',                  cpsOff: 0.20,  cpsOn: 0.40,  resolution: '1080p', label: 'Veo 3.1 Standard 1080p',    sub: '$0.20~0.40/초 · 구글 최고급 · 사운드 옵션' },
-  { value: 'bytedance/seedance-2.0/fast/image-to-video',    cpsOff: 0.2419, cpsOn: 0.2419, resolution: '720p', label: 'Seedance 2.0 Fast 720p',    sub: '$0.2419/초 · ByteDance · 사운드 포함' },
-  { value: 'alibaba/happy-horse/image-to-video',            cpsOff: 0.28,  cpsOn: 0.28,  resolution: '1080p', label: 'HappyHorse 1080p',          sub: '$0.28/초 · Arena 1위 · HD' },
-  { value: 'bytedance/seedance-2.0/image-to-video',         cpsOff: 0.3024, cpsOn: 0.3024, resolution: '720p', label: 'Seedance 2.0 Standard 720p', sub: '$0.3024/초 · ByteDance 최고급' },
+  {
+    value: 'fal-ai/veo3.1/lite/image-to-video',
+    label: 'Veo 3.1 Lite',
+    sub: '구글 가성비 · 사운드 옵션',
+    durations: [4, 6, 8],
+    resolutions: [
+      { key: '720p',  label: '720p',  cpsOff: 0.03, cpsOn: 0.05, audioFixed: false, audioIncluded: true },
+      { key: '1080p', label: '1080p', cpsOff: 0.05, cpsOn: 0.08, audioFixed: false, audioIncluded: true },
+    ],
+  },
+  {
+    value: 'fal-ai/kling-video/v1.6/standard/image-to-video',
+    label: 'Kling 1.6 Standard',
+    sub: '저렴 · 오디오 없음',
+    durations: [5, 10],
+    resolutions: [
+      { key: '720p',  label: '720p',  cpsOff: 0.056, cpsOn: 0.056, audioFixed: true, audioIncluded: false },
+    ],
+  },
+  {
+    value: 'fal-ai/kling-video/v2.6/pro/image-to-video',
+    label: 'Kling 2.6 Pro',
+    sub: '균형 · 사운드 옵션',
+    durations: [5, 10],
+    resolutions: [
+      { key: '1080p', label: '1080p', cpsOff: 0.07, cpsOn: 0.14, audioFixed: false, audioIncluded: true },
+    ],
+  },
+  {
+    value: 'fal-ai/kling-video/v3/standard/image-to-video',
+    label: 'Kling 3.0 Standard',
+    sub: '권장 · 가성비 · 1초 단위',
+    recommended: true,
+    durations: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+    resolutions: [
+      { key: '1080p', label: '1080p', cpsOff: 0.084, cpsOn: 0.126, audioFixed: false, audioIncluded: true },
+    ],
+  },
+  {
+    value: 'fal-ai/kling-video/v3/pro/image-to-video',
+    label: 'Kling 3.0 Pro',
+    sub: '최고 화질 · 1초 단위',
+    durations: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+    resolutions: [
+      { key: '1080p', label: '1080p', cpsOff: 0.112, cpsOn: 0.168, audioFixed: false, audioIncluded: true },
+    ],
+  },
+  {
+    value: 'fal-ai/veo3.1/fast/image-to-video',
+    label: 'Veo 3.1 Fast',
+    sub: '빠름 · 사운드 옵션',
+    durations: [4, 6, 8],
+    resolutions: [
+      { key: '720p',  label: '720p',  cpsOff: 0.10, cpsOn: 0.15, audioFixed: false, audioIncluded: true },
+      { key: '1080p', label: '1080p', cpsOff: 0.10, cpsOn: 0.15, audioFixed: false, audioIncluded: true },
+    ],
+  },
+  {
+    value: 'alibaba/happy-horse/image-to-video',
+    label: 'HappyHorse',
+    sub: 'Arena 1위 · 립싱크',
+    durations: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+    resolutions: [
+      { key: '720p',  label: '720p',  cpsOff: 0.14, cpsOn: 0.14, audioFixed: true, audioIncluded: true },
+      { key: '1080p', label: '1080p', cpsOff: 0.28, cpsOn: 0.28, audioFixed: true, audioIncluded: true },
+    ],
+  },
+  {
+    value: 'fal-ai/veo3.1/image-to-video',
+    label: 'Veo 3.1 Standard',
+    sub: '구글 최고급 · 사운드 옵션',
+    durations: [4, 6, 8],
+    resolutions: [
+      { key: '720p',  label: '720p',  cpsOff: 0.20, cpsOn: 0.40, audioFixed: false, audioIncluded: true },
+      { key: '1080p', label: '1080p', cpsOff: 0.20, cpsOn: 0.40, audioFixed: false, audioIncluded: true },
+    ],
+  },
+  {
+    value: 'bytedance/seedance-2.0/fast/image-to-video',
+    label: 'Seedance 2.0 Fast',
+    sub: 'ByteDance · 사운드 + 멀티샷',
+    durations: [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+    resolutions: [
+      { key: '720p',  label: '720p',  cpsOff: 0.2419, cpsOn: 0.2419, audioFixed: true, audioIncluded: true },
+    ],
+  },
+  {
+    value: 'bytedance/seedance-2.0/image-to-video',
+    label: 'Seedance 2.0 Standard',
+    sub: 'ByteDance 최고급',
+    durations: [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+    resolutions: [
+      { key: '720p',  label: '720p',  cpsOff: 0.3024, cpsOn: 0.3024, audioFixed: true, audioIncluded: true },
+      { key: '1080p', label: '1080p', cpsOff: 0.3024, cpsOn: 0.3024, audioFixed: true, audioIncluded: true },
+    ],
+  },
 ];
+
+// 가격 객체에 P값 자동 계산
+VID_MODELS.forEach(m => {
+  m.resolutions.forEach(r => {
+    r.pointsOff = Math.round(r.cpsOff * 42 * 10) / 10;
+    r.pointsOn  = Math.round(r.cpsOn  * 42 * 10) / 10;
+  });
+  // 모델 레벨 기본값 (첫 해상도 기준) — 호환성용
+  const r0 = m.resolutions[0];
+  m.cpsOff = r0.cpsOff;
+  m.cpsOn  = r0.cpsOn;
+  m.pointsOff = r0.pointsOff;
+  m.pointsOn  = r0.pointsOn;
+  m.minDur = m.durations[0];
+  m.maxDur = m.durations[m.durations.length - 1];
+});
 
 // 모델 선택 모달 — 사용자가 선택한 모델 정보 반환 (취소 시 null)
 function pickModel(kind) {
@@ -7422,6 +7522,14 @@ function renderVidCards() {
           <div id="vidModelSub${i}" style="font-size:9px;color:var(--ink3);margin-top:4px"></div>
         </div>
 
+        <!-- 1.5) 해상도 (모델 선택 후 표시) -->
+        <div id="vidResWrap${i}" style="display:none;margin-bottom:8px;padding:6px 8px;background:var(--bg3);border:1px solid var(--line);border-radius:0">
+          <label style="font-size:9px;color:var(--ink3);font-weight:700;letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:3px">해상도</label>
+          <select id="vidRes${i}" onchange="onVidResolutionChange(${i})" disabled style="width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:4px 6px;color:var(--ink);font-size:11px;font-family:inherit;cursor:pointer">
+            <option value="">-</option>
+          </select>
+        </div>
+
         <!-- 2) 시간 + 오디오 (모델에 따라 옵션 변화) -->
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
           <div style="display:inline-flex;align-items:center;gap:6px;padding:5px 8px;background:var(--bg3);border:1px solid var(--gold);border-radius:0">
@@ -7490,23 +7598,9 @@ function renderVidCards() {
 
 // vidModel select(전역, 숨겨진)에서 옵션 데이터 추출
 function getAllVidModels() {
-  const sel = document.getElementById('vidModel');
-  if (!sel) return [];
-  return Array.from(sel.options).map(opt => ({
-    value: opt.value,
-    label: opt.dataset.label || opt.textContent,
-    sub: opt.dataset.sub || '',
-    cpsOff: parseFloat(opt.dataset.cpsOff || 0),
-    cpsOn: parseFloat(opt.dataset.cpsOn || 0),
-    pointsOff: parseFloat(opt.dataset.pointsOff || 0),
-    pointsOn: parseFloat(opt.dataset.pointsOn || 0),
-    minDur: parseInt(opt.dataset.minDur || 5),
-    maxDur: parseInt(opt.dataset.maxDur || 10),
-    durations: (opt.dataset.durations || '').split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n)),
-    audioFixed: opt.dataset.audioFixed === 'true',
-    audioIncluded: opt.dataset.audioIncluded === 'true',
-    resolution: opt.dataset.resolution || '',
-  }));
+  // VID_MODELS 배열을 그대로 반환 (해상도 매트릭스 포함)
+  if (typeof VID_MODELS === 'undefined') return [];
+  return VID_MODELS;
 }
 
 // 카드별 모델 select option HTML 생성 (renderVidCards 안에서 호출)
@@ -7516,9 +7610,12 @@ function getVidModelOptions(i) {
   return list.map((m, idx) => {
     const key = m.value + '|' + m.label;
     const sel = (cur === key) ? 'selected' : '';
-    const audioTag = m.audioFixed && m.audioIncluded ? ' (오디오 포함)' :
-                     m.audioFixed && !m.audioIncluded ? ' (오디오 없음)' : '';
-    return '<option value="' + key + '" ' + sel + '>' + m.label + ' · ' + m.pointsOff + 'P/초' + audioTag + '</option>';
+    // 가격 범위 (off ~ on, 첫 해상도 기준)
+    const r = m.resolutions && m.resolutions[0];
+    const priceTag = r ? ((r.cpsOff !== r.cpsOn)
+      ? r.pointsOff + '~' + r.pointsOn + 'P/초'
+      : r.pointsOff + 'P/초') : (m.pointsOff + 'P/초');
+    return '<option value="' + key + '" ' + sel + '>' + m.label + ' · ' + priceTag + (m.recommended ? ' ⭐' : '') + '</option>';
   }).join('');
 }
 
@@ -7546,22 +7643,82 @@ function getSelectedVidModel(i) {
 }
 
 // 모델 변경 — duration 옵션 동적 채우기, 오디오 활성화/비활성, 첫값=최소duration
+// 카드별 해상도 옵션 HTML 생성
+function getVidResolutionOptions(i) {
+  const m = getSelectedVidModel(i);
+  if (!m || !m.resolutions || !m.resolutions.length) {
+    return '<option value="">-</option>';
+  }
+  const cur = (S.vidResolutions && S.vidResolutions[i]) || m.resolutions[0].key;
+  return m.resolutions.map(r => {
+    const sel = (cur === r.key) ? 'selected' : '';
+    const priceTag = (r.cpsOff !== r.cpsOn)
+      ? r.pointsOff + '~' + r.pointsOn + 'P/초'
+      : r.pointsOff + 'P/초';
+    return '<option value="' + r.key + '" ' + sel + '>' + r.label + ' · ' + priceTag + '</option>';
+  }).join('');
+}
+
+// 카드별 선택된 해상도 객체 반환
+function getSelectedVidResolution(i) {
+  const m = getSelectedVidModel(i);
+  if (!m) return null;
+  const key = (S.vidResolutions && S.vidResolutions[i]) || m.resolutions[0].key;
+  return m.resolutions.find(r => r.key === key) || m.resolutions[0];
+}
+
+// 해상도 변경 핸들러
+function onVidResolutionChange(i) {
+  const sel = document.getElementById('vidRes' + i);
+  if (!sel) return;
+  if (!S.vidResolutions) S.vidResolutions = ['', '', '', ''];
+  S.vidResolutions[i] = sel.value;
+
+  // 해상도 변경 시 오디오 옵션도 모델+해상도 조합에 따라 다시 결정
+  const m = getSelectedVidModel(i);
+  const r = getSelectedVidResolution(i);
+  const audioBox = document.getElementById('vidAudio' + i);
+  const audioLabel = document.getElementById('vidAudioLabel' + i);
+  const audioText = document.getElementById('vidAudioText' + i);
+  if (m && r && audioBox && audioLabel) {
+    if (r.audioFixed) {
+      audioBox.disabled = true;
+      audioBox.checked = !!r.audioIncluded;
+      audioLabel.style.opacity = '0.6';
+      audioLabel.style.cursor = 'not-allowed';
+      if (audioText) audioText.textContent = r.audioIncluded ? '오디오 포함 (고정)' : '오디오 없음 (고정)';
+    } else {
+      audioBox.disabled = false;
+      audioLabel.style.opacity = '1';
+      audioLabel.style.cursor = 'pointer';
+      if (audioText) audioText.textContent = '오디오';
+    }
+  }
+  updateVidCostEst(i);
+}
+
 function onVidModelChange(i) {
   const sel = document.getElementById('vidModelSel' + i);
   if (!sel) return;
   const key = sel.value;
   if (!S.vidModelSel) S.vidModelSel = ['', '', '', ''];
   S.vidModelSel[i] = key;
+  if (!S.vidResolutions) S.vidResolutions = ['', '', '', ''];
+  S.vidResolutions[i] = '';
 
   const m = getSelectedVidModel(i);
   const subEl = document.getElementById('vidModelSub' + i);
   const durSel = document.getElementById('vidDur' + i);
+  const resSel = document.getElementById('vidRes' + i);
+  const resWrap = document.getElementById('vidResWrap' + i);
   const audioBox = document.getElementById('vidAudio' + i);
   const audioLabel = document.getElementById('vidAudioLabel' + i);
 
   if (!m) {
-    if (subEl) subEl.textContent = '모델을 선택하면 시간과 오디오 옵션이 활성화됩니다';
+    if (subEl) subEl.textContent = '모델을 선택하면 해상도/시간/오디오 옵션이 활성화됩니다';
     if (durSel) { durSel.disabled = true; durSel.innerHTML = '<option value="">선택</option>'; }
+    if (resSel) { resSel.disabled = true; resSel.innerHTML = '<option value="">-</option>'; }
+    if (resWrap) resWrap.style.display = 'none';
     if (audioBox) { audioBox.disabled = true; audioBox.checked = false; }
     if (audioLabel) { audioLabel.style.opacity = '0.5'; audioLabel.style.cursor = 'not-allowed'; }
     updateVidCostEst(i);
@@ -7571,12 +7728,20 @@ function onVidModelChange(i) {
   // 모델 sub 표시
   if (subEl) {
     let info = m.sub;
-    if (m.resolution) info += ' · ' + m.resolution;
-    info += ' · ' + m.minDur + '\u201C-\u201D' + m.maxDur + '초';
+    info += ' · ' + m.minDur + '~' + m.maxDur + '초';
     subEl.textContent = info;
   }
 
-  // duration 옵션 채우기 (모델별 durations 리스트), 첫값 = 최소
+  // 해상도 옵션 채우기 (해상도 1개여도 select 표시 — 일관성)
+  if (resSel) {
+    resSel.disabled = false;
+    S.vidResolutions[i] = m.resolutions[0].key;
+    resSel.innerHTML = getVidResolutionOptions(i);
+    resSel.value = m.resolutions[0].key;
+  }
+  if (resWrap) resWrap.style.display = '';
+
+  // duration 옵션 채우기
   if (durSel) {
     durSel.disabled = false;
     const durList = (m.durations && m.durations.length) ? m.durations : [m.minDur, m.maxDur].filter(Boolean);
@@ -7586,13 +7751,24 @@ function onVidModelChange(i) {
     S.cutDurations[i] = durList[0];
   }
 
-  // 오디오는 모두 모델 고정 (fal API 단일가). UI에 뱃지로만 표시.
-  if (audioBox && audioLabel) {
+  // 오디오 — 첫 해상도 기준 결정
+  applyAudioStateForResolution(i, m.resolutions[0]);
+
+  if (typeof updateVidAudioLabel === 'function') updateVidAudioLabel(i);
+  updateVidCostEst(i);
+  if (typeof updateScriptCounter === 'function') updateScriptCounter(i);
+}
+
+// 해상도 객체에 따라 오디오 상태 적용 (모델 변경/해상도 변경 시 공통 사용)
+function applyAudioStateForResolution(i, r) {
+  const audioBox = document.getElementById('vidAudio' + i);
+  const audioLabel = document.getElementById('vidAudioLabel' + i);
+  if (!audioBox || !audioLabel || !r) return;
+  if (r.audioFixed) {
     audioBox.disabled = true;
-    audioBox.checked = m.audioIncluded;
-    S.cutAudio[i] = m.audioIncluded;
-    // 색상으로 차별화 — 포함이면 골드, 미포함이면 회색
-    if (m.audioIncluded) {
+    audioBox.checked = !!r.audioIncluded;
+    S.cutAudio[i] = !!r.audioIncluded;
+    if (r.audioIncluded) {
       audioLabel.style.opacity = '1';
       audioLabel.style.borderColor = 'var(--gold)';
       audioLabel.style.background = 'rgba(200,160,74,.10)';
@@ -7602,12 +7778,25 @@ function onVidModelChange(i) {
       audioLabel.style.background = 'var(--bg3)';
     }
     audioLabel.style.cursor = 'not-allowed';
+  } else {
+    audioBox.disabled = false;
+    audioLabel.style.opacity = '1';
+    audioLabel.style.borderColor = 'var(--gold)';
+    audioLabel.style.background = 'rgba(200,160,74,.10)';
+    audioLabel.style.cursor = 'pointer';
   }
+}
 
-  // 오디오 라벨 텍스트 갱신 (+N P 표시)
-  updateVidAudioLabel(i);
+// 해상도 변경 핸들러
+function onVidResolutionChange(i) {
+  const sel = document.getElementById('vidRes' + i);
+  if (!sel) return;
+  if (!S.vidResolutions) S.vidResolutions = ['', '', '', ''];
+  S.vidResolutions[i] = sel.value;
+  const r = getSelectedVidResolution(i);
+  applyAudioStateForResolution(i, r);
+  if (typeof updateVidAudioLabel === 'function') updateVidAudioLabel(i);
   updateVidCostEst(i);
-  if (typeof updateScriptCounter === 'function') updateScriptCounter(i);
 }
 
 // 오디오 라벨 텍스트 갱신 — 토글 가능하면 '오디오 (+N P/초)', 고정이면 '오디오 포함' 또는 '오디오 없음'
@@ -7637,13 +7826,14 @@ function onVidAudioChange(i) {
 function calcVidPoints(i) {
   const m = getSelectedVidModel(i);
   if (!m) return { points: 0, cps: 0, dur: 0, audio: false };
+  const r = getSelectedVidResolution(i);
+  if (!r) return { points: 0, cps: 0, dur: 0, audio: false };
   const dur = parseInt(document.getElementById('vidDur' + i)?.value || S.cutDurations[i] || m.minDur);
-  const audio = m.audioFixed ? m.audioIncluded : !!(document.getElementById('vidAudio' + i)?.checked);
-  const pts = audio ? m.pointsOn : m.pointsOff;
-  const cps = audio ? m.cpsOn : m.cpsOff;
-  // 0.1 단위 반올림 (부동소수점 오차 방지)
+  const audio = r.audioFixed ? r.audioIncluded : !!(document.getElementById('vidAudio' + i)?.checked);
+  const pts = audio ? r.pointsOn : r.pointsOff;
+  const cps = audio ? r.cpsOn : r.cpsOff;
   const totalPts = Math.round(pts * dur * 10) / 10;
-  return { points: totalPts, cps, dur, audio, model: m };
+  return { points: totalPts, cps, dur, audio, model: m, resolution: r };
 }
 
 function updateVidCostEst(i) {
@@ -7862,9 +8052,9 @@ async function generateCutVideo(i) {
         aspect_ratio: getVideoAspectRatio(),
         negative_prompt: KLING_NEGATIVE_PROMPT,
       };
-      // 모델별 resolution 추가 (HappyHorse 720p/1080p 구분, Veo도 720p/1080p 지원)
-      const opt = (typeof getSelectedVidModelOption === 'function') ? getSelectedVidModelOption(i) : null;
-      const resolution = opt?.dataset?.resolution || (model.includes('happy-horse') ? '720p' : '');
+      // 모델별 resolution 추가 — S.vidResolutions[i]에서 가져옴 (해상도 select와 동기화)
+      const r = (typeof getSelectedVidResolution === 'function') ? getSelectedVidResolution(i) : null;
+      const resolution = (r && r.key) || '';
       if (resolution) body.resolution = resolution;
     }
 
@@ -9040,7 +9230,8 @@ function openMergedVideoPicker() {
         <button class="btn btn-primary btn-full" onclick="downloadMergedVideo()">통합 영상 저장</button>
       `;
     }
-    const statusEl = document.getElementById('mergeStatus');
+    const btn = document.getElementById('mergeBtn');
+  const statusEl = document.getElementById('mergeStatus');
     if (statusEl) {
       statusEl.textContent = `✅ 클라우드에서 불러온 — ${item.title}`;
       statusEl.style.color = 'var(--green)';
@@ -9090,13 +9281,13 @@ function updateMergeBtn() {
 }
 
 // blob URL을 fal storage에 업로드하고 CDN URL 반환
-async function _uploadVideoBlobToFal(falKey, blobUrl, idx) {
+async function _uploadVideoBlobToFal(blobUrl, idx) {
   // blob URL → Blob 객체
   const resp = await fetch(blobUrl);
   const blob = await resp.blob();
-  // uploadToFalStorage 는 image용이지만 contentType만 올바르면 video도 동작
+  // uploadToFalStorage는 내부에서 JWT를 가져오므로 첫 인자(key)는 무시됨
   const filename = `merge_input_${idx}_${Date.now()}.mp4`;
-  return await uploadToFalStorage(falKey, blob, filename, 'video/mp4');
+  return await uploadToFalStorage('', blob, filename, 'video/mp4');
 }
 
 // 영상 통합 메인 함수 (fal.ai 서버의 ffmpeg API 사용 — 5~10초 소요)
@@ -9107,7 +9298,6 @@ async function mergeVideos() {
     return;
   }
 
-  const falKey = document.getElementById('falKey')?.value.trim();
   const btn = document.getElementById('mergeBtn');
   const statusEl = document.getElementById('mergeStatus');
   const resultEl = document.getElementById('mergeResult');
@@ -9127,7 +9317,7 @@ async function mergeVideos() {
       if (url.startsWith('blob:')) {
         statusEl.textContent = `로컬 영상 ${i + 1}/${validClips.length} fal에 업로드 중...`;
         log('info', `영상 ${i+1} blob → fal storage 업로드 중`);
-        const cdnUrl = await _uploadVideoBlobToFal(falKey, url, i);
+        const cdnUrl = await _uploadVideoBlobToFal(url, i);
         videoUrls.push(cdnUrl);
         log('ok', `영상 ${i+1} 업로드 완료: ${cdnUrl.slice(0, 60)}`);
       } else if (url.startsWith('http')) {
@@ -9179,8 +9369,8 @@ async function mergeVideos() {
       attempts++;
       statusEl.textContent = `서버 처리 중... (${attempts * 2}초 경과)`;
 
-      const statusRes = await fetch(statusUrl, {
-        headers: { 'Authorization': `Key ${falKey}` },
+      const statusRes = await fetch('/fal-proxy-abs?url=' + encodeURIComponent(statusUrl), {
+        headers: { 'Authorization': 'Bearer ' + (await getSupabaseJWT()) },
       });
       if (!statusRes.ok) {
         log('warn', `status 체크 오류 ${statusRes.status}`);
@@ -9199,8 +9389,8 @@ async function mergeVideos() {
     }
 
     // 4단계: 결과 받기
-    const resultRes = await fetch(responseUrl, {
-      headers: { 'Authorization': `Key ${falKey}` },
+    const resultRes = await fetch('/fal-proxy-abs?url=' + encodeURIComponent(responseUrl), {
+      headers: { 'Authorization': 'Bearer ' + (await getSupabaseJWT()) },
     });
     if (!resultRes.ok) {
       throw new Error(`결과 조회 오류 ${resultRes.status}`);
@@ -9271,6 +9461,7 @@ function resetMerge() {
   _mergedVideoSize = 0;
   const resultEl = document.getElementById('mergeResult');
   if (resultEl) resultEl.innerHTML = '';
+  const btn = document.getElementById('mergeBtn');
   const statusEl = document.getElementById('mergeStatus');
   if (statusEl) { statusEl.textContent = ''; statusEl.style.color = ''; }
   log('info', '통합 결과 초기화');
