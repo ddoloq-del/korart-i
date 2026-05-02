@@ -6741,7 +6741,7 @@ async function callFalImage(key, model, prompt, size) {
     ? { prompt, image_size: { width: w, height: h }, quality: qualityVal, output_format: 'png' }
     : { prompt, image_size: { width: w, height: h }, num_inference_steps: 28, guidance_scale: 3.5 };
 
-  const r = await fetch('/fal-proxy/' + model, {
+  const r = await fetch('/fal-sync/' + model, {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + (await getSupabaseJWT()), 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -6849,7 +6849,7 @@ ${prompt}`;
   };
   log('info', `quality: ${userQuality}`);
 
-  const r = await fetch('/fal-proxy/openai/gpt-image-2/edit', {
+  const r = await fetch('/fal-sync/openai/gpt-image-2/edit', {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + (await getSupabaseJWT()), 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

@@ -324,7 +324,69 @@ export default {
       }
 
       // ─────────────────────────────────────────
-      // /fal-proxy/<endpoint_path>
+      // /fal-sync/<endpoint_path> — fal.run 직접 호출 (이미지 생성용, 즉시 응답)
+      // queue 패턴 안 쓰는 빠른 작업에 사용
+      // ─────────────────────────────────────────
+      if (url.pathname.startsWith('/fal-sync/')) {
+        const user = await getUserFromJWT(request, env);
+        if (!user) return j({ error: 'unauthorized' }, 401);
+
+        const falPath = url.pathname.replace('/fal-sync/', '');
+        const falUrl = 'https://fal.run/' + falPath + (url.search || '');
+
+        let chargeResult = null;
+        if (request.method === 'POST') {
+          const estPoints = parseInt(request.headers.get('X-Estimated-Points') || '0');
+          if (estPoints > 0) {
+            chargeResult = await chargePoints(env, user.id, estPoints, 'fal: ' + falPath, falPath, null, null);
+            if (!chargeResult.ok) {
+              if (chargeResult.error === 'insufficient_points') {
+                return j({
+                  error: 'insufficient_points',
+                  balance: chargeResult.balance,
+                  required: chargeResult.required,
+                }, 402);
+              }
+              return j({ error: chargeResult.error }, 500);
+            }
+          }
+        }
+
+        const proxyHeaders = new Headers();
+        proxyHeaders.set('Authorization', falAuthHeader(env));
+        const ct = request.headers.get('Content-Type');
+        if (ct) proxyHeaders.set('Content-Type', ct);
+
+        let falRes;
+        try {
+          falRes = await fetch(falUrl, {
+            method: request.method,
+            headers: proxyHeaders,
+            body: request.method !== 'GET' && request.method !== 'HEAD' ? request.body : undefined,
+          });
+        } catch (e) {
+          if (chargeResult && chargeResult.charged > 0) {
+            await refundPoints(env, user.id, chargeResult.charged, 'fal call failed: ' + falPath);
+          }
+          return j({ error: 'fal-sync fetch failed', detail: e.message }, 502);
+        }
+
+        if (!falRes.ok && chargeResult && chargeResult.charged > 0) {
+          await refundPoints(env, user.id, chargeResult.charged, 'fal error ' + falRes.status + ': ' + falPath);
+        }
+
+        const resHeaders = new Headers(corsHeaders);
+        resHeaders.set('Content-Type', falRes.headers.get('Content-Type') || 'application/json');
+        if (chargeResult) {
+          resHeaders.set('X-Points-Charged', String(chargeResult.charged));
+          resHeaders.set('X-Points-Remaining', String(chargeResult.remaining));
+          resHeaders.set('X-Unlimited', chargeResult.unlimited ? '1' : '0');
+        }
+        return new Response(falRes.body, { status: falRes.status, headers: resHeaders });
+      }
+
+      // ─────────────────────────────────────────
+      // /fal-proxy/<endpoint_path>      // /fal-proxy/<endpoint_path>
       // - X-Estimated-Points 헤더로 예상 포인트 받음
       // - JWT 검증 + 포인트 차감 + fal 호출
       // - 첫 POST에 차감, 이후 GET (폴링)은 그냥 패스
