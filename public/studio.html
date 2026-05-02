@@ -3989,8 +3989,6 @@ async function uploadAvatarImage(event) {
 }
 
 async function generateAvatarImage() {
-  const falKey = document.getElementById('falKey').value.trim();
-  if (!falKey) { toast('❌ fal.ai API 키를 입력해주세요'); return; }
 
   // 다각도 캐릭터 시트 — GPT Image 2 Medium 고정 (1536x1024, ~$0.10)
   const FIXED_MODEL = 'openai/gpt-image-2';
@@ -5665,8 +5663,6 @@ async function generateByMode() {
 
 // 1컷 단독 생성 — 선택한 컷의 앵글/묘사로 단일 이미지 생성
 async function generateOneCut() {
-  const falKey = document.getElementById('falKey').value.trim();
-  if (!falKey) { toast('❌ fal.ai API 키를 입력해주세요'); return; }
 
   const i = _oneCutIdx;
   if (!S.angles || !S.angles[i]) {
@@ -5854,8 +5850,6 @@ function renderQuadOneLoading(i) {
 }
 
 async function generateImage() {
-  const falKey = document.getElementById('falKey').value.trim();
-  if (!falKey) { toast('❌ fal.ai API 키를 입력해주세요'); return; }
 
   // 이미지 모델 인라인 선택
   const picked = await pickModel('img');
@@ -6038,8 +6032,6 @@ async function goToStep3() {
   if (!approved.length) { toast('❌ 승인된 컷이 없습니다'); return; }
 
   // CDN 업로드 (영상 생성에 필요)
-  const falKey = document.getElementById('falKey').value.trim();
-  if (!falKey) { toast('❌ fal.ai API 키를 입력해주세요'); return; }
 
   toast('⏳ 컷 이미지 업로드 중...');
   for (const i of approved) {
@@ -6473,8 +6465,6 @@ function refreshAllVidCosts() {
 
 
 async function generateCutVideo(i) {
-  const falKey = document.getElementById('falKey').value.trim();
-  if (!falKey) { toast('❌ fal.ai API 키를 입력해주세요'); return; }
 
   // 카드 자체에서 모델 선택값 가져오기
   const pickedV = getSelectedVidModel(i);
@@ -7821,11 +7811,6 @@ async function mergeVideos() {
   }
 
   const falKey = document.getElementById('falKey')?.value.trim();
-  if (!falKey) {
-    toast('❌ fal.ai API 키를 입력해주세요');
-    return;
-  }
-
   const btn = document.getElementById('mergeBtn');
   const statusEl = document.getElementById('mergeStatus');
   const resultEl = document.getElementById('mergeResult');

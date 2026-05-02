@@ -10,6 +10,23 @@ const corsHeaders = {
   'Access-Control-Expose-Headers': 'X-Points-Charged, X-Points-Remaining, X-Unlimited',
 };
 
+// secret 값 정화 — BOM(U+FEFF), 양쪽 공백, 따옴표, 줄바꿈, 제어문자 제거
+function clean(v) {
+  if (!v) return '';
+  return String(v)
+    .replace(/^\uFEFF/, '')
+    .replace(/^[\s\u0000-\u001F"']+|[\s\u0000-\u001F"']+$/g, '');
+}
+
+function getEnv(env) {
+  return {
+    SUPABASE_URL: clean(env.SUPABASE_URL).replace(/\/$/, ''),
+    SUPABASE_SERVICE_KEY: clean(env.SUPABASE_SERVICE_KEY),
+    FAL_API_KEY: clean(env.FAL_API_KEY),
+    ASSETS: env.ASSETS,
+  };
+}
+
 const j = (data, status = 200, extraHeaders = {}) => new Response(JSON.stringify(data), {
   status,
   headers: { ...corsHeaders, ...extraHeaders, 'Content-Type': 'application/json' },
@@ -132,8 +149,9 @@ function falAuthHeader(env) {
 // 메인 라우터
 // ============================================
 export default {
-  async fetch(request, env) {
+  async fetch(request, rawEnv) {
     try {
+      const env = getEnv(rawEnv);
       const url = new URL(request.url);
 
       // ─────────────────────────────────────────
@@ -141,6 +159,49 @@ export default {
       // ─────────────────────────────────────────
       if (request.method === 'OPTIONS') {
         return new Response(null, { status: 204, headers: corsHeaders });
+      }
+
+      // ─────────────────────────────────────────
+      // /api/debug — JWT 검증 디버그 (임시)
+      // ─────────────────────────────────────────
+      if (url.pathname === '/api/debug') {
+        const auth = request.headers.get('Authorization') || '';
+        const m = auth.match(/^Bearer\s+(.+)$/);
+        const debug = {
+          received_auth_header: auth ? auth.substring(0, 30) + '...' : '(없음)',
+          jwt_extracted: !!m,
+          jwt_length: m ? m[1].length : 0,
+          supabase_url: env.SUPABASE_URL ? env.SUPABASE_URL.substring(0, 40) + '...' : '(없음)',
+          service_key_set: !!env.SUPABASE_SERVICE_KEY,
+          service_key_length: env.SUPABASE_SERVICE_KEY ? env.SUPABASE_SERVICE_KEY.length : 0,
+        };
+        if (!m) return j({ debug, step: 'no_bearer' });
+        const jwt = m[1];
+
+        // Step 1: SUPABASE_URL이 끝슬래시 있는지
+        let supaUrl = env.SUPABASE_URL || '';
+        debug.supabase_url_full = supaUrl;
+        debug.has_trailing_slash = supaUrl.endsWith('/');
+        if (supaUrl.endsWith('/')) supaUrl = supaUrl.slice(0, -1);
+
+        // Step 2: /auth/v1/user 호출
+        const userUrl = supaUrl + '/auth/v1/user';
+        debug.user_url = userUrl;
+        try {
+          const r = await fetch(userUrl, {
+            headers: {
+              'Authorization': 'Bearer ' + jwt,
+              'apikey': env.SUPABASE_SERVICE_KEY,
+            },
+          });
+          debug.supabase_status = r.status;
+          const text = await r.text();
+          debug.supabase_body = text.substring(0, 500);
+          return j({ debug, step: 'done' });
+        } catch (e) {
+          debug.fetch_error = e.message;
+          return j({ debug, step: 'fetch_failed' });
+        }
       }
 
       // ─────────────────────────────────────────
