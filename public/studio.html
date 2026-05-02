@@ -2034,7 +2034,7 @@ select option:hover {
         <label style="font-size:9px;color:var(--pink);font-weight:700;letter-spacing:.05em;text-transform:uppercase">모드</label>
         <select id="imgModeSel" onchange="onImgModeChange()" style="background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:5px 8px;color:var(--ink);font-size:11px;font-family:inherit;cursor:pointer">
           <option value="normal" selected>일반 생성</option>
-          <option value="sketch">스케치 → 업그레이드 (GPT)</option>
+          <option value="sketch">스케치 → 업그레이드 (GPT) [추천]</option>
         </select>
         <div id="imgModeHint" style="font-size:10px;color:var(--ink3)">선택한 모델로 한 번에 생성</div>
       </div>
@@ -2044,10 +2044,19 @@ select option:hover {
         <label style="font-size:9px;color:var(--gold);font-weight:700;letter-spacing:.05em;text-transform:uppercase">화질</label>
         <select id="imgQualitySel" onchange="onImgQualityChange()" style="background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:5px 8px;color:var(--ink);font-size:11px;font-family:inherit;cursor:pointer">
           <option value="hd">HD (1K)</option>
-          <option value="fhd" selected>FHD (2K)</option>
+          <option value="fhd" selected>FHD (2K) [추천]</option>
           <option value="uhd">UHD (4K)</option>
         </select>
         <div id="imgQualityHint" style="font-size:10px;color:var(--ink3)">FHD · 1920×1080 (16:9 기준)</div>
+      </div>
+
+      <!-- AI 선택 드롭다운 -->
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;padding:8px 10px;background:rgba(94,234,212,.06);border:1px solid var(--teal);border-radius:0">
+        <label style="font-size:9px;color:var(--teal);font-weight:700;letter-spacing:.05em;text-transform:uppercase">AI</label>
+        <select id="imgAiSel" onchange="onImgAiChange()" style="background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:5px 8px;color:var(--ink);font-size:11px;font-family:inherit;cursor:pointer;flex:1;min-width:0">
+          <option value="">AI 선택</option>
+        </select>
+        <div id="imgAiHint" style="font-size:10px;color:var(--ink3)"></div>
       </div>
 
       <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
@@ -3413,6 +3422,7 @@ const S = {
   aspectRatio: '',  // 16:9, 9:16, 1:1
   imgQuality: 'fhd',  // hd, fhd, uhd (이미지 화질)
   imgMode: 'normal',  // normal | sketch (스케치->업그레이드 모드)
+  imgAiKey: '',  // 'value|quality' 형식 (예: 'openai/gpt-image-2/edit|high')
   sketchPubUrl: null,  // 스케치 모드: Low로 생성한 fal CDN url (업그레이드 input용)
   avatars: [],
   avatarCuts: {},  // libId → 출연 컷 인덱스 배열 [0,1,2,3] (기본: 모든 컷 출연)
@@ -3745,10 +3755,14 @@ function goStep(n) {
     const qSel = document.getElementById('imgQualitySel');
     if (qSel) qSel.value = S.imgQuality || 'fhd';
     if (typeof updateImgQualityHint === 'function') updateImgQualityHint();
+    // AI 옵션 채우기 (IMG_MODELS 기반)
+    if (typeof renderImgAiOptions === 'function') renderImgAiOptions();
     // 모드 select 동기화 + 힌트/버튼 라벨 갱신
     const mSel = document.getElementById('imgModeSel');
     if (mSel) mSel.value = S.imgMode || 'normal';
     if (typeof onImgModeChange === 'function') onImgModeChange();
+    // AI hint 갱신
+    if (typeof onImgAiChange === 'function') onImgAiChange();
   }
 
   // 영상 패널 진입 시 컷 카드 렌더링 (4컷 없이 도달해도 빈 슬롯 표시 + 불러오기 가능)
@@ -6246,15 +6260,15 @@ const IMG_MODELS = [
     value: 'openai/gpt-image-2/edit',
     quality: 'high',
     label: 'GPT Image 2 Edit High',
-    sub: '최고 화질',
+    sub: '최고 화질 · 디테일 풍부',
     cpm: 0.158,
+    recommended: true,
   },
   {
     value: 'fal-ai/nano-banana-pro/edit',
     label: '나노바나나 프로',
     sub: 'Gemini 3 Pro · 고품질',
     cpm: 0.15,
-    recommended: true,
   },
   {
     value: 'fal-ai/nano-banana-2/edit',
@@ -6325,6 +6339,10 @@ function onImgQualityChange() {
 }
 
 function updateImgQualityHint() {
+  // 화질 바뀌면 AI hint도 같이 갱신 (가격이 화질에 따라 변함)
+  if (typeof onImgAiChange === 'function') {
+    setTimeout(() => onImgAiChange(), 0);
+  }
   const hint = document.getElementById('imgQualityHint');
   if (!hint) return;
   const q = getSelectedImgQuality();
@@ -7122,16 +7140,121 @@ async function generateByMode() {
   if (_cutsMode === '1cut') {
     return generateOneCut();
   }
-  // 스케치 모드: GPT Low로 자동 생성
+  // 스케치 모드: GPT Low 자동 (확인 팝업 포함)
   if (S.imgMode === 'sketch') {
+    const ar = S.aspectRatio || '16:9';
+    const q = getSelectedImgQuality();
+    const pts = calcImgPoints('openai/gpt-image-2/edit', 'low', ar, q);
+    if (pts === null) {
+      toast('이 비율 + 화질 조합은 GPT가 지원하지 않습니다 (예: 1:1 + UHD)');
+      return;
+    }
+    const ok = await showConfirm(
+      '이대로 진행할까요?',
+      `<div style="padding:8px 0">
+         <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:13px;color:var(--ink2)">
+           <span style="color:var(--ink3)">모드</span><span style="color:var(--pink);font-weight:700">스케치 → 업그레이드</span>
+           <span style="color:var(--ink3)">화질</span><span>${IMG_QUALITY_LABELS[q] || q}</span>
+           <span style="color:var(--ink3)">AI</span><span>GPT Image 2 Edit Low (자동 고정)</span>
+           <span style="color:var(--ink3)">예상 비용</span><span style="color:var(--gold);font-weight:700">${pts} P</span>
+         </div>
+         <div style="font-size:11px;color:var(--ink3);margin-top:10px">스케치 후 업그레이드 버튼이 표시됩니다.</div>
+       </div>`
+    );
+    if (!ok) return;
     return generateSketchLow();
   }
+  // 일반 모드: AI 선택 검증
+  const m = getSelectedImgAi();
+  if (!m) {
+    toast('AI를 선택해주세요');
+    const aiSel = document.getElementById('imgAiSel');
+    if (aiSel) aiSel.focus();
+    return;
+  }
+  const ar = S.aspectRatio || '16:9';
+  const q = getSelectedImgQuality();
+  const pts = calcImgPoints(m.value, m.quality, ar, q);
+  if (pts === null) {
+    toast('이 비율 + 화질 + AI 조합은 지원하지 않습니다');
+    return;
+  }
+  const ok = await showConfirm(
+    '이대로 진행할까요?',
+    `<div style="padding:8px 0">
+       <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:13px;color:var(--ink2)">
+         <span style="color:var(--ink3)">모드</span><span>일반 생성</span>
+         <span style="color:var(--ink3)">화질</span><span>${IMG_QUALITY_LABELS[q] || q}</span>
+         <span style="color:var(--ink3)">AI</span><span style="color:var(--cream);font-weight:700">${m.label}${m.recommended ? ' [추천]' : ''}</span>
+         <span style="color:var(--ink3)">예상 비용</span><span style="color:var(--gold);font-weight:700">${pts} P</span>
+       </div>
+     </div>`
+  );
+  if (!ok) return;
   return generateImage();
 }
 
 // ============================================================
 // 스케치 → 업그레이드 워크플로우
 // ============================================================
+
+// AI 선택 옵션 채우기 (IMG_MODELS 기반)
+function renderImgAiOptions() {
+  const sel = document.getElementById('imgAiSel');
+  if (!sel || typeof IMG_MODELS === 'undefined') return;
+  const cur = S.imgAiKey || '';
+  const opts = ['<option value="">AI 선택</option>'];
+  IMG_MODELS.forEach((m, idx) => {
+    const key = m.value + '|' + (m.quality || '');
+    const sl = (cur === key) ? 'selected' : '';
+    const tag = m.recommended ? ' [추천]' : '';
+    opts.push('<option value="' + key + '" ' + sl + '>' + m.label + tag + '</option>');
+  });
+  sel.innerHTML = opts.join('');
+}
+
+// 카드별 IMG_MODELS에서 객체 가져오기
+function getSelectedImgAi() {
+  const key = S.imgAiKey || '';
+  if (!key || typeof IMG_MODELS === 'undefined') return null;
+  return IMG_MODELS.find(m => (m.value + '|' + (m.quality || '')) === key) || null;
+}
+
+// AI 선택 변경 핸들러
+function onImgAiChange() {
+  const sel = document.getElementById('imgAiSel');
+  if (!sel) return;
+  S.imgAiKey = sel.value;
+  const m = getSelectedImgAi();
+  const hint = document.getElementById('imgAiHint');
+  if (hint) {
+    if (m) {
+      const ar = S.aspectRatio || '16:9';
+      const q = getSelectedImgQuality();
+      const pts = calcImgPoints(m.value, m.quality, ar, q);
+      if (pts === null) {
+        hint.textContent = '⚠️ 이 비율+화질에서는 미지원';
+        hint.style.color = 'var(--gold)';
+      } else {
+        hint.textContent = pts + ' P/장';
+        hint.style.color = 'var(--gold)';
+      }
+    } else {
+      hint.textContent = '';
+    }
+  }
+  // hidden imgModel select 동기화 (callFalImage 등 기존 로직 호환)
+  const hSel = document.getElementById('imgModel');
+  if (hSel && m) {
+    for (let i = 0; i < hSel.options.length; i++) {
+      const opt = hSel.options[i];
+      if (opt.value === m.value && (opt.dataset.quality || '') === (m.quality || '')) {
+        hSel.selectedIndex = i;
+        break;
+      }
+    }
+  }
+}
 
 // 모드 변경 핸들러
 function onImgModeChange() {
@@ -7146,6 +7269,24 @@ function onImgModeChange() {
     } else {
       hint.textContent = '선택한 모델로 한 번에 생성';
       hint.style.color = 'var(--ink3)';
+    }
+  }
+  // 스케치 모드: AI를 GPT Image 2 Edit Low로 자동 고정 + 비활성
+  const aiSel = document.getElementById('imgAiSel');
+  if (aiSel) {
+    if (S.imgMode === 'sketch') {
+      // GPT Low 옵션의 key 찾기
+      const lowKey = 'openai/gpt-image-2/edit|low';
+      S.imgAiKey = lowKey;
+      aiSel.value = lowKey;
+      aiSel.disabled = true;
+      aiSel.style.opacity = '0.6';
+      aiSel.style.cursor = 'not-allowed';
+      onImgAiChange();
+    } else {
+      aiSel.disabled = false;
+      aiSel.style.opacity = '1';
+      aiSel.style.cursor = 'pointer';
     }
   }
   // 모드 바뀌면 생성 버튼 라벨도 갱신
@@ -7545,21 +7686,12 @@ function renderQuadOneLoading(i) {
 }
 
 async function generateImage() {
-
-  // 이미지 모델 인라인 선택
-  const picked = await pickModel('img');
-  if (!picked) return;
-
-  // 선택 후 확인 팝업
-  const confirmOk = await showConfirm(
-    '이 모델로 4컷 생성',
-    `<div style="padding:8px 0">
-       <div style="font-size:14px;font-weight:700;color:var(--cream);margin-bottom:6px">${picked.label}</div>
-       <div style="font-size:12px;color:var(--ink2);margin-bottom:14px">${picked.sub}</div>
-       <div style="font-size:13px;color:var(--ink2)">해당 AI로 4컷 이미지를 생성하시겠습니까?</div>
-     </div>`
-  );
-  if (!confirmOk) return;
+  // generateByMode에서 이미 AI 선택 + 확인 모달 처리됨
+  const picked = getSelectedImgAi();
+  if (!picked) {
+    toast('AI를 선택해주세요');
+    return;
+  }
 
   const model = picked.value;
   const btn = document.getElementById('genImgBtn');
