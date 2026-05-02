@@ -3431,7 +3431,7 @@ function renderStep1Avatars() {
     const outfitMatch = outfitOptions.find(o => o.en === outfit || o.luxEn === outfit);
     const isCustomOutfit = (outfit === ' ' || (outfit && !outfitMatch));
     // 헤어 custom 검사 — sceneHair가 있는데 시대 옵션 매치 안 되면 custom
-    const sceneHair = av.sceneHair || '';
+    const sceneHair = cast?.sceneHair || '';
     const hairOptions = (typeof getSceneHairOptions === 'function') ? getSceneHairOptions(av.gender) : [];
     const hairMatch = hairOptions.find(h => h.en === sceneHair);
     const isCustomHair = (sceneHair === ' ' || (sceneHair && !hairMatch));
@@ -3491,14 +3491,14 @@ function renderStep1Avatars() {
 
             <!-- 헤어스타일 드롭다운 (씬에서 변경 — 시대 맞게) -->
             <div>
-              <label style="font-size:9px;color:${(av.sceneHair && av.sceneHair.trim()) ? 'var(--gold)' : 'var(--ink3)'};font-weight:700;letter-spacing:.05em;display:block;margin-bottom:3px">
-                헤어스타일${(av.sceneHair && av.sceneHair.trim()) ? ' ✓' : ''}
+              <label style="font-size:9px;color:${(sceneHair && sceneHair.trim()) ? 'var(--gold)' : 'var(--ink3)'};font-weight:700;letter-spacing:.05em;display:block;margin-bottom:3px">
+                헤어스타일${(sceneHair && sceneHair.trim()) ? ' ✓' : ''}
               </label>
               <select onchange="setSceneHairFromSelect(${av.id}, this.value)"
-                      style="width:100%;background:${(av.sceneHair && av.sceneHair.trim()) ? 'rgba(200,160,74,.18)' : 'var(--bg3)'};border:1px solid ${(av.sceneHair && av.sceneHair.trim()) ? 'var(--gold)' : 'var(--line)'};border-radius:0;padding:6px 8px;color:var(--ink);font-size:11px;font-family:inherit;cursor:pointer">
+                      style="width:100%;background:${(sceneHair && sceneHair.trim()) ? 'rgba(200,160,74,.18)' : 'var(--bg3)'};border:1px solid ${(sceneHair && sceneHair.trim()) ? 'var(--gold)' : 'var(--line)'};border-radius:0;padding:6px 8px;color:var(--ink);font-size:11px;font-family:inherit;cursor:pointer">
                 <option value="">— 원본 유지 —</option>
                 ${getSceneHairOptions(av.gender).map(h => {
-                  const sel = (av.sceneHair === h.en) ? 'selected' : '';
+                  const sel = (sceneHair === h.en) ? 'selected' : '';
                   const eraTag = h.era === 'historical' ? '[사극] ' :
                                  h.era === 'gyeongseong' ? '[경성] ' :
                                  h.era === 'retro' ? '[레트로] ' : '';
@@ -3545,18 +3545,12 @@ function setOutfitFromSelect(libId, val) {
 
 // === 4단계 헤어 드롭다운 (씬에서만 적용 — av.hair 라이브러리는 그대로) ===
 function setSceneHairFromSelect(libId, val) {
-  console.log('[setSceneHairFromSelect] called', { libId, val });
   const cast = S.avatars.find(a => (a._libId || a.id) === libId);
-  if (!cast) {
-    console.warn('[setSceneHairFromSelect] cast not found for libId', libId);
-    return;
-  }
+  if (!cast) return;
   if (val === '__custom__') {
     cast.sceneHair = ' ';
-    console.log('[setSceneHairFromSelect] custom mode');
   } else {
     cast.sceneHair = val || '';
-    console.log('[setSceneHairFromSelect] set to', cast.sceneHair);
   }
   renderStep1Avatars();
   if (val === '__custom__') {
