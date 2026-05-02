@@ -1100,6 +1100,17 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   margin-right: 2px;
 }
 
+
+/* 4단계 의상/헤어 드롭다운 option — 흰 배경 방지 */
+select option {
+  background: var(--bg2, #0f172a);
+  color: var(--ink, #f1f5f9);
+}
+select option:checked,
+select option:hover {
+  background: var(--bg3, #1e293b);
+  color: var(--cream, #f1f5f9);
+}
 </style>
 </head>
 <body>
