@@ -4708,9 +4708,18 @@ function restoreSceneUI() {
   document.querySelectorAll('#personCountSegs .seg').forEach((seg, i) => {
     seg.classList.toggle('active', i === S.personCount);
   });
-  document.getElementById('passerbyWrap').style.display = S.personCount > 0 ? '' : 'none';
-  document.getElementById('passerbyCheck').checked = S.passerby;
-  document.getElementById('passerbyDensity').style.display = S.passerby ? '' : 'none';
+  (function(){const e=document.getElementById('passerbyWrap');if(e)e.style.display = S.personCount > 0 ? '' : 'none';})();
+  (function(){const e=document.getElementById('passerbyCheck');if(e)e.checked = S.passerby;})();
+  (function(){const e=document.getElementById('passerbyDensity');if(e)e.style.display = S.passerby ? '' : 'none';})();
+  // 새 segs 행인 — active 표시 복원 (passerby 박스 제거 후 추가됨)
+  document.querySelectorAll('.field .segs .seg[onclick*="selPasserby"]').forEach(s => {
+    const m = s.getAttribute('onclick') || '';
+    const isActive = S.passerby && (
+      (S.passerbyDensity === 'a few passersby' && m.includes('a few')) ||
+      (S.passerbyDensity === 'many passersby, crowded' && m.includes('many'))
+    );
+    s.classList.toggle('active', isActive);
+  });
 
   // Fail-safe: sceneStepB가 보일 때 헤더 강제 'B' 갱신
   if (typeof updateScenePanelHeader === 'function') {
