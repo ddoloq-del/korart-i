@@ -6540,21 +6540,60 @@ function toggleCustomAngle() { /* 제거됨 — 팝업 적용으로 이주 */ }
 // 동기 버전 — 미리보기 / 즉시 표시용 (한글 그대로)
 function buildImagePrompt() {
   const sc = SCENES[S.scene];
+  // 카테고리별로 분리 (반려동물/제품이 사람으로 묘사되는 것 방지)
+  const fullLib = (typeof loadAvatarLib === 'function') ? loadAvatarLib() : [];
+  const getCat = (av) => {
+    const libId = av._libId || av.id;
+    const libAv = fullLib.find(a => a.id === libId);
+    return (libAv && libAv.category) || av.category || 'person';
+  };
+  const personAvs  = S.avatars.filter(av => getCat(av) === 'person');
+  const petAvs     = S.avatars.filter(av => getCat(av) === 'pet');
+  const productAvs = S.avatars.filter(av => getCat(av) === 'product');
+
   let charDesc = '';
-  if (S.avatars.length) {
-    charDesc = S.avatars.map(av => {
+  if (personAvs.length) {
+    charDesc = personAvs.map(av => {
       const parts = [av.gender, av.age, av.body];
       if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
-      else if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
-      else if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
-      else if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
-      else if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
-      else if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
       else if (av.hair) parts.push(av.hair);
       if (av.skin) parts.push(av.skin);
       if (av.extra) parts.push(av.extra);
       if (av.outfit && av.outfit.trim()) parts.push(av.outfit.trim());
-      return av.name + ': ' + parts.join(', ');
+      return av.name + ': ' + parts.filter(Boolean).join(', ');
+    }).join(' | ');
+  }
+  // 반려동물 묘사
+  let petDesc = '';
+  if (petAvs.length) {
+    const speciesEn = { dog:'dog', cat:'cat', rabbit:'rabbit', hamster:'hamster', bird:'bird', other:'pet' };
+    petDesc = petAvs.map(av => {
+      const lib = fullLib.find(a => a.id === (av._libId || av.id)) || av;
+      const parts = [];
+      if (lib.petBreed) parts.push(lib.petBreed);
+      else if (lib.petSpecies) parts.push(speciesEn[lib.petSpecies] || lib.petSpecies);
+      if (lib.petColor) parts.push(lib.petColor);
+      if (lib.petCoat)  parts.push(lib.petCoat);
+      if (lib.petSize)  parts.push(lib.petSize);
+      if (lib.petExtra) parts.push(lib.petExtra);
+      return (av.name || 'pet') + ': ' + parts.filter(Boolean).join(', ');
+    }).join(' | ');
+  }
+  // 제품 묘사
+  let productDesc = '';
+  if (productAvs.length) {
+    productDesc = productAvs.map(av => {
+      const lib = fullLib.find(a => a.id === (av._libId || av.id)) || av;
+      const parts = [];
+      if (lib.productStyle)    parts.push(lib.productStyle);
+      if (lib.productColor)    parts.push(lib.productColor);
+      if (lib.productMaterial) parts.push(lib.productMaterial);
+      if (lib.productCat)      parts.push(lib.productCat);
+      if (lib.productShape)    parts.push(lib.productShape);
+      if (lib.productSize)     parts.push(lib.productSize);
+      if (lib.productLogo)     parts.push('with brand text "' + lib.productLogo + '"');
+      if (lib.productExtra)    parts.push(lib.productExtra);
+      return (av.name || 'product') + ': ' + parts.filter(Boolean).join(', ');
     }).join(' | ');
   }
   const loc = getCombinedLocation();
@@ -6567,14 +6606,30 @@ function buildImagePrompt() {
   const angleDesc = S.angles.filter(Boolean).map((a,i) => { const d = (S.cutDescriptions && S.cutDescriptions[i] || '').trim(); return `Panel ${i+1}: ${a}${d ? ' (' + d + ')' : ''}`;}).join(' | ');
   const extra = document.getElementById('extraPrompt')?.value.trim() || '';
 
+  // 인원수 강제 명시 — AI가 추가 인물 만들어내지 못하게
+  const nPerson = personAvs.length;
+  const nPet    = petAvs.length;
+  const nProd   = productAvs.length;
+  const subjectLock = (nPerson + nPet + nProd > 0)
+    ? 'EXACTLY ' + (nPerson > 0 ? nPerson + ' person' + (nPerson===1?'':'s') : '') +
+      ((nPerson > 0 && nPet > 0) ? ' and ' : '') +
+      (nPet > 0 ? nPet + ' pet' + (nPet===1?'':'s') : '') +
+      (((nPerson > 0 || nPet > 0) && nProd > 0) ? ' and ' : '') +
+      (nProd > 0 ? nProd + ' product' + (nProd===1?'':'s') : '') +
+      ' visible. NO additional people, NO extra characters, NO bystanders, NO romantic partners unless specified.'
+    : 'NO people, NO characters visible.';
+
   return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Each panel shows the SAME Korean drama scene from a DIFFERENT camera angle.
+SUBJECTS: ${subjectLock}
 ${charDesc ? 'CHARACTERS: ' + charDesc + '.' : ''}
+${petDesc ? 'PETS: ' + petDesc + '.' : ''}
+${productDesc ? 'PRODUCTS: ' + productDesc + '.' : ''}
 VISUAL STYLE: ${sc.style}.
 TIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.
 ENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}
 CAMERA ANGLES: ${angleDesc}.${extra ? '\nADDITIONAL: ' + extra + '.' : ''}
 WARDROBE: All characters wear clothing appropriate for ${S.season} weather and ${loc}. Outfits should match the season, weather, and environment naturally.
-All 4 panels share identical characters, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.`.trim();
+All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.`.trim();
 }
 
 // async 버전 — 실제 API 전송용 (한글 → 영어 번역)
@@ -6588,25 +6643,87 @@ async function buildImagePromptForApi() {
   const locEn = await translateKoToEn(loc);
   const extraEn = extra ? await translateKoToEn(extra) : '';
 
-  // 아바타 필드 번역
+  // 카테고리별로 분리 (반려동물/제품이 사람으로 묘사되는 것 방지)
+  const fullLib = (typeof loadAvatarLib === 'function') ? loadAvatarLib() : [];
+  const getCat = (av) => {
+    const libId = av._libId || av.id;
+    const libAv = fullLib.find(a => a.id === libId);
+    return (libAv && libAv.category) || av.category || 'person';
+  };
+  const personAvs  = S.avatars.filter(av => getCat(av) === 'person');
+  const petAvs     = S.avatars.filter(av => getCat(av) === 'pet');
+  const productAvs = S.avatars.filter(av => getCat(av) === 'product');
+
+  // 사람 — 영문 번역 필요 (이름/머리/액세서리/의상)
   let charDesc = '';
-  if (S.avatars.length) {
-    const translatedAvs = await Promise.all(S.avatars.map(async av => ({
+  if (personAvs.length) {
+    const translatedAvs = await Promise.all(personAvs.map(async av => ({
       name: await translateKoToEn(av.name),
       gender: av.gender,
       age: av.age,
       body: av.body,
       hair: av.hair ? await translateKoToEn(av.hair) : '',
+      sceneHair: av.sceneHair ? await translateKoToEn(av.sceneHair) : '',
       extra: av.extra ? await translateKoToEn(av.extra) : '',
       outfit: av.outfit ? await translateKoToEn(av.outfit) : '',
+      skin: av.skin || '',
     })));
     charDesc = translatedAvs.map(av => {
       const parts = [av.gender, av.age, av.body];
-      if (av.hair) parts.push(av.hair);
+      if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
+      else if (av.hair) parts.push(av.hair);
       if (av.skin) parts.push(av.skin);
       if (av.extra) parts.push(av.extra);
       if (av.outfit && av.outfit.trim()) parts.push(av.outfit.trim());
-      return av.name + ': ' + parts.join(', ');
+      return av.name + ': ' + parts.filter(Boolean).join(', ');
+    }).join(' | ');
+  }
+  // 반려동물 — 이름만 번역 (나머지는 이미 영문)
+  let petDesc = '';
+  if (petAvs.length) {
+    const speciesEn = { dog:'dog', cat:'cat', rabbit:'rabbit', hamster:'hamster', bird:'bird', other:'pet' };
+    const translatedPets = await Promise.all(petAvs.map(async av => {
+      const lib = fullLib.find(a => a.id === (av._libId || av.id)) || av;
+      return {
+        name: await translateKoToEn(av.name || 'pet'),
+        species: lib.petSpecies, breed: lib.petBreed, color: lib.petColor,
+        coat: lib.petCoat, size: lib.petSize, extra: lib.petExtra,
+      };
+    }));
+    petDesc = translatedPets.map(p => {
+      const parts = [];
+      if (p.breed) parts.push(p.breed);
+      else if (p.species) parts.push(speciesEn[p.species] || p.species);
+      if (p.color) parts.push(p.color);
+      if (p.coat)  parts.push(p.coat);
+      if (p.size)  parts.push(p.size);
+      if (p.extra) parts.push(p.extra);
+      return p.name + ': ' + parts.filter(Boolean).join(', ');
+    }).join(' | ');
+  }
+  // 제품
+  let productDesc = '';
+  if (productAvs.length) {
+    const translatedProducts = await Promise.all(productAvs.map(async av => {
+      const lib = fullLib.find(a => a.id === (av._libId || av.id)) || av;
+      return {
+        name: await translateKoToEn(av.name || 'product'),
+        cat: lib.productCat, material: lib.productMaterial, color: lib.productColor,
+        size: lib.productSize, shape: lib.productShape, logo: lib.productLogo,
+        style: lib.productStyle, extra: lib.productExtra,
+      };
+    }));
+    productDesc = translatedProducts.map(p => {
+      const parts = [];
+      if (p.style)    parts.push(p.style);
+      if (p.color)    parts.push(p.color);
+      if (p.material) parts.push(p.material);
+      if (p.cat)      parts.push(p.cat);
+      if (p.shape)    parts.push(p.shape);
+      if (p.size)     parts.push(p.size);
+      if (p.logo)     parts.push('with brand text "' + p.logo + '"');
+      if (p.extra)    parts.push(p.extra);
+      return p.name + ': ' + parts.filter(Boolean).join(', ');
     }).join(' | ');
   }
 
@@ -6618,14 +6735,30 @@ async function buildImagePromptForApi() {
   }
   const angleDesc = S.angles.filter(Boolean).map((a,i) => { const d = (S.cutDescriptions && S.cutDescriptions[i] || '').trim(); return `Panel ${i+1}: ${a}${d ? ' (' + d + ')' : ''}`;}).join(' | ');
 
+  // 인원수 강제 명시 — AI가 추가 인물 만들어내지 못하게
+  const nPerson = personAvs.length;
+  const nPet    = petAvs.length;
+  const nProd   = productAvs.length;
+  const subjectLock = (nPerson + nPet + nProd > 0)
+    ? 'EXACTLY ' + (nPerson > 0 ? nPerson + ' person' + (nPerson===1?'':'s') : '') +
+      ((nPerson > 0 && nPet > 0) ? ' and ' : '') +
+      (nPet > 0 ? nPet + ' pet' + (nPet===1?'':'s') : '') +
+      (((nPerson > 0 || nPet > 0) && nProd > 0) ? ' and ' : '') +
+      (nProd > 0 ? nProd + ' product' + (nProd===1?'':'s') : '') +
+      ' visible. NO additional people, NO extra characters, NO bystanders, NO romantic partners unless specified.'
+    : 'NO people, NO characters visible.';
+
   return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Each panel shows the SAME Korean drama scene from a DIFFERENT camera angle.
+SUBJECTS: ${subjectLock}
 ${charDesc ? 'CHARACTERS: ' + charDesc + '.' : ''}
+${petDesc ? 'PETS: ' + petDesc + '.' : ''}
+${productDesc ? 'PRODUCTS: ' + productDesc + '.' : ''}
 VISUAL STYLE: ${sc.style}.
 TIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.
 ENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}
 CAMERA ANGLES: ${angleDesc}.${extraEn ? '\nADDITIONAL: ' + extraEn + '.' : ''}
 WARDROBE: All characters wear clothing appropriate for ${S.season} weather and ${locEn}. Outfits should match the season, weather, and environment naturally.
-All 4 panels share identical characters, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.`.trim();
+All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.`.trim();
 }
 
 function updatePromptPreview() {
