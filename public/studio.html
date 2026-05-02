@@ -7419,6 +7419,19 @@ async function upgradeSketch(targetQuality) {
   if (S.continueRefDataUrl && S.continueRefPubUrl) refImgs.push(S.continueRefPubUrl);
   refImgs.push(S.sketchPubUrl);  // 스케치 결과를 마지막 input으로
 
+  // 디버그: 실제 url 종류 확인
+  log('info', `업그레이드 input ${refImgs.length}개:`);
+  refImgs.forEach((u, i) => {
+    const type = u?.startsWith('http') ? 'http' : (u?.startsWith('data:') ? 'dataURL' : (u ? 'other' : 'null'));
+    log('info', `  [${i}] ${type} — ${(u || '').slice(0, 60)}`);
+  });
+  if (refImgs.length === 0) {
+    toast('참고 이미지가 없습니다 (스케치를 먼저 하세요)');
+    if (btnM) { btnM.disabled = false; btnM.innerHTML = 'Medium 업그레이드'; }
+    if (btnH) { btnH.disabled = false; btnH.innerHTML = 'High 업그레이드'; }
+    return;
+  }
+
   document.getElementById('quad').innerHTML = `
     <div style="grid-column:1/-1;grid-row:1/-1;display:flex;align-items:center;justify-content:center;background:#0a0a0c;flex-direction:column;gap:10px">
       <div class="spin" style="width:28px;height:28px;border-width:3px"></div>
@@ -8819,8 +8832,8 @@ async function callFalImageWithRef(key, model, prompt, size, refImageUrls) {
   }
 
   if (publicUrls.length === 0) {
-    log('warn', '아바타 공개 URL 없음 → 일반 생성으로 폴백');
-    return await callFalImage(key, model, prompt, size);
+    log('err', '아바타/스케치 공개 URL이 0개 — Edit 모델은 image_urls 필수');
+    throw new Error('참고 이미지 업로드 실패 (image_urls 비어있음). 아바타 이미지를 다시 업로드해주세요.');
   }
 
   // GPT Image 2 Edit: image_urls 배열 + 프롬프트에 Image1/Image2 레이블 명시
@@ -8924,8 +8937,8 @@ ${prompt}`;
     }
     log('info', `${useModel} · aspect_ratio: ${aspectRatio} · resolution: ${body.resolution || 'default'}`);
   } else {
-    // 폴백 — 일반 이미지 모델
-    return await callFalImage(key, useModel, editPrompt, size);
+    // 알 수 없는 모델 — 명확한 에러
+    throw new Error('지원하지 않는 모델: ' + useModel);
   }
 
   const r = await fetch('/fal-sync/' + useModel, {
@@ -8936,8 +8949,8 @@ ${prompt}`;
 
   if (!r.ok) {
     const errText = await r.text();
-    log('warn', `${useModel} 실패 (${r.status}) → 일반 폴백: ${errText.slice(0, 150)}`);
-    return await callFalImage(key, useModel, editPrompt, size);
+    log('err', `${useModel} 실패 (${r.status}): ${errText.slice(0, 300)}`);
+    throw new Error(`fal.ai ${r.status}: ${errText.slice(0, 200)}`);
   }
 
   const d = await r.json();
