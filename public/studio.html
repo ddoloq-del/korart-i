@@ -2015,8 +2015,28 @@ select option:hover {
           </div>
         </div>
       </div>
+      <!-- 스케치 모드: 업그레이드 버튼 영역 (스케치 후 표시) -->
+      <div id="sketchUpgradeWrap" style="display:none;margin-top:10px;padding:12px;background:rgba(255,107,157,.06);border:1px solid var(--pink);border-radius:0">
+        <div style="font-size:12px;font-weight:700;color:var(--pink);margin-bottom:8px">✨ 스케치 결과를 업그레이드</div>
+        <div style="font-size:10px;color:var(--ink3);margin-bottom:10px">같은 구도 + 포즈 유지하면서 디테일 향상</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm" id="upgradeBtnMedium" onclick="upgradeSketch('medium')" style="flex:1">Medium 업그레이드</button>
+          <button class="btn btn-primary btn-sm" id="upgradeBtnHigh" onclick="upgradeSketch('high')" style="flex:1">High 업그레이드</button>
+        </div>
+      </div>
+
       <div id="quadDownloadBar" style="display:none;margin-top:10px;text-align:center">
         <button class="btn btn-sm" onclick="downloadGrid()" title="원본 4컷 통합 이미지 저장">4컷 그리드 전체 저장</button>
+      </div>
+
+      <!-- 모드 토글 (일반 / 스케치->업그레이드) -->
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;padding:8px 10px;background:rgba(255,107,157,.06);border:1px solid var(--pink);border-radius:0">
+        <label style="font-size:9px;color:var(--pink);font-weight:700;letter-spacing:.05em;text-transform:uppercase">모드</label>
+        <select id="imgModeSel" onchange="onImgModeChange()" style="background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:5px 8px;color:var(--ink);font-size:11px;font-family:inherit;cursor:pointer">
+          <option value="normal" selected>일반 생성</option>
+          <option value="sketch">스케치 → 업그레이드 (GPT)</option>
+        </select>
+        <div id="imgModeHint" style="font-size:10px;color:var(--ink3)">선택한 모델로 한 번에 생성</div>
       </div>
 
       <!-- 화질 드롭다운 (모든 이미지 모델 공통) -->
@@ -3392,6 +3412,8 @@ function saveSceneLib(arr) {
 const S = {
   aspectRatio: '',  // 16:9, 9:16, 1:1
   imgQuality: 'fhd',  // hd, fhd, uhd (이미지 화질)
+  imgMode: 'normal',  // normal | sketch (스케치->업그레이드 모드)
+  sketchPubUrl: null,  // 스케치 모드: Low로 생성한 fal CDN url (업그레이드 input용)
   avatars: [],
   avatarCuts: {},  // libId → 출연 컷 인덱스 배열 [0,1,2,3] (기본: 모든 컷 출연)
   scene: 'romance',
@@ -3723,6 +3745,10 @@ function goStep(n) {
     const qSel = document.getElementById('imgQualitySel');
     if (qSel) qSel.value = S.imgQuality || 'fhd';
     if (typeof updateImgQualityHint === 'function') updateImgQualityHint();
+    // 모드 select 동기화 + 힌트/버튼 라벨 갱신
+    const mSel = document.getElementById('imgModeSel');
+    if (mSel) mSel.value = S.imgMode || 'normal';
+    if (typeof onImgModeChange === 'function') onImgModeChange();
   }
 
   // 영상 패널 진입 시 컷 카드 렌더링 (4컷 없이 도달해도 빈 슬롯 표시 + 불러오기 가능)
@@ -7096,7 +7122,238 @@ async function generateByMode() {
   if (_cutsMode === '1cut') {
     return generateOneCut();
   }
+  // 스케치 모드: GPT Low로 자동 생성
+  if (S.imgMode === 'sketch') {
+    return generateSketchLow();
+  }
   return generateImage();
+}
+
+// ============================================================
+// 스케치 → 업그레이드 워크플로우
+// ============================================================
+
+// 모드 변경 핸들러
+function onImgModeChange() {
+  const sel = document.getElementById('imgModeSel');
+  if (!sel) return;
+  S.imgMode = sel.value;
+  const hint = document.getElementById('imgModeHint');
+  if (hint) {
+    if (S.imgMode === 'sketch') {
+      hint.textContent = 'GPT Low로 스케치 → Medium/High로 업그레이드';
+      hint.style.color = 'var(--pink)';
+    } else {
+      hint.textContent = '선택한 모델로 한 번에 생성';
+      hint.style.color = 'var(--ink3)';
+    }
+  }
+  // 모드 바뀌면 생성 버튼 라벨도 갱신
+  const btn = document.getElementById('genImgBtn');
+  if (btn && !btn.disabled) {
+    btn.textContent = (S.imgMode === 'sketch') ? 'Low로 스케치 시작' : '4컷 생성';
+  }
+  // 업그레이드 버튼 영역 초기화 (모드 바뀌면 이전 결과 무효)
+  const upWrap = document.getElementById('sketchUpgradeWrap');
+  if (upWrap) upWrap.style.display = 'none';
+  S.sketchPubUrl = null;
+}
+
+// 스케치 단계 — GPT Image 2 Edit Low로 자동 4컷 생성
+async function generateSketchLow() {
+  const btn = document.getElementById('genImgBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> 스케치 중...';
+
+  // 비율 + 화질 검증
+  const ar = S.aspectRatio || '16:9';
+  const q = getSelectedImgQuality();
+  const sz = getGptImgSize(ar, q);
+  if (!sz) {
+    toast('이 비율 + 화질 조합은 GPT가 지원하지 않습니다 (예: 1:1 + UHD)');
+    btn.disabled = false;
+    btn.innerHTML = 'Low로 스케치 시작';
+    return;
+  }
+
+  // 아바타 레퍼런스 수집
+  const refImgs = S.avatars.filter(av => av.imgUrl).map(av => av.imgUrl);
+  if (S.continueRefDataUrl && S.continueRefPubUrl) {
+    refImgs.push(S.continueRefPubUrl);
+  }
+  const useRef = refImgs.length > 0;
+
+  document.getElementById('quad').innerHTML = `
+    <div style="grid-column:1/-1;grid-row:1/-1;display:flex;align-items:center;justify-content:center;background:#0a0a0c;flex-direction:column;gap:10px">
+      <div class="spin" style="width:28px;height:28px;border-width:3px"></div>
+      <div style="font-size:11px;color:var(--ink2)">스케치 생성 중 (GPT Low, 빠름)...</div>
+    </div>`;
+
+  let prompt;
+  try {
+    prompt = await buildImagePromptForApi();
+  } catch (e) {
+    prompt = buildImagePrompt();
+  }
+
+  // imgModel select를 GPT Low로 강제 (callFalImageWithRef가 그것을 읽음)
+  const imgSel = document.getElementById('imgModel');
+  let prevSelected = -1;
+  if (imgSel) {
+    prevSelected = imgSel.selectedIndex;
+    for (let i = 0; i < imgSel.options.length; i++) {
+      const opt = imgSel.options[i];
+      if (opt.value === 'openai/gpt-image-2/edit' && opt.dataset.quality === 'low') {
+        imgSel.selectedIndex = i;
+        break;
+      }
+    }
+  }
+
+  log('info', `스케치 시작 — GPT Image 2 Edit Low (${sz.width}x${sz.height})`);
+
+  try {
+    const url = useRef
+      ? await callFalImageWithRef('', 'openai/gpt-image-2/edit', prompt, getGridSize(), refImgs)
+      : await callFalImage('', 'openai/gpt-image-2/edit', prompt, getGridSize());
+
+    S.gridPubUrl = url;
+    S.sketchPubUrl = url;  // 업그레이드 input용으로 저장
+
+    // 이미지 표시 (기존 generateImage 후처리와 동일하게)
+    await _displayQuadFromUrl(url);
+
+    // 업그레이드 버튼 영역 표시
+    const upWrap = document.getElementById('sketchUpgradeWrap');
+    if (upWrap) upWrap.style.display = '';
+
+    // 비용 계산 (Low 가격)
+    const pts = calcImgPoints('openai/gpt-image-2/edit', 'low', ar, q);
+    if (pts) addImgCost(pts);
+
+    log('ok', `스케치 완료 (${pts || 0} P 차감) — 업그레이드 버튼 활성`);
+    toast('스케치 완료 — 마음에 드시면 업그레이드하세요');
+  } catch (e) {
+    log('err', '스케치 실패: ' + e.message);
+    toast('스케치 실패: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Low로 스케치 시작';
+    if (imgSel && prevSelected >= 0) imgSel.selectedIndex = prevSelected;
+  }
+}
+
+// 스케치 결과를 input으로 넣고 Medium/High로 업그레이드
+async function upgradeSketch(targetQuality) {
+  if (!S.sketchPubUrl) {
+    toast('먼저 스케치를 생성하세요');
+    return;
+  }
+  if (!['medium', 'high'].includes(targetQuality)) return;
+
+  const ar = S.aspectRatio || '16:9';
+  const q = getSelectedImgQuality();
+
+  // 비용 안내
+  const pts = calcImgPoints('openai/gpt-image-2/edit', targetQuality, ar, q);
+  const ok = await showConfirm(
+    `${targetQuality === 'high' ? 'High' : 'Medium'}로 업그레이드`,
+    `<div style="padding:8px 0">
+       <div style="font-size:13px;color:var(--ink2);margin-bottom:8px">스케치 결과를 input으로 넣고 ${targetQuality === 'high' ? 'High' : 'Medium'} 품질로 재생성합니다.</div>
+       <div style="font-size:13px;color:var(--gold);font-weight:700">예상 비용: ${pts} P</div>
+       <div style="font-size:11px;color:var(--ink3);margin-top:6px">구도와 포즈는 거의 동일하게 유지됩니다.</div>
+     </div>`
+  );
+  if (!ok) return;
+
+  const btnM = document.getElementById('upgradeBtnMedium');
+  const btnH = document.getElementById('upgradeBtnHigh');
+  if (btnM) btnM.disabled = true;
+  if (btnH) btnH.disabled = true;
+  const targetBtn = (targetQuality === 'high') ? btnH : btnM;
+  if (targetBtn) targetBtn.innerHTML = '<div class="spin"></div> 업그레이드 중...';
+
+  // 아바타 레퍼런스 + 스케치 결과 url 둘 다 image_urls에 포함
+  const refImgs = S.avatars.filter(av => av.imgUrl).map(av => av.imgUrl);
+  if (S.continueRefDataUrl && S.continueRefPubUrl) refImgs.push(S.continueRefPubUrl);
+  refImgs.push(S.sketchPubUrl);  // 스케치 결과를 마지막 input으로
+
+  document.getElementById('quad').innerHTML = `
+    <div style="grid-column:1/-1;grid-row:1/-1;display:flex;align-items:center;justify-content:center;background:#0a0a0c;flex-direction:column;gap:10px">
+      <div class="spin" style="width:28px;height:28px;border-width:3px"></div>
+      <div style="font-size:11px;color:var(--ink2)">${targetQuality === 'high' ? 'High' : 'Medium'} 업그레이드 중...</div>
+    </div>`;
+
+  // 프롬프트 — 업그레이드용 추가 키워드
+  let basePrompt;
+  try { basePrompt = await buildImagePromptForApi(); } catch (e) { basePrompt = buildImagePrompt(); }
+  const upgradePrompt = basePrompt + '\n\nUPGRADE INSTRUCTIONS: Preserve the composition, character poses, camera angles, and overall layout from the previous result (last reference image). Enhance details, sharpen edges, improve textures and lighting quality. Keep the 4-panel grid structure identical.';
+
+  // imgModel select를 해당 quality로 강제
+  const imgSel = document.getElementById('imgModel');
+  let prevSelected = -1;
+  if (imgSel) {
+    prevSelected = imgSel.selectedIndex;
+    for (let i = 0; i < imgSel.options.length; i++) {
+      const opt = imgSel.options[i];
+      if (opt.value === 'openai/gpt-image-2/edit' && opt.dataset.quality === targetQuality) {
+        imgSel.selectedIndex = i;
+        break;
+      }
+    }
+  }
+
+  try {
+    const url = await callFalImageWithRef('', 'openai/gpt-image-2/edit', upgradePrompt, getGridSize(), refImgs);
+    S.gridPubUrl = url;
+    await _displayQuadFromUrl(url);
+
+    if (pts) addImgCost(pts);
+    log('ok', `업그레이드 완료 (${targetQuality}, ${pts || 0} P 차감)`);
+    toast(`업그레이드 완료 — ${targetQuality === 'high' ? 'High' : 'Medium'}`);
+  } catch (e) {
+    log('err', '업그레이드 실패: ' + e.message);
+    toast('업그레이드 실패: ' + e.message);
+  } finally {
+    if (btnM) { btnM.disabled = false; btnM.innerHTML = 'Medium 업그레이드'; }
+    if (btnH) { btnH.disabled = false; btnH.innerHTML = 'High 업그레이드'; }
+    if (imgSel && prevSelected >= 0) imgSel.selectedIndex = prevSelected;
+  }
+}
+
+// quad에 url 표시 + 4컷 분할 (generateImage 후처리 공통 추출)
+async function _displayQuadFromUrl(url) {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+
+  const canvas = document.createElement('canvas');
+  canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+  S.gridDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+
+  const hw = Math.floor(img.naturalWidth/2);
+  const hh = Math.floor(img.naturalHeight/2);
+  const positions = [[0,0],[hw,0],[0,hh],[hw,hh]];
+  S.cutDataUrls = [];
+  for (let i = 0; i < 4; i++) {
+    const cc = document.createElement('canvas');
+    cc.width = hw; cc.height = hh;
+    const cx = cc.getContext('2d');
+    cx.drawImage(img, positions[i][0], positions[i][1], hw, hh, 0, 0, hw, hh);
+    S.cutDataUrls[i] = cc.toDataURL('image/jpeg', 0.92);
+  }
+
+  if (typeof renderQuad === 'function') renderQuad();
+  if (typeof renderCutControls === 'function') renderCutControls();
+
+  const dlBar = document.getElementById('quadDownloadBar');
+  if (dlBar) dlBar.style.display = 'block';
+  const wrap = document.getElementById('cutCtrlWrap');
+  if (wrap) wrap.style.display = 'block';
+  const goBtn = document.getElementById('goVidBtn');
+  if (goBtn) goBtn.disabled = false;
 }
 
 // 1컷 단독 생성 — 선택한 컷의 앵글/묘사로 단일 이미지 생성
