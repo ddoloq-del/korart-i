@@ -3430,6 +3430,11 @@ function renderStep1Avatars() {
     // 현재 cast.outfit이 active 옵션과 매치하는지 (en 또는 luxEn)
     const outfitMatch = outfitOptions.find(o => o.en === outfit || o.luxEn === outfit);
     const isCustomOutfit = (outfit === ' ' || (outfit && !outfitMatch));
+    // 헤어 custom 검사 — sceneHair가 있는데 시대 옵션 매치 안 되면 custom
+    const sceneHair = av.sceneHair || '';
+    const hairOptions = (typeof getSceneHairOptions === 'function') ? getSceneHairOptions(av.gender) : [];
+    const hairMatch = hairOptions.find(h => h.en === sceneHair);
+    const isCustomHair = (sceneHair === ' ' || (sceneHair && !hairMatch));
     // 출연 컷 뱃지 — S.avatarCuts 기반
     let cutBadge = '';
     if (isCast) {
@@ -3499,7 +3504,12 @@ function renderStep1Avatars() {
                                  h.era === 'retro' ? '[레트로] ' : '';
                   return '<option value="' + escHtml(h.en) + '" ' + sel + '>' + eraTag + h.ko + '</option>';
                 }).join('')}
+                <option value="__custom__" ${isCustomHair ? 'selected' : ''}>직접 입력...</option>
               </select>
+              <input id="sceneHairCustom-${av.id}" placeholder="직접 입력 (예: 빨간 머리, 핑크 단발)"
+                     value="${isCustomHair ? escHtml(sceneHair) : ''}"
+                     oninput="updateAvatarSceneHairCustom(${av.id}, this.value)"
+                     style="display:${isCustomHair ? 'block' : 'none'};margin-top:5px;width:100%;background:var(--bg3);border:1px solid var(--gold);border-radius:0;padding:4px 6px;color:var(--ink);font-size:10px;box-sizing:border-box">
             </div>
           </div>
         ` : ''}
@@ -3537,8 +3547,19 @@ function setOutfitFromSelect(libId, val) {
 function setSceneHairFromSelect(libId, val) {
   const cast = S.avatars.find(a => (a._libId || a.id) === libId);
   if (!cast) return;
-  cast.sceneHair = val || '';
+  if (val === '__custom__') {
+    cast.sceneHair = ' ';  // custom mode 트리거 (공백)
+  } else {
+    cast.sceneHair = val || '';
+  }
   renderStep1Avatars();
+}
+
+// 헤어 custom input 입력 시 (포커스 유지 — 재렌더 X)
+function updateAvatarSceneHairCustom(libId, value) {
+  const cast = S.avatars.find(a => (a._libId || a.id) === libId);
+  if (!cast) return;
+  cast.sceneHair = value || ' ';
 }
 
 // === 시대 맞춤 헤어 옵션 (4단계 씬에서) ===
