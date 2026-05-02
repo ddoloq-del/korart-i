@@ -2019,6 +2019,17 @@ select option:hover {
         <button class="btn btn-sm" onclick="downloadGrid()" title="원본 4컷 통합 이미지 저장">4컷 그리드 전체 저장</button>
       </div>
 
+      <!-- 화질 드롭다운 (모든 이미지 모델 공통) -->
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;padding:8px 10px;background:rgba(200,160,74,.08);border:1px solid var(--gold);border-radius:0">
+        <label style="font-size:9px;color:var(--gold);font-weight:700;letter-spacing:.05em;text-transform:uppercase">화질</label>
+        <select id="imgQualitySel" onchange="onImgQualityChange()" style="background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:5px 8px;color:var(--ink);font-size:11px;font-family:inherit;cursor:pointer">
+          <option value="hd">HD (1K)</option>
+          <option value="fhd" selected>FHD (2K)</option>
+          <option value="uhd">UHD (4K)</option>
+        </select>
+        <div id="imgQualityHint" style="font-size:10px;color:var(--ink3)">FHD · 1920×1080 (16:9 기준)</div>
+      </div>
+
       <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
         <button class="btn btn-primary" id="genImgBtn" onclick="generateByMode()">4컷 생성</button>
         <button class="btn btn-sm" onclick="generateByMode()" title="재생성">재생성</button>
@@ -3380,6 +3391,7 @@ function saveSceneLib(arr) {
 // ════════════════════════════════════════════════════════════
 const S = {
   aspectRatio: '',  // 16:9, 9:16, 1:1
+  imgQuality: 'fhd',  // hd, fhd, uhd (이미지 화질)
   avatars: [],
   avatarCuts: {},  // libId → 출연 컷 인덱스 배열 [0,1,2,3] (기본: 모든 컷 출연)
   scene: 'romance',
@@ -3707,6 +3719,10 @@ function goStep(n) {
   if (n === 4) {
     const quad = document.getElementById('quad');
     if (quad) quad.style.aspectRatio = getQuadCssAspect();
+    // 화질 select를 S.imgQuality와 동기화 + 힌트 갱신
+    const qSel = document.getElementById('imgQualitySel');
+    if (qSel) qSel.value = S.imgQuality || 'fhd';
+    if (typeof updateImgQualityHint === 'function') updateImgQualityHint();
   }
 
   // 영상 패널 진입 시 컷 카드 렌더링 (4컷 없이 도달해도 빈 슬롯 표시 + 불러오기 가능)
@@ -3841,6 +3857,8 @@ function renderRatioGrid() {
 async function selectAspectRatio(value) {
   S.aspectRatio = value;
   renderRatioGrid();
+  // 화질 힌트 갱신 (비율 변경되면 사이즈도 변함)
+  if (typeof updateImgQualityHint === 'function') updateImgQualityHint();
 
   // 다음 버튼 활성화
   const btn = document.getElementById('ratioNextBtn');
@@ -6220,20 +6238,115 @@ const IMG_MODELS = [
   },
 ];
 
-// 비율별 GPT Image 2 사이즈 매핑 (가격표 기준)
+// 화질 티어 정의 (HD = 1K, FHD = 2K, UHD = 4K)
+const IMG_QUALITY_TIERS = ['hd', 'fhd', 'uhd'];
+const IMG_QUALITY_LABELS = { hd: 'HD (1K)', fhd: 'FHD (2K)', uhd: 'UHD (4K)' };
+
+// 비율 × 화질 → 사이즈 매핑 (1:1 + UHD는 GPT가 지원 안 하므로 null)
 const GPT_IMG_SIZE_MAP = {
-  '16:9': { width: 1920, height: 1080 },
-  '9:16': { width: 1080, height: 1920 },
-  '1:1':  { width: 1024, height: 1024 },
+  '16:9': {
+    hd:  { width: 1280, height: 720 },
+    fhd: { width: 1920, height: 1080 },
+    uhd: { width: 3840, height: 2160 },
+  },
+  '9:16': {
+    hd:  { width: 720,  height: 1280 },
+    fhd: { width: 1080, height: 1920 },
+    uhd: { width: 2160, height: 3840 },
+  },
+  '1:1': {
+    hd:  { width: 1024, height: 1024 },
+    fhd: { width: 2048, height: 2048 },
+    uhd: null,  // GPT Image 2 가격표에 1:1 4K 없음 → 비활성
+  },
 };
 
-// GPT Image 2 Edit 가격 매트릭스 (사이즈 + quality)
-// 1024x1024는 가격표에 명시, 1920x1080/1080x1920은 동일 가격으로 처리
+// GPT Image 2 Edit 가격 (Edit 페이지 가격표 기준)
+// 같은 픽셀 수 사이즈끼리 가격 동일
 const GPT_IMG_PRICING = {
-  '1920x1080': { low: 0.017, medium: 0.053, high: 0.158 },
-  '1080x1920': { low: 0.017, medium: 0.053, high: 0.158 },
-  '1024x1024': { low: 0.015, medium: 0.061, high: 0.219 },
+  // HD (1K)
+  '1280x720':   { low: 0.011, medium: 0.043, high: 0.151 },
+  '720x1280':   { low: 0.011, medium: 0.043, high: 0.151 },
+  '1024x1024':  { low: 0.015, medium: 0.061, high: 0.219 },
+  // FHD (2K)
+  '1920x1080':  { low: 0.017, medium: 0.053, high: 0.158 },
+  '1080x1920':  { low: 0.017, medium: 0.053, high: 0.158 },
+  '2048x2048':  { low: 0.019, medium: 0.068, high: 0.234 },  // 2560x1440 가격에 가깝게 매핑
+  // UHD (4K)
+  '3840x2160':  { low: 0.024, medium: 0.113, high: 0.413 },
+  '2160x3840':  { low: 0.024, medium: 0.113, high: 0.413 },
 };
+
+// 나노바나나 가격 (resolution: 1k/2k/4k에 따라 변동)
+// nano-banana-pro: \$0.15 (1K/2K), \$0.30 (4K = 2배)
+// nano-banana-2:   \$0.08 (1K), \$0.12 (2K = 1.5배), \$0.16 (4K = 2배)
+const NANO_BANANA_PRICING = {
+  'fal-ai/nano-banana-pro/edit': { hd: 0.15, fhd: 0.15, uhd: 0.30 },
+  'fal-ai/nano-banana-2/edit':   { hd: 0.08, fhd: 0.12, uhd: 0.16 },
+};
+
+// 화질 → 나노바나나 resolution 파라미터 매핑
+const NANO_RES_PARAM = { hd: '1K', fhd: '2K', uhd: '4K' };
+
+// 현재 선택된 화질 (HD/FHD/UHD) — 기본 FHD
+// 화질 변경 핸들러
+function onImgQualityChange() {
+  const sel = document.getElementById('imgQualitySel');
+  if (!sel) return;
+  if (typeof S !== 'undefined') S.imgQuality = sel.value;
+  // 힌트 텍스트 갱신 (현재 비율 기준 사이즈 표시)
+  updateImgQualityHint();
+}
+
+function updateImgQualityHint() {
+  const hint = document.getElementById('imgQualityHint');
+  if (!hint) return;
+  const q = getSelectedImgQuality();
+  const ar = (typeof S !== 'undefined' && S.aspectRatio) ? S.aspectRatio : '16:9';
+  const sz = getGptImgSize(ar, q);
+  const qLabel = IMG_QUALITY_LABELS[q] || q;
+  if (sz) {
+    hint.textContent = qLabel + ' · ' + sz.width + '×' + sz.height + ' (' + ar + ')';
+    hint.style.color = 'var(--ink3)';
+  } else {
+    hint.textContent = qLabel + ' · ' + ar + '에서는 GPT 지원 안함 (나노바나나만 가능)';
+    hint.style.color = 'var(--gold)';
+  }
+}
+
+function getSelectedImgQuality() {
+  return (S && S.imgQuality) || 'fhd';
+}
+
+// 비율 + 화질 → GPT 사이즈 (1:1 + UHD는 null)
+function getGptImgSize(aspectRatio, quality) {
+  const m = GPT_IMG_SIZE_MAP[aspectRatio];
+  if (!m) return null;
+  return m[quality] || null;
+}
+
+// 모델 + 비율 + 화질 → 가격(P)
+function calcImgPoints(modelValue, modelQuality, aspectRatio, imgQuality) {
+  // 나노바나나
+  if (modelValue && modelValue.includes('nano-banana')) {
+    const p = NANO_BANANA_PRICING[modelValue];
+    if (!p) return 0;
+    const usd = p[imgQuality] || p.fhd || 0;
+    return Math.round(usd * 42 * 10) / 10;
+  }
+  // GPT Image 2 Edit
+  if (modelValue && modelValue.includes('gpt-image')) {
+    const sz = getGptImgSize(aspectRatio, imgQuality);
+    if (!sz) return null;  // 1:1 + UHD는 비활성
+    const key = sz.width + 'x' + sz.height;
+    const p = GPT_IMG_PRICING[key];
+    if (!p) return 0;
+    const q = modelQuality || 'medium';
+    const usd = p[q] || 0;
+    return Math.round(usd * 42 * 10) / 10;
+  }
+  return 0;
+}
 
 
 const VID_MODELS = [
@@ -6349,21 +6462,34 @@ function pickModel(kind) {
       <div style="font-size:11px;color:var(--ink3);margin-bottom:12px">생성에 사용할 모델을 선택하세요</div>
       <div style="display:flex;flex-direction:column;gap:8px;max-height:380px;overflow-y:auto">
         ${list.map((m, i) => {
-          // P 가격 계산 (이미지: cpm × 42, 영상: 첫 해상도 기준)
+          // P 가격 계산 — 이미지: 화질+비율 반영, 영상: 첫 해상도 기준
           let priceTag = '';
-          if (kind === 'img' && m.cpm) {
-            const pts = Math.round(m.cpm * 42 * 10) / 10;
-            priceTag = pts + ' P/장';
+          let disabled = false;
+          if (kind === 'img') {
+            const ar = (typeof S !== 'undefined' && S.aspectRatio) ? S.aspectRatio : '16:9';
+            const q = (typeof getSelectedImgQuality === 'function') ? getSelectedImgQuality() : 'fhd';
+            const pts = (typeof calcImgPoints === 'function')
+              ? calcImgPoints(m.value, m.quality, ar, q)
+              : (m.cpm ? Math.round(m.cpm * 42 * 10) / 10 : 0);
+            if (pts === null) {
+              priceTag = '⚠️ ' + ar + '+UHD 미지원';
+              disabled = true;
+            } else if (pts > 0) {
+              priceTag = pts + ' P/장';
+            }
           } else if (kind === 'vid' && m.resolutions && m.resolutions[0]) {
             const r = m.resolutions[0];
             priceTag = (r.cpsOff !== r.cpsOn)
               ? r.pointsOff + '~' + r.pointsOn + ' P/초'
               : r.pointsOff + ' P/초';
           }
+          const cardStyle = disabled
+            ? 'cursor:not-allowed;padding:12px 14px;border-radius: 0;border:1px solid var(--line);background:var(--bg2);opacity:0.45;display:flex;align-items:center;gap:10px'
+            : 'cursor:pointer;padding:12px 14px;border-radius: 0;border:1px solid var(--line);background:var(--bg2);transition:.15s;display:flex;align-items:center;gap:10px';
+          const onClick = disabled ? "event.stopPropagation();toast('이 비율+화질 조합에서는 지원하지 않는 모델입니다')" : ('_pickModelChoice(' + i + ')');
+          const hover = disabled ? '' : 'onmouseover="this.style.borderColor=\'var(--pink)\';this.style.background=\'rgba(255,107,157,.05)\'" onmouseout="this.style.borderColor=\'var(--line)\';this.style.background=\'var(--bg2)\'"';
           return `
-          <div onclick="_pickModelChoice(${i})" style="cursor:pointer;padding:12px 14px;border-radius: 0;border:1px solid var(--line);background:var(--bg2);transition:.15s;display:flex;align-items:center;gap:10px"
-               onmouseover="this.style.borderColor='var(--pink)';this.style.background='rgba(255,107,157,.05)'"
-               onmouseout="this.style.borderColor='var(--line)';this.style.background='var(--bg2)'">
+          <div onclick="${onClick}" style="${cardStyle}" ${hover}>
             <div style="flex:1">
               <div style="font-size:13px;font-weight:700;color:var(--cream);margin-bottom:2px">
                 ${m.label}${m.recommended ? ' <span style=\"font-size:9px;background:linear-gradient(135deg,#818cf8 0%,#c084fc 50%,#f472b6 100%);color:#fff;padding:2px 7px;border-radius: 0;margin-left:4px;font-weight:800\">추천</span>' : ''}
@@ -8212,11 +8338,13 @@ async function callFalImage(key, model, prompt, size, refImageUrl) {
   const isNanoBanana = model.includes('nano-banana');
   const isFluxUltra = model.includes('flux-pro/v1.1-ultra');
   const isFlux = model.includes('flux');
-  // GPT Image 2: 1920x1080 / 1080x1920 / 1024x1024 사이즈로 강제 매핑
+  // GPT Image 2 / 나노바나나: 비율 + 화질 → 사이즈 매핑
+  const imgQ = (typeof getSelectedImgQuality === 'function') ? getSelectedImgQuality() : 'fhd';
   if (isGpt) {
     const ar = (typeof S !== 'undefined' && S.aspectRatio) ? S.aspectRatio : '16:9';
-    const m = (typeof GPT_IMG_SIZE_MAP !== 'undefined') ? GPT_IMG_SIZE_MAP[ar] : null;
-    if (m) { w = m.width; h = m.height; }
+    const sz = (typeof getGptImgSize === 'function') ? getGptImgSize(ar, imgQ) : null;
+    if (sz) { w = sz.width; h = sz.height; }
+    else { throw new Error('이 비율 + 화질 조합은 지원하지 않습니다 (예: 1:1 + UHD)'); }
   }
 
   // 사용자가 선택한 quality 가져오기 (GPT Image 2: low/medium/high)
@@ -8249,8 +8377,12 @@ async function callFalImage(key, model, prompt, size, refImageUrl) {
     // refImageUrl 있으면 image_urls 배열로 전달 (Edit 모델은 필수)
     if (refImageUrl) body.image_urls = [refImageUrl];
   } else if (isNanoBanana) {
-    // 나노바나나 프로/2 Edit: prompt + aspect_ratio + image_urls
+    // 나노바나나 프로/2 Edit: prompt + aspect_ratio + resolution + image_urls
     body = { prompt, aspect_ratio: ratio, output_format: 'png' };
+    // 화질 → resolution 파라미터 (1K/2K/4K)
+    if (typeof NANO_RES_PARAM !== 'undefined' && NANO_RES_PARAM[imgQ]) {
+      body.resolution = NANO_RES_PARAM[imgQ];
+    }
     if (refImageUrl) body.image_urls = [refImageUrl];
   } else if (isFluxUltra) {
     body = { prompt, aspect_ratio: ratio, output_format: 'jpeg', safety_tolerance: '5' };
@@ -8327,7 +8459,18 @@ async function callFalImageWithRef(key, model, prompt, size, refImageUrls) {
   }));
   const imageLabels = labelLines.join('\n');
 
-  const [w, h] = size.split('x').map(Number);
+  let [w, h] = size.split('x').map(Number);
+  // 화질 + 비율 → 사이즈 재매핑 (사용자가 imgQualitySel 선택 반영)
+  const refImgQ = (typeof getSelectedImgQuality === 'function') ? getSelectedImgQuality() : 'fhd';
+  const refAr = (typeof S !== 'undefined' && S.aspectRatio) ? S.aspectRatio : '16:9';
+  // 모델은 아래에서 결정 (model 또는 select.value)
+  const _selForSize = document.getElementById('imgModel');
+  const _useModelForSize = model || _selForSize?.value || '';
+  if (_useModelForSize.includes('gpt-image')) {
+    const sz = getGptImgSize(refAr, refImgQ);
+    if (sz) { w = sz.width; h = sz.height; }
+    else { throw new Error('이 비율 + 화질 조합은 GPT Image 2 Edit이 지원 안 합니다 (예: 1:1 + UHD). 나노바나나로 시도하세요.'); }
+  }
   const editSize = { width: w, height: h };
 
   const editPrompt = `REFERENCE IMAGES:
@@ -8380,14 +8523,17 @@ ${prompt}`;
     };
     log('info', `GPT Image 2 Edit · quality: ${userQuality}`);
   } else if (isNanoBanana) {
-    // 나노바나나 프로/2 Edit: prompt + image_urls + aspect_ratio
+    // 나노바나나 프로/2 Edit: prompt + image_urls + aspect_ratio + resolution
     body = {
       prompt: editPrompt,
       image_urls: publicUrls,
       aspect_ratio: aspectRatio,
       output_format: 'png',
     };
-    log('info', `${useModel} · aspect_ratio: ${aspectRatio}`);
+    if (typeof NANO_RES_PARAM !== 'undefined' && NANO_RES_PARAM[refImgQ]) {
+      body.resolution = NANO_RES_PARAM[refImgQ];
+    }
+    log('info', `${useModel} · aspect_ratio: ${aspectRatio} · resolution: ${body.resolution || 'default'}`);
   } else {
     // 폴백 — 일반 이미지 모델
     return await callFalImage(key, useModel, editPrompt, size);
