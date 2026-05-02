@@ -2317,6 +2317,119 @@ select option:hover {
     </div>
     <!-- ============= 반려동물 카테고리 입력 폼 끝 ============= -->
 
+    <!-- ============= 제품 카테고리 입력 폼 ============= -->
+    <div id="avProductFields" style="display:none">
+      <!-- 카테고리 -->
+      <div class="field">
+        <label>카테고리</label>
+        <div class="segs" id="avProductCatSegs" style="flex-wrap:wrap">
+          <div class="seg" onclick="selSeg(this,'avProductCat','food and beverage product')">음식/음료</div>
+          <div class="seg" onclick="selSeg(this,'avProductCat','cosmetic and beauty product')">화장품/뷰티</div>
+          <div class="seg" onclick="selSeg(this,'avProductCat','fashion and clothing item')">의류/패션</div>
+          <div class="seg" onclick="selSeg(this,'avProductCat','electronic device')">전자제품</div>
+          <div class="seg" onclick="selSeg(this,'avProductCat','furniture and home goods')">가구/홈</div>
+          <div class="seg" onclick="selSeg(this,'avProductCat','household and lifestyle product')">생활용품</div>
+          <div class="seg" onclick="selSeg(this,'avProductCat','jewelry and accessory')">주얼리/액세서리</div>
+          <div class="seg" onclick="selSeg(this,'avProductCat','stationery and office supply')">문구/사무용품</div>
+          <div class="seg" onclick="selSeg(this,'avProductCat','toy and gift item')">장난감/선물</div>
+          <div class="seg" onclick="selSeg(this,'avProductCat','pet supply')">반려동물 용품</div>
+        </div>
+        <input id="avProductCatCustom" placeholder="개인설정: 직접 입력 (예: 아트 굿즈, 핸드메이드)" oninput="useProductCatCustom()" style="width:100%;margin-top:6px;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:6px 10px;color:var(--ink);font-size:11px">
+        <input type="hidden" id="avProductCat" value="">
+      </div>
+
+      <!-- 재질 -->
+      <div class="field">
+        <label>재질</label>
+        <div class="segs" id="avProductMaterialSegs" style="flex-wrap:wrap">
+          <div class="seg" onclick="selSeg(this,'avProductMaterial','glass')">유리</div>
+          <div class="seg" onclick="selSeg(this,'avProductMaterial','plastic')">플라스틱</div>
+          <div class="seg" onclick="selSeg(this,'avProductMaterial','paper and cardboard')">종이</div>
+          <div class="seg" onclick="selSeg(this,'avProductMaterial','metal, brushed steel')">금속</div>
+          <div class="seg" onclick="selSeg(this,'avProductMaterial','leather')">가죽</div>
+          <div class="seg" onclick="selSeg(this,'avProductMaterial','fabric, woven textile')">천/패브릭</div>
+          <div class="seg" onclick="selSeg(this,'avProductMaterial','wood, natural grain')">나무</div>
+          <div class="seg" onclick="selSeg(this,'avProductMaterial','ceramic')">세라믹</div>
+          <div class="seg" onclick="selSeg(this,'avProductMaterial','silicone')">실리콘</div>
+          <div class="seg" onclick="selSeg(this,'avProductMaterial','mixed materials')">복합 재질</div>
+        </div>
+        <input id="avProductMaterialCustom" placeholder="개인설정: 직접 입력 (예: 매트 알루미늄 + 우드 그립)" oninput="useProductMaterialCustom()" style="width:100%;margin-top:6px;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:6px 10px;color:var(--ink);font-size:11px">
+      </div>
+
+      <!-- 색상 -->
+      <div class="field">
+        <label>색상</label>
+        <div class="segs" id="avProductColorSegs" style="flex-wrap:wrap">
+          <div class="seg" onclick="selSeg(this,'avProductColor','pure white')">화이트</div>
+          <div class="seg" onclick="selSeg(this,'avProductColor','jet black')">블랙</div>
+          <div class="seg" onclick="selSeg(this,'avProductColor','soft beige')">베이지</div>
+          <div class="seg" onclick="selSeg(this,'avProductColor','mint green')">민트</div>
+          <div class="seg" onclick="selSeg(this,'avProductColor','pastel pink')">파스텔 핑크</div>
+          <div class="seg" onclick="selSeg(this,'avProductColor','sky blue')">스카이 블루</div>
+          <div class="seg" onclick="selSeg(this,'avProductColor','wine red')">와인 레드</div>
+          <div class="seg" onclick="selSeg(this,'avProductColor','gold metallic')">골드</div>
+          <div class="seg" onclick="selSeg(this,'avProductColor','silver metallic')">실버</div>
+          <div class="seg" onclick="selSeg(this,'avProductColor','transparent clear')">투명</div>
+        </div>
+        <input id="avProductColorCustom" placeholder="개인설정: 직접 입력 (예: 라벤더 + 골드 라벨)" oninput="useProductColorCustom()" style="width:100%;margin-top:6px;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:6px 10px;color:var(--ink);font-size:11px">
+      </div>
+
+      <!-- 크기 -->
+      <div class="field">
+        <label>크기</label>
+        <div class="segs">
+          <div class="seg" onclick="selSeg(this,'avProductSize','tiny pocket-sized')">손바닥</div>
+          <div class="seg" onclick="selSeg(this,'avProductSize','small handheld size')">소형</div>
+          <div class="seg" onclick="selSeg(this,'avProductSize','medium tabletop size')">중형</div>
+          <div class="seg" onclick="selSeg(this,'avProductSize','large floor-standing size')">대형</div>
+        </div>
+        <input type="hidden" id="avProductSize" value="">
+      </div>
+
+      <!-- 형태 -->
+      <div class="field">
+        <label>형태</label>
+        <div class="segs" style="flex-wrap:wrap">
+          <div class="seg" onclick="selSeg(this,'avProductShape','round, circular')">둥근</div>
+          <div class="seg" onclick="selSeg(this,'avProductShape','square, rectangular')">사각</div>
+          <div class="seg" onclick="selSeg(this,'avProductShape','cylindrical bottle shape')">원통/병</div>
+          <div class="seg" onclick="selSeg(this,'avProductShape','curved organic shape')">유선형</div>
+          <div class="seg" onclick="selSeg(this,'avProductShape','flat slim shape')">납작</div>
+          <div class="seg" onclick="selSeg(this,'avProductShape','irregular unique shape')">비정형</div>
+        </div>
+        <input type="hidden" id="avProductShape" value="">
+      </div>
+
+      <!-- 텍스트/로고 -->
+      <div class="field">
+        <label>로고/텍스트 (선택)</label>
+        <input id="avProductLogo" placeholder="제품에 표시될 텍스트나 로고 이름 (예: KORART, 봄봄)" style="width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:6px 10px;color:var(--ink);font-size:11px">
+        <div style="font-size:9px;color:var(--ink3);margin-top:4px">제품 표면에 표시되는 브랜드/문구</div>
+      </div>
+
+      <!-- 디자인 스타일 -->
+      <div class="field">
+        <label>디자인 스타일</label>
+        <div class="segs" id="avProductStyleSegs" style="flex-wrap:wrap">
+          <div class="seg" onclick="selSeg(this,'avProductStyle','minimalist clean modern design')">미니멀</div>
+          <div class="seg" onclick="selSeg(this,'avProductStyle','luxury premium high-end design')">럭셔리</div>
+          <div class="seg" onclick="selSeg(this,'avProductStyle','cute kawaii cheerful design')">큐티/카와이</div>
+          <div class="seg" onclick="selSeg(this,'avProductStyle','vintage retro classic design')">빈티지</div>
+          <div class="seg" onclick="selSeg(this,'avProductStyle','natural eco-friendly organic design')">내추럴</div>
+          <div class="seg" onclick="selSeg(this,'avProductStyle','tech futuristic sleek design')">테크/모던</div>
+          <div class="seg" onclick="selSeg(this,'avProductStyle','playful colorful pop design')">팝/컬러풀</div>
+        </div>
+        <input id="avProductStyleCustom" placeholder="개인설정: 직접 입력 (예: 한국적 단아함)" oninput="useProductStyleCustom()" style="width:100%;margin-top:6px;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:6px 10px;color:var(--ink);font-size:11px">
+      </div>
+
+      <!-- 특징 -->
+      <div class="field">
+        <label>특징 (선택)</label>
+        <input id="avProductExtra" placeholder="추가 특징 (예: 손잡이 있음, 뚜껑 회전식, 양각 무늬)" style="width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:6px 10px;color:var(--ink);font-size:11px">
+      </div>
+    </div>
+    <!-- ============= 제품 카테고리 입력 폼 끝 ============= -->
+
     <!-- 아바타 이미지 -->
     <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;padding:12px;background:var(--bg);border:1px solid var(--line);border-radius:8px">
       <div id="avImgPreview" style="width:180px;height:120px;background:var(--bg4);border:1px dashed var(--line2);border-radius: 0;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:32px;flex-shrink:0;overflow:hidden">👤</div>
@@ -3177,7 +3290,7 @@ function loadAvatarLib() {
 const AVATAR_CATEGORIES = [
   { value: 'person',  label: '사람',     enabled: true  },
   { value: 'pet',     label: '반려동물', enabled: true  },
-  { value: 'product', label: '제품',     enabled: false },
+  { value: 'product', label: '제품',     enabled: true  },
 ];
 
 // 현재 선택된 카테고리 (전역, 두 화면 공유)
@@ -4261,6 +4374,15 @@ function addAvatar() {
     petSize:    document.getElementById('avPetSize')?.value || '',
     petCoat:    document.getElementById('avPetCoat')?.value || '',
     petExtra:   document.getElementById('avPetExtra')?.value || '',
+    // 제품 카테고리 필드
+    productCat:      document.getElementById('avProductCat')?.value || '',
+    productMaterial: document.getElementById('avProductMaterial')?.value || '',
+    productColor:    document.getElementById('avProductColor')?.value || '',
+    productSize:     document.getElementById('avProductSize')?.value || '',
+    productShape:    document.getElementById('avProductShape')?.value || '',
+    productLogo:     document.getElementById('avProductLogo')?.value || '',
+    productStyle:    document.getElementById('avProductStyle')?.value || '',
+    productExtra:    document.getElementById('avProductExtra')?.value || '',
   };
   S.avatars.push(av);
   renderAvatars();
@@ -4520,13 +4642,62 @@ function clearPetForm() {
 function toggleAvatarFormByCategory(cat) {
   const personFields = document.getElementById('avPersonFields');
   const petFields = document.getElementById('avPetFields');
-  if (personFields) personFields.style.display = (cat === 'person') ? '' : 'none';
-  if (petFields)    petFields.style.display    = (cat === 'pet')    ? '' : 'none';
+  const productFields = document.getElementById('avProductFields');
+  if (personFields)  personFields.style.display  = (cat === 'person')  ? '' : 'none';
+  if (petFields)     petFields.style.display     = (cat === 'pet')     ? '' : 'none';
+  if (productFields) productFields.style.display = (cat === 'product') ? '' : 'none';
   // 모달 카테고리 라벨 갱신
   const modalCat = document.getElementById('avModalCat');
   if (modalCat) {
-    modalCat.textContent = (cat === 'pet') ? 'NEW PET' : 'NEW AVATAR';
+    if      (cat === 'pet')     modalCat.textContent = 'NEW PET';
+    else if (cat === 'product') modalCat.textContent = 'NEW PRODUCT';
+    else                        modalCat.textContent = 'NEW AVATAR';
   }
+}
+
+// ============================================
+// 제품 카테고리 헬퍼
+// ============================================
+function useProductCatCustom() {
+  const custom = document.getElementById('avProductCatCustom').value.trim();
+  if (custom) {
+    document.querySelectorAll('#avProductCatSegs .seg').forEach(s => s.classList.remove('active'));
+    document.getElementById('avProductCat').value = custom;
+  }
+}
+
+function useProductMaterialCustom() {
+  const custom = document.getElementById('avProductMaterialCustom').value.trim();
+  if (custom) {
+    document.querySelectorAll('#avProductMaterialSegs .seg').forEach(s => s.classList.remove('active'));
+    document.getElementById('avProductMaterial').value = custom;
+  }
+}
+
+function useProductColorCustom() {
+  const custom = document.getElementById('avProductColorCustom').value.trim();
+  if (custom) {
+    document.querySelectorAll('#avProductColorSegs .seg').forEach(s => s.classList.remove('active'));
+    document.getElementById('avProductColor').value = custom;
+  }
+}
+
+function useProductStyleCustom() {
+  const custom = document.getElementById('avProductStyleCustom').value.trim();
+  if (custom) {
+    document.querySelectorAll('#avProductStyleSegs .seg').forEach(s => s.classList.remove('active'));
+    document.getElementById('avProductStyle').value = custom;
+  }
+}
+
+function clearProductForm() {
+  ['avProductCat', 'avProductMaterial', 'avProductColor', 'avProductSize', 'avProductShape', 'avProductLogo', 'avProductStyle', 'avProductExtra'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  ['avProductCatCustom', 'avProductMaterialCustom', 'avProductColorCustom', 'avProductStyleCustom'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.querySelectorAll('#avProductFields .seg').forEach(s => s.classList.remove('active'));
 }
 
 async function generateAvatarImage() {
@@ -4547,11 +4718,11 @@ async function generateAvatarImage() {
   }
 
   // 현재 카테고리 확인 (모달에서 보이는 폼 기준)
-  const _isPet = (typeof getCurrentAvatarCat === 'function')
-    && (document.getElementById('avPetFields')?.style.display !== 'none')
-    && (document.getElementById('avPersonFields')?.style.display === 'none');
+  const _personHidden = (document.getElementById('avPersonFields')?.style.display === 'none');
+  const _isPet = _personHidden && (document.getElementById('avPetFields')?.style.display !== 'none');
+  const _isProduct = _personHidden && (document.getElementById('avProductFields')?.style.display !== 'none');
 
-  const name = document.getElementById('avName').value.trim() || (_isPet ? 'pet' : 'Korean character');
+  const name = document.getElementById('avName').value.trim() || (_isPet ? 'pet' : _isProduct ? 'product' : 'Korean character');
   const gender = document.getElementById('avGender').value || 'Korean person';
   const age = document.getElementById('avAge').value;
   const body = document.getElementById('avBody').value;
@@ -4609,6 +4780,32 @@ CRITICAL requirements:
 - No humans visible
 
 Pet description: ${charDesc}.`;
+  } else if (_isProduct) {
+    // 제품 프롬프트 빌드
+    const productCat      = document.getElementById('avProductCat')?.value      || 'product';
+    const productMaterial = document.getElementById('avProductMaterial')?.value || '';
+    const productColor    = document.getElementById('avProductColor')?.value    || '';
+    const productSize     = document.getElementById('avProductSize')?.value     || '';
+    const productShape    = document.getElementById('avProductShape')?.value    || '';
+    const productLogo     = document.getElementById('avProductLogo')?.value.trim() || '';
+    const productStyle    = document.getElementById('avProductStyle')?.value    || '';
+    const productExtra    = document.getElementById('avProductExtra')?.value.trim() || '';
+
+    const prodParts = [];
+    if (productStyle)    prodParts.push(productStyle);
+    if (productColor)    prodParts.push(productColor);
+    if (productMaterial) prodParts.push(productMaterial);
+    if (productCat)      prodParts.push(productCat);
+    if (productShape)    prodParts.push(productShape);
+    if (productSize)     prodParts.push(productSize);
+    if (productExtra)    prodParts.push(productExtra);
+    charDesc = prodParts.join(', ') || 'a product';
+
+    const logoLine = productLogo
+      ? `\n- The brand text or logo \"${productLogo}\" must be clearly visible and consistent across all panels`
+      : '';
+
+    prompt = `Create a single product reference sheet image showing the SAME product in a strict 3x2 grid layout (3 columns, 2 rows) with thin black dividing lines between each panel. Plain neutral light gray studio background, professional product photography lighting.\n\nTop row (left to right):\n1. Front view, straight-on angle\n2. Three-quarter view from the LEFT\n3. Three-quarter view from the RIGHT\n\nBottom row (left to right):\n4. Back view\n5. Top-down view (from above)\n6. Detail close-up showing texture and material\n\nCRITICAL requirements:\n- Exact same product, same color, same material, same proportions in ALL 6 panels${logoLine}\n- Studio product photography, soft diffused lighting, clean shadows\n- Photorealistic, sharp focus, high detail\n- No humans, no hands holding the product\n- Centered composition with empty negative space around the product\n\nProduct description: ${charDesc}.`;
   } else {
     // 사람 프롬프트 빌드 (기존)
     const charParts = [`a ${gender}`];
@@ -4851,6 +5048,8 @@ function openAvatarModal(editId) {
   clearAvatarRefImage();
   // 반려동물 폼 초기화
   if (typeof clearPetForm === 'function') clearPetForm();
+  // 제품 폼 초기화
+  if (typeof clearProductForm === 'function') clearProductForm();
   // 편집 모드면 그 아바타의 카테고리, 새 모드면 현재 탭 카테고리
   let _modalCat = getCurrentAvatarCat();
   if (editId) {
@@ -5016,6 +5215,63 @@ function openAvatarModal(editId) {
           document.getElementById('avPetExtra').value = av.petExtra;
         }
       }
+      // 제품 필드 복원
+      if (av.category === 'product') {
+        // 카테고리 — 표준 매치 또는 직접 입력
+        if (av.productCat) {
+          let matched = false;
+          document.querySelectorAll('#avProductCatSegs .seg').forEach(s => {
+            const oc = s.getAttribute('onclick') || '';
+            if (oc.includes("'" + av.productCat + "'")) { s.classList.add('active'); matched = true; }
+          });
+          if (!matched) document.getElementById('avProductCatCustom').value = av.productCat;
+          document.getElementById('avProductCat').value = av.productCat;
+        }
+        // 재질
+        if (av.productMaterial) {
+          let matched = false;
+          document.querySelectorAll('#avProductMaterialSegs .seg').forEach(s => {
+            const oc = s.getAttribute('onclick') || '';
+            if (oc.includes("'" + av.productMaterial + "'")) { s.classList.add('active'); matched = true; }
+          });
+          if (!matched) document.getElementById('avProductMaterialCustom').value = av.productMaterial;
+          document.getElementById('avProductMaterial').value = av.productMaterial;
+        }
+        // 색상
+        if (av.productColor) {
+          let matched = false;
+          document.querySelectorAll('#avProductColorSegs .seg').forEach(s => {
+            const oc = s.getAttribute('onclick') || '';
+            if (oc.includes("'" + av.productColor + "'")) { s.classList.add('active'); matched = true; }
+          });
+          if (!matched) document.getElementById('avProductColorCustom').value = av.productColor;
+          document.getElementById('avProductColor').value = av.productColor;
+        }
+        // 크기/형태 — segs
+        ['avProductSize', 'avProductShape'].forEach(fid => {
+          const val = av[fid.replace('av', '').charAt(0).toLowerCase() + fid.replace('av', '').slice(1)];
+          if (val) {
+            document.querySelectorAll('#avProductFields .seg').forEach(s => {
+              const oc = s.getAttribute('onclick') || '';
+              if (oc.includes("'" + fid + "'") && oc.includes("'" + val + "'")) s.classList.add('active');
+            });
+            document.getElementById(fid).value = val;
+          }
+        });
+        // 스타일
+        if (av.productStyle) {
+          let matched = false;
+          document.querySelectorAll('#avProductStyleSegs .seg').forEach(s => {
+            const oc = s.getAttribute('onclick') || '';
+            if (oc.includes("'" + av.productStyle + "'")) { s.classList.add('active'); matched = true; }
+          });
+          if (!matched) document.getElementById('avProductStyleCustom').value = av.productStyle;
+          document.getElementById('avProductStyle').value = av.productStyle;
+        }
+        // 로고/특징 — text input
+        if (av.productLogo)  document.getElementById('avProductLogo').value  = av.productLogo;
+        if (av.productExtra) document.getElementById('avProductExtra').value = av.productExtra;
+      }
       // 헤더 라벨
       document.getElementById('avModalCat').textContent = 'EDIT AVATAR';
       document.getElementById('avModalTitle').textContent = `"${av.name}" 수정`;
@@ -5160,6 +5416,10 @@ function saveAvatarToLibFromModal() {
   if (typeof usePetSpeciesCustom === 'function') usePetSpeciesCustom();
   if (typeof usePetBreedCustom === 'function') usePetBreedCustom();
   if (typeof usePetColorCustom === 'function') usePetColorCustom();
+  if (typeof useProductCatCustom === 'function') useProductCatCustom();
+  if (typeof useProductMaterialCustom === 'function') useProductMaterialCustom();
+  if (typeof useProductColorCustom === 'function') useProductColorCustom();
+  if (typeof useProductStyleCustom === 'function') useProductStyleCustom();
 
   // 저장 (기존 saveAvatarToLib 활용)
   const editingId = S._editingAvId;
@@ -5190,6 +5450,15 @@ function saveAvatarToLibFromModal() {
     petSize:    document.getElementById('avPetSize')?.value || '',
     petCoat:    document.getElementById('avPetCoat')?.value || '',
     petExtra:   document.getElementById('avPetExtra')?.value || '',
+    // 제품 카테고리 필드
+    productCat:      document.getElementById('avProductCat')?.value || '',
+    productMaterial: document.getElementById('avProductMaterial')?.value || '',
+    productColor:    document.getElementById('avProductColor')?.value || '',
+    productSize:     document.getElementById('avProductSize')?.value || '',
+    productShape:    document.getElementById('avProductShape')?.value || '',
+    productLogo:     document.getElementById('avProductLogo')?.value || '',
+    productStyle:    document.getElementById('avProductStyle')?.value || '',
+    productExtra:    document.getElementById('avProductExtra')?.value || '',
   };
 
   if (editingId) {
@@ -5298,6 +5567,15 @@ function saveAvatarToLib() {
     petSize:    document.getElementById('avPetSize')?.value || '',
     petCoat:    document.getElementById('avPetCoat')?.value || '',
     petExtra:   document.getElementById('avPetExtra')?.value || '',
+    // 제품 카테고리 필드
+    productCat:      document.getElementById('avProductCat')?.value || '',
+    productMaterial: document.getElementById('avProductMaterial')?.value || '',
+    productColor:    document.getElementById('avProductColor')?.value || '',
+    productSize:     document.getElementById('avProductSize')?.value || '',
+    productShape:    document.getElementById('avProductShape')?.value || '',
+    productLogo:     document.getElementById('avProductLogo')?.value || '',
+    productStyle:    document.getElementById('avProductStyle')?.value || '',
+    productExtra:    document.getElementById('avProductExtra')?.value || '',
   };
 
   // 편집 모드: ID로 찾아서 덮어쓰기
@@ -5389,6 +5667,13 @@ function renderSavedAvatars() {
       if (av.petBreed)  tags.push(av.petBreed.split(',')[0]);
       if (av.petColor)  tags.push((av.petColor.split(',')[0] || '').replace(/ fur/, '').trim());
       if (av.petSize)   tags.push((av.petSize.split(',')[0] || ''));
+    } else if (av.category === 'product') {
+      // 제품 태그
+      tags.push('제품');
+      if (av.productCat)      tags.push(av.productCat.split(',')[0].split(' ')[0]);
+      if (av.productMaterial) tags.push(av.productMaterial.split(',')[0]);
+      if (av.productColor)    tags.push(av.productColor.split(',')[0]);
+      if (av.productSize)     tags.push((av.productSize.split(',')[0] || '').split(' ')[0]);
     } else {
       const ageShort = (av.age || '').includes('teenager') ? '10대'
         : (av.age || '').includes('elderly') ? '80대'
@@ -6848,7 +7133,16 @@ function buildVidPrompt(i) {
     const libId = av._libId || av.id;
     return S.avatarCuts && Array.isArray(S.avatarCuts[libId]) ? S.avatarCuts[libId] : [0,1,2,3];
   };
-  const cutAvatars = S.avatars.filter(av => cutsForAv(av).includes(i));
+  // 영상 프롬프트는 사람 캐릭터만 포함 (반려동물/제품 제외)
+  const cutAvatars = S.avatars.filter(av => {
+    if (!cutsForAv(av).includes(i)) return false;
+    // 라이브러리에서 카테고리 확인 (사람만 통과)
+    const libId = av._libId || av.id;
+    const fullLib = (typeof loadAvatarLib === 'function') ? loadAvatarLib() : [];
+    const libAv = fullLib.find(a => a.id === libId);
+    const cat = (libAv && libAv.category) || av.category || 'person';
+    return cat === 'person';
+  });
   const charCount = cutAvatars.length;
 
   // 캐릭터 일관성 락 — 원본 형식 (이름·인원수 자동, 강한 명시)
@@ -8383,6 +8677,14 @@ function openAvatarPicker() {
       petSize:    md.petSize    || '',
       petCoat:    md.petCoat    || '',
       petExtra:   md.petExtra   || '',
+      productCat:      md.productCat      || '',
+      productMaterial: md.productMaterial || '',
+      productColor:    md.productColor    || '',
+      productSize:     md.productSize     || '',
+      productShape:    md.productShape    || '',
+      productLogo:     md.productLogo     || '',
+      productStyle:    md.productStyle    || '',
+      productExtra:    md.productExtra    || '',
     };
     // 이름 중복 처리
     const dup = lib.findIndex(a => a.name === av.name);
