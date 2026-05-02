@@ -2230,6 +2230,25 @@ select option:hover {
       </div>
     </div>
 
+    <!-- 참고용 이미지 (사람/반려동물/제품 공통) -->
+    <div class="field">
+      <label>참고용 이미지 <span style="font-size:9px;color:var(--ink3);font-weight:400;margin-left:4px">선택사항 · AI에게 닮은 이미지 참조</span></label>
+      <div style="background:var(--bg3);border:1px dashed var(--line2);border-radius:0;padding:14px;text-align:center" id="avRefImgArea">
+        <div id="avRefImgPreview" style="display:none;margin-bottom:8px">
+          <img id="avRefImgEl" src="" style="max-width:100%;max-height:160px;border:1px solid var(--line);display:block;margin:0 auto">
+        </div>
+        <div id="avRefImgEmpty" style="font-size:11px;color:var(--ink3);margin-bottom:8px">실제 사진을 업로드하면 AI가 더 정확하게 닮은 이미지를 만듭니다</div>
+        <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+          <button type="button" class="btn btn-sm" onclick="document.getElementById('avRefImgUpload').click()">이미지 선택</button>
+          <button type="button" class="btn btn-sm" onclick="clearAvatarRefImage()" id="avRefImgClearBtn" style="display:none">제거</button>
+          <input type="file" id="avRefImgUpload" accept="image/*" style="display:none" onchange="uploadAvatarRefImage(event)">
+        </div>
+        <div id="avRefImgStatus" style="font-size:10px;color:var(--gold);margin-top:6px;display:none"></div>
+      </div>
+      <input type="hidden" id="avRefImgUrl" value="">
+      <div style="font-size:9px;color:var(--ink3);margin-top:6px">JPG/PNG/WEBP · 최대 5MB · fal.ai CDN에 업로드</div>
+    </div>
+
     <!-- 저장 버튼 -->
     <div style="display:flex;gap:8px">
       <button class="btn" onclick="closeAvatarModal()" style="flex:1">취소</button>
@@ -4127,6 +4146,7 @@ function addAvatar() {
     style: (document.getElementById('avStyle')?.value || '').trim(),
     extra: document.getElementById('avExtra').value.trim(),
     imgUrl: document.getElementById('avImgUrl').value || '',
+    refImageUrl: document.getElementById('avRefImgUrl').value || '',
   };
   S.avatars.push(av);
   renderAvatars();
@@ -4173,6 +4193,85 @@ async function uploadAvatarImage(event) {
   reader.onload = (e) => setAvatarImagePreview(e.target.result);
   reader.readAsDataURL(file);
   event.target.value = '';
+}
+
+// ============================================
+// 참고용 이미지 (사람/반려동물/제품 공통)
+// ============================================
+function setAvatarRefImagePreview(url) {
+  const preview = document.getElementById('avRefImgPreview');
+  const empty = document.getElementById('avRefImgEmpty');
+  const clearBtn = document.getElementById('avRefImgClearBtn');
+  const imgEl = document.getElementById('avRefImgEl');
+  const urlInput = document.getElementById('avRefImgUrl');
+  if (url) {
+    imgEl.src = url;
+    preview.style.display = 'block';
+    empty.style.display = 'none';
+    clearBtn.style.display = 'inline-block';
+    urlInput.value = url;
+  } else {
+    imgEl.src = '';
+    preview.style.display = 'none';
+    empty.style.display = 'block';
+    clearBtn.style.display = 'none';
+    urlInput.value = '';
+  }
+}
+
+function clearAvatarRefImage() {
+  setAvatarRefImagePreview('');
+  const status = document.getElementById('avRefImgStatus');
+  if (status) status.style.display = 'none';
+}
+
+async function uploadAvatarRefImage(event) {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+  // 5MB 제한
+  if (file.size > 5 * 1024 * 1024) {
+    if (typeof toast === 'function') toast('파일이 너무 큽니다 (최대 5MB)');
+    return;
+  }
+  if (!/^image\//.test(file.type)) {
+    if (typeof toast === 'function') toast('이미지 파일만 가능합니다');
+    return;
+  }
+  const status = document.getElementById('avRefImgStatus');
+  // 즉시 미리보기 (dataURL) — 업로드 동안 사용자에게 표시
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const preview = document.getElementById('avRefImgPreview');
+    const empty = document.getElementById('avRefImgEmpty');
+    const imgEl = document.getElementById('avRefImgEl');
+    imgEl.src = e.target.result;
+    preview.style.display = 'block';
+    empty.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+  // fal storage 업로드
+  if (status) {
+    status.textContent = '업로드 중...';
+    status.style.display = 'block';
+    status.style.color = 'var(--gold)';
+  }
+  try {
+    const cdnUrl = await uploadToFalStorage(null, file, `ref_${Date.now()}_${file.name}`, file.type);
+    setAvatarRefImagePreview(cdnUrl);
+    if (status) {
+      status.textContent = '업로드 완료';
+      status.style.color = 'var(--teal)';
+      setTimeout(() => { if (status) status.style.display = 'none'; }, 1800);
+    }
+    if (typeof toast === 'function') toast('참고용 이미지 업로드 완료');
+  } catch (e) {
+    if (status) {
+      status.textContent = '업로드 실패: ' + (e.message || '');
+      status.style.color = '#ef4444';
+    }
+    if (typeof toast === 'function') toast('업로드 실패');
+  }
 }
 
 async function generateAvatarImage() {
@@ -4443,6 +4542,7 @@ function openAvatarModal(editId) {
   document.getElementById('avExtra').value = '';
   document.getElementById('avExtraCustom').value = '';
   clearAvatarImage();
+  clearAvatarRefImage();
 
   // 모든 segs active 해제
   document.querySelectorAll('#avModal .segs .seg').forEach(s => s.classList.remove('active'));
@@ -4510,6 +4610,7 @@ function openAvatarModal(editId) {
       }
       document.getElementById('avExtraCustom').value = customParts.join(', ');
       if (av.imgUrl) setAvatarImagePreview(av.imgUrl);
+      if (av.refImageUrl) setAvatarRefImagePreview(av.refImageUrl);
       // 헤더 라벨
       document.getElementById('avModalCat').textContent = 'EDIT AVATAR';
       document.getElementById('avModalTitle').textContent = `"${av.name}" 수정`;
@@ -4661,6 +4762,7 @@ function saveAvatarToLibFromModal() {
     style: '',
     extra: document.getElementById('avExtra').value.trim(),
     imgUrl: document.getElementById('avImgUrl').value || '',
+    refImageUrl: document.getElementById('avRefImgUrl').value || '',
   };
 
   if (editingId) {
@@ -4760,6 +4862,7 @@ function saveAvatarToLib() {
     style: (document.getElementById('avStyle')?.value || '').trim(),
     extra: document.getElementById('avExtra').value.trim(),
     imgUrl: document.getElementById('avImgUrl').value || '',
+    refImageUrl: document.getElementById('avRefImgUrl').value || '',
   };
 
   // 편집 모드: ID로 찾아서 덮어쓰기
@@ -7827,6 +7930,7 @@ function openAvatarPicker() {
       style: md.style || '',
       extra: md.extra || '',
       imgUrl: item.asset_url || md.imgUrl || '',
+      refImageUrl: md.refImageUrl || '',
     };
     // 이름 중복 처리
     const dup = lib.findIndex(a => a.name === av.name);
