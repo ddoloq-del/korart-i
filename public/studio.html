@@ -3427,6 +3427,10 @@ const ASPECT_RATIOS = [
     klingRatio: '9:16', imgSize: { width: 1024, height: 1792 }, gridSize: { width: 1024, height: 1792 } },
   { value: '1:1',  size: '1080×1080', purpose: '인스타 피드', badge: null,
     klingRatio: '1:1',  imgSize: { width: 1024, height: 1024 }, gridSize: { width: 1024, height: 1024 } },
+  { value: '4:3',  size: '1408×1056', purpose: '클래식·프레젠테이션', badge: null,
+    klingRatio: '4:3',  imgSize: { width: 1408, height: 1056 }, gridSize: { width: 1408, height: 1056 } },
+  { value: '3:4',  size: '1056×1408', purpose: '폴라로이드·세로 포스터', badge: null,
+    klingRatio: '3:4',  imgSize: { width: 1056, height: 1408 }, gridSize: { width: 1056, height: 1408 } },
 ];
 // 비율 카드 렌더
 
@@ -3434,7 +3438,7 @@ function renderRatioGrid() {
   const grid = document.getElementById('ratioGrid');
   if (!grid) return;
   grid.innerHTML = ASPECT_RATIOS.map(r => {
-    const isPortrait = ['9:16'].includes(r.value);
+    const isPortrait = ['9:16', '3:4'].includes(r.value);
     const isSquare = r.value === '1:1';
     // 썸네일 사이즈 (110x110 기준)
     let thW, thH;
@@ -5823,6 +5827,8 @@ function getOneCutImgSize() {
   const ratio = S.aspectRatio || '16:9';
   if (ratio === '9:16') return '1024x1792';
   if (ratio === '1:1')  return '1024x1024';
+  if (ratio === '4:3')  return '1408x1056';
+  if (ratio === '3:4')  return '1056x1408';
   return '1792x1024';
 }
 
@@ -6786,7 +6792,16 @@ async function callFalImage(key, model, prompt, size) {
   }
 
   // 비율 매핑 (Flux 모델용 aspect_ratio 문자열)
-  const ratio = (w === h) ? '1:1' : (w > h) ? '16:9' : '9:16';
+  // 정확한 비율 매칭: w/h 비율을 표준값에 매핑
+  let ratio;
+  if (w === h) ratio = '1:1';
+  else {
+    const r = w / h;
+    if (r >= 1.7) ratio = '16:9';        // 1792/1024 = 1.75
+    else if (r >= 1.25) ratio = '4:3';   // 1408/1056 = 1.33
+    else if (r >= 0.75) ratio = '3:4';   // 1056/1408 = 0.75
+    else ratio = '9:16';                  // 1024/1792 = 0.57
+  }
 
   let body;
   if (isGpt) {
