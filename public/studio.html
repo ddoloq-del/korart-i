@@ -2102,6 +2102,8 @@ select option:hover {
       <input id="avName" placeholder="예: 김민준">
     </div>
 
+    <!-- ============= 사람 카테고리 입력 폼 ============= -->
+    <div id="avPersonFields">
     <!-- 성별 -->
     <div class="field">
       <label>성별</label>
@@ -2212,6 +2214,108 @@ select option:hover {
       </div>
       <input type="hidden" id="avExtra" value="">
     </div>
+    </div>
+    <!-- ============= 사람 카테고리 입력 폼 끝 ============= -->
+
+    <!-- ============= 반려동물 카테고리 입력 폼 ============= -->
+    <div id="avPetFields" style="display:none">
+      <!-- 종 -->
+      <div class="field">
+        <label>종</label>
+        <div class="segs" id="avPetSpeciesSegs">
+          <div class="seg" onclick="selPetSpecies(this,'dog')">강아지</div>
+          <div class="seg" onclick="selPetSpecies(this,'cat')">고양이</div>
+          <div class="seg" onclick="selPetSpecies(this,'rabbit')">토끼</div>
+          <div class="seg" onclick="selPetSpecies(this,'hamster')">햄스터</div>
+          <div class="seg" onclick="selPetSpecies(this,'bird')">앵무새/새</div>
+          <div class="seg" onclick="selPetSpecies(this,'other')">기타</div>
+        </div>
+        <input id="avPetSpeciesCustom" placeholder="개인설정: 직접 입력 (예: 페럿, 이구아나)" oninput="usePetSpeciesCustom()" style="width:100%;margin-top:6px;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:6px 10px;color:var(--ink);font-size:11px">
+        <input type="hidden" id="avPetSpecies" value="">
+      </div>
+
+      <!-- 품종 -->
+      <div class="field">
+        <label>품종</label>
+        <div class="segs" id="avPetBreedSegs" style="flex-wrap:wrap"></div>
+        <input id="avPetBreedCustom" placeholder="개인설정: 직접 입력 (예: 비숑 푸들 믹스)" oninput="usePetBreedCustom()" style="width:100%;margin-top:6px;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:6px 10px;color:var(--ink);font-size:11px">
+        <input type="hidden" id="avPetBreed" value="">
+        <div id="avPetBreedHint" style="font-size:10px;color:var(--ink3);margin-top:4px">먼저 종을 선택하세요</div>
+      </div>
+
+      <!-- 모색 -->
+      <div class="field">
+        <label>모색</label>
+        <div class="segs" id="avPetColorSegs" style="flex-wrap:wrap">
+          <div class="seg" onclick="selSeg(this,'avPetColor','pure white fur')">화이트</div>
+          <div class="seg" onclick="selSeg(this,'avPetColor','cream and beige fur')">크림/베이지</div>
+          <div class="seg" onclick="selSeg(this,'avPetColor','golden brown fur')">골든</div>
+          <div class="seg" onclick="selSeg(this,'avPetColor','chocolate brown fur')">초콜릿/브라운</div>
+          <div class="seg" onclick="selSeg(this,'avPetColor','black fur')">블랙</div>
+          <div class="seg" onclick="selSeg(this,'avPetColor','gray and silver fur')">그레이/실버</div>
+          <div class="seg" onclick="selSeg(this,'avPetColor','orange and ginger fur')">오렌지/진저</div>
+          <div class="seg" onclick="selSeg(this,'avPetColor','tabby pattern fur')">태비/얼룩</div>
+          <div class="seg" onclick="selSeg(this,'avPetColor','tricolor mixed fur')">삼색/믹스</div>
+          <div class="seg" onclick="selSeg(this,'avPetColor','black and white fur, two-tone')">흑백</div>
+        </div>
+        <input id="avPetColorCustom" placeholder="개인설정: 직접 입력 (예: 카키색 + 가슴 흰털)" oninput="usePetColorCustom()" style="width:100%;margin-top:6px;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:6px 10px;color:var(--ink);font-size:11px">
+      </div>
+
+      <!-- 나이대 -->
+      <div class="field">
+        <label>나이대</label>
+        <div class="segs">
+          <div class="seg" onclick="selSeg(this,'avPetAge','baby, very young')">아기</div>
+          <div class="seg" onclick="selSeg(this,'avPetAge','young')">어린</div>
+          <div class="seg" onclick="selSeg(this,'avPetAge','adult, full-grown')">성체</div>
+          <div class="seg" onclick="selSeg(this,'avPetAge','senior, older')">노령</div>
+        </div>
+        <input type="hidden" id="avPetAge" value="">
+      </div>
+
+      <!-- 크기 -->
+      <div class="field">
+        <label>크기</label>
+        <div class="segs">
+          <div class="seg" onclick="selSeg(this,'avPetSize','tiny size, palm-sized')">초소형</div>
+          <div class="seg" onclick="selSeg(this,'avPetSize','small size')">소형</div>
+          <div class="seg" onclick="selSeg(this,'avPetSize','medium size')">중형</div>
+          <div class="seg" onclick="selSeg(this,'avPetSize','large size')">대형</div>
+        </div>
+        <input type="hidden" id="avPetSize" value="">
+      </div>
+
+      <!-- 털 길이 -->
+      <div class="field">
+        <label>털</label>
+        <div class="segs">
+          <div class="seg" onclick="selSeg(this,'avPetCoat','short hair, smooth coat')">단모</div>
+          <div class="seg" onclick="selSeg(this,'avPetCoat','medium length fur')">중모</div>
+          <div class="seg" onclick="selSeg(this,'avPetCoat','long fluffy fur')">장모</div>
+          <div class="seg" onclick="selSeg(this,'avPetCoat','curly fur')">곱슬</div>
+          <div class="seg" onclick="selSeg(this,'avPetCoat','hairless')">무모</div>
+        </div>
+        <input type="hidden" id="avPetCoat" value="">
+      </div>
+
+      <!-- 특징/액세서리 -->
+      <div class="field">
+        <label>특징 (선택)</label>
+        <div class="segs" id="avPetExtraSegs" style="flex-wrap:wrap">
+          <div class="seg" data-petextra="wearing a collar" onclick="togglePetExtra(this)">목줄</div>
+          <div class="seg" data-petextra="wearing a pet harness" onclick="togglePetExtra(this)">하네스</div>
+          <div class="seg" data-petextra="wearing pet clothes" onclick="togglePetExtra(this)">옷 입음</div>
+          <div class="seg" data-petextra="wearing a small bow on head" onclick="togglePetExtra(this)">리본</div>
+          <div class="seg" data-petextra="floppy ears" onclick="togglePetExtra(this)">늘어진 귀</div>
+          <div class="seg" data-petextra="pointy ears" onclick="togglePetExtra(this)">쫑긋 귀</div>
+          <div class="seg" data-petextra="fluffy tail" onclick="togglePetExtra(this)">풍성한 꼬리</div>
+          <div class="seg" data-petextra="big round eyes" onclick="togglePetExtra(this)">큰 눈</div>
+        </div>
+        <input id="avPetExtraCustom" placeholder="개인설정: 직접 입력 (예: 한쪽 귀가 접혀있음)" style="width:100%;margin-top:6px;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:6px 10px;color:var(--ink);font-size:11px">
+        <input type="hidden" id="avPetExtra" value="">
+      </div>
+    </div>
+    <!-- ============= 반려동물 카테고리 입력 폼 끝 ============= -->
 
     <!-- 아바타 이미지 -->
     <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;padding:12px;background:var(--bg);border:1px solid var(--line);border-radius:8px">
@@ -3072,7 +3176,7 @@ function loadAvatarLib() {
 // ============================================
 const AVATAR_CATEGORIES = [
   { value: 'person',  label: '사람',     enabled: true  },
-  { value: 'pet',     label: '반려동물', enabled: false },
+  { value: 'pet',     label: '반려동물', enabled: true  },
   { value: 'product', label: '제품',     enabled: false },
 ];
 
@@ -3091,6 +3195,8 @@ function setAvatarCategory(cat) {
     return;
   }
   window.__currentAvatarCat = cat;
+  // 모달 폼 토글 (열려 있을 때 카테고리 바뀌면)
+  if (typeof toggleAvatarFormByCategory === 'function') toggleAvatarFormByCategory(cat);
   // 두 화면 모두 다시 렌더
   renderCatTabs('avLabCatTabs');
   renderCatTabs('step1CatTabs');
@@ -4147,6 +4253,14 @@ function addAvatar() {
     extra: document.getElementById('avExtra').value.trim(),
     imgUrl: document.getElementById('avImgUrl').value || '',
     refImageUrl: document.getElementById('avRefImgUrl').value || '',
+    // 반려동물 카테고리 필드 (다른 카테고리에서는 빈 값)
+    petSpecies: document.getElementById('avPetSpecies')?.value || '',
+    petBreed:   document.getElementById('avPetBreed')?.value || '',
+    petColor:   document.getElementById('avPetColor')?.value || '',
+    petAge:     document.getElementById('avPetAge')?.value || '',
+    petSize:    document.getElementById('avPetSize')?.value || '',
+    petCoat:    document.getElementById('avPetCoat')?.value || '',
+    petExtra:   document.getElementById('avPetExtra')?.value || '',
   };
   S.avatars.push(av);
   renderAvatars();
@@ -4274,6 +4388,147 @@ async function uploadAvatarRefImage(event) {
   }
 }
 
+// ============================================
+// 반려동물 카테고리 헬퍼
+// ============================================
+const PET_BREEDS_BY_SPECIES = {
+  dog: [
+    { ko: '말티즈',     en: 'Maltese' },
+    { ko: '푸들',       en: 'Poodle' },
+    { ko: '비숑 프리제', en: 'Bichon Frise' },
+    { ko: '포메라니안', en: 'Pomeranian' },
+    { ko: '시바견',     en: 'Shiba Inu' },
+    { ko: '진돗개',     en: 'Jindo dog' },
+    { ko: '리트리버',   en: 'Golden Retriever' },
+    { ko: '래브라도',   en: 'Labrador Retriever' },
+    { ko: '치와와',     en: 'Chihuahua' },
+    { ko: '닥스훈트',   en: 'Dachshund' },
+    { ko: '슈나우저',   en: 'Schnauzer' },
+    { ko: '시츄',       en: 'Shih Tzu' },
+    { ko: '웰시 코기',  en: 'Welsh Corgi' },
+    { ko: '보더 콜리',  en: 'Border Collie' },
+    { ko: '믹스견',     en: 'mixed breed dog' },
+  ],
+  cat: [
+    { ko: '코리안 숏헤어', en: 'Korean Shorthair' },
+    { ko: '먼치킨',        en: 'Munchkin' },
+    { ko: '러시안 블루',   en: 'Russian Blue' },
+    { ko: '페르시안',      en: 'Persian' },
+    { ko: '스코티시 폴드', en: 'Scottish Fold' },
+    { ko: '브리티시 숏헤어', en: 'British Shorthair' },
+    { ko: '메인 쿤',       en: 'Maine Coon' },
+    { ko: '아메리칸 숏헤어', en: 'American Shorthair' },
+    { ko: '랙돌',          en: 'Ragdoll' },
+    { ko: '뱅갈',          en: 'Bengal' },
+    { ko: '터키시 앙고라', en: 'Turkish Angora' },
+    { ko: '스핑크스',      en: 'Sphynx' },
+    { ko: '믹스묘',        en: 'mixed breed cat' },
+  ],
+  rabbit: [
+    { ko: '네덜란드 드워프', en: 'Netherland Dwarf rabbit' },
+    { ko: '홀랜드 롭',       en: 'Holland Lop rabbit' },
+    { ko: '미니 렉스',       en: 'Mini Rex rabbit' },
+    { ko: '라이언헤드',      en: 'Lionhead rabbit' },
+    { ko: '앙고라',          en: 'Angora rabbit' },
+  ],
+  hamster: [
+    { ko: '골든',     en: 'Syrian (Golden) hamster' },
+    { ko: '드워프',   en: 'Dwarf hamster' },
+    { ko: '로보로프스키', en: 'Roborovski hamster' },
+    { ko: '윈터화이트', en: 'Winter White hamster' },
+  ],
+  bird: [
+    { ko: '왕관앵무 (코카티엘)', en: 'Cockatiel' },
+    { ko: '사랑앵무 (버지니아)', en: 'Budgerigar' },
+    { ko: '회색앵무',           en: 'African Grey Parrot' },
+    { ko: '카나리아',           en: 'Canary' },
+    { ko: '문조',               en: 'Java Sparrow' },
+  ],
+  other: [],
+};
+
+function selPetSpecies(el, species) {
+  // 다른 seg active 해제
+  document.querySelectorAll('#avPetSpeciesSegs .seg').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('avPetSpecies').value = species;
+  // 직접 입력 비우기
+  const custom = document.getElementById('avPetSpeciesCustom');
+  if (custom) custom.value = '';
+  // 품종 옵션 갱신
+  refreshPetBreedList(species);
+}
+
+function usePetSpeciesCustom() {
+  const custom = document.getElementById('avPetSpeciesCustom').value.trim();
+  if (custom) {
+    document.querySelectorAll('#avPetSpeciesSegs .seg').forEach(s => s.classList.remove('active'));
+    document.getElementById('avPetSpecies').value = custom;
+    // 품종 영역 비우기 (직접 입력 종은 품종 옵션 없음)
+    refreshPetBreedList(null);
+  }
+}
+
+function refreshPetBreedList(species) {
+  const wrap = document.getElementById('avPetBreedSegs');
+  const hint = document.getElementById('avPetBreedHint');
+  if (!wrap) return;
+  if (!species || !PET_BREEDS_BY_SPECIES[species] || PET_BREEDS_BY_SPECIES[species].length === 0) {
+    wrap.innerHTML = '';
+    if (hint) hint.textContent = species ? '아래 직접 입력에 품종을 적어주세요' : '먼저 종을 선택하세요';
+    return;
+  }
+  if (hint) hint.textContent = '품종을 선택하거나 아래에 직접 입력하세요';
+  wrap.innerHTML = PET_BREEDS_BY_SPECIES[species].map(b => {
+    return '<div class="seg" onclick="selSeg(this,\'avPetBreed\',\'' + b.en + '\')">' + b.ko + '</div>';
+  }).join('');
+}
+
+function usePetBreedCustom() {
+  const custom = document.getElementById('avPetBreedCustom').value.trim();
+  if (custom) {
+    document.querySelectorAll('#avPetBreedSegs .seg').forEach(s => s.classList.remove('active'));
+    document.getElementById('avPetBreed').value = custom;
+  }
+}
+
+function usePetColorCustom() {
+  const custom = document.getElementById('avPetColorCustom').value.trim();
+  if (custom) {
+    document.querySelectorAll('#avPetColorSegs .seg').forEach(s => s.classList.remove('active'));
+    document.getElementById('avPetColor').value = custom;
+  }
+}
+
+function togglePetExtra(el) {
+  el.classList.toggle('active');
+}
+
+// 반려동물 폼 초기화
+function clearPetForm() {
+  ['avPetSpecies', 'avPetBreed', 'avPetColor', 'avPetAge', 'avPetSize', 'avPetCoat', 'avPetExtra'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  ['avPetSpeciesCustom', 'avPetBreedCustom', 'avPetColorCustom', 'avPetExtraCustom'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.querySelectorAll('#avPetFields .seg').forEach(s => s.classList.remove('active'));
+  refreshPetBreedList(null);
+}
+
+// 카테고리에 따른 폼 토글
+function toggleAvatarFormByCategory(cat) {
+  const personFields = document.getElementById('avPersonFields');
+  const petFields = document.getElementById('avPetFields');
+  if (personFields) personFields.style.display = (cat === 'person') ? '' : 'none';
+  if (petFields)    petFields.style.display    = (cat === 'pet')    ? '' : 'none';
+  // 모달 카테고리 라벨 갱신
+  const modalCat = document.getElementById('avModalCat');
+  if (modalCat) {
+    modalCat.textContent = (cat === 'pet') ? 'NEW PET' : 'NEW AVATAR';
+  }
+}
+
 async function generateAvatarImage() {
 
   // 다각도 캐릭터 시트 — GPT Image 2 Medium 고정 (1536x1024, ~$0.10)
@@ -4291,7 +4546,12 @@ async function generateAvatarImage() {
     }
   }
 
-  const name = document.getElementById('avName').value.trim() || 'Korean character';
+  // 현재 카테고리 확인 (모달에서 보이는 폼 기준)
+  const _isPet = (typeof getCurrentAvatarCat === 'function')
+    && (document.getElementById('avPetFields')?.style.display !== 'none')
+    && (document.getElementById('avPersonFields')?.style.display === 'none');
+
+  const name = document.getElementById('avName').value.trim() || (_isPet ? 'pet' : 'Korean character');
   const gender = document.getElementById('avGender').value || 'Korean person';
   const age = document.getElementById('avAge').value;
   const body = document.getElementById('avBody').value;
@@ -4306,22 +4566,67 @@ async function generateAvatarImage() {
   if (customExtra) accTags.push(customExtra);
   const extra = accTags.join(', ');
 
-  const charParts = [`a ${gender}`];
-  if (age)    charParts.push(age);
-  if (body)   charParts.push(body);
-  if (height) charParts.push(height);
-  if (look)   charParts.push(look);
-  if (hair)   charParts.push(hair);
-  if (extra)  charParts.push(extra);
-  const charDesc = charParts.join(', ');
+  let charDesc = '';
+  let prompt = '';
+  let randomNote = '';
 
-  // 비어있는 필드가 있으면 모델한테 자연스럽게 채우라고 안내
-  const specifiedCount = [age, body, height, look, hair, extra].filter(Boolean).length;
-  const randomNote = specifiedCount < 4
-    ? '\n\nFor any unspecified features (face shape, eye shape if not stated, skin tone, etc.), choose natural and consistent Korean drama character features.'
-    : '';
+  if (_isPet) {
+    // 반려동물 프롬프트 빌드
+    const petSpecies = document.getElementById('avPetSpecies')?.value || 'pet';
+    const petBreed   = document.getElementById('avPetBreed')?.value   || '';
+    const petColor   = document.getElementById('avPetColor')?.value   || '';
+    const petAge     = document.getElementById('avPetAge')?.value     || '';
+    const petSize    = document.getElementById('avPetSize')?.value    || '';
+    const petCoat    = document.getElementById('avPetCoat')?.value    || '';
+    const petExtra   = document.getElementById('avPetExtra')?.value   || '';
 
-  const prompt = `Create a single character reference sheet image showing the SAME person in a strict 3x2 grid layout (3 columns, 2 rows) with thin black dividing lines between each panel. Plain neutral light gray studio background.
+    const petParts = [];
+    if (petBreed)   petParts.push(petBreed);
+    else if (petSpecies && petSpecies !== 'other') petParts.push(petSpecies);
+    if (petColor)   petParts.push(petColor);
+    if (petCoat)    petParts.push(petCoat);
+    if (petAge)     petParts.push(petAge);
+    if (petSize)    petParts.push(petSize);
+    if (petExtra)   petParts.push(petExtra);
+    charDesc = petParts.join(', ') || 'a cute pet';
+
+    prompt = `Create a single pet character reference sheet image showing the SAME pet in a strict 3x2 grid layout (3 columns, 2 rows) with thin black dividing lines between each panel. Plain neutral light gray studio background.
+
+Top row (left to right):
+1. Front view, sitting calmly, looking at camera
+2. Three-quarter view from the LEFT side
+3. Three-quarter view from the RIGHT side
+
+Bottom row (left to right):
+4. Standing pose, full body visible
+5. Pure side profile view (full body sideways)
+6. Playful pose, alert expression
+
+CRITICAL requirements:
+- Exact same pet, same fur color, same fur pattern, same body shape in ALL 6 panels
+- Studio pet photography lighting, professional pet portrait
+- Sharp focus, high detail, photorealistic
+- No humans visible
+
+Pet description: ${charDesc}.`;
+  } else {
+    // 사람 프롬프트 빌드 (기존)
+    const charParts = [`a ${gender}`];
+    if (age)    charParts.push(age);
+    if (body)   charParts.push(body);
+    if (height) charParts.push(height);
+    if (look)   charParts.push(look);
+    if (hair)   charParts.push(hair);
+    if (extra)  charParts.push(extra);
+    charDesc = charParts.join(', ');
+
+    // 비어있는 필드가 있으면 모델한테 자연스럽게 채우라고 안내
+    const specifiedCount = [age, body, height, look, hair, extra].filter(Boolean).length;
+    randomNote = specifiedCount < 4
+      ? '\n\nFor any unspecified features (face shape, eye shape if not stated, skin tone, etc.), choose natural and consistent Korean drama character features.'
+      : '';
+
+    prompt = `Create a single character reference sheet image showing the SAME person in a strict 3x2 grid layout (3 columns, 2 rows) with thin black dividing lines between each panel. Plain neutral light gray studio background.
 
 Top row (left to right):
 1. Front view, neutral relaxed expression, looking straight at camera
@@ -4341,6 +4646,7 @@ CRITICAL requirements:
 - Korean drama character
 
 Character: ${charDesc}.${randomNote}`;
+  }
 
   const btn = document.getElementById('avGenImgBtn');
   btn.disabled = true;
@@ -4543,6 +4849,16 @@ function openAvatarModal(editId) {
   document.getElementById('avExtraCustom').value = '';
   clearAvatarImage();
   clearAvatarRefImage();
+  // 반려동물 폼 초기화
+  if (typeof clearPetForm === 'function') clearPetForm();
+  // 편집 모드면 그 아바타의 카테고리, 새 모드면 현재 탭 카테고리
+  let _modalCat = getCurrentAvatarCat();
+  if (editId) {
+    const _exLib = loadAvatarLib();
+    const _ex = _exLib.find(a => a.id === editId);
+    if (_ex && _ex.category) _modalCat = _ex.category;
+  }
+  if (typeof toggleAvatarFormByCategory === 'function') toggleAvatarFormByCategory(_modalCat);
 
   // 모든 segs active 해제
   document.querySelectorAll('#avModal .segs .seg').forEach(s => s.classList.remove('active'));
@@ -4611,6 +4927,95 @@ function openAvatarModal(editId) {
       document.getElementById('avExtraCustom').value = customParts.join(', ');
       if (av.imgUrl) setAvatarImagePreview(av.imgUrl);
       if (av.refImageUrl) setAvatarRefImagePreview(av.refImageUrl);
+      // 반려동물 필드 복원
+      if (av.category === 'pet') {
+        if (av.petSpecies) {
+          // 표준 종이면 seg 활성화
+          const stdSpecies = ['dog', 'cat', 'rabbit', 'hamster', 'bird', 'other'];
+          if (stdSpecies.includes(av.petSpecies)) {
+            document.querySelectorAll('#avPetSpeciesSegs .seg').forEach(s => {
+              const oc = s.getAttribute('onclick') || '';
+              s.classList.toggle('active', oc.includes("'" + av.petSpecies + "'"));
+            });
+            document.getElementById('avPetSpecies').value = av.petSpecies;
+            refreshPetBreedList(av.petSpecies);
+          } else {
+            // 직접 입력 종
+            document.getElementById('avPetSpeciesCustom').value = av.petSpecies;
+            document.getElementById('avPetSpecies').value = av.petSpecies;
+            refreshPetBreedList(null);
+          }
+        }
+        // 품종 — segs에 같은 값 있으면 active, 없으면 직접 입력으로
+        if (av.petBreed) {
+          const breedSegs = document.querySelectorAll('#avPetBreedSegs .seg');
+          let matched = false;
+          breedSegs.forEach(s => {
+            const oc = s.getAttribute('onclick') || '';
+            if (oc.includes("'" + av.petBreed + "'")) {
+              s.classList.add('active');
+              matched = true;
+            }
+          });
+          if (!matched) document.getElementById('avPetBreedCustom').value = av.petBreed;
+          document.getElementById('avPetBreed').value = av.petBreed;
+        }
+        // 모색 — 동일 패턴
+        if (av.petColor) {
+          const colorSegs = document.querySelectorAll('#avPetColorSegs .seg');
+          let matched = false;
+          colorSegs.forEach(s => {
+            const oc = s.getAttribute('onclick') || '';
+            if (oc.includes("'" + av.petColor + "'")) {
+              s.classList.add('active');
+              matched = true;
+            }
+          });
+          if (!matched) document.getElementById('avPetColorCustom').value = av.petColor;
+          document.getElementById('avPetColor').value = av.petColor;
+        }
+        // 나이/크기/털 — segs 활성화
+        ['avPetAge', 'avPetSize', 'avPetCoat'].forEach(fid => {
+          const val = av[fid.replace('avPet', 'pet').replace(/^pet/, '').toLowerCase()] || av[fid.replace('av', '').charAt(0).toLowerCase() + fid.replace('av', '').slice(1)];
+        });
+        if (av.petAge) {
+          document.querySelectorAll('#avPetFields .field').forEach(f => {
+            const segs = f.querySelectorAll('.seg');
+            segs.forEach(s => {
+              const oc = s.getAttribute('onclick') || '';
+              if (oc.includes("'avPetAge'") && oc.includes("'" + av.petAge + "'")) s.classList.add('active');
+            });
+          });
+          document.getElementById('avPetAge').value = av.petAge;
+        }
+        if (av.petSize) {
+          document.querySelectorAll('#avPetFields .seg').forEach(s => {
+            const oc = s.getAttribute('onclick') || '';
+            if (oc.includes("'avPetSize'") && oc.includes("'" + av.petSize + "'")) s.classList.add('active');
+          });
+          document.getElementById('avPetSize').value = av.petSize;
+        }
+        if (av.petCoat) {
+          document.querySelectorAll('#avPetFields .seg').forEach(s => {
+            const oc = s.getAttribute('onclick') || '';
+            if (oc.includes("'avPetCoat'") && oc.includes("'" + av.petCoat + "'")) s.classList.add('active');
+          });
+          document.getElementById('avPetCoat').value = av.petCoat;
+        }
+        // 액세서리 — petExtra (콤마 구분 영문)
+        if (av.petExtra) {
+          const items = av.petExtra.split(',').map(s => s.trim());
+          document.querySelectorAll('#avPetExtraSegs .seg').forEach(s => {
+            const ext = s.dataset.petextra || '';
+            if (items.includes(ext)) s.classList.add('active');
+          });
+          // 매치 안 되는 건 직접 입력으로
+          const known = Array.from(document.querySelectorAll('#avPetExtraSegs .seg')).map(s => s.dataset.petextra);
+          const customs = items.filter(it => it && !known.includes(it));
+          if (customs.length) document.getElementById('avPetExtraCustom').value = customs.join(', ');
+          document.getElementById('avPetExtra').value = av.petExtra;
+        }
+      }
       // 헤더 라벨
       document.getElementById('avModalCat').textContent = 'EDIT AVATAR';
       document.getElementById('avModalTitle').textContent = `"${av.name}" 수정`;
@@ -4733,7 +5138,7 @@ function saveAvatarToLibFromModal() {
   const name = document.getElementById('avName').value.trim();
   if (!name) { toast('이름을 입력하세요'); return; }
 
-  // 액세서리 토글들 + custom 합치기
+  // 액세서리 토글들 + custom 합치기 (사람)
   const tags = [];
   document.querySelectorAll('#avExtraSegs .seg.active').forEach(s => {
     tags.push(s.dataset.extra);
@@ -4741,6 +5146,20 @@ function saveAvatarToLibFromModal() {
   const customExtra = document.getElementById('avExtraCustom').value.trim();
   if (customExtra) tags.push(customExtra);
   document.getElementById('avExtra').value = tags.join(', ');
+
+  // 반려동물 액세서리 합치기
+  const petTags = [];
+  document.querySelectorAll('#avPetExtraSegs .seg.active').forEach(s => {
+    petTags.push(s.dataset.petextra);
+  });
+  const petCustomExtra = document.getElementById('avPetExtraCustom').value.trim();
+  if (petCustomExtra) petTags.push(petCustomExtra);
+  document.getElementById('avPetExtra').value = petTags.join(', ');
+
+  // 직접 입력 종/품종/모색 적용 (custom input은 oninput으로 즉시 반영되지만, 저장 시 한 번 더)
+  if (typeof usePetSpeciesCustom === 'function') usePetSpeciesCustom();
+  if (typeof usePetBreedCustom === 'function') usePetBreedCustom();
+  if (typeof usePetColorCustom === 'function') usePetColorCustom();
 
   // 저장 (기존 saveAvatarToLib 활용)
   const editingId = S._editingAvId;
@@ -4763,6 +5182,14 @@ function saveAvatarToLibFromModal() {
     extra: document.getElementById('avExtra').value.trim(),
     imgUrl: document.getElementById('avImgUrl').value || '',
     refImageUrl: document.getElementById('avRefImgUrl').value || '',
+    // 반려동물 카테고리 필드 (다른 카테고리에서는 빈 값)
+    petSpecies: document.getElementById('avPetSpecies')?.value || '',
+    petBreed:   document.getElementById('avPetBreed')?.value || '',
+    petColor:   document.getElementById('avPetColor')?.value || '',
+    petAge:     document.getElementById('avPetAge')?.value || '',
+    petSize:    document.getElementById('avPetSize')?.value || '',
+    petCoat:    document.getElementById('avPetCoat')?.value || '',
+    petExtra:   document.getElementById('avPetExtra')?.value || '',
   };
 
   if (editingId) {
@@ -4863,6 +5290,14 @@ function saveAvatarToLib() {
     extra: document.getElementById('avExtra').value.trim(),
     imgUrl: document.getElementById('avImgUrl').value || '',
     refImageUrl: document.getElementById('avRefImgUrl').value || '',
+    // 반려동물 카테고리 필드 (다른 카테고리에서는 빈 값)
+    petSpecies: document.getElementById('avPetSpecies')?.value || '',
+    petBreed:   document.getElementById('avPetBreed')?.value || '',
+    petColor:   document.getElementById('avPetColor')?.value || '',
+    petAge:     document.getElementById('avPetAge')?.value || '',
+    petSize:    document.getElementById('avPetSize')?.value || '',
+    petCoat:    document.getElementById('avPetCoat')?.value || '',
+    petExtra:   document.getElementById('avPetExtra')?.value || '',
   };
 
   // 편집 모드: ID로 찾아서 덮어쓰기
@@ -4946,15 +5381,24 @@ function renderSavedAvatars() {
   }
 
   grid.innerHTML = lib.map(av => {
-    const ageShort = av.age.includes('teenager') ? '10대'
-      : av.age.includes('elderly') ? '80대'
-      : ((av.age.match(/(\d+)/) || ['','30'])[1] + '대');
-    const bodyShort = av.body.split(',')[0];
-    const tags = [
-      av.gender === 'Korean man' ? '남' : '여',
-      ageShort,
-      bodyShort,
-    ];
+    let tags = [];
+    if (av.category === 'pet') {
+      // 반려동물 태그
+      const speciesKo = { dog:'강아지', cat:'고양이', rabbit:'토끼', hamster:'햄스터', bird:'새', other:'기타' };
+      tags.push(speciesKo[av.petSpecies] || av.petSpecies || '동물');
+      if (av.petBreed)  tags.push(av.petBreed.split(',')[0]);
+      if (av.petColor)  tags.push((av.petColor.split(',')[0] || '').replace(/ fur/, '').trim());
+      if (av.petSize)   tags.push((av.petSize.split(',')[0] || ''));
+    } else {
+      const ageShort = (av.age || '').includes('teenager') ? '10대'
+        : (av.age || '').includes('elderly') ? '80대'
+        : (((av.age || '').match(/(\d+)/) || ['','30'])[1] + '대');
+      const bodyShort = (av.body || '').split(',')[0];
+      tags = [
+        av.gender === 'Korean man' ? '남' : '여',
+        ageShort,
+        bodyShort,
+      ];
     if (av.height) {
       const m = av.height.match(/(\d+)cm/);
       if (m) tags.push(m[1] + 'cm');
@@ -4971,8 +5415,9 @@ function renderSavedAvatars() {
       const key = Object.keys(lookMap).find(k => av.look.includes(k));
       if (key) tags.push(lookMap[key]);
     }
-    if (av.hair) tags.push(av.hair.split(',')[0]);
-    if (av.extra) tags.push(av.extra.split(',')[0]);
+      if (av.hair) tags.push(av.hair.split(',')[0]);
+      if (av.extra) tags.push(av.extra.split(',')[0]);
+    }
     return `
       <div onclick="editAvatarInLib(${av.id})" style="background:var(--bg2);border:1px solid var(--line);border-radius: 0;overflow:hidden;cursor:pointer;transition:.15s;position:relative" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--line)'">
         <div onclick="event.stopPropagation();deleteAvatarFromLib(${av.id})" style="position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:var(--red);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2" title="삭제">✕</div>
@@ -7931,6 +8376,13 @@ function openAvatarPicker() {
       extra: md.extra || '',
       imgUrl: item.asset_url || md.imgUrl || '',
       refImageUrl: md.refImageUrl || '',
+      petSpecies: md.petSpecies || '',
+      petBreed:   md.petBreed   || '',
+      petColor:   md.petColor   || '',
+      petAge:     md.petAge     || '',
+      petSize:    md.petSize    || '',
+      petCoat:    md.petCoat    || '',
+      petExtra:   md.petExtra   || '',
     };
     // 이름 중복 처리
     const dup = lib.findIndex(a => a.name === av.name);
