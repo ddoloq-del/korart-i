@@ -8882,9 +8882,10 @@ async function generateSketchLow() {
   log('info', `스케치 시작 — GPT Image 2 Edit Low (${sz.width}x${sz.height})`);
 
   try {
+    // useRef false이면 /edit 빼고 기본 gpt-image-2 사용 (edit은 image_urls 필수)
     const url = useRef
       ? await callFalImageWithRef('', 'openai/gpt-image-2/edit', prompt, getGridSize(), refImgs)
-      : await callFalImage('', 'openai/gpt-image-2/edit', prompt, getGridSize());
+      : await callFalImage('', 'openai/gpt-image-2', prompt, getGridSize());
 
     S.gridPubUrl = url;
     S.sketchPubUrl = url;  // 업그레이드 input용으로 저장
@@ -9278,9 +9279,11 @@ async function generateImage() {
     </div>`;
 
   try {
+    // useRef false이면 /edit 모델에서 /edit 제거 (image_urls 필수 거절 방지)
+    const modelToUse = useRef ? model : model.replace('/edit', '');
     const url = useRef
       ? await callFalImageWithRef(falKey, model, prompt, getGridSize(), refImgs)
-        : await callFalImage(falKey, model, prompt, getGridSize());
+        : await callFalImage(falKey, modelToUse, prompt, getGridSize());
     S.gridPubUrl = url;
 
     // 이미지 로드 & 표시
