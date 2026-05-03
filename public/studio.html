@@ -6853,8 +6853,7 @@ function updateImgIdFields() {
     renderImgIdOutfitChips();
     renderImgIdHairChips();
     if (typeof _refreshImgIdFacePreview === 'function') _refreshImgIdFacePreview();
-    // GPT 호환성: 9:16으로 생성 후 idRatio로 크롭. sc.idRatio는 cropToIdRatio에서만 사용
-    S.aspectRatio = '9:16';
+    if (sc && sc.idRatio) S.aspectRatio = sc.idRatio;
     // 1컷 모드 강제 전환
     if (typeof _cutsMode !== 'undefined' && _cutsMode !== '1cut' && typeof switchCutsMode === 'function') {
       switchCutsMode('1cut');
@@ -9172,18 +9171,13 @@ async function generateOneCut() {
   }
   const useRef = refImgs.length > 0;
 
-  // 단일 컷 프롬프트 빌드 (이미지 모드와 영상 모드 분기)
+  // 단일 컷 프롬프트 빌드
   let prompt;
   try {
-    if (_IS_IMG_MODE) {
-      // 이미지 모드의 씬은 SCENES_IMAGE에 있으므로 이미지 모드 빌더 사용
-      prompt = await buildImagePromptImageModeForApi();
-    } else {
-      prompt = await buildOneCutPromptForApi(i);
-    }
+    prompt = await buildOneCutPromptForApi(i);
   } catch (e) {
-    log('err', '프롬프트 빌덈 실패: ' + e.message);
-    prompt = _IS_IMG_MODE ? buildImagePromptImageMode() : buildOneCutPrompt(i);
+    log('err', '프롬프트 빌드 실패: ' + e.message);
+    prompt = buildOneCutPrompt(i);
   }
 
   log('info', `1컷 생성 시작 — 컷 ${i+1}, ${model}${useRef ? ' (' + refImgs.length + '개 레퍼런스)' : ''}`);
