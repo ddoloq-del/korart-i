@@ -3097,8 +3097,6 @@ const IMAGE_SCENE_GROUPS = {
   editorial: { ko: '화보' },
   job:       { ko: '직업 체험' },
   lifestyle: { ko: '라이프스타일' },
-  concept:   { ko: '컨셉 사진' },
-  art:       { ko: '아트 사진' },
 };
 
 // 이미지 모드 16씬 — 영상 모드 SCENES와 별개 (앵글 없음, 카테고리 그룹 포함)
@@ -3119,16 +3117,8 @@ const SCENES_IMAGE = {
 
   // ── 라이프스타일 (3) ──
   life_sns:     { name:'SNS 프로필', group:'lifestyle', catLabel:'INSTAGRAM',     style:'trendy Instagram aesthetic, soft natural window light, Korean cafe vibe, casual chic outfit, candid lifestyle moment, warm pastel tones' },
-  life_travel:  { name:'여행 인증샷',group:'lifestyle', catLabel:'TRAVEL',        style:'scenic travel destination, golden hour lighting, candid traveler lifestyle, vibrant adventurous mood, postcard worthy composition' },
-  life_couple:  { name:'커플 사진',  group:'lifestyle', catLabel:'COUPLE',        style:'romantic couple portrait, soft warm lighting, K-drama aesthetic, intimate genuine moment, beautiful natural backdrop, dreamy bokeh' },
-
-  // ── 컨셉 사진 (2) ──
-  concept_y2k:  { name:'Y2K 레트로', group:'concept',   catLabel:'Y2K RETRO',     style:'Y2K aesthetic, butterfly hair clips, glossy lip gloss, low-rise fashion, vibrant saturated tones, early 2000s nostalgia, glittery accessories, flip phone era' },
-  concept_cyber:{ name:'사이버펑크', group:'concept',   catLabel:'CYBERPUNK',     style:'cyberpunk neon lights, holographic accents, futuristic Seoul backdrop, blade runner aesthetic, rain-soaked streets, glowing signage, dystopian atmosphere' },
-
-  // ── 아트 사진 (2) ──
-  art_noir:     { name:'흑백 누아르',group:'art',       catLabel:'FILM NOIR',     style:'black and white photography, high contrast film noir, dramatic chiaroscuro shadows, classic Hollywood aesthetic, mysterious atmosphere, vintage detective vibe' },
-  art_double:   { name:'더블 익스포저',group:'art',     catLabel:'DOUBLE EXPOSURE',style:'double exposure art photography, surreal portrait blended with nature or cityscape, dreamlike artistic composition, ethereal layered imagery, fine art aesthetic' },
+  life_family:  { name:'가족 사진', group:'lifestyle', catLabel:'FAMILY',        style:'warm family portrait, natural happy expressions, soft pastel tones, cozy home atmosphere or sunny park, genuine loving moments, K-drama family aesthetic' },
+  life_couple:  { name:'미래의 내 여친/남친',  group:'lifestyle', catLabel:'FUTURE LOVE',  style:'romantic couple portrait, soft warm lighting, K-drama aesthetic, intimate genuine moment, beautiful natural backdrop, dreamy bokeh, ideal partner imagery' },
 };
 
 // 이미지 모드 화보용 앵글 12개 — 영상 모드의 ANGLE_DESCRIPTIONS 리소스 재사용
@@ -3200,12 +3190,8 @@ const SCENE_DEFAULTS = {
   job_chef:      { location: 'kitchen',        mood: 'mood_chic',     variation: 'pose' },
   job_flight:    { location: 'airport',        mood: 'mood_chic',     variation: 'pose' },
   life_sns:      { location: 'cafe',           mood: 'mood_bright',   variation: 'pose' },
-  life_travel:   { location: 'landmark',       mood: 'mood_bright',   variation: 'composition' },
+  life_family:   { location: 'park',           mood: 'mood_bright',   variation: 'pose' },
   life_couple:   { location: 'park',           mood: 'mood_dreamy',   variation: 'pose' },
-  concept_y2k:   { location: 'studio_neon',    mood: 'mood_bright',   variation: 'outfit' },
-  concept_cyber: { location: 'cyber_city',     mood: 'mood_dramatic', variation: 'lighting' },
-  art_noir:      { location: 'noir_alley',     mood: 'mood_dramatic', variation: 'lighting' },
-  art_double:    { location: 'studio',         mood: 'mood_dreamy',   variation: 'composition' },
 };
 
 // 직업 체험 씬별 4컷 테마 (자동 적용, 사용자가 아바타나 사진만 넣으면 주어진 테마로 생성)
@@ -6702,7 +6688,9 @@ function selImgScene(key, el) {
     const theme = JOB_THEMES[key];
     if (theme.location) S.imgLocation = theme.location;
     if (Array.isArray(theme.cuts)) {
-      S.angles = theme.cuts.map(c => c.angle || '');
+      const angles = theme.cuts.map(c => c.angle || '');
+      S.angles = angles.slice();
+      S.imgCutAngles = angles.slice();  // 이미지 모드 컷별 앵글
       S.imgCutDescriptions = theme.cuts.map(c => c.desc || '');
       S.cutDescriptions = S.imgCutDescriptions.slice();
     }
@@ -6865,18 +6853,25 @@ function openImgAnglePickerModal(cutIdx) {
     const ko = meta.ko || '';
     const use = meta.use || '';
     const isSelected = S.imgCutAngles[cutIdx] === angle;
+    // 다른 컷에서 이미 사용 중인지 확인
+    let usedByCut = -1;
+    for (let k = 0; k < 4; k++) {
+      if (k !== cutIdx && S.imgCutAngles[k] === angle) { usedByCut = k; break; }
+    }
+    const isDisabled = usedByCut >= 0;
     const safeAngle = angle.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    const onclickAttr = isDisabled ? '' : `onclick="selectImgAngleForCut('${safeAngle}')"`;
+    const cursorStyle = isDisabled ? 'not-allowed' : 'pointer';
+    const opacity = isDisabled ? '0.4' : '1';
     html += `
-      <div onclick="selectImgAngleForCut('${safeAngle}')"
-           style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-radius:0;border:1px solid ${isSelected ? colors[cutIdx] : 'var(--line)'};background:${isSelected ? `rgba(${rgbs[cutIdx]},0.1)` : 'var(--bg3)'};margin-bottom:5px;cursor:pointer;transition:.12s"
-           onmouseover="this.style.background='var(--bg4)'"
-           onmouseout="this.style.background='${isSelected ? `rgba(${rgbs[cutIdx]},0.1)` : 'var(--bg3)'}'">
+      <div ${onclickAttr}
+           style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-radius:0;border:1px solid ${isSelected ? colors[cutIdx] : 'var(--line)'};background:${isSelected ? `rgba(${rgbs[cutIdx]},0.1)` : 'var(--bg3)'};margin-bottom:5px;cursor:${cursorStyle};opacity:${opacity};transition:.12s">
         <div style="flex:1;min-width:0">
           <div style="font-size:12px;font-weight:700;color:var(--cream)">${escHtml(angle)}</div>
           <div style="font-size:10px;color:var(--ink2);margin-top:2px">${escHtml(ko)}</div>
           ${use ? `<div style="font-size:9px;color:var(--ink3);margin-top:2px;font-style:italic">${escHtml(use)}</div>` : ''}
         </div>
-        ${isSelected ? `<div style="flex:0 0 auto;font-size:18px;color:${colors[cutIdx]}">✓</div>` : ''}
+        ${isSelected ? `<div style="flex:0 0 auto;font-size:18px;color:${colors[cutIdx]}">✓</div>` : (isDisabled ? `<div style="flex:0 0 auto;font-size:9px;color:var(--ink3);font-weight:700;letter-spacing:1px">CUT ${usedByCut+1} 사용 중</div>` : '')}
       </div>
     `;
   });
@@ -6890,7 +6885,18 @@ function openImgAnglePickerModal(cutIdx) {
 function selectImgAngleForCut(angleName) {
   if (_imgAnglePickerCutIdx < 0 || _imgAnglePickerCutIdx > 3) return;
   ensureImageModeState();
+  // 중복 방지: 다른 컷에 이미 선택된 앵글이면 차단
+  if (angleName) {
+    for (let k = 0; k < 4; k++) {
+      if (k !== _imgAnglePickerCutIdx && S.imgCutAngles[k] === angleName) {
+        if (typeof toast === 'function') toast(`이 앵글은 CUT ${k+1}에서 사용 중입니다. 다른 앵글을 선택해주세요`);
+        return;
+      }
+    }
+  }
   S.imgCutAngles[_imgAnglePickerCutIdx] = angleName || '';
+  // S.angles도 동기화 (4컷 프롬프트 빌드에서 사용)
+  if (Array.isArray(S.angles)) S.angles[_imgAnglePickerCutIdx] = angleName || '';
   closeAnglePickerModal();
   _imgAnglePickerCutIdx = -1;
   renderImgCutDescriptions();
