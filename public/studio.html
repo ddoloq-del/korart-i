@@ -10307,7 +10307,11 @@ async function generateCutVideo(i) {
     status.textContent = '❌ ' + e.message;
     status.style.color = 'var(--red)';
     log('err', `컷${i+1} 영상 실패: ` + e.message);
-    toast('❌ ' + e.message);
+    if (_isContentPolicyError(e.message)) {
+      _showContentPolicyAlert(e.message);
+    } else {
+      toast('❌ ' + e.message);
+    }
   } finally {
     btn.disabled = false;
     btn.innerHTML = `▶ 컷${i+1} 영상 재생성`;
@@ -10414,13 +10418,13 @@ function _isContentPolicyError(errMsg) {
 async function _showContentPolicyAlert(detail) {
   const msg = `<div style="padding:6px 0">
     <div style="font-size:14px;color:var(--cream);margin-bottom:10px">생성 불가능한 콘텐츠를 요청하셨습니다.</div>
-    <div style="font-size:12px;color:var(--ink2);line-height:1.5">AI 모델의 콘텐츠 정삱에 맞지 않는 요청의는 생성되지 않습니다.</div>
-    <div style="font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.5">성적/폭력적/유명인 등 민감 콘텐츠는 제외하고 다시 시도해주세요. 나노바나나 모델은 정책이 다르니 다른 AI로 시도도 가능합니다.</div>
+    <div style="font-size:12px;color:var(--ink2);line-height:1.5">AI 콘텐츠 정삱에 맞지 않는 요청의는 생성되지 않습니다.</div>
+    <div style="font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.5">성적/폭력적/유명인 등 민감 콘텐츠는 제외하고 다시 시도해주세요.</div>
   </div>`;
   if (typeof showAlert === 'function') {
-    await showAlert('콘텐츠 정삱 안내', msg);
+    await showAlert('생성 불가', msg);
   } else if (typeof showConfirm === 'function') {
-    await showConfirm('콘텐츠 정삱 안내', msg);
+    await showConfirm('생성 불가', msg);
   } else {
     alert('생성 불가능한 콘텐츠를 요청하셨습니다.');
   }
