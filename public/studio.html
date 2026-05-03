@@ -3095,7 +3095,6 @@ const SCENES = {
 // 이미지 모드 카테고리 그룹 정의 (탭 UI용)
 const IMAGE_SCENE_GROUPS = {
   editorial: { ko: '화보' },
-  id:        { ko: '증명사진' },
   job:       { ko: '직업 체험' },
   lifestyle: { ko: '라이프스타일' },
   concept:   { ko: '컨셉 사진' },
@@ -3111,10 +3110,6 @@ const SCENES_IMAGE = {
   magazine:     { name:'잡지 화보',   group:'editorial', catLabel:'EDITORIAL',     style:'high fashion editorial photography, professional studio lighting, Vogue magazine aesthetic, sharp clean composition, premium glossy finish' },
   cinematic:    { name:'시네마틱',    group:'editorial', catLabel:'CINEMATIC',     style:'cinematic film still, anamorphic lens flare, moody atmospheric lighting, movie poster aesthetic, dramatic color grading' },
   vintage_film: { name:'빈티지 필름', group:'editorial', catLabel:'VINTAGE FILM',  style:'analog film photography, Kodak Portra warmth, faded retro tones, soft film grain, 70s 80s aesthetic, nostalgic mood' },
-
-  // ── 증명사진 (2) ──
-  id_passport:  { name:'여권/공무원', group:'id',        catLabel:'PASSPORT',      style:'clean white background, formal ID photo, neutral expression, sharp focus, even soft lighting, official document photo, frontal composition' },
-  id_resume:    { name:'취업/링크드인',group:'id',        catLabel:'PROFESSIONAL',  style:'professional headshot, soft gradient background, confident warm smile, business attire, polished corporate style, LinkedIn profile aesthetic' },
 
   // ── 직업 체험 (4) ──
   job_doctor:   { name:'의사',       group:'job',       catLabel:'DOCTOR',        style:'white doctor coat, hospital setting, stethoscope around neck, professional medical photography, confident clinical atmosphere, clean bright lighting' },
@@ -3200,8 +3195,6 @@ const SCENE_DEFAULTS = {
   magazine:      { location: 'studio',         mood: 'mood_chic',     variation: 'pose' },
   cinematic:     { location: 'urban_night',    mood: 'mood_dramatic', variation: 'composition' },
   vintage_film:  { location: 'cafe',           mood: 'mood_calm',     variation: 'expression' },
-  id_passport:   { location: 'plain_white',    mood: 'mood_bright',   variation: 'same' },
-  id_resume:     { location: 'soft_gradient',  mood: 'mood_chic',     variation: 'expression' },
   job_doctor:    { location: 'hospital',       mood: 'mood_chic',     variation: 'pose' },
   job_lawyer:    { location: 'office',         mood: 'mood_chic',     variation: 'pose' },
   job_chef:      { location: 'kitchen',        mood: 'mood_chic',     variation: 'pose' },
