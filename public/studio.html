@@ -1795,7 +1795,7 @@ select option:hover {
       <button class="btn btn-primary" id="step1NextBtn" onclick="goSceneStepB()">다음</button>
     </div>
     <div class="panel-header" id="panel1Header">
-      <span class="panel-num" id="panel1Num">03</span>
+      <span class="panel-num" id="panel1Num">01</span>
       <span class="panel-cat" id="panel1Cat">K-DRAMA / SCENE SELECT</span>
       <h1 class="panel-title" id="panel1Title">내가 만들 영상 <span class="accent">씬</span> 선택</h1>
       <p class="panel-sub" id="panel1Subtxt">씬 분위기를 골라주세요.</p>
@@ -2117,7 +2117,7 @@ select option:hover {
       </div>
     </div>
     <div class="panel-header">
-      <span class="panel-num" id="panel2Num">05</span>
+      <span class="panel-num" id="panel2Num">03</span>
       <span class="panel-cat">K-FRAME / 4 CUT</span>
       <h1 class="panel-title">4컷으로 <span class="accent">한 번에</span></h1>
       <p class="panel-sub">AI가 한 번에 4컷을 그려 통일감을 잡습니다. 마음에 들면 영상 생성으로.</p>
@@ -2226,7 +2226,7 @@ select option:hover {
       <button class="btn btn-sm btn-ghost" onclick="resetStep5()" title="영상 생성 결과만 초기화">단계 초기화</button>
     </div>
     <div class="panel-header">
-      <span class="panel-num">06</span>
+      <span class="panel-num" id="panel3Num">04</span>
       <span class="panel-cat">K-MOTION / VIDEO</span>
       <h1 class="panel-title">컷마다 <span class="accent">움직임</span>을</h1>
       <p class="panel-sub">승인한 것마다 독립 영상을 만드세요.</p>
@@ -4227,6 +4227,20 @@ function goStep(n) {
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('show', p.id === targetId));
   S._currentStep = n;
   renderGlobalSteps(n);
+  // panel1 진입 시 이게 씬 선택 단계인지 씬 상세 단계인지 구분 (sceneStepA/B 토글)
+  if (targetId === 'panel1') {
+    const sceneA = document.getElementById('sceneStepA');
+    const sceneB = document.getElementById('sceneStepB');
+    // 씬 선택 단계: 이미지 step 1 / 영상 step 2
+    const isStepA = (_IS_IMG_MODE && n === 1) || (!_IS_IMG_MODE && n === 2);
+    if (sceneA && sceneB) {
+      sceneA.style.display = isStepA ? '' : 'none';
+      sceneB.style.display = isStepA ? 'none' : '';
+    }
+    if (typeof updateScenePanelHeader === 'function') {
+      updateScenePanelHeader(isStepA ? 'A' : 'B');
+    }
+  }
 
   // 내부적으로는 영상 모드 기준 step 번호로 변환해서 기존 분기 재사용
   // 이미지 모드 0→1, 1→2, 2→3, 3→4 로 매핑 (panelRatio 없으니 +1)
@@ -4280,7 +4294,7 @@ function goStep(n) {
     updateScenePanelHeader('B');
     // 추가 fail-safe — panel-num 직접 모드별로 강제 (영상=04, 이미지=03)
     const __numEl = document.getElementById('panel1Num');
-    if (__numEl) __numEl.textContent = _IS_IMG_MODE ? '02' : '04';
+    if (__numEl) __numEl.textContent = '02';  // 이미지/영상 멀두 씬 상세 = 02
     // 이미지 모드: 씬 상세 진입 시 비율 칩 렌더링
     // 이미지 + 영상 모드 둘 다 비율 칩 표시
     if (typeof renderImgRatioChips === 'function') {
@@ -4319,9 +4333,9 @@ function updateScenePanelHeader(sub) {
   const cat = document.getElementById('panel1Cat');
   const title = document.getElementById('panel1Title');
   const sub_el = document.getElementById('panel1Subtxt');
-  // 이미지 모드: A=01, B=02 / 영상 모드: A=03, B=04
-  const numA = _IS_IMG_MODE ? '01' : '03';
-  const numB = _IS_IMG_MODE ? '02' : '04';
+  // 이미지 모드: A=01, B=02 / 영상 모드도 4단계로 압축: A=01, B=02
+  const numA = '01';
+  const numB = '02';
   // 이미지 모드는 K-STUDIO, 영상 모드는 K-DRAMA
   const _kPrefix = _IS_IMG_MODE ? 'K-STUDIO' : 'K-DRAMA';
   if (sub === 'A') {
