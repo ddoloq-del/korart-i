@@ -1804,7 +1804,7 @@ select option:hover {
     <!-- 씬 분위기 선택 화면 (Sub-step A) -->
     <div id="sceneStepA" style="display:block">
       <!-- 시대 배경 선택 (현대극/레트로/사극) — 이미지 프롬프트에만 반영 -->
-      <div class="field" style="margin-bottom:14px">
+      <div class="field" id="sceneStepAEraField" style="margin-bottom:14px">
         <label style="margin:0 0 8px 0;font-size:14px;font-weight:700;display:block">시대 배경 선택</label>
         <div id="eraChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
         <div style="font-size:10px;color:var(--ink3);margin-top:6px">의상·배경의 시대감이 이미지에 반영됩니다 (영상 단계엔 영향 없음)</div>
@@ -1861,7 +1861,70 @@ select option:hover {
       <div id="step1AvatarChips" style="display:flex;flex-wrap:wrap;gap:10px;padding:12px;background:var(--bg2);border:1px solid var(--line);border-radius: 0;min-height:50px"></div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+    <!-- ════════ 이미지 모드 전용 폼 (영상 모드에선 숨김) ════════ -->
+    <div id="imageModeForm" style="display:none">
+      <!-- 시대 배경 (이미지 모드용 - sceneStepA의 chip 재사용 안 하고 여기 새로 렌더) -->
+      <div class="field" style="margin-bottom:14px">
+        <label style="margin:0 0 8px 0;font-size:14px;font-weight:700;display:block">🕰️ 시대 배경 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
+        <div id="imgEraChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
+
+      <!-- 무드 -->
+      <div class="field" style="margin-bottom:14px">
+        <label style="margin:0 0 8px 0;font-size:14px;font-weight:700;display:block">🎨 무드 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
+        <div id="imgMoodChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
+
+      <!-- 장소 -->
+      <div class="field" style="margin-bottom:14px">
+        <label style="margin:0 0 8px 0;font-size:14px;font-weight:700;display:block">📍 장소 <span style="font-size:10px;color:var(--ink3);font-weight:400">(씬에 따라 자동 추천)</span></label>
+        <div id="imgLocChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
+
+      <!-- 4컷 변주 스타일 (다중 선택) -->
+      <div class="field" style="margin-bottom:14px">
+        <label style="margin:0 0 8px 0;font-size:14px;font-weight:700;display:block">📸 4컷 변주 스타일 <span style="font-size:10px;color:var(--ink3);font-weight:400">(여러 개 선택 가능)</span></label>
+        <div id="imgVariationChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+        <div style="font-size:10px;color:var(--ink3);margin-top:6px">선택한 변주 스타일들이 조합되어 4컷에 적용됩니다.</div>
+      </div>
+
+      <!-- 컷별 추가 설명 (선택) -->
+      <div class="field" style="margin-bottom:14px">
+        <label style="margin:0 0 8px 0;font-size:14px;font-weight:700;display:block">✏️ 컷별 추가 설명 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
+        <div id="imgCutDescriptions" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+
+      <!-- 참고 이미지 (영상 모드와 동일한 ID 재사용 — continueRefField는 영상 모드에 있어서 같이 보임) -->
+      <!-- 추가 프롬프트 (영상 모드와 동일한 ID 재사용 — extraPrompt는 영상 모드에 있음) -->
+      <!-- 따라서 이미지 모드에선 이 두 영역을 영상 모드 그리드 안에서 그대로 사용 -->
+      <div class="field" style="margin-bottom:14px">
+        <label style="margin:0 0 5px 0;font-size:14px;font-weight:700;display:block">💬 추가 프롬프트 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
+        <textarea id="imgExtraPrompt" rows="2" placeholder="예: warm sunset light, holding a coffee cup" style="width:100%;background:var(--bg3);border:1px solid var(--line);padding:8px;color:var(--ink);font-size:12px;font-family:inherit;resize:vertical"></textarea>
+      </div>
+
+      <!-- 참고 이미지 -->
+      <div class="field" id="imgContinueRefField" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+          <label style="margin:0;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700">
+            📎 참고 이미지 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span>
+          </label>
+          <button class="btn btn-sm btn-ghost" id="imgContinueRefClearBtn" onclick="clearContinueRef()" style="display:none">제거</button>
+        </div>
+        <div style="font-size:10px;color:var(--ink3);margin-bottom:6px;line-height:1.5">참고할 이미지를 첨부하면 배경·마감·조명·스타일을 참고해서 생성합니다.</div>
+        <div style="display:flex;gap:6px;align-items:flex-start">
+          <div id="imgContinueRefPreview" style="width:120px;aspect-ratio:16/9;background:var(--bg3);border:1px dashed var(--line2);border-radius: 0;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:24px;flex-shrink:0;overflow:hidden"></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px;align-items:flex-start">
+            <button class="btn btn-sm" onclick="document.getElementById('imgContinueRefUpload').click()" style="width:auto;padding:6px 14px;white-space:nowrap">파일 업로드</button>
+            <div style="font-size:9px;color:var(--ink3);line-height:1.4">이전에 다운로드한 <strong>4컷 그리드</strong> 또는 <strong>단일 컷</strong> 이미지를 올려주세요.</div>
+            <input type="file" id="imgContinueRefUpload" accept="image/*" style="display:none" onchange="uploadContinueRef(event)">
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ════════ /이미지 모드 전용 폼 ════════ -->
+
+    <!-- ════════ 영상 모드 전용 폼 (이미지 모드에선 숨김) — 기존 그대로 ════════ -->
+    <div id="videoModeForm" style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
 
     <!-- 좌측 -->
     <div>
@@ -1984,7 +2047,7 @@ select option:hover {
       </div>
 
     </div>
-    </div><!-- grid end -->
+    </div><!-- /videoModeForm (grid end) -->
 
     </div><!-- /sceneStepB -->
   </div>
@@ -4436,15 +4499,21 @@ function validateStep(step) {
     // 2: 씬 선택 — 씬 분위기만
     if (!S.scene)          missing.push('씬 분위기');
   } else if (_vStep === 3) {
-    // 3: 씬 상세 설정 — 출연 아바타 + 계절/시간/날씨/장소/앵글
-    // 이미지 모드는 비율도 여기서 검증
-    if (_IS_IMG_MODE && !S.aspectRatio) missing.push('이미지 비율');
-    if (!S.avatars.length) missing.push('등장 아바타');
-    if (!S.season)    missing.push('계절');
-    if (!S.timeofday) missing.push('시간대');
-    if (!S.weather)   missing.push('날씨');
-    if (!S.location)  missing.push('장소');
-    if (S.angles.filter(Boolean).length < 4) missing.push('카메라 앵글 4개');
+    // 3: 씬 상세 설정 — 모드별로 다른 검증
+    if (_IS_IMG_MODE) {
+      // 이미지 모드: 비율 + 아바타만 필수 (무드/장소/변주는 자동 추천 + 선택)
+      if (!S.aspectRatio) missing.push('이미지 비율');
+      if (!S.avatars.length) missing.push('등장 아바타');
+      // 무드/장소/변주는 비어있어도 통과 — 씬 자체 style만으로도 4컷 생성 가능
+    } else {
+      // 영상 모드: 출연 아바타 + 계절/시간/날씨/장소/앵글
+      if (!S.avatars.length) missing.push('등장 아바타');
+      if (!S.season)    missing.push('계절');
+      if (!S.timeofday) missing.push('시간대');
+      if (!S.weather)   missing.push('날씨');
+      if (!S.location)  missing.push('장소');
+      if (S.angles.filter(Boolean).length < 4) missing.push('카메라 앵글 4개');
+    }
   } else if (_vStep === 4) {
     // 4: 4컷 — 스킵 허용 (4컷 이미지 없어도 6단계에서 영상 불러오기 가능)
     // 최소 하나라도 승인된 컷이 있으면 잠금 해제. 아무것도 없으면 (다 안 만들어도) 그대로 통과 — 6단계에서 영상만 불러와서 통합 가능
@@ -6395,7 +6464,273 @@ function selectEra(key) {
 // ════════════════════════════════════════════════════════════
 //  STEP 1: SCENE
 // ════════════════════════════════════════════════════════════
+
+// ────────────────────────────────────────────────────────────
+//  이미지 모드 전용 — 씬 선택 + 씬 상세 폼 렌더링
+//  영상 모드 함수와 완전 분리 (영상 모드 코드는 건드리지 않음)
+// ────────────────────────────────────────────────────────────
+
+// 이미지 모드 상태 (S 객체에 추가 — JS는 동적이라 OK)
+// S.imgActiveCategory : 현재 선택된 카테고리 그룹 키 (예: 'editorial')
+// S.imgMood           : 선택된 무드 키 (예: 'mood_chic')
+// S.imgLocation       : 선택된 장소 키 (영상 모드 S.location과 별도)
+// S.imgVariations     : 선택된 변주 키 배열 (다중 선택, 예: ['pose','lighting'])
+// S.imgCutDescriptions: 컷별 추가 설명 배열 (4개)
+
+function ensureImageModeState() {
+  if (!_IS_IMG_MODE) return;
+  if (typeof S.imgActiveCategory === 'undefined') S.imgActiveCategory = 'editorial';
+  if (typeof S.imgMood === 'undefined')           S.imgMood = '';
+  if (typeof S.imgLocation === 'undefined')       S.imgLocation = '';
+  if (!Array.isArray(S.imgVariations))            S.imgVariations = [];
+  if (!Array.isArray(S.imgCutDescriptions))       S.imgCutDescriptions = ['','','',''];
+}
+
+// 카테고리 탭 + 포토카드 그리드 렌더 (sceneStepA의 sceneGrid 영역에 그림)
+function renderImageScenes() {
+  ensureImageModeState();
+  const grid = document.getElementById('sceneGrid');
+  if (!grid) return;
+
+  // 이미지 모드: sceneStepA의 시대 배경 필드 숨김 (씬 상세에서 처리)
+  const eraField = document.getElementById('sceneStepAEraField');
+  if (eraField) eraField.style.display = 'none';
+
+  // 카테고리 탭 (그리드 위에 배치)
+  const tabsHtml = `
+    <div id="imgCatTabs" style="grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line)">
+      ${Object.entries(IMAGE_SCENE_GROUPS).map(([key, g]) => {
+        const active = S.imgActiveCategory === key;
+        const bg = active ? `${g.color}22` : 'transparent';
+        const border = active ? g.color : 'var(--line)';
+        const color = active ? g.color : 'var(--ink2)';
+        const fontWeight = active ? '800' : '600';
+        return `<div onclick="selectImgCategory('${key}')" style="cursor:pointer;padding:8px 14px;background:${bg};border:1.5px solid ${border};color:${color};font-weight:${fontWeight};font-size:12px;display:flex;align-items:center;gap:6px;letter-spacing:.02em;transition:all .15s">
+          <span style="font-size:14px">${g.icon}</span>
+          <span>${g.ko}</span>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+
+  // 포토카드 그리드 (현재 선택된 카테고리만 표시)
+  const cards = Object.entries(SCENES_IMAGE)
+    .filter(([k, sc]) => sc.group === S.imgActiveCategory)
+    .map(([key, sc]) => {
+      const group = IMAGE_SCENE_GROUPS[sc.group];
+      const isActive = S.scene === key;
+      const color = group?.color || '#818cf8';
+      const icon = group?.icon || '🎨';
+      // 그라디언트 + 아이콘 썸네일 (MVP — 후에 실제 이미지로 교체 예정)
+      const gradient = `linear-gradient(135deg, ${color}, ${color}88, ${color}44)`;
+      return `<div class="scene-card${isActive ? ' active' : ''}" onclick="selImgScene('${key}',this)" style="position:relative;overflow:hidden;display:flex;flex-direction:column;cursor:pointer">
+        <div style="aspect-ratio:1/1;background:${gradient};display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
+          <span style="font-size:54px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.4))">${icon}</span>
+          <div style="position:absolute;top:8px;left:8px;font-size:9px;font-weight:800;letter-spacing:1.5px;color:rgba(255,255,255,.95);text-shadow:0 1px 3px rgba(0,0,0,.6);background:rgba(0,0,0,.25);padding:3px 7px;backdrop-filter:blur(4px)">${sc.catLabel}</div>
+        </div>
+        <div style="padding:10px 12px;background:var(--bg2)">
+          <div class="sc-name" style="font-size:14px;font-weight:800;color:var(--cream);letter-spacing:-.01em">${sc.name}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+  grid.innerHTML = tabsHtml + cards;
+  // 그리드 컬럼 수 조정 (포토카드는 좀 더 큰 사이즈 — 3열 유지)
+  grid.style.gridTemplateColumns = 'repeat(3,1fr)';
+}
+
+// 카테고리 탭 클릭
+function selectImgCategory(catKey) {
+  ensureImageModeState();
+  S.imgActiveCategory = catKey;
+  renderImageScenes();
+}
+
+// 이미지 모드 씬 선택
+function selImgScene(key, el) {
+  ensureImageModeState();
+  document.querySelectorAll('.scene-card').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  S.scene = key;
+
+  // 자동 추천값 적용 (사용자가 변경 가능)
+  const defaults = SCENE_DEFAULTS[key];
+  if (defaults) {
+    if (!S.imgMood) S.imgMood = defaults.mood;
+    else S.imgMood = defaults.mood;  // 씬 바꾸면 추천값으로 갱신
+    S.imgLocation = defaults.location;
+    // 변주는 추천값 1개로 시작 (다중 선택은 사용자가 추가 가능)
+    S.imgVariations = [defaults.variation];
+  }
+
+  // 자동으로 씬 상세로 이동 (영상 모드의 selScene과 같은 동작)
+  setTimeout(() => {
+    if (typeof goStep === 'function') goStep(2);  // 이미지 모드 step 2 = sceneStepB
+  }, 300);
+}
+
+// 시대 칩 렌더 (이미지 모드 — sceneStepB 안의 imgEraChips 영역)
+function renderImgEraChips() {
+  ensureImageModeState();
+  const wrap = document.getElementById('imgEraChips');
+  if (!wrap) return;
+  // 영상 모드의 ERA_GROUPS 재사용 (현대극/사극/레트로/해외여행)
+  // 단, 이미지 모드에선 단순히 그룹 키로만 칩 표시 (드롭다운은 생략 — 단순화)
+  const groups = ['modern', 'historical', 'retro', 'travel'];
+  wrap.innerHTML = groups.map(gKey => {
+    const g = ERA_GROUPS[gKey];
+    if (!g) return '';
+    const isActive = (ERAS[S.era]?.group === gKey);
+    const bg = isActive ? 'rgba(94,234,212,.18)' : 'var(--bg3)';
+    const border = isActive ? 'var(--teal)' : 'var(--line)';
+    const color = isActive ? 'var(--teal)' : 'var(--ink2)';
+    return `<div onclick="selectImgEra('${gKey}')" style="cursor:pointer;padding:6px 12px;background:${bg};border:1.5px solid ${border};color:${color};font-weight:${isActive?'800':'600'};font-size:12px;letter-spacing:.02em">${g.ko}</div>`;
+  }).join('');
+}
+
+function selectImgEra(groupKey) {
+  // 그룹의 기본 키로 설정
+  const g = ERA_GROUPS[groupKey];
+  if (!g) return;
+  S.era = g.defaultKey;
+  renderImgEraChips();
+}
+
+// 무드 칩 렌더
+function renderImgMoodChips() {
+  ensureImageModeState();
+  const wrap = document.getElementById('imgMoodChips');
+  if (!wrap) return;
+  wrap.innerHTML = Object.entries(IMAGE_MOODS).map(([key, m]) => {
+    const isActive = S.imgMood === key;
+    const bg = isActive ? 'rgba(244,114,182,.18)' : 'var(--bg3)';
+    const border = isActive ? 'var(--pink)' : 'var(--line)';
+    const color = isActive ? 'var(--pink)' : 'var(--ink2)';
+    return `<div onclick="selectImgMood('${key}')" style="cursor:pointer;padding:6px 12px;background:${bg};border:1.5px solid ${border};color:${color};font-weight:${isActive?'800':'600'};font-size:12px;letter-spacing:.02em">${m.ko}</div>`;
+  }).join('');
+}
+
+function selectImgMood(key) {
+  // 같은 무드 다시 누르면 해제 (선택 취소)
+  S.imgMood = (S.imgMood === key) ? '' : key;
+  renderImgMoodChips();
+}
+
+// 장소 칩 렌더
+function renderImgLocChips() {
+  ensureImageModeState();
+  const wrap = document.getElementById('imgLocChips');
+  if (!wrap) return;
+  wrap.innerHTML = Object.entries(IMAGE_LOCATIONS).map(([key, loc]) => {
+    const isActive = S.imgLocation === key;
+    const bg = isActive ? 'rgba(96,165,250,.18)' : 'var(--bg3)';
+    const border = isActive ? 'var(--blue, #60a5fa)' : 'var(--line)';
+    const color = isActive ? '#60a5fa' : 'var(--ink2)';
+    return `<div onclick="selectImgLoc('${key}')" style="cursor:pointer;padding:6px 12px;background:${bg};border:1.5px solid ${border};color:${color};font-weight:${isActive?'800':'600'};font-size:12px;letter-spacing:.02em">${loc.ko}</div>`;
+  }).join('');
+}
+
+function selectImgLoc(key) {
+  S.imgLocation = (S.imgLocation === key) ? '' : key;
+  renderImgLocChips();
+}
+
+// 4컷 변주 칩 렌더 (다중 선택)
+function renderImgVariationChips() {
+  ensureImageModeState();
+  const wrap = document.getElementById('imgVariationChips');
+  if (!wrap) return;
+  wrap.innerHTML = Object.entries(IMAGE_VARIATIONS).map(([key, v]) => {
+    const isActive = S.imgVariations.includes(key);
+    const bg = isActive ? 'rgba(167,139,250,.18)' : 'var(--bg3)';
+    const border = isActive ? '#a78bfa' : 'var(--line)';
+    const color = isActive ? '#a78bfa' : 'var(--ink2)';
+    return `<div onclick="toggleImgVariation('${key}')" title="${v.desc}" style="cursor:pointer;padding:6px 12px;background:${bg};border:1.5px solid ${border};color:${color};font-weight:${isActive?'800':'600'};font-size:12px;display:flex;flex-direction:column;align-items:flex-start;gap:1px;letter-spacing:.02em">
+      <span>${v.ko}</span>
+      <span style="font-size:9px;opacity:.75;font-weight:500">${v.desc}</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleImgVariation(key) {
+  ensureImageModeState();
+  const idx = S.imgVariations.indexOf(key);
+  if (idx >= 0) {
+    S.imgVariations.splice(idx, 1);
+  } else {
+    S.imgVariations.push(key);
+  }
+  renderImgVariationChips();
+}
+
+// 컷별 설명 (4개) 렌더
+function renderImgCutDescriptions() {
+  ensureImageModeState();
+  const wrap = document.getElementById('imgCutDescriptions');
+  if (!wrap) return;
+  wrap.innerHTML = [0,1,2,3].map(i => `
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:11px;color:var(--pink);font-weight:800;letter-spacing:1.5px;min-width:50px">CUT ${i+1}</span>
+      <input type="text" value="${(S.imgCutDescriptions[i] || '').replace(/"/g,'&quot;')}"
+             oninput="setImgCutDesc(${i}, this.value)"
+             placeholder="이 컷에 추가할 디테일 (선택)"
+             style="flex:1;background:var(--bg3);border:1px solid var(--line);padding:6px 10px;color:var(--ink);font-size:12px;font-family:inherit">
+    </div>
+  `).join('');
+}
+
+function setImgCutDesc(idx, val) {
+  ensureImageModeState();
+  S.imgCutDescriptions[idx] = val;
+}
+
+// 이미지 모드 폼 전체 렌더 (씬 상세 진입 시 호출)
+function renderImageModeForm() {
+  if (!_IS_IMG_MODE) return;
+  ensureImageModeState();
+  // 이미지 모드 폼 보이기, 영상 모드 폼 숨기기
+  const imgForm = document.getElementById('imageModeForm');
+  const vidForm = document.getElementById('videoModeForm');
+  if (imgForm) imgForm.style.display = 'block';
+  if (vidForm) vidForm.style.display = 'none';
+
+  // 비율 칩 (Phase 1에서 추가됨, 씬 상세 상단 imgRatioField 안)
+  if (typeof renderImgRatioChips === 'function') renderImgRatioChips();
+
+  renderImgEraChips();
+  renderImgMoodChips();
+  renderImgLocChips();
+  renderImgVariationChips();
+  renderImgCutDescriptions();
+
+  // 추가 프롬프트 textarea 동기화
+  const extraEl = document.getElementById('imgExtraPrompt');
+  if (extraEl) extraEl.value = S.imgExtraPromptValue || '';
+  if (extraEl && !extraEl._bound) {
+    extraEl.addEventListener('input', () => { S.imgExtraPromptValue = extraEl.value; });
+    extraEl._bound = true;
+  }
+}
+
+// 영상 모드 폼 보이기 / 이미지 모드 폼 숨기기 (영상 모드일 때 호출)
+function renderVideoModeForm() {
+  if (_IS_IMG_MODE) return;
+  const imgForm = document.getElementById('imageModeForm');
+  const vidForm = document.getElementById('videoModeForm');
+  if (imgForm) imgForm.style.display = 'none';
+  if (vidForm) vidForm.style.display = 'grid';
+}
+
+// ────────────────────────────────────────────────────────────
+//  영상 모드 — 기존 함수들 (수정 없음)
+// ────────────────────────────────────────────────────────────
+
 function renderScenes() {
+  // 이미지 모드면 이미지 모드 전용 렌더로 분기
+  if (_IS_IMG_MODE) {
+    renderImageScenes();
+    return;
+  }
   renderEraChips();  // 시대 chip도 같이 렌더
   const grid = document.getElementById('sceneGrid');
   // 기본 8개 씬
@@ -6499,6 +6834,13 @@ function selScene(key, el) {
 }
 
 function restoreSceneUI() {
+  // 이미지 모드면 이미지 모드 폼 렌더 후 종료 (영상 모드 UI 동기화 불필요)
+  if (_IS_IMG_MODE) {
+    renderImageModeForm();
+    return;
+  }
+  // 영상 모드일 때 영상 모드 폼 보장 (혹시 모드 토글 시 대비)
+  if (typeof renderVideoModeForm === 'function') renderVideoModeForm();
   // 시대별 장소 옵션 렌더
   if (typeof renderLocationOptions === 'function') renderLocationOptions();
   if (typeof renderVehicleOptions === 'function') renderVehicleOptions();
@@ -7370,7 +7712,254 @@ function resetAngles() {
 function toggleCustomAngle() { /* 제거됨 — 팝업 적용으로 이주 */ }
 
 // 동기 버전 — 미리보기 / 즉시 표시용 (한글 그대로)
+// ────────────────────────────────────────────────────────────
+//  이미지 모드 전용 프롬프트 빌더 (영상 모드 buildImagePrompt와 분리)
+//  앵글/계절/시간/날씨 없이, 무드 + 장소 + 변주 + 컷설명 기반
+// ────────────────────────────────────────────────────────────
+
+// 아바타 묘사를 구성하는 공통 헬퍼 (영상 모드 buildImagePrompt 내 로직 재사용)
+// returns { charDesc, petDesc, productDesc, nPerson, nPet, nProd }
+function _imgBuildAvatarDescriptions() {
+  const fullLib = (typeof loadAvatarLib === 'function') ? loadAvatarLib() : [];
+  const getCat = (av) => {
+    const libId = av._libId || av.id;
+    const libAv = fullLib.find(a => a.id === libId);
+    return (libAv && libAv.category) || av.category || 'person';
+  };
+  const personAvs  = (S.avatars || []).filter(av => getCat(av) === 'person');
+  const petAvs     = (S.avatars || []).filter(av => getCat(av) === 'pet');
+  const productAvs = (S.avatars || []).filter(av => getCat(av) === 'product');
+
+  let charDesc = '';
+  if (personAvs.length) {
+    charDesc = personAvs.map(av => {
+      const parts = [av.gender, av.age, av.body];
+      if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
+      else if (av.hair) parts.push(av.hair);
+      if (av.skin) parts.push(av.skin);
+      if (av.extra) parts.push(av.extra);
+      if (av.outfit && av.outfit.trim()) parts.push(av.outfit.trim());
+      return av.name + ': ' + parts.filter(Boolean).join(', ');
+    }).join(' | ');
+  }
+  let petDesc = '';
+  if (petAvs.length) {
+    const speciesEn = { dog:'dog', cat:'cat', rabbit:'rabbit', hamster:'hamster', bird:'bird', other:'pet' };
+    petDesc = petAvs.map(av => {
+      const lib = fullLib.find(a => a.id === (av._libId || av.id)) || av;
+      const parts = [];
+      if (lib.petBreed) parts.push(lib.petBreed);
+      else if (lib.petSpecies) parts.push(speciesEn[lib.petSpecies] || lib.petSpecies);
+      if (lib.petColor) parts.push(lib.petColor);
+      if (lib.petCoat)  parts.push(lib.petCoat);
+      if (lib.petSize)  parts.push(lib.petSize);
+      if (lib.petExtra) parts.push(lib.petExtra);
+      return (av.name || 'pet') + ': ' + parts.filter(Boolean).join(', ');
+    }).join(' | ');
+  }
+  let productDesc = '';
+  if (productAvs.length) {
+    productDesc = productAvs.map(av => {
+      const lib = fullLib.find(a => a.id === (av._libId || av.id)) || av;
+      const parts = [];
+      if (lib.productStyle)    parts.push(lib.productStyle);
+      if (lib.productColor)    parts.push(lib.productColor);
+      if (lib.productMaterial) parts.push(lib.productMaterial);
+      if (lib.productCat)      parts.push(lib.productCat);
+      if (lib.productShape)    parts.push(lib.productShape);
+      if (lib.productSize)     parts.push(lib.productSize);
+      if (lib.productLogo)     parts.push('with brand text "' + lib.productLogo + '"');
+      if (lib.productExtra)    parts.push(lib.productExtra);
+      return (av.name || 'product') + ': ' + parts.filter(Boolean).join(', ');
+    }).join(' | ');
+  }
+  return { charDesc, petDesc, productDesc, nPerson: personAvs.length, nPet: petAvs.length, nProd: productAvs.length };
+}
+
+function _imgBuildSubjectLock(nPerson, nPet, nProd) {
+  return (nPerson + nPet + nProd > 0)
+    ? 'EXACTLY ' + (nPerson > 0 ? nPerson + ' person' + (nPerson===1?'':'s') : '') +
+      ((nPerson > 0 && nPet > 0) ? ' and ' : '') +
+      (nPet > 0 ? nPet + ' pet' + (nPet===1?'':'s') : '') +
+      (((nPerson > 0 || nPet > 0) && nProd > 0) ? ' and ' : '') +
+      (nProd > 0 ? nProd + ' product' + (nProd===1?'':'s') : '') +
+      ' visible. NO additional people, NO extra characters, NO bystanders, NO romantic partners unless specified.'
+    : 'NO people, NO characters visible.';
+}
+
+// 이미지 모드 프롬프트 빌더 (sync) — 영상 모드와 분리
+function buildImagePromptImageMode() {
+  const sc = SCENES_IMAGE[S.scene];
+  if (!sc) return ''; // 안전장치 (이미지 모드 씬이 아니면 빈 문자열)
+
+  const { charDesc, petDesc, productDesc, nPerson, nPet, nProd } = _imgBuildAvatarDescriptions();
+  const subjectLock = _imgBuildSubjectLock(nPerson, nPet, nProd);
+
+  // 컷별 설명 (선택적)
+  const cutDescs = (S.imgCutDescriptions || []).map((d, i) => {
+    const trimmed = (d || '').trim();
+    return trimmed ? `Panel ${i+1}: ${trimmed}` : '';
+  }).filter(Boolean).join(' | ');
+
+  // 변주 키워드 조합 (다중 선택)
+  const variations = (S.imgVariations || [])
+    .map(k => IMAGE_VARIATIONS[k]?.promptHint)
+    .filter(Boolean)
+    .join('; ');
+
+  const moodKeywords = IMAGE_MOODS[S.imgMood]?.keywords || '';
+  const locEn = IMAGE_LOCATIONS[S.imgLocation]?.en || '';
+  const eraKeyword = ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern;
+  const extraEl = document.getElementById('imgExtraPrompt');
+  const extra = (extraEl?.value || S.imgExtraPromptValue || '').trim();
+
+  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Each panel shows variations of the same concept.
+SUBJECTS: ${subjectLock}
+${charDesc ? 'CHARACTERS: ' + charDesc + '.' : ''}
+${petDesc ? 'PETS: ' + petDesc + '.' : ''}
+${productDesc ? 'PRODUCTS: ' + productDesc + '.' : ''}
+SCENE STYLE: ${sc.style}.
+${moodKeywords ? 'MOOD: ' + moodKeywords + '.' : ''}
+${locEn ? 'LOCATION: ' + locEn + '.' : ''}
+TIME PERIOD: ${eraKeyword}.
+${variations ? '4-PANEL VARIATIONS: ' + variations + '.' : '4-PANEL VARIATIONS: natural variety of best shots, slight subtle variations.'}
+${cutDescs ? 'CUT DETAILS: ' + cutDescs + '.' : ''}
+${extra ? 'ADDITIONAL: ' + extra + '.' : ''}
+All 4 panels share consistent subjects and core concept. High-quality professional photography.`.trim();
+}
+
+// 이미지 모드 프롬프트 빌더 (async — API용, 한글 번역 포함)
+async function buildImagePromptImageModeForApi() {
+  const sc = SCENES_IMAGE[S.scene];
+  if (!sc) return '';
+
+  const fullLib = (typeof loadAvatarLib === 'function') ? loadAvatarLib() : [];
+  const getCat = (av) => {
+    const libId = av._libId || av.id;
+    const libAv = fullLib.find(a => a.id === libId);
+    return (libAv && libAv.category) || av.category || 'person';
+  };
+  const personAvs  = (S.avatars || []).filter(av => getCat(av) === 'person');
+  const petAvs     = (S.avatars || []).filter(av => getCat(av) === 'pet');
+  const productAvs = (S.avatars || []).filter(av => getCat(av) === 'product');
+
+  log('info', '한글 필드 영어 번역 중... (이미지 모드)');
+
+  // 사람 — 한글 필드 번역
+  let charDesc = '';
+  if (personAvs.length) {
+    const translatedAvs = await Promise.all(personAvs.map(async av => ({
+      name: await translateKoToEn(av.name),
+      gender: av.gender, age: av.age, body: av.body,
+      hair: av.hair ? await translateKoToEn(av.hair) : '',
+      sceneHair: av.sceneHair ? await translateKoToEn(av.sceneHair) : '',
+      extra: av.extra ? await translateKoToEn(av.extra) : '',
+      outfit: av.outfit ? await translateKoToEn(av.outfit) : '',
+      skin: av.skin || '',
+    })));
+    charDesc = translatedAvs.map(av => {
+      const parts = [av.gender, av.age, av.body];
+      if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
+      else if (av.hair) parts.push(av.hair);
+      if (av.skin) parts.push(av.skin);
+      if (av.extra) parts.push(av.extra);
+      if (av.outfit && av.outfit.trim()) parts.push(av.outfit.trim());
+      return av.name + ': ' + parts.filter(Boolean).join(', ');
+    }).join(' | ');
+  }
+  let petDesc = '';
+  if (petAvs.length) {
+    const speciesEn = { dog:'dog', cat:'cat', rabbit:'rabbit', hamster:'hamster', bird:'bird', other:'pet' };
+    const translatedPets = await Promise.all(petAvs.map(async av => {
+      const lib = fullLib.find(a => a.id === (av._libId || av.id)) || av;
+      return {
+        name: await translateKoToEn(av.name || 'pet'),
+        species: lib.petSpecies, breed: lib.petBreed, color: lib.petColor,
+        coat: lib.petCoat, size: lib.petSize, extra: lib.petExtra,
+      };
+    }));
+    petDesc = translatedPets.map(p => {
+      const parts = [];
+      if (p.breed) parts.push(p.breed);
+      else if (p.species) parts.push(speciesEn[p.species] || p.species);
+      if (p.color) parts.push(p.color);
+      if (p.coat)  parts.push(p.coat);
+      if (p.size)  parts.push(p.size);
+      if (p.extra) parts.push(p.extra);
+      return p.name + ': ' + parts.filter(Boolean).join(', ');
+    }).join(' | ');
+  }
+  let productDesc = '';
+  if (productAvs.length) {
+    const translatedProducts = await Promise.all(productAvs.map(async av => {
+      const lib = fullLib.find(a => a.id === (av._libId || av.id)) || av;
+      return {
+        name: await translateKoToEn(av.name || 'product'),
+        cat: lib.productCat, material: lib.productMaterial, color: lib.productColor,
+        size: lib.productSize, shape: lib.productShape, logo: lib.productLogo,
+        style: lib.productStyle, extra: lib.productExtra,
+      };
+    }));
+    productDesc = translatedProducts.map(p => {
+      const parts = [];
+      if (p.style)    parts.push(p.style);
+      if (p.color)    parts.push(p.color);
+      if (p.material) parts.push(p.material);
+      if (p.cat)      parts.push(p.cat);
+      if (p.shape)    parts.push(p.shape);
+      if (p.size)     parts.push(p.size);
+      if (p.logo)     parts.push('with brand text "' + p.logo + '"');
+      if (p.extra)    parts.push(p.extra);
+      return p.name + ': ' + parts.filter(Boolean).join(', ');
+    }).join(' | ');
+  }
+
+  const subjectLock = _imgBuildSubjectLock(personAvs.length, petAvs.length, productAvs.length);
+
+  // 컷별 설명 한글 번역
+  const cutDescsArr = await Promise.all((S.imgCutDescriptions || []).map(async (d, i) => {
+    const trimmed = (d || '').trim();
+    if (!trimmed) return '';
+    const en = await translateKoToEn(trimmed);
+    return `Panel ${i+1}: ${en}`;
+  }));
+  const cutDescs = cutDescsArr.filter(Boolean).join(' | ');
+
+  const variations = (S.imgVariations || [])
+    .map(k => IMAGE_VARIATIONS[k]?.promptHint)
+    .filter(Boolean)
+    .join('; ');
+
+  const moodKeywords = IMAGE_MOODS[S.imgMood]?.keywords || '';
+  const locEn = IMAGE_LOCATIONS[S.imgLocation]?.en || '';
+  const eraKeyword = ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern;
+
+  const extraEl = document.getElementById('imgExtraPrompt');
+  const extraRaw = (extraEl?.value || S.imgExtraPromptValue || '').trim();
+  const extraEn = extraRaw ? await translateKoToEn(extraRaw) : '';
+
+  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Each panel shows variations of the same concept.
+SUBJECTS: ${subjectLock}
+${charDesc ? 'CHARACTERS: ' + charDesc + '.' : ''}
+${petDesc ? 'PETS: ' + petDesc + '.' : ''}
+${productDesc ? 'PRODUCTS: ' + productDesc + '.' : ''}
+SCENE STYLE: ${sc.style}.
+${moodKeywords ? 'MOOD: ' + moodKeywords + '.' : ''}
+${locEn ? 'LOCATION: ' + locEn + '.' : ''}
+TIME PERIOD: ${eraKeyword}.
+${variations ? '4-PANEL VARIATIONS: ' + variations + '.' : '4-PANEL VARIATIONS: natural variety of best shots, slight subtle variations.'}
+${cutDescs ? 'CUT DETAILS: ' + cutDescs + '.' : ''}
+${extraEn ? 'ADDITIONAL: ' + extraEn + '.' : ''}
+All 4 panels share consistent subjects and core concept. High-quality professional photography.`.trim();
+}
+
+// ────────────────────────────────────────────────────────────
+//  영상 모드 — 기존 함수 (수정 없음, 단 시작부에 분기만 추가)
+// ────────────────────────────────────────────────────────────
+
 function buildImagePrompt() {
+  // 이미지 모드면 이미지 모드 전용 빌더로 위임
+  if (_IS_IMG_MODE) return buildImagePromptImageMode();
   const sc = SCENES[S.scene];
   // 카테고리별로 분리 (반려동물/제품이 사람으로 묘사되는 것 방지)
   const fullLib = (typeof loadAvatarLib === 'function') ? loadAvatarLib() : [];
@@ -7466,6 +8055,8 @@ All 4 panels share identical subjects, lighting, and location. Same moment, diff
 
 // async 버전 — 실제 API 전송용 (한글 → 영어 번역)
 async function buildImagePromptForApi() {
+  // 이미지 모드면 이미지 모드 전용 async 빌더로 위임
+  if (_IS_IMG_MODE) return await buildImagePromptImageModeForApi();
   const sc = SCENES[S.scene];
   const loc = getCombinedLocation();
   const extra = document.getElementById('extraPrompt')?.value.trim() || '';
