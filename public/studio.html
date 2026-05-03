@@ -1766,7 +1766,7 @@ select option:hover {
       <button class="btn btn-primary" onclick="tryGoStep(2)">다음</button>
     </div>
     <div class="panel-header">
-      <span class="panel-num">02</span>
+      <span class="panel-num" id="panel0Num">02</span>
       <span class="panel-cat">K-PROFILE / AVATAR</span>
       <h1 class="panel-title">나만의 <span class="accent">아바타</span>를 만들어보세요</h1>
       <p class="panel-sub">얼굴 · 헤어 · 안경 — 모든 씬에 재사용되는 캐릭터를 만듭니다.</p>
@@ -2072,7 +2072,7 @@ select option:hover {
       </div>
     </div>
     <div class="panel-header">
-      <span class="panel-num">05</span>
+      <span class="panel-num" id="panel2Num">05</span>
       <span class="panel-cat">K-FRAME / 4 CUT</span>
       <h1 class="panel-title">4컷으로 <span class="accent">한 번에</span></h1>
       <p class="panel-sub">AI가 한 번에 4컷을 그려 통일감을 잡습니다. 마음에 들면 영상 생성으로.</p>
@@ -4189,9 +4189,9 @@ function goStep(n) {
     renderStep1Avatars();
     // 다시 한번 — restoreSceneUI 등이 헤더를 덮어쓸 가능성에 대비
     updateScenePanelHeader('B');
-    // 추가 fail-safe — panel-num 직접 04로 강제
+    // 추가 fail-safe — panel-num 직접 모드별로 강제 (영상=04, 이미지=03)
     const __numEl = document.getElementById('panel1Num');
-    if (__numEl) __numEl.textContent = '04';
+    if (__numEl) __numEl.textContent = _IS_IMG_MODE ? '03' : '04';
     // 이미지 모드: 씬 상세 진입 시 비율 칩 렌더링
     if (_IS_IMG_MODE && typeof renderImgRatioChips === 'function') {
       renderImgRatioChips();
@@ -4229,15 +4229,18 @@ function updateScenePanelHeader(sub) {
   const cat = document.getElementById('panel1Cat');
   const title = document.getElementById('panel1Title');
   const sub_el = document.getElementById('panel1Subtxt');
+  // 이미지 모드: A=02, B=03 / 영상 모드: A=03, B=04
+  const numA = _IS_IMG_MODE ? '02' : '03';
+  const numB = _IS_IMG_MODE ? '03' : '04';
   if (sub === 'A') {
-    if (numEl) numEl.textContent = '03';
+    if (numEl) numEl.textContent = numA;
     if (cat) cat.textContent = 'K-DRAMA / SCENE SELECT';
     if (title) title.innerHTML = '내가 만들 영상 <span class="accent">씬</span> 선택';
     if (sub_el) sub_el.textContent = '씬 분위기를 골라주세요.';
   } else {
     const sc = SCENES[S.scene];
     const label = sc?.name || S.scene || '';
-    if (numEl) numEl.textContent = '04';
+    if (numEl) numEl.textContent = numB;
     if (cat) cat.textContent = `K-DRAMA / SCENE DETAIL · ${label.toUpperCase()}`;
     if (title) title.innerHTML = '디테일을 <span class="accent">완성</span>해주세요';
     if (sub_el) sub_el.textContent = '계절·시간대·날씨·장소·카메라 앵글까지 정교하게 설정하세요.';
@@ -11074,6 +11077,11 @@ if (_IS_IMG_MODE) {
       <button class="btn btn-primary" onclick="tryGoStep(1)">다음</button>
     `;
   }
+  // 단계 숫자 갱신: 이미지 모드는 panel0=01, panel2=04 (panel1은 updateScenePanelHeader에서 처리)
+  const _p0Num = document.getElementById('panel0Num');
+  if (_p0Num) _p0Num.textContent = '01';
+  const _p2Num = document.getElementById('panel2Num');
+  if (_p2Num) _p2Num.textContent = '04';
 }
 
 S._currentStep = 0;
