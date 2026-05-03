@@ -1917,7 +1917,7 @@ select option:hover {
         <div>
           <!-- 컷별 추가 설명 -->
           <div class="field" style="margin-bottom:14px">
-            <label style="margin:0 0 8px 0;font-size:13px;font-weight:700;display:block">컷별 추가 설명 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
+            <label style="margin:0 0 8px 0;font-size:13px;font-weight:700;display:block">컷별 화보 앵글 + 추가 설명 <span style="font-size:10px;color:var(--ink3);font-weight:400">(앵글 카드 클릭하여 선택)</span></label>
             <div id="imgCutDescriptions" style="display:flex;flex-direction:column;gap:6px"></div>
           </div>
 
@@ -3097,6 +3097,22 @@ const SCENES_IMAGE = {
   art_double:   { name:'더블 익스포저',group:'art',     catLabel:'DOUBLE EXPOSURE',style:'double exposure art photography, surreal portrait blended with nature or cityscape, dreamlike artistic composition, ethereal layered imagery, fine art aesthetic' },
 };
 
+// 이미지 모드 화보용 앵글 12개 — 영상 모드의 ANGLE_DESCRIPTIONS 리소스 재사용
+const IMAGE_ANGLES = [
+  'Full Shot (FS)',
+  'Cowboy Shot',
+  'Medium Shot',
+  'Bust Shot',
+  'Close-up (CU)',
+  'Extreme Close-up (ECU)',
+  'Eye-Level Shot',
+  'Low Angle',
+  'High Angle',
+  'Dutch Angle',
+  'Over-the-Shoulder (OTS)',
+  'Shallow Depth of Field',
+];
+
 // 이미지 모드 무드 5개 — 계절/시간대/날씨를 통합한 단순화된 분위기
 const IMAGE_MOODS = {
   mood_bright:    { ko: '밝고 활기찬', keywords: 'bright cheerful lighting, vibrant colors, energetic atmosphere, uplifting mood' },
@@ -3585,6 +3601,8 @@ const ANGLE_DESCRIPTIONS = {
   'Drone Shot':             { ko: '드론으로 위에서 광활하게 촬영', use: '풍경·여행·도시 전경의 스케일을 보여줄 때' },
   'Tracking Shot':          { ko: '인물·물체를 따라가며 촬영', use: '운동·달리기·역동적 움직임을 자연스럽게 담을 때' },
   'Crane Shot':             { ko: '크레인으로 부드럽게 상승/하강 이동', use: '댄스·뮤직비디오·웅장한 전환에 시각적 임팩트를 줄 때' },
+  'Medium Shot':            { ko: '허리 위 화면, 표정과 의상 동시에', use: '화보의 기본 샷, 표정과 상의 의상을 함께 보여줄 때' },
+  'Over-the-Shoulder (OTS)':{ ko: '어깨 너머 시점으로 보는 구도', use: '인물과 배경의 관계감, 손짓/액세서리 강조' },
 };
 
 const ANGLE_IMG_KEYS = {
@@ -4943,9 +4961,11 @@ function selRace(el, race) {
     const gen = genderHidden.value.toLowerCase().includes('woman') ? 'woman' : 'man';
     genderHidden.value = _buildGenderLabel(race, gen);
   }
+  // race 변경 시 헤어 옵션도 다시 그리기
+  if (typeof refreshHairList === 'function') refreshHairList();
 }
 
-// 성별 선택 — 현재 race와 조합해 라벨 생성
+// 성별 선택 — 현재 race와 조합해 라벨 생성 + 헤어 리스트 갱신
 function selGender(el, gen) {
   const par = el.parentElement;
   par.querySelectorAll('.seg').forEach(s => s.classList.remove('active'));
@@ -4953,6 +4973,8 @@ function selGender(el, gen) {
   const race = (document.getElementById('avRace')?.value) || 'korean';
   const hidden = document.getElementById('avGender');
   if (hidden) hidden.value = _buildGenderLabel(race, gen);
+  // 성별에 맞게 헤어 옵션 다시 그리기
+  if (typeof refreshHairList === 'function') refreshHairList();
 }
 
 // 옛 데이터(race 필드 없음)에서 gender 라벨로 race 유추
@@ -6521,6 +6543,7 @@ function ensureImageModeState() {
   if (!Array.isArray(S.imgVariations))            S.imgVariations = [];
   if (typeof S.imgVariationCustom === 'undefined')S.imgVariationCustom = '';
   if (!Array.isArray(S.imgCutDescriptions))       S.imgCutDescriptions = ['','','',''];
+  if (!Array.isArray(S.imgCutAngles))             S.imgCutAngles       = ['','','',''];
   // 시대 배경은 이미지 모드에서 현대극 고정
   S.era = 'modern';
 }
@@ -6672,20 +6695,93 @@ function toggleImgVariation(key) {
   renderImgVariationChips();
 }
 
-// 컷별 설명 (4개) 렌더
+// 컷별 앵글 + 설명 렌더 (4개)
 function renderImgCutDescriptions() {
   ensureImageModeState();
   const wrap = document.getElementById('imgCutDescriptions');
   if (!wrap) return;
-  wrap.innerHTML = [0,1,2,3].map(i => `
-    <div style="display:flex;align-items:center;gap:8px">
-      <span style="font-size:11px;color:var(--pink);font-weight:800;letter-spacing:1.5px;min-width:50px">CUT ${i+1}</span>
-      <input type="text" value="${(S.imgCutDescriptions[i] || '').replace(/"/g,'&quot;')}"
-             oninput="setImgCutDesc(${i}, this.value)"
-             placeholder="이 컷에 추가할 디테일 (선택)"
-             style="flex:1;background:var(--bg3);border:1px solid var(--line);padding:6px 10px;color:var(--ink);font-size:12px;font-family:inherit">
-    </div>
-  `).join('');
+  const colors = ['var(--gold)','var(--blue)','var(--green)','var(--red)'];
+  const rgbs = ['255,184,77','96,165,250','74,222,128','255,85,119'];
+  wrap.innerHTML = [0,1,2,3].map(i => {
+    const angle = S.imgCutAngles[i] || '';
+    const meta = (typeof ANGLE_DESCRIPTIONS !== 'undefined' && ANGLE_DESCRIPTIONS[angle]) || {};
+    const ko = meta.ko || '';
+    const color = colors[i];
+    const rgb = rgbs[i];
+    return `
+      <div style="display:flex;gap:8px;align-items:stretch">
+        <div onclick="openImgAnglePickerModal(${i})" 
+             style="flex:0 0 130px;cursor:pointer;padding:8px 6px;border-radius:0;border:1.5px solid ${angle ? color : 'var(--line)'};background:${angle ? `rgba(${rgb},0.08)` : 'var(--bg3)'};text-align:center;transition:.15s;display:flex;flex-direction:column;justify-content:center" 
+             title="클릭하여 앵글 선택">
+          <div style="font-size:10px;font-weight:800;color:${color};letter-spacing:1.2px">CUT ${i+1}</div>
+          ${angle ? `
+            <div style="font-size:9px;font-weight:700;color:var(--cream);margin-top:3px;line-height:1.2;word-break:keep-all">${escHtml(angle)}</div>
+            <div style="font-size:8px;color:var(--ink3);margin-top:1px;line-height:1.2">${escHtml(ko)}</div>
+          ` : `
+            <div style="font-size:9px;color:var(--ink3);margin-top:4px">클릭하여 선택</div>
+          `}
+        </div>
+        <input type="text" value="${(S.imgCutDescriptions[i] || '').replace(/"/g,'&quot;')}"
+               oninput="setImgCutDesc(${i}, this.value)"
+               placeholder="이 컷에 추가할 디테일 (선택)"
+               style="flex:1;background:var(--bg3);border:1px solid var(--line);padding:6px 10px;color:var(--ink);font-size:12px;font-family:inherit">
+      </div>
+    `;
+  }).join('');
+}
+
+// 이미지 모드 앵글 전용 모달 로직 (영상 모드와 완전 분리)
+let _imgAnglePickerCutIdx = -1;
+function openImgAnglePickerModal(cutIdx) {
+  _imgAnglePickerCutIdx = cutIdx;
+  ensureImageModeState();
+  const modal = document.getElementById('anglePickerModal');
+  if (!modal) { console.error('[ImgAnglePicker] modal not found'); return; }
+  const colors = ['var(--gold)','var(--blue)','var(--green)','var(--red)'];
+  const rgbs = ['255,184,77','96,165,250','74,222,128','255,85,119'];
+  const lbl = document.getElementById('anglePickerCutLabel');
+  if (lbl) {
+    lbl.textContent = `CUT ${cutIdx + 1}`;
+    lbl.style.color = colors[cutIdx];
+  }
+  const list = document.getElementById('anglePickerModalList');
+  if (!list) return;
+  let html = `<div style="font-size:10px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px">화보용 12개 앵글</div>`;
+  IMAGE_ANGLES.forEach(angle => {
+    const meta = ANGLE_DESCRIPTIONS[angle] || {};
+    const ko = meta.ko || '';
+    const use = meta.use || '';
+    const isSelected = S.imgCutAngles[cutIdx] === angle;
+    const safeAngle = angle.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    html += `
+      <div onclick="selectImgAngleForCut('${safeAngle}')"
+           style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-radius:0;border:1px solid ${isSelected ? colors[cutIdx] : 'var(--line)'};background:${isSelected ? `rgba(${rgbs[cutIdx]},0.1)` : 'var(--bg3)'};margin-bottom:5px;cursor:pointer;transition:.12s"
+           onmouseover="this.style.background='var(--bg4)'"
+           onmouseout="this.style.background='${isSelected ? `rgba(${rgbs[cutIdx]},0.1)` : 'var(--bg3)'}'">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:700;color:var(--cream)">${escHtml(angle)}</div>
+          <div style="font-size:10px;color:var(--ink2);margin-top:2px">${escHtml(ko)}</div>
+          ${use ? `<div style="font-size:9px;color:var(--ink3);margin-top:2px;font-style:italic">${escHtml(use)}</div>` : ''}
+        </div>
+        ${isSelected ? `<div style="flex:0 0 auto;font-size:18px;color:${colors[cutIdx]}">✓</div>` : ''}
+      </div>
+    `;
+  });
+  if (S.imgCutAngles[cutIdx]) {
+    html += `<div onclick="selectImgAngleForCut('')" style="text-align:center;padding:8px;border-radius:0;border:1px dashed var(--ink3);color:var(--ink3);cursor:pointer;margin-top:8px;font-size:11px">앵글 해제</div>`;
+  }
+  list.innerHTML = html;
+  modal.style.display = 'flex';
+}
+
+function selectImgAngleForCut(angleName) {
+  if (_imgAnglePickerCutIdx < 0 || _imgAnglePickerCutIdx > 3) return;
+  ensureImageModeState();
+  S.imgCutAngles[_imgAnglePickerCutIdx] = angleName || '';
+  closeAnglePickerModal();
+  _imgAnglePickerCutIdx = -1;
+  renderImgCutDescriptions();
+  if (typeof updatePromptPreview === 'function') updatePromptPreview();
 }
 
 function setImgCutDesc(idx, val) {
@@ -7810,10 +7906,17 @@ function buildImagePromptImageMode() {
   const { charDesc, petDesc, productDesc, nPerson, nPet, nProd } = _imgBuildAvatarDescriptions();
   const subjectLock = _imgBuildSubjectLock(nPerson, nPet, nProd);
 
-  // 컷별 설명 (선택적)
+  // 컷별 앵글 + 설명 며지
   const cutDescs = (S.imgCutDescriptions || []).map((d, i) => {
     const trimmed = (d || '').trim();
-    return trimmed ? `Panel ${i+1}: ${trimmed}` : '';
+    const angle = (S.imgCutAngles && S.imgCutAngles[i]) || '';
+    const parts = [];
+    if (angle) {
+      const meta = (typeof ANGLE_DESCRIPTIONS !== 'undefined' && ANGLE_DESCRIPTIONS[angle]) || {};
+      parts.push(`${angle} composition${meta.ko ? ' (' + meta.ko + ')' : ''}`);
+    }
+    if (trimmed) parts.push(trimmed);
+    return parts.length ? `Panel ${i+1}: ${parts.join(', ')}` : '';
   }).filter(Boolean).join(' | ');
 
   // 무드: 칩 키워드 + 자유 입력 (둘 다 있으면 같이)
@@ -7947,9 +8050,17 @@ async function buildImagePromptImageModeForApi() {
   // 컷별 설명 한글 번역
   const cutDescsArr = await Promise.all((S.imgCutDescriptions || []).map(async (d, i) => {
     const trimmed = (d || '').trim();
-    if (!trimmed) return '';
-    const en = await translateKoToEn(trimmed);
-    return `Panel ${i+1}: ${en}`;
+    const angle = (S.imgCutAngles && S.imgCutAngles[i]) || '';
+    const parts = [];
+    if (angle) {
+      const meta = (typeof ANGLE_DESCRIPTIONS !== 'undefined' && ANGLE_DESCRIPTIONS[angle]) || {};
+      parts.push(`${angle} composition${meta.ko ? ' (' + meta.ko + ')' : ''}`);
+    }
+    if (trimmed) {
+      const en = await translateKoToEn(trimmed);
+      if (en) parts.push(en);
+    }
+    return parts.length ? `Panel ${i+1}: ${parts.join(', ')}` : '';
   }));
   const cutDescs = cutDescsArr.filter(Boolean).join(' | ');
 
@@ -8968,7 +9079,7 @@ function renderQuad() {
   quad.innerHTML = S.cutDataUrls.map((url, i) => `
     <div class="qcell" style="${!S.cutApproval[i] ? 'opacity:.4' : ''}">
       ${url ? `<img src="${url}">` : '<div style="background:#111;width:100%;height:100%"></div>'}
-      <div class="q-badge" style="background:rgba(0,0,0,.75);border:1px solid ${colors[i]}40;color:${colors[i]}">${S.angles[i] || '컷'+(i+1)}</div>
+      ${_IS_IMG_MODE ? '' : `<div class="q-badge" style="background:rgba(0,0,0,.75);border:1px solid ${colors[i]}40;color:${colors[i]}">${S.angles[i] || '컷'+(i+1)}</div>`}
       <div class="q-num" style="background:${colors[i]}cc">컷${i+1}</div>
       ${url ? `<div onclick="downloadImage(S.cutDataUrls[${i}], 'korart_cut${i+1}_${Date.now()}.jpg')" style="position:absolute;bottom:6px;right:6px;font-size:11px;padding:4px 8px;border-radius: 0;background:rgba(0,0,0,.7);color:#fff;cursor:pointer;border:1px solid rgba(255,255,255,.2)" title="이 컷 저장">💾</div>` : ''}
       ${!S.cutApproval[i] ? '<div style="position:absolute;top:6px;right:6px;font-size:9px;padding:2px 6px;border-radius: 0;background:rgba(192,48,64,.8);color:#fff">제외</div>' : ''}
@@ -8985,7 +9096,7 @@ function renderCutControls() {
         ${url ? `<img src="${url}" style="width:48px;height:32px;object-fit:cover;border-radius: 0;border:1px solid var(--line)">` : ''}
         <div>
           <div style="font-size:11px;font-weight:700;color:${colors[i]}">컷${i+1}</div>
-          <div style="font-size:9px;color:var(--ink3)">${S.angles[i]||''}</div>
+          <div style="font-size:9px;color:var(--ink3)">${_IS_IMG_MODE ? '' : (S.angles[i]||'')}</div>
         </div>
         <div style="margin-left:auto;display:flex;gap:4px">
           <div onclick="setCutApproval(${i},true)" style="cursor:pointer;padding:3px 8px;border-radius: 0;font-size:10px;font-weight:700;border:1px solid ${S.cutApproval[i]?'var(--green)':'var(--line)'};background:${S.cutApproval[i]?'rgba(62,150,96,.15)':'var(--bg3)'};color:${S.cutApproval[i]?'var(--green)':'var(--ink3)'}">✓</div>
