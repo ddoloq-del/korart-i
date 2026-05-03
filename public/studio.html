@@ -2976,6 +2976,128 @@ const SCENES = {
 
 
 // ════════════════════════════════════════════════════════════
+//  IMAGE MODE DATA — 이미지 모드 전용 데이터 (영상 모드와 완전 분리)
+//  ?mode=image 일 때만 사용
+// ════════════════════════════════════════════════════════════
+
+// 이미지 모드 카테고리 그룹 정의 (탭 UI용)
+const IMAGE_SCENE_GROUPS = {
+  editorial: { ko: '화보',         icon: '📸', color: '#f472b6' },
+  id:        { ko: '증명사진',     icon: '🪪', color: '#60a5fa' },
+  job:       { ko: '직업 체험',     icon: '💼', color: '#fbbf24' },
+  lifestyle: { ko: '라이프스타일', icon: '🌿', color: '#4ade80' },
+  concept:   { ko: '컨셉 사진',     icon: '🎭', color: '#a78bfa' },
+  art:       { ko: '아트 사진',     icon: '🎨', color: '#dc2626' },
+};
+
+// 이미지 모드 16씬 — 영상 모드 SCENES와 별개 (앵글 없음, 카테고리 그룹 포함)
+// style: 이미지 프롬프트에 주입될 풍부한 키워드
+// group: 카테고리 그룹 키 (IMAGE_SCENE_GROUPS 참조)
+// catLabel: 포토카드에 표시될 영문 부제 (예: "EDITORIAL", "PASSPORT")
+const SCENES_IMAGE = {
+  // ── 화보 (3) ──
+  magazine:     { name:'잡지 화보',   group:'editorial', catLabel:'EDITORIAL',     style:'high fashion editorial photography, professional studio lighting, Vogue magazine aesthetic, sharp clean composition, premium glossy finish' },
+  cinematic:    { name:'시네마틱',    group:'editorial', catLabel:'CINEMATIC',     style:'cinematic film still, anamorphic lens flare, moody atmospheric lighting, movie poster aesthetic, dramatic color grading' },
+  vintage_film: { name:'빈티지 필름', group:'editorial', catLabel:'VINTAGE FILM',  style:'analog film photography, Kodak Portra warmth, faded retro tones, soft film grain, 70s 80s aesthetic, nostalgic mood' },
+
+  // ── 증명사진 (2) ──
+  id_passport:  { name:'여권/공무원', group:'id',        catLabel:'PASSPORT',      style:'clean white background, formal ID photo, neutral expression, sharp focus, even soft lighting, official document photo, frontal composition' },
+  id_resume:    { name:'취업/링크드인',group:'id',        catLabel:'PROFESSIONAL',  style:'professional headshot, soft gradient background, confident warm smile, business attire, polished corporate style, LinkedIn profile aesthetic' },
+
+  // ── 직업 체험 (4) ──
+  job_doctor:   { name:'의사',       group:'job',       catLabel:'DOCTOR',        style:'white doctor coat, hospital setting, stethoscope around neck, professional medical photography, confident clinical atmosphere, clean bright lighting' },
+  job_lawyer:   { name:'변호사',     group:'job',       catLabel:'LAWYER',        style:'sharp tailored business suit, law office with bookshelves, authoritative confident posture, dramatic professional lighting, legal documents on desk' },
+  job_chef:     { name:'셰프',       group:'job',       catLabel:'CHEF',          style:'chef whites uniform with apron, professional restaurant kitchen, dramatic culinary lighting, focused expert expression, stainless steel appliances' },
+  job_flight:   { name:'승무원',     group:'job',       catLabel:'FLIGHT CREW',   style:'airline flight attendant uniform, airport terminal or airplane interior, polished friendly aesthetic, neat hair and makeup, professional service smile' },
+
+  // ── 라이프스타일 (3) ──
+  life_sns:     { name:'SNS 프로필', group:'lifestyle', catLabel:'INSTAGRAM',     style:'trendy Instagram aesthetic, soft natural window light, Korean cafe vibe, casual chic outfit, candid lifestyle moment, warm pastel tones' },
+  life_travel:  { name:'여행 인증샷',group:'lifestyle', catLabel:'TRAVEL',        style:'scenic travel destination, golden hour lighting, candid traveler lifestyle, vibrant adventurous mood, postcard worthy composition' },
+  life_couple:  { name:'커플 사진',  group:'lifestyle', catLabel:'COUPLE',        style:'romantic couple portrait, soft warm lighting, K-drama aesthetic, intimate genuine moment, beautiful natural backdrop, dreamy bokeh' },
+
+  // ── 컨셉 사진 (2) ──
+  concept_y2k:  { name:'Y2K 레트로', group:'concept',   catLabel:'Y2K RETRO',     style:'Y2K aesthetic, butterfly hair clips, glossy lip gloss, low-rise fashion, vibrant saturated tones, early 2000s nostalgia, glittery accessories, flip phone era' },
+  concept_cyber:{ name:'사이버펑크', group:'concept',   catLabel:'CYBERPUNK',     style:'cyberpunk neon lights, holographic accents, futuristic Seoul backdrop, blade runner aesthetic, rain-soaked streets, glowing signage, dystopian atmosphere' },
+
+  // ── 아트 사진 (2) ──
+  art_noir:     { name:'흑백 누아르',group:'art',       catLabel:'FILM NOIR',     style:'black and white photography, high contrast film noir, dramatic chiaroscuro shadows, classic Hollywood aesthetic, mysterious atmosphere, vintage detective vibe' },
+  art_double:   { name:'더블 익스포저',group:'art',     catLabel:'DOUBLE EXPOSURE',style:'double exposure art photography, surreal portrait blended with nature or cityscape, dreamlike artistic composition, ethereal layered imagery, fine art aesthetic' },
+};
+
+// 이미지 모드 무드 5개 — 계절/시간대/날씨를 통합한 단순화된 분위기
+const IMAGE_MOODS = {
+  mood_bright:    { ko: '밝고 활기찬', keywords: 'bright cheerful lighting, vibrant colors, energetic atmosphere, uplifting mood' },
+  mood_calm:      { ko: '차분한',      keywords: 'soft calm lighting, muted gentle tones, serene peaceful mood, tranquil atmosphere' },
+  mood_dramatic:  { ko: '드라마틱',    keywords: 'dramatic lighting, high contrast, intense atmosphere, bold cinematic mood' },
+  mood_dreamy:    { ko: '몽환적',      keywords: 'dreamy hazy atmosphere, soft focus, ethereal light, magical dreamlike quality' },
+  mood_chic:      { ko: '세련된',      keywords: 'sophisticated lighting, clean modern aesthetic, polished refined mood, elegant atmosphere' },
+};
+
+// 4컷 변주 스타일 9가지 — 다중 선택 가능 (조합되면 효과 누적)
+// promptHint: 4컷 생성 프롬프트에 추가될 키워드
+const IMAGE_VARIATIONS = {
+  default:     { ko: '기본 4종 변주', desc: '자연스러운 베스트샷',     promptHint: 'natural variety of best shots, slight subtle variations' },
+  pose:        { ko: '포즈 다양화',   desc: '서있기/앉기/기대기 등',    promptHint: 'varied poses across cuts (standing, sitting, leaning, walking)' },
+  expression:  { ko: '표정 다양화',   desc: '미소/진지/웃음 등',        promptHint: 'varied facial expressions across cuts (smile, serious, laugh, contemplative)' },
+  composition: { ko: '구도 다양화',   desc: '인물 위치/크기 변화',      promptHint: 'varied composition across cuts (centered, off-center, distant, close)' },
+  angle:       { ko: '각도 다양화',   desc: '정면/측면/위/아래',        promptHint: 'varied camera angles across cuts (frontal, profile, high angle, low angle)' },
+  lighting:    { ko: '조명 다양화',   desc: '자연광/역광/측광 등',      promptHint: 'varied lighting across cuts (natural, backlight, side light, high contrast)' },
+  distance:    { ko: '거리 다양화',   desc: '전신/상반신/얼굴',         promptHint: 'varied shot distances across cuts (full body, half body, portrait, close-up)' },
+  outfit:      { ko: '의상 다양화',   desc: '같은 씬 다른 옷차림',      promptHint: 'four different outfits matching the scene concept' },
+  same:        { ko: '모두 같은 컷',  desc: '4컷 거의 동일',           promptHint: 'four nearly identical shots, consistent pose and framing' },
+};
+
+// 이미지 모드 전용 장소 (영상 모드 LOCATIONS_BY_ERA에 없는 것들 추가)
+// 영상 모드 장소도 이미지 모드에서 사용 가능 (씬에 따라 자동 매핑)
+const IMAGE_LOCATIONS = {
+  // 증명사진 / 스튜디오 계열
+  plain_white:    { ko: '흰 배경',      en: 'plain pure white seamless background' },
+  soft_gradient:  { ko: '그라디언트',   en: 'soft gradient studio backdrop' },
+  studio:         { ko: '스튜디오',     en: 'professional photo studio with seamless backdrop' },
+  studio_neon:    { ko: '네온 스튜디오',en: 'studio with colorful neon lighting and reflective surfaces' },
+  // 직업 장소
+  hospital:       { ko: '병원',         en: 'modern hospital interior, medical clinic' },
+  office:         { ko: '사무실',       en: 'professional law office or corporate office interior' },
+  kitchen:        { ko: '주방',         en: 'professional restaurant kitchen with stainless steel' },
+  airport:        { ko: '공항',         en: 'airport terminal or airplane cabin interior' },
+  // 라이프 / 컨셉
+  cafe:           { ko: '카페',         en: 'cozy Korean cafe interior with warm wooden tones' },
+  landmark:       { ko: '랜드마크',     en: 'iconic travel landmark with scenic backdrop' },
+  park:           { ko: '공원',         en: 'beautiful park with greenery and soft natural light' },
+  cyber_city:     { ko: '사이버 도시',  en: 'futuristic cyberpunk city with neon signs and rain' },
+  noir_alley:     { ko: '누아르 골목',  en: 'shadowy black-and-white film noir alley with dramatic lighting' },
+  urban_night:    { ko: '도시 야경',    en: 'urban city street at night with cinematic lighting' },
+};
+
+// 씬별 자동 추천값 — 사용자가 씬 선택 시 자동 채워짐 (변경 가능)
+// location, mood, variation 3가지 추천
+const SCENE_DEFAULTS = {
+  magazine:      { location: 'studio',         mood: 'mood_chic',     variation: 'pose' },
+  cinematic:     { location: 'urban_night',    mood: 'mood_dramatic', variation: 'composition' },
+  vintage_film:  { location: 'cafe',           mood: 'mood_calm',     variation: 'expression' },
+  id_passport:   { location: 'plain_white',    mood: 'mood_bright',   variation: 'same' },
+  id_resume:     { location: 'soft_gradient',  mood: 'mood_chic',     variation: 'expression' },
+  job_doctor:    { location: 'hospital',       mood: 'mood_chic',     variation: 'pose' },
+  job_lawyer:    { location: 'office',         mood: 'mood_chic',     variation: 'pose' },
+  job_chef:      { location: 'kitchen',        mood: 'mood_chic',     variation: 'pose' },
+  job_flight:    { location: 'airport',        mood: 'mood_chic',     variation: 'pose' },
+  life_sns:      { location: 'cafe',           mood: 'mood_bright',   variation: 'pose' },
+  life_travel:   { location: 'landmark',       mood: 'mood_bright',   variation: 'composition' },
+  life_couple:   { location: 'park',           mood: 'mood_dreamy',   variation: 'pose' },
+  concept_y2k:   { location: 'studio_neon',    mood: 'mood_bright',   variation: 'outfit' },
+  concept_cyber: { location: 'cyber_city',     mood: 'mood_dramatic', variation: 'lighting' },
+  art_noir:      { location: 'noir_alley',     mood: 'mood_dramatic', variation: 'lighting' },
+  art_double:    { location: 'studio',         mood: 'mood_dreamy',   variation: 'composition' },
+};
+
+// 씬 키 → 어느 SCENES 객체에서 찾을지 헬퍼 (이미지 모드에서 SCENES_IMAGE 우선 조회)
+// 영상 모드에선 항상 SCENES만 사용 (이 함수 호출 안 함)
+function getImageScene(key) {
+  return SCENES_IMAGE[key] || null;
+}
+
+
+// ════════════════════════════════════════════════════════════
 //  ERA (시대 구분) — 현대극 / 사극(2종) / 레트로(3종)
 //  이미지+영상 프롬프트 양쪽에 한글로 주입 (인식 OK + 글자 절약)
 // ════════════════════════════════════════════════════════════

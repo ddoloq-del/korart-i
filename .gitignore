@@ -45,3 +45,4 @@ wrangler_login_out.txt
 
 # 이미지 모드 작업 백업 (로컬 보관용)
 public/studio-before-image-mode.html
+public/studio-phase1.html
