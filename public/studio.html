@@ -10181,7 +10181,10 @@ async function generateCutVideo(i) {
             const rr = await fetch('/fal-proxy-abs?url=' + encodeURIComponent(responseUrl), {
               headers: { 'Authorization': 'Bearer ' + jwt },
             });
-            if (!rr.ok) throw new Error('결과 fetch 실패: ' + rr.status);
+            if (!rr.ok) {
+            const errBody = await rr.text();
+            throw new Error('결과 fetch 실패: ' + rr.status + ' — ' + errBody.slice(0, 300));
+          }
             d = await rr.json();
             break;
           }
@@ -10293,7 +10296,10 @@ async function _falImageQueue(model, body, statusEl) {
           const rr = await fetch('/fal-proxy-abs?url=' + encodeURIComponent(responseUrl), {
             headers: { 'Authorization': 'Bearer ' + jwt },
           });
-          if (!rr.ok) throw new Error('결과 fetch 실패: ' + rr.status);
+          if (!rr.ok) {
+            const errBody = await rr.text();
+            throw new Error('결과 fetch 실패: ' + rr.status + ' — ' + errBody.slice(0, 300));
+          }
           d = await rr.json();
           break;
         }
