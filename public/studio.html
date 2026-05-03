@@ -192,8 +192,10 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 
 /* ── scene grid ── */
 .scene-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+.mobile-br { display: none; }
 @media (max-width: 768px) {
   .scene-grid { grid-template-columns: 1fr !important; }
+  .mobile-br { display: inline; }
 }
 .scene-card{background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:18px 18px 16px 18px;cursor:pointer;text-align:left;transition:.18s;position:relative;overflow:hidden;aspect-ratio:16/9;display:flex;flex-direction:column;justify-content:space-between;gap:8px}
 .scene-card .sc-cat{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--pink);text-transform:uppercase;display:flex;align-items:center;gap:6px}
@@ -1782,7 +1784,7 @@ select option:hover {
         <div class="section-head" style="margin:0">📂 아바타 리스트</div>
         <div style="display:flex;gap:6px;align-items:center">
           <span style="font-size:10px;color:var(--ink3)" id="savedAvCount">0개</span>
-          <button class="btn btn-sm" onclick="openAvatarPicker()" title="클라우드 아바타 불러오기" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">☁️ 클라우드 불러오기</button>
+          <button class="btn btn-sm" onclick="openAvatarPicker()" title="클라우드 아바타 불러오기" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">☁️ 클라우드<br class="mobile-br"> 불러오기</button>
         </div>
       </div>
       <div id="savedAvGrid" style="display:flex;flex-wrap:wrap;gap:6px;min-height:30px"></div>
@@ -1816,8 +1818,8 @@ select option:hover {
       <div class="field">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <label style="margin:0;font-size:14px;font-weight:700">씬 분위기를 선택하세요</label>
-          <div id="customSceneActions" style="display:flex;align-items:center;gap:8px"><button class="btn btn-sm" onclick="openMyCustomSceneModal()" title="나만의 씬 분위기 만들기" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">+ 나만의 씬 분위기 만들기</button>
-          <button class="btn btn-sm btn-ghost" onclick="openScenePicker()" title="클라우드에 저장한 나만의 씬 분위기 불러오기">클라우드 불러오기</button></div>
+          <div id="customSceneActions" style="display:flex;align-items:center;gap:8px"><button class="btn btn-sm" onclick="openMyCustomSceneModal()" title="나만의 씬 분위기 만들기" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">+ 나만의 씬<br class="mobile-br"> 분위기 만들기</button>
+          <button class="btn btn-sm btn-ghost" onclick="openScenePicker()" title="클라우드에 저장한 나만의 씬 분위기 불러오기">클라우드<br class="mobile-br"> 불러오기</button></div>
         </div>
         <div class="scene-grid" id="sceneGrid" style="grid-template-columns:repeat(3,1fr);gap:14px"></div>
       </div>
@@ -1837,9 +1839,9 @@ select option:hover {
         <span id="selectedEraLabel" style="font-size:14px;font-weight:700;color:var(--cream);letter-spacing:-.01em">현대극</span>
       </div>
       <div style="margin-left:auto;display:flex;gap:6px">
-        <button class="btn btn-sm" onclick="saveSceneDetailToCloud()" title="씬 상세 설정을 클라우드에 저장" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">+ 클라우드 저장</button>
-        <button class="btn btn-sm btn-ghost" onclick="openSceneDetailPicker()" title="저장된 씬 상세 불러오기">클라우드 불러오기</button>
-        <button class="btn btn-sm btn-ghost" onclick="backToSceneStepA()">분위기 다시 고르기</button>
+        <button class="btn btn-sm" onclick="saveSceneDetailToCloud()" title="씬 상세 설정을 클라우드에 저장" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">+ 클라우드<br class="mobile-br"> 저장</button>
+        <button class="btn btn-sm btn-ghost" onclick="openSceneDetailPicker()" title="저장된 씬 상세 불러오기">클라우드<br class="mobile-br"> 불러오기</button>
+        <button class="btn btn-sm btn-ghost" onclick="backToSceneStepA()">분위기<br class="mobile-br"> 다시 고르기</button>
       </div>
     </div>
 
@@ -1859,8 +1861,8 @@ select option:hover {
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <label style="margin:0;font-size:13px;font-weight:700">등장 아바타 선택하기</label>
         <div style="display:flex;gap:6px">
-          <button class="btn btn-sm" onclick="openAvatarPicker()" title="클라우드에 저장한 아바타 불러오기" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">☁️ 클라우드 불러오기</button>
-          <button class="btn btn-sm btn-ghost" onclick="openAvatarModal()">+ 아바타 추가</button>
+          <button class="btn btn-sm" onclick="openAvatarPicker()" title="클라우드에 저장한 아바타 불러오기" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">☁️ 클라우드<br class="mobile-br"> 불러오기</button>
+          <button class="btn btn-sm btn-ghost" onclick="openAvatarModal()">+ 아바타<br class="mobile-br"> 추가</button>
         </div>
       </div>
       <div id="step1CatTabs" class="cat-tabs"></div>
