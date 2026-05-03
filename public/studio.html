@@ -1826,7 +1826,7 @@ select option:hover {
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:14px 18px;background:var(--bg2);border:1px solid var(--line);border-radius:0">
       <div style="display:flex;flex-direction:column;gap:4px">
         <span style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700">선택된 씬</span>
-        <span id="selectedSceneLabel" style="font-size:18px;font-weight:800;color:var(--pink);letter-spacing:-.02em">로맨스</span>
+        <span id="selectedSceneLabel" style="font-size:18px;font-weight:800;color:var(--pink);letter-spacing:-.02em">—</span>
       </div>
       <div style="width:1px;height:32px;background:var(--line)"></div>
       <div style="display:flex;flex-direction:column;gap:4px">
@@ -1874,6 +1874,45 @@ select option:hover {
             <div id="imgMoodChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
             <input type="text" id="imgMoodCustom" placeholder="개인 설정: 자유롭게 입력 (예: 파스텔 톤 + 차가운 조명)"
                    style="margin-top:8px;width:100%;background:var(--bg3);border:1px solid var(--line);padding:6px 10px;color:var(--ink);font-size:11px;font-family:inherit">
+          </div>
+
+          <!-- 화보 전용: 계절/시간대/날씨 (editorial 카테고리에서만 표시) -->
+          <div id="imgEditorialFields" style="display:none">
+            <!-- 계절 -->
+            <div class="field" style="margin-bottom:14px">
+              <label style="margin:0 0 8px 0;font-size:13px;font-weight:700;display:block">계절 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
+              <div class="segs">
+                <div class="seg" onclick="selOpt(this,'season','spring')">봄</div>
+                <div class="seg" onclick="selOpt(this,'season','summer')">여름</div>
+                <div class="seg" onclick="selOpt(this,'season','autumn')">가을</div>
+                <div class="seg" onclick="selOpt(this,'season','winter')">겨울</div>
+              </div>
+            </div>
+            <!-- 시간대 -->
+            <div class="field" style="margin-bottom:14px">
+              <label style="margin:0 0 8px 0;font-size:13px;font-weight:700;display:block">시간대 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
+              <div class="segs">
+                <div class="seg" onclick="selOpt(this,'timeofday','before dawn, 3-5am')">새벽</div>
+                <div class="seg" onclick="selOpt(this,'timeofday','morning')">아침</div>
+                <div class="seg" onclick="selOpt(this,'timeofday','daytime, midday')">낮</div>
+                <div class="seg" onclick="selOpt(this,'timeofday','golden hour, dusk')">황혼</div>
+                <div class="seg" onclick="selOpt(this,'timeofday','nighttime')">밤</div>
+                <div class="seg" onclick="selOpt(this,'timeofday','late night, midnight')">심야</div>
+              </div>
+            </div>
+            <!-- 날씨 -->
+            <div class="field" style="margin-bottom:14px">
+              <label style="margin:0 0 8px 0;font-size:13px;font-weight:700;display:block">날씨 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
+              <div class="segs">
+                <div class="seg" onclick="selOpt(this,'weather','clear sky')">맑음</div>
+                <div class="seg" onclick="selOpt(this,'weather','cloudy, overcast')">흐림</div>
+                <div class="seg" onclick="selOpt(this,'weather','light rain, drizzle')">비</div>
+                <div class="seg" onclick="selOpt(this,'weather','heavy rain, pouring')">폭우</div>
+                <div class="seg" onclick="selOpt(this,'weather','snowing')">눈</div>
+                <div class="seg" onclick="selOpt(this,'weather','foggy, misty')">안개</div>
+                <div class="seg" onclick="selOpt(this,'weather','windy')">바람</div>
+              </div>
+            </div>
           </div>
 
           <!-- 장소 -->
@@ -3128,10 +3167,7 @@ const IMAGE_VARIATIONS = {
   default:     { ko: '기본 4종 변주', desc: '자연스러운 베스트샷',     promptHint: 'natural variety of best shots, slight subtle variations' },
   pose:        { ko: '포즈 다양화',   desc: '서있기/앉기/기대기 등',    promptHint: 'varied poses across cuts (standing, sitting, leaning, walking)' },
   expression:  { ko: '표정 다양화',   desc: '미소/진지/웃음 등',        promptHint: 'varied facial expressions across cuts (smile, serious, laugh, contemplative)' },
-  composition: { ko: '구도 다양화',   desc: '인물 위치/크기 변화',      promptHint: 'varied composition across cuts (centered, off-center, distant, close)' },
-  angle:       { ko: '각도 다양화',   desc: '정면/측면/위/아래',        promptHint: 'varied camera angles across cuts (frontal, profile, high angle, low angle)' },
   lighting:    { ko: '조명 다양화',   desc: '자연광/역광/측광 등',      promptHint: 'varied lighting across cuts (natural, backlight, side light, high contrast)' },
-  distance:    { ko: '거리 다양화',   desc: '전신/상반신/얼굴',         promptHint: 'varied shot distances across cuts (full body, half body, portrait, close-up)' },
   outfit:      { ko: '의상 다양화',   desc: '같은 씬 다른 옷차림',      promptHint: 'four different outfits matching the scene concept' },
   same:        { ko: '모두 같은 컷',  desc: '4컷 거의 동일',           promptHint: 'four nearly identical shots, consistent pose and framing' },
 };
@@ -4251,16 +4287,22 @@ function updateScenePanelHeader(sub) {
   // 이미지 모드: A=02, B=03 / 영상 모드: A=03, B=04
   const numA = _IS_IMG_MODE ? '02' : '03';
   const numB = _IS_IMG_MODE ? '03' : '04';
+  // 이미지 모드는 K-STUDIO, 영상 모드는 K-DRAMA
+  const _kPrefix = _IS_IMG_MODE ? 'K-STUDIO' : 'K-DRAMA';
   if (sub === 'A') {
     if (numEl) numEl.textContent = numA;
-    if (cat) cat.textContent = 'K-DRAMA / SCENE SELECT';
-    if (title) title.innerHTML = '내가 만들 영상 <span class="accent">씬</span> 선택';
+    if (cat) cat.textContent = `${_kPrefix} / SCENE SELECT`;
+    if (title) title.innerHTML = _IS_IMG_MODE
+      ? '찍을 <span class="accent">씬</span> 선택'
+      : '내가 만들 영상 <span class="accent">씬</span> 선택';
     if (sub_el) sub_el.textContent = '씬 분위기를 골라주세요.';
   } else {
-    const sc = SCENES[S.scene];
+    // 이미지 모드의 씬SCENES_IMAGE 룩업, 영상 모드는 SCENES 
+    const _scTbl = _IS_IMG_MODE ? (typeof SCENES_IMAGE !== 'undefined' ? SCENES_IMAGE : {}) : SCENES;
+    const sc = _scTbl[S.scene];
     const label = sc?.name || S.scene || '';
     if (numEl) numEl.textContent = numB;
-    if (cat) cat.textContent = `K-DRAMA / SCENE DETAIL · ${label.toUpperCase()}`;
+    if (cat) cat.textContent = `${_kPrefix} / SCENE DETAIL · ${label.toUpperCase()}`;
     if (title) title.innerHTML = '디테일을 <span class="accent">완성</span>해주세요';
     if (sub_el) sub_el.textContent = '계절·시간대·날씨·장소·카메라 앵글까지 정교하게 설정하세요.';
     // 선택된 씬/시대 박스 라벨 자동 갱신
@@ -6695,6 +6737,15 @@ function toggleImgVariation(key) {
   renderImgVariationChips();
 }
 
+// 화보(editorial) 카테고리에서만 계절/시간대/날씨 필드 표시
+function updateImgEditorialFields() {
+  const wrap = document.getElementById('imgEditorialFields');
+  if (!wrap) return;
+  const sc = (typeof SCENES_IMAGE !== 'undefined') ? SCENES_IMAGE[S.scene] : null;
+  const isEditorial = sc && sc.group === 'editorial';
+  wrap.style.display = isEditorial ? '' : 'none';
+}
+
 // 컷별 앵글 + 설명 렌더 (4개)
 function renderImgCutDescriptions() {
   ensureImageModeState();
@@ -6737,6 +6788,10 @@ function openImgAnglePickerModal(cutIdx) {
   ensureImageModeState();
   const modal = document.getElementById('anglePickerModal');
   if (!modal) { console.error('[ImgAnglePicker] modal not found'); return; }
+  // panel 안에 있으면 panel이 비활성화된 상태에서 안 보이는 버그 해결 → body로 이동
+  if (modal.parentElement && modal.parentElement.tagName !== 'BODY') {
+    document.body.appendChild(modal);
+  }
   const colors = ['var(--gold)','var(--blue)','var(--green)','var(--red)'];
   const rgbs = ['255,184,77','96,165,250','74,222,128','255,85,119'];
   const lbl = document.getElementById('anglePickerCutLabel');
@@ -6806,6 +6861,7 @@ function renderImageModeForm() {
   renderImgLocChips();
   renderImgVariationChips();
   renderImgCutDescriptions();
+  updateImgEditorialFields();
 
   // 자유 입력칸 동기화 + 이벤트 바인딩 (1회만)
   const bindCustom = (id, key) => {
