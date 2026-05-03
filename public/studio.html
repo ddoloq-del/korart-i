@@ -4749,7 +4749,7 @@ function renderStep1Avatars() {
     }
     return `
       <div style="background:${isCast?'rgba(200,160,74,.12)':'var(--bg2)'};border:2px solid ${isCast?'var(--gold)':'var(--line)'};border-radius: 0;overflow:hidden;transition:.15s;position:relative">
-        ${!isCast ? `<button onclick="event.stopPropagation();deleteAvatarFromLib(${av.id})" title="라이브리에서 영구 삭제" onmouseover="this.style.background='#ef4444';this.style.color='#fff'" onmouseout="this.style.background='rgba(0,0,0,.7)';this.style.color='var(--ink2)'" style="position:absolute;top:5px;right:5px;background:rgba(0,0,0,.7);border:1px solid var(--line2);color:var(--ink2);font-size:13px;font-weight:800;width:22px;height:22px;border-radius:0;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;z-index:3;transition:.15s">×</button>` : ''}
+        ${!isCast ? `<button onclick="event.stopPropagation();deleteAvatarFromLib(${av.id})" title="라이브리에서 제거" onmouseover="this.style.background='#ef4444';this.style.color='#fff'" onmouseout="this.style.background='rgba(0,0,0,.7)';this.style.color='var(--ink2)'" style="position:absolute;top:5px;right:5px;background:rgba(0,0,0,.7);border:1px solid var(--line2);color:var(--ink2);font-size:13px;font-weight:800;width:22px;height:22px;border-radius:0;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;z-index:3;transition:.15s">×</button>` : ''}
         ${isCast ? `<div style="position:absolute;top:5px;right:5px;display:flex;gap:4px;z-index:3">
             <button onclick="event.stopPropagation();uncastAvatar(${av.id})" title="출연 해제 — 이 아바타를 캐스팅에서 제외" onmouseover="this.style.background='#ef4444'" onmouseout="this.style.background='rgba(239,68,68,.85)'" style="background:rgba(239,68,68,.85);border:1px solid #ef4444;color:#fff;font-size:14px;font-weight:800;width:24px;height:24px;border-radius:0;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;box-shadow:0 2px 6px rgba(0,0,0,.5);transition:.15s">×</button>
             <div style="background:var(--gold);color:#000;font-size:9px;font-weight:800;padding:2px 6px;border-radius: 0;display:flex;align-items:center">${cutBadge}</div>
@@ -7218,7 +7218,7 @@ function selScene(key, el) {
   updatePromptPreview();
   // 씀 선택 시 자동으로 4단계(씀 상세)로 이동 — 검증 우회 (goStep 직접)
   setTimeout(() => {
-    if (typeof goStep === 'function') goStep(2);
+    if (typeof goStep === 'function') goStep(3);
   }, 300);
 }
 
@@ -7338,14 +7338,14 @@ function deleteAvatarFromLib(id) {
   const lib = loadAvatarLib();
   const av = lib.find(a => a.id === id);
   if (!av) return;
-  if (!confirm(`"${av.name}" 아바타를 라이브리에서 영구 삭제할까요?`)) return;
+  if (!confirm(`"${av.name}" 아바타를 라이브리에서 제거하시겠습니까?`)) return;
   saveAvatarLib(lib.filter(a => a.id !== id));
   // 현재 씬에 출연 중이면 캐스팅에서도 제거 (안전장치 — 버튼은 조건부지만)
   S.avatars = (S.avatars || []).filter(a => (a._libId || a.id) !== id);
   if (S.avatarCuts) delete S.avatarCuts[id];
   if (typeof saveSession === 'function') saveSession();
   renderStep1Avatars();
-  toast('아바타 삭제됨');
+  toast('아바타가 라이브리에서 제거됨');
 }
 
 
