@@ -3070,9 +3070,9 @@ function getAccessToken() {
 const SCENES = {
   // style: 이미지 프롬프트 (4컷 생성 시) — 풍부한 키워드로 분위기 명확히
   // vidStyle: 영상 프롬프트 (5초 영상 생성 시) — 510자 cap 안에서 동작하도록 핵심만
-  romance:    {name:'로맨스',     group:'drama',      vidStyle:'warm golden hour, romantic, soft bokeh',          style:'warm golden hour lighting, romantic atmosphere, soft bokeh, shallow depth of field, Korean drama aesthetic', angles:['Two Shot','Medium Close-up (MCU)','Shallow Depth of Field close-up','Eye-Level Shot']},
+  romance:    {name:'로맨스',     group:'drama',      bgImage:'/images/scenes/romance.jpg',     vidStyle:'warm golden hour, romantic, soft bokeh',          style:'warm golden hour lighting, romantic atmosphere, soft bokeh, shallow depth of field, Korean drama aesthetic', angles:['Two Shot','Medium Close-up (MCU)','Shallow Depth of Field close-up','Eye-Level Shot']},
   tension:    {name:'긴장',       group:'thriller',   vidStyle:'high contrast shadows, cold tones',                style:'high contrast dramatic shadows, intense cold tones, sharp cinematic focus', angles:['Over-the-Shoulder (OTS)','Extreme Close-up (ECU)','Dutch Angle','Point of View (POV)']},
-  breakup:    {name:'이별',       group:'drama',      vidStyle:'melancholic rain, blue-gray tones',                style:'melancholic rainy atmosphere, blue-gray tones, emotional soft lighting', angles:['Wide Shot','Medium Close-up (MCU)','Close-up (CU)','Rack Focus']},
+  breakup:    {name:'이별',       group:'drama',      bgImage:'/images/scenes/breakup.jpg',     vidStyle:'melancholic rain, blue-gray tones',                style:'melancholic rainy atmosphere, blue-gray tones, emotional soft lighting', angles:['Wide Shot','Medium Close-up (MCU)','Close-up (CU)','Rack Focus']},
   climax:     {name:'감정 절정',  group:'drama',      vidStyle:'extreme emotion, dramatic light, tears',            style:'extreme emotional expression, dramatic lighting, high contrast tears', angles:['Extreme Close-up (ECU)','Close-up (CU)','Low Angle','Zoom-in']},
   suspense:   {name:'서스펜스',   group:'thriller',   vidStyle:'dark ominous, noir desaturated',                    style:'dark ominous atmosphere, heavy shadows, noir desaturated tones', angles:['Dutch Angle','Point of View (POV)','Extreme Close-up (ECU)','Low Angle']},
   mellow:     {name:'막장',       group:'drama',      vidStyle:'melodramatic, theatrical, vivid',                  style:'melodramatic exaggerated emotion, theatrical lighting, vivid colors', angles:['Two Shot','Close-up (CU)','Low Angle','Zoom-in']},
@@ -3085,7 +3085,7 @@ const SCENES = {
   confession: {name:'고백',       group:'drama',      vidStyle:'intimate warm, trembling, golden glow',            style:'intimate soft lighting, intense emotional warmth, trembling intensity, golden glow', angles:['Extreme Close-up (ECU)','Close-up (CU)','Two Shot','Eye-Level Shot']},
   horror:     {name:'공포',       group:'thriller',   vidStyle:'dark unsettling, deep shadows, eerie',             style:'dark unsettling atmosphere, deep shadows, eerie cold tones, suspenseful framing', angles:['Dutch Angle','Extreme Close-up (ECU)','Point of View (POV)','Worm\'s Eye View']},
   foodie:     {name:'먹방',       group:'content',    vidStyle:'appetizing close-up, ASMR',                        style:'appetizing food close-up lighting, warm tasty colors, mouth-watering visual, ASMR-friendly framing', angles:['Bird\'s Eye View','Macro Shot','Medium Close-up (MCU)','Extreme Close-up (ECU)']},
-  travel:     {name:'풍경',       group:'lifestyle',  vidStyle:'breathtaking landscape, golden hour',              style:'breathtaking scenic landscape, vast natural beauty, golden hour lighting, cinematic travel aesthetic', angles:['Wide Shot','Establishing Shot','Drone Shot','Bird\'s Eye View']},
+  travel:     {name:'풍경',       group:'lifestyle',  bgImage:'/images/scenes/travel.jpg',      vidStyle:'breathtaking landscape, golden hour',              style:'breathtaking scenic landscape, vast natural beauty, golden hour lighting, cinematic travel aesthetic', angles:['Wide Shot','Establishing Shot','Drone Shot','Bird\'s Eye View']},
   fitness:    {name:'운동',       group:'lifestyle',  vidStyle:'energetic motion, athletic, sweat',                style:'energetic dynamic motion, sweat-drenched intensity, sharp athletic focus, gym aesthetic', angles:['Low Angle','Full Shot (FS)','Extreme Close-up (ECU)','Tracking Shot']},
   dance:      {name:'댄스',       group:'lifestyle',  vidStyle:'rhythmic K-pop choreo, vibrant',                   style:'rhythmic K-pop choreography, vibrant studio lighting, dynamic synchronized movement', angles:['Wide Shot','Full Shot (FS)','Low Angle','Crane Shot']},
   interview:  {name:'인터뷰',     group:'content',    vidStyle:'documentary, natural, focused',                    style:'professional documentary lighting, natural setting, focused conversation, talking-head style', angles:['Bust Shot','Medium Close-up (MCU)','Dirty Single','Over-the-Shoulder (OTS)']},
@@ -7136,7 +7136,11 @@ function renderScenes() {
     const vidStyle = sc.vidStyle || '';
     const cam = (sc.angles || []).slice(0,3).join(' \u00b7 ');
     const cat = SCENE_CAT[s.key] || s.key.toUpperCase();
-    return `<div class="scene-card${S.scene===s.key?' active':''}" onclick="selScene('${s.key}',this)"><div class="sc-cat" style="color:${SCENE_COLOR[s.key] || '#818cf8'}">${cat}</div><div class="sc-title-block"><div class="sc-name">${s.name}</div>${vidStyle ? `<div class="sc-vidstyle">${vidStyle}</div>` : ''}</div>${cam ? `<div class="sc-cam">${cam}</div>` : ''}</div>`;
+    // bgImage 있으면 배경 이미지 + 어로운 오버레이 (가독성)
+    const bgStyle = sc.bgImage
+      ? `background-image:linear-gradient(rgba(10,10,12,.55), rgba(10,10,12,.85)), url('${sc.bgImage}');background-size:cover;background-position:center`
+      : '';
+    return `<div class="scene-card${S.scene===s.key?' active':''}" onclick="selScene('${s.key}',this)" style="${bgStyle}"><div class="sc-cat" style="color:${SCENE_COLOR[s.key] || '#818cf8'}">${cat}</div><div class="sc-title-block"><div class="sc-name">${s.name}</div>${vidStyle ? `<div class="sc-vidstyle">${vidStyle}</div>` : ''}</div>${cam ? `<div class="sc-cam">${cam}</div>` : ''}</div>`;
   }).join('');
   html += customs.map(s => {
     const vidStyle = s.style ? s.style.split(',').slice(0,3).join(',').trim() : '';
