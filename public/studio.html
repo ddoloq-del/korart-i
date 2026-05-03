@@ -1921,14 +1921,17 @@ select option:hover {
             <div class="field" style="margin-bottom:14px">
               <label style="margin:0 0 8px 0;font-size:13px;font-weight:700;display:block">배경색 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
               <div id="imgIdBgChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+              <input type="text" id="imgIdBgCustom" placeholder="개인 설정: 자유 입력" style="margin-top:8px;width:100%;background:var(--bg3);border:1px solid var(--line);padding:6px 10px;color:var(--ink);font-size:11px;font-family:inherit">
             </div>
             <div class="field" style="margin-bottom:14px">
               <label style="margin:0 0 8px 0;font-size:13px;font-weight:700;display:block">의상 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
               <div id="imgIdOutfitChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+              <input type="text" id="imgIdOutfitCustom" placeholder="개인 설정: 자유 입력" style="margin-top:8px;width:100%;background:var(--bg3);border:1px solid var(--line);padding:6px 10px;color:var(--ink);font-size:11px;font-family:inherit">
             </div>
             <div class="field" style="margin-bottom:14px">
               <label style="margin:0 0 8px 0;font-size:13px;font-weight:700;display:block">헤어 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
               <div id="imgIdHairChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+              <input type="text" id="imgIdHairCustom" placeholder="개인 설정: 자유 입력" style="margin-top:8px;width:100%;background:var(--bg3);border:1px solid var(--line);padding:6px 10px;color:var(--ink);font-size:11px;font-family:inherit">
             </div>
           </div>
 
@@ -1972,7 +1975,7 @@ select option:hover {
         <!-- ── 우측 ── -->
         <div>
           <!-- 컷별 추가 설명 -->
-          <div class="field" style="margin-bottom:14px">
+          <div class="field" id="imgCutDescField" style="margin-bottom:14px">
             <label style="margin:0 0 8px 0;font-size:13px;font-weight:700;display:block">컷별 화보 앵글 + 추가 설명 <span style="font-size:10px;color:var(--ink3);font-weight:400">(앵글 카드 클릭하여 선택)</span></label>
             <div id="imgCutDescriptions" style="display:flex;flex-direction:column;gap:6px"></div>
           </div>
@@ -6613,6 +6616,9 @@ function ensureImageModeState() {
   if (typeof S.imgIdBg === 'undefined')            S.imgIdBg     = '';
   if (typeof S.imgIdOutfit === 'undefined')        S.imgIdOutfit = '';
   if (typeof S.imgIdHair === 'undefined')          S.imgIdHair   = '';
+  if (typeof S.imgIdBgCustom === 'undefined')      S.imgIdBgCustom     = '';
+  if (typeof S.imgIdOutfitCustom === 'undefined')  S.imgIdOutfitCustom = '';
+  if (typeof S.imgIdHairCustom === 'undefined')    S.imgIdHairCustom   = ''
   // 시대 배경은 이미지 모드에서 현대극 고정
   S.era = 'modern';
 }
@@ -6837,6 +6843,19 @@ function updateImgIdFields() {
       switchCutsMode('1cut');
     }
   }
+  // 컷별 화보 앵글 영역 토글
+  const cutDescField = document.getElementById('imgCutDescField');
+  if (cutDescField) cutDescField.style.display = isId ? 'none' : '';
+  // 입력칸 동기화 + 이벤트 바인딩
+  ['imgIdBgCustom','imgIdOutfitCustom','imgIdHairCustom'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = S[id] || '';
+    if (!el._bound) {
+      el.addEventListener('input', () => { S[id] = el.value; });
+      el._bound = true;
+    }
+  });
   // 4컷 탭 UI 활성/비활성
   const tab4 = document.querySelector('.cuts-tab[data-mode="4cut"]');
   if (tab4) {
@@ -8070,18 +8089,47 @@ function _imgBuildSubjectLock(nPerson, nPet, nProd) {
 }
 
 // 이미지 모드 프롬프트 빌더 (sync) — 영상 모드와 분리
-// 인증사진 전용 프롬프트 빌더 — 단순한 구조, 배경색/의상/헤어만 반영
+// 증명사진 자동 크롭 헬퍼 — 9:16 이미지를 씬의 idRatio(7:9 / 3:4 / 5:7)에 맞게 중앙 크롭
+async function cropToIdRatio(dataUrl, targetRatio) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const W = img.width, H = img.height;
+      const [tw, th] = targetRatio.split(':').map(Number);
+      const targetH = Math.round(W * th / tw);
+      if (targetH >= H) {
+        resolve(dataUrl);
+        return;
+      }
+      const offsetY = Math.round((H - targetH) / 2);
+      const c = document.createElement('canvas');
+      c.width = W;
+      c.height = targetH;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, -offsetY);
+      resolve(c.toDataURL('image/png'));
+    };
+    img.onerror = reject;
+    img.src = dataUrl;
+  });
+}
+
+// 증명사진 전용 프롬프트 빌더 — 단순한 구조, 배경색/의상/헤어만 반영
 function _buildIdPrompt(sc) {
   const { charDesc, petDesc, productDesc, nPerson, nPet, nProd } = _imgBuildAvatarDescriptions();
   const subjectLock = _imgBuildSubjectLock(nPerson, nPet, nProd);
   // 배경색 (사용자 선택 우선, 없으면 씬 기본값)
+  // 자유 입력 우선, 없으면 칩 선택
+  const bgCustom = (S.imgIdBgCustom || '').trim();
   const bgKey = S.imgIdBg || sc.idBg || 'white';
-  const bgEn = (typeof ID_BG_OPTIONS !== 'undefined' && ID_BG_OPTIONS[bgKey]?.en) || 'pure white background';
+  const bgEn = bgCustom || ((typeof ID_BG_OPTIONS !== 'undefined' && ID_BG_OPTIONS[bgKey]?.en) || 'pure white background');
   // 의상
-  const outfitEn = (S.imgIdOutfit && typeof ID_OUTFIT_OPTIONS !== 'undefined' && ID_OUTFIT_OPTIONS[S.imgIdOutfit]?.en) || '';
+  const outfitCustom = (S.imgIdOutfitCustom || '').trim();
+  const outfitEn = outfitCustom || ((S.imgIdOutfit && typeof ID_OUTFIT_OPTIONS !== 'undefined' && ID_OUTFIT_OPTIONS[S.imgIdOutfit]?.en) || '');
   // 헤어 (아바타 그대로가 아니거나 설정 안 했으면 아바타 헤어 따름)
-  let hairEn = '';
-  if (S.imgIdHair && S.imgIdHair !== 'asis' && typeof ID_HAIR_OPTIONS !== 'undefined') {
+  const hairCustom = (S.imgIdHairCustom || '').trim();
+  let hairEn = hairCustom;
+  if (!hairEn && S.imgIdHair && S.imgIdHair !== 'asis' && typeof ID_HAIR_OPTIONS !== 'undefined') {
     hairEn = ID_HAIR_OPTIONS[S.imgIdHair]?.en || '';
   }
   // 비율
@@ -9070,12 +9118,23 @@ async function generateOneCut() {
     // 다운로드 -> dataURL
     const r = await fetch(url);
     const blob = await r.blob();
-    const dataUrl = await new Promise((res, rej) => {
+    let dataUrl = await new Promise((res, rej) => {
       const fr = new FileReader();
       fr.onload = () => res(fr.result);
       fr.onerror = rej;
       fr.readAsDataURL(blob);
     });
+
+    // 증명사진이면 즉시 중앙 크롭 (화면+다운로드 모두 크롭된 결과)
+    const _scIdCrop = (typeof SCENES_IMAGE !== 'undefined') ? SCENES_IMAGE[S.scene] : null;
+    if (_scIdCrop && _scIdCrop.group === 'id' && _scIdCrop.idRatio && typeof cropToIdRatio === 'function') {
+      try {
+        dataUrl = await cropToIdRatio(dataUrl, _scIdCrop.idRatio);
+        log('info', `증명사진 자동 크롭: ${_scIdCrop.idRatio}`);
+      } catch (cropErr) {
+        log('warn', '크롭 실패: ' + cropErr.message);
+      }
+    }
 
     // S.cutDataUrls[i]만 갱신
     S.cutDataUrls[i] = dataUrl;
