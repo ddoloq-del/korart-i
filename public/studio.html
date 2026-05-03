@@ -4273,7 +4273,8 @@ function goStep(n) {
     const __numEl = document.getElementById('panel1Num');
     if (__numEl) __numEl.textContent = _IS_IMG_MODE ? '02' : '04';
     // 이미지 모드: 씬 상세 진입 시 비율 칩 렌더링
-    if (_IS_IMG_MODE && typeof renderImgRatioChips === 'function') {
+    // 이미지 + 영상 모드 둘 다 비율 칩 표시
+    if (typeof renderImgRatioChips === 'function') {
       renderImgRatioChips();
     }
   }
@@ -4349,7 +4350,7 @@ const _MODE = (new URLSearchParams(location.search)).get('mode') === 'image' ? '
 const _IS_IMG_MODE = (_MODE === 'image');
 const STEP_LABELS = _IS_IMG_MODE
   ? ['씬 선택', '씬 상세', '4컷']
-  : ['비율', '아바타', '씬 선택', '씬 상세', '4컷', '영상'];
+  : ['씬 선택', '씬 상세', '4컷', '영상'];
 const _MAX_STEPS = STEP_LABELS.length;  // 4 또는 6
 // 이미지 모드 진입 시 페이지 타이틀 즉시 변경 + 기본 비율 16:9
 if (_IS_IMG_MODE) {
@@ -4368,7 +4369,7 @@ const ASPECT_RATIOS = [
 
 // 이미지 모드 전용 — 씬 상세 안의 비율 칩 (panelRatio 단계 제거 대체 UI)
 function renderImgRatioChips() {
-  if (!_IS_IMG_MODE) return;
+  // 이미지 + 영상 모드 둘 다 사용
   const field = document.getElementById('imgRatioField');
   const wrap = document.getElementById('imgRatioChips');
   if (!field || !wrap) return;
@@ -4527,7 +4528,8 @@ function renderGlobalSteps(currentStep) {
   // 인디케이터 — 모드에 따라 4단계 (이미지) 또는 6단계 (영상)
   const containers = ['globalStepsR', 'globalSteps0', 'globalSteps1', 'globalSteps2', 'globalSteps3'];
   // 이미지 모드는 step 0(비율) + step 1(아바타) 사용 안 함 → step 1부터 시작 (UI에서는 01,02,03으로 표시)
-  const stepStart = _IS_IMG_MODE ? 1 : 0;
+  // 이미지 모드: step 1부터 (panel1=씬선택). 영상 모드: step 2부터 (비율 0 + 아바타 1 제거)
+  const stepStart = _IS_IMG_MODE ? 1 : 2;
   containers.forEach(id => {
     const wrap = document.getElementById(id);
     if (!wrap) return;
@@ -4556,6 +4558,10 @@ async function tryGoStep(n) {
   // 이미지 모드: step 0(비율) + step 4+(영상) 차단
   if (_IS_IMG_MODE && (n === 0 || n >= 4)) {
     if (n >= 4) toast('이미지 모드는 4컷 그리드까지만 작업합니다');
+    return;
+  }
+  // 영상 모드: step 0(비율) + step 1(아바타) 차단 — 씬 상세에서 모두 설정
+  if (!_IS_IMG_MODE && (n === 0 || n === 1)) {
     return;
   }
   const cur = S._currentStep ?? 0;
@@ -4594,13 +4600,10 @@ function validateStep(step) {
   // 이미지 모드는 비율 검증을 씬 상세 (step 2)에서 수행
   const _vStep = _IS_IMG_MODE ? (step + 1) : step;
 
-  if (!_IS_IMG_MODE && _vStep === 0) {
-    // 영상 모드 0: 비율 — 선택해야 함
-    if (!S.aspectRatio) missing.push('영상 비율');
+  if (_vStep === 0) {
+    // 이미지/영상 모드 둘 다 자동 16:9 (씬 상세에서 변경 가능)
   } else if (_vStep === 1) {
-    // 1: 아바타 — 1명 이상 저장
-    const lib = loadAvatarLib();
-    if (!lib.length) missing.push('저장된 아바타 (1명 이상)');
+    // 아바타 — 이미지/영상 모드 둘 다 씬 상세에서 검증
   } else if (_vStep === 2) {
     // 2: 씬 선택 — 씬 분위기만
     if (!S.scene)          missing.push('씬 분위기');
@@ -4642,7 +4645,8 @@ function backToSceneStepA() {
 // 씬 상세의 "+ 아바타 추가" 버튼 — 아바타 페이지(panel0)로 이동
 // 영상 모드: step 1 = panel0(아바타) / 이미지 모드: step 0 = panel0(아바타)
 function goToAvatarStep() {
-  tryGoStep(_IS_IMG_MODE ? 0 : 1);
+  // 이미지/영상 모드 둘 다 아바타 추가 모달 직접 호출
+  if (typeof openAvatarModal === 'function') openAvatarModal();
 }
 
 function uncastAvatar(libId) {
@@ -11420,10 +11424,24 @@ if (_IS_IMG_MODE) {
   const _p2Num = document.getElementById('panel2Num');
   if (_p2Num) _p2Num.textContent = '03';
   S._currentStep = 1;  // 첫 단계가 panel1
+} else {
+  // 영상 모드: 4단계 압축 (비율 + 아바타 둘 다 스킵)
+  if (!S.aspectRatio) S.aspectRatio = '16:9';
+  const _ratioPanel = document.getElementById('panelRatio');
+  if (_ratioPanel) _ratioPanel.classList.remove('show');
+  const _panel0v = document.getElementById('panel0');
+  if (_panel0v) _panel0v.classList.remove('show');
+  const _panel1v = document.getElementById('panel1');
+  if (_panel1v) _panel1v.classList.add('show');
+  const _p1NumV = document.getElementById('panel1Num');
+  if (_p1NumV) _p1NumV.textContent = '01';
+  const _p2NumV = document.getElementById('panel2Num');
+  if (_p2NumV) _p2NumV.textContent = '03';
+  const _p3Num = document.getElementById('panel3Num');
+  if (_p3Num) _p3Num.textContent = '04';
+  S._currentStep = 2;  // 영상 모드의 씬 선택은 step 2
 }
 
-// 이미지 모드는 위에서 step 1로 설정됨 — 영상 모드만 step 0
-if (!_IS_IMG_MODE) S._currentStep = 0;
 renderGlobalSteps(S._currentStep);
 renderRatioGrid();
 
