@@ -2233,6 +2233,25 @@ select option:hover {
       <input id="avName" placeholder="예: 김민준">
     </div>
 
+    <!-- 참고용 이미지 (사람/반려동물/제품 공통) -->
+    <div class="field">
+      <label>참고용 이미지 <span style="font-size:9px;color:var(--ink3);font-weight:400;margin-left:4px">선택사항 · AI에게 닮은 이미지 참조</span></label>
+      <div style="background:var(--bg3);border:1px dashed var(--line2);border-radius:0;padding:14px;text-align:center" id="avRefImgArea">
+        <div id="avRefImgPreview" style="display:none;margin-bottom:8px">
+          <img id="avRefImgEl" src="" style="max-width:100%;max-height:160px;border:1px solid var(--line);display:block;margin:0 auto">
+        </div>
+        <div id="avRefImgEmpty" style="font-size:11px;color:var(--ink3);margin-bottom:8px">실제 사진을 업로드하면 AI가 더 정확하게 닮은 이미지를 만듭니다</div>
+        <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+          <button type="button" class="btn btn-sm" onclick="document.getElementById('avRefImgUpload').click()">이미지 선택</button>
+          <button type="button" class="btn btn-sm" onclick="clearAvatarRefImage()" id="avRefImgClearBtn" style="display:none">제거</button>
+          <input type="file" id="avRefImgUpload" accept="image/*" style="display:none" onchange="uploadAvatarRefImage(event)">
+        </div>
+        <div id="avRefImgStatus" style="font-size:10px;color:var(--gold);margin-top:6px;display:none"></div>
+      </div>
+      <input type="hidden" id="avRefImgUrl" value="">
+      <div style="font-size:9px;color:var(--ink3);margin-top:6px">JPG/PNG/WEBP · 최대 5MB</div>
+    </div>
+
     <!-- ============= 사람 카테고리 입력 폼 ============= -->
     <div id="avPersonFields">
     <!-- 인종 (선택, 기본은 한국인) -->
@@ -2591,24 +2610,6 @@ select option:hover {
       </div>
     </div>
 
-    <!-- 참고용 이미지 (사람/반려동물/제품 공통) -->
-    <div class="field">
-      <label>참고용 이미지 <span style="font-size:9px;color:var(--ink3);font-weight:400;margin-left:4px">선택사항 · AI에게 닮은 이미지 참조</span></label>
-      <div style="background:var(--bg3);border:1px dashed var(--line2);border-radius:0;padding:14px;text-align:center" id="avRefImgArea">
-        <div id="avRefImgPreview" style="display:none;margin-bottom:8px">
-          <img id="avRefImgEl" src="" style="max-width:100%;max-height:160px;border:1px solid var(--line);display:block;margin:0 auto">
-        </div>
-        <div id="avRefImgEmpty" style="font-size:11px;color:var(--ink3);margin-bottom:8px">실제 사진을 업로드하면 AI가 더 정확하게 닮은 이미지를 만듭니다</div>
-        <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
-          <button type="button" class="btn btn-sm" onclick="document.getElementById('avRefImgUpload').click()">이미지 선택</button>
-          <button type="button" class="btn btn-sm" onclick="clearAvatarRefImage()" id="avRefImgClearBtn" style="display:none">제거</button>
-          <input type="file" id="avRefImgUpload" accept="image/*" style="display:none" onchange="uploadAvatarRefImage(event)">
-        </div>
-        <div id="avRefImgStatus" style="font-size:10px;color:var(--gold);margin-top:6px;display:none"></div>
-      </div>
-      <input type="hidden" id="avRefImgUrl" value="">
-      <div style="font-size:9px;color:var(--ink3);margin-top:6px">JPG/PNG/WEBP · 최대 5MB</div>
-    </div>
 
     <!-- 저장 버튼 -->
     <div style="display:flex;gap:8px">
@@ -5345,7 +5346,9 @@ function clearProductForm() {
 async function generateAvatarImage() {
 
   // 다각도 캐릭터 시트 — GPT Image 2 Medium 고정 (1536x1024, ~$0.10)
-  const FIXED_MODEL = 'openai/gpt-image-2';
+  // 레퍼런스 이미지가 있으면 edit 모델 사용 (image_urls로 참고)
+  const _refImgUrl = (document.getElementById('avRefImgUrl')?.value || '').trim();
+  const FIXED_MODEL = _refImgUrl ? 'openai/gpt-image-2/edit' : 'openai/gpt-image-2';
   const FIXED_QUALITY = 'medium';
   const FIXED_CPM = 0.10;
 
@@ -5383,6 +5386,10 @@ async function generateAvatarImage() {
   let charDesc = '';
   let prompt = '';
   let randomNote = '';
+
+  // 레퍼런스 이미지가 있을 때 프롬프트에 추가할 가이던스
+  // (그대로 붙여넣기 방지 — 특징만 참고하고 6각도 처음부터 다시 생성)
+  const _refGuidance = _refImgUrl ? "\n\nREFERENCE IMAGE USAGE (CRITICAL):\n- The provided reference image is for VISUAL TRAITS ONLY (face shape, features, hair texture, skin tone, distinctive marks, body proportions).\n- DO NOT copy-paste, crop, or directly reuse any part of the reference image into the output.\n- DO NOT place the reference image as one of the 6 panels.\n- ALL 6 panels must be FRESHLY GENERATED from scratch based on the extracted visual traits.\n- The reference is inspiration for likeness only; the output composition, poses, lighting, and angles must be created anew.\n- Do not preserve the reference background, clothing, accessories, or pose unless explicitly described in the character text below." : "";
 
   if (_isPet) {
     // 반려동물 프롬프트 빌드
@@ -5422,7 +5429,7 @@ CRITICAL requirements:
 - Sharp focus, high detail, photorealistic
 - No humans visible
 
-Pet description: ${charDesc}.`;
+Pet description: ${charDesc}.${_refGuidance}`;
   } else if (_isProduct) {
     // 제품 프롬프트 빌드
     const productCat      = document.getElementById('avProductCat')?.value      || 'product';
@@ -5448,7 +5455,7 @@ Pet description: ${charDesc}.`;
       ? `\n- The brand text or logo \"${productLogo}\" must be clearly visible and consistent across all panels`
       : '';
 
-    prompt = `Create a single product reference sheet image showing the SAME product in a strict 3x2 grid layout (3 columns, 2 rows) with thin black dividing lines between each panel. Plain neutral light gray studio background, professional product photography lighting.\n\nTop row (left to right):\n1. Front view, straight-on angle\n2. Three-quarter view from the LEFT\n3. Three-quarter view from the RIGHT\n\nBottom row (left to right):\n4. Back view\n5. Top-down view (from above)\n6. Detail close-up showing texture and material\n\nCRITICAL requirements:\n- Exact same product, same color, same material, same proportions in ALL 6 panels${logoLine}\n- Studio product photography, soft diffused lighting, clean shadows\n- Photorealistic, sharp focus, high detail\n- No humans, no hands holding the product\n- Centered composition with empty negative space around the product\n\nProduct description: ${charDesc}.`;
+    prompt = `Create a single product reference sheet image showing the SAME product in a strict 3x2 grid layout (3 columns, 2 rows) with thin black dividing lines between each panel. Plain neutral light gray studio background, professional product photography lighting.\n\nTop row (left to right):\n1. Front view, straight-on angle\n2. Three-quarter view from the LEFT\n3. Three-quarter view from the RIGHT\n\nBottom row (left to right):\n4. Back view\n5. Top-down view (from above)\n6. Detail close-up showing texture and material\n\nCRITICAL requirements:\n- Exact same product, same color, same material, same proportions in ALL 6 panels${logoLine}\n- Studio product photography, soft diffused lighting, clean shadows\n- Photorealistic, sharp focus, high detail\n- No humans, no hands holding the product\n- Centered composition with empty negative space around the product\n\nProduct description: ${charDesc}.${_refGuidance}`;
   } else {
     // 사람 프롬프트 빌드 (기존)
     const charParts = [`a ${gender}`];
@@ -5485,7 +5492,7 @@ CRITICAL requirements:
 - Sharp focus on face, high detail
 - Korean drama character
 
-Character: ${charDesc}.${randomNote}`;
+Character: ${charDesc}.${randomNote}${_refGuidance}`;
   }
 
   const btn = document.getElementById('avGenImgBtn');
@@ -5496,7 +5503,7 @@ Character: ${charDesc}.${randomNote}`;
   log('info', `아바타 다각도 시트 생성 — ${name} (3x2 grid, 1536x1024)`);
 
   try {
-    const url = await callFalImage(falKey, FIXED_MODEL, prompt, '1536x1024');
+    const url = await callFalImage(falKey, FIXED_MODEL, prompt, '1536x1024', _refImgUrl || undefined);
     setAvatarImagePreview(url);
     addImgCost(FIXED_CPM);
     log('ok', '다각도 시트 생성 완료 (6 angles)');
