@@ -1724,10 +1724,10 @@ select option:hover {
   <option value="fal-ai/veo3.1/fast/image-to-video" data-cps-off="0.03" data-cps-on="0.05" data-points-off="1.3" data-points-on="2.1" data-durations="4,6,8" data-min-dur="4" data-max-dur="8" data-label="Veo 3.1 Fast 720p" data-sub="720p" data-audio-fixed="false" data-audio-included="true" data-resolution="720p">Veo 3.1 Fast 720p</option>
   <option value="fal-ai/veo3.1/fast/image-to-video" data-cps-off="0.05" data-cps-on="0.08" data-points-off="2.1" data-points-on="3.4" data-durations="4,6,8" data-min-dur="4" data-max-dur="8" data-label="Veo 3.1 Fast 1080p" data-sub="1080p" data-audio-fixed="false" data-audio-included="true" data-resolution="1080p">Veo 3.1 Fast 1080p</option>
   <option value="fal-ai/veo3.1/image-to-video" data-cps-off="0.20" data-cps-on="0.40" data-points-off="8.4" data-points-on="16.8" data-durations="4,6,8" data-min-dur="4" data-max-dur="8" data-label="Veo 3.1" data-sub="1080p" data-audio-fixed="false" data-audio-included="true" data-resolution="1080p">Veo 3.1 1080p</option>
-  <option value="alibaba/happy-horse/image-to-video" data-cps-off="0.14" data-cps-on="0.14" data-points-off="5.9" data-points-on="5.9" data-durations="3,4,5,6,7,8,9,10,11,12,13,14,15" data-min-dur="3" data-max-dur="15" data-label="HappyHorse 720p" data-sub="720p · 오디오 포함" data-audio-fixed="true" data-audio-included="true" data-resolution="720p">HappyHorse 720p</option>
-  <option value="alibaba/happy-horse/image-to-video" data-cps-off="0.28" data-cps-on="0.28" data-points-off="11.8" data-points-on="11.8" data-durations="3,4,5,6,7,8,9,10,11,12,13,14,15" data-min-dur="3" data-max-dur="15" data-label="HappyHorse 1080p" data-sub="1080p · 오디오 포함" data-audio-fixed="true" data-audio-included="true" data-resolution="1080p">HappyHorse 1080p</option>
-  <option value="bytedance/seedance-2.0/fast/image-to-video" data-cps-off="0.2419" data-cps-on="0.2419" data-points-off="10.2" data-points-on="10.2" data-durations="4,5,6,7,8,9,10,11,12,13,14,15" data-min-dur="4" data-max-dur="15" data-label="Seedance 2.0 Fast" data-sub="720p · 오디오 포함" data-audio-fixed="true" data-audio-included="true" data-resolution="720p">Seedance 2.0 Fast 720p</option>
-  <option value="bytedance/seedance-2.0/image-to-video" data-cps-off="0.3024" data-cps-on="0.3024" data-points-off="12.7" data-points-on="12.7" data-durations="4,5,6,7,8,9,10,11,12,13,14,15" data-min-dur="4" data-max-dur="15" data-label="Seedance 2.0 Standard" data-sub="1080p · 오디오 포함" data-audio-fixed="true" data-audio-included="true" data-resolution="1080p">Seedance 2.0 Standard 1080p</option>
+  <option value="alibaba/happy-horse/image-to-video" data-cps-off="0.14" data-cps-on="0.14" data-points-off="5.9" data-points-on="5.9" data-durations="3,4,5,6,7,8,9,10,11,12,13,14,15" data-min-dur="3" data-max-dur="15" data-label="HappyHorse 720p" data-sub="720p" data-audio-fixed="true" data-audio-included="true" data-resolution="720p">HappyHorse 720p</option>
+  <option value="alibaba/happy-horse/image-to-video" data-cps-off="0.28" data-cps-on="0.28" data-points-off="11.8" data-points-on="11.8" data-durations="3,4,5,6,7,8,9,10,11,12,13,14,15" data-min-dur="3" data-max-dur="15" data-label="HappyHorse 1080p" data-sub="1080p" data-audio-fixed="true" data-audio-included="true" data-resolution="1080p">HappyHorse 1080p</option>
+  <option value="bytedance/seedance-2.0/fast/image-to-video" data-cps-off="0.2419" data-cps-on="0.2419" data-points-off="10.2" data-points-on="10.2" data-durations="4,5,6,7,8,9,10,11,12,13,14,15" data-min-dur="4" data-max-dur="15" data-label="Seedance 2.0 Fast" data-sub="720p" data-audio-fixed="true" data-audio-included="true" data-resolution="720p">Seedance 2.0 Fast 720p</option>
+  <option value="bytedance/seedance-2.0/image-to-video" data-cps-off="0.3024" data-cps-on="0.3024" data-points-off="12.7" data-points-on="12.7" data-durations="4,5,6,7,8,9,10,11,12,13,14,15" data-min-dur="4" data-max-dur="15" data-label="Seedance 2.0 Standard" data-sub="1080p" data-audio-fixed="true" data-audio-included="true" data-resolution="1080p">Seedance 2.0 Standard 1080p</option>
 </select>
 
   <!-- ══ STEP 0 (NEW): 비율 선택 ══ -->
@@ -6745,7 +6745,7 @@ const VID_MODELS = [
   {
     value: 'alibaba/happy-horse/image-to-video',
     label: 'HappyHorse 720p',
-    sub: '720p · 1초 단위 · 오디오 포함',
+    sub: '720p · 1초 단위',
     durations: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
     resolutions: [
       { key: '720p', label: '720p', cpsOff: 0.14, cpsOn: 0.14, audioFixed: true, audioIncluded: true },
@@ -6755,7 +6755,7 @@ const VID_MODELS = [
   {
     value: 'alibaba/happy-horse/image-to-video',
     label: 'HappyHorse 1080p',
-    sub: '1080p · 1초 단위 · 오디오 포함',
+    sub: '1080p · 1초 단위',
     durations: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
     resolutions: [
       { key: '1080p', label: '1080p', cpsOff: 0.28, cpsOn: 0.28, audioFixed: true, audioIncluded: true },
@@ -6765,7 +6765,7 @@ const VID_MODELS = [
   {
     value: 'bytedance/seedance-2.0/fast/image-to-video',
     label: 'Seedance 2.0 Fast',
-    sub: '720p · 1초 단위 · 오디오 포함',
+    sub: '720p · 1초 단위',
     durations: [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
     resolutions: [
       { key: '720p', label: '720p', cpsOff: 0.2419, cpsOn: 0.2419, audioFixed: true, audioIncluded: true },
@@ -6775,7 +6775,7 @@ const VID_MODELS = [
   {
     value: 'bytedance/seedance-2.0/image-to-video',
     label: 'Seedance 2.0 Standard',
-    sub: '1080p · 1초 단위 · 오디오 포함',
+    sub: '1080p · 1초 단위',
     durations: [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
     resolutions: [
       { key: '1080p', label: '1080p', cpsOff: 0.3024, cpsOn: 0.3024, audioFixed: true, audioIncluded: true },
@@ -8544,7 +8544,7 @@ function onVidResolutionChange(i) {
       audioBox.checked = !!r.audioIncluded;
       audioLabel.style.opacity = '0.6';
       audioLabel.style.cursor = 'not-allowed';
-      if (audioText) audioText.textContent = r.audioIncluded ? '오디오 포함 (고정)' : '오디오 없음 (고정)';
+      // 라벨은 updateVidAudioLabel에서 '오디오'로 통일
     } else {
       audioBox.disabled = false;
       audioLabel.style.opacity = '1';
@@ -8662,9 +8662,8 @@ function updateVidAudioLabel(i) {
   const m = getSelectedVidModel(i);
   const txt = document.getElementById('vidAudioText' + i);
   if (!txt) return;
-  if (!m) { txt.textContent = '오디오'; return; }
-  // fal API는 단일 가격 (audio 토글 없음). 뱃지로만 표시
-  txt.textContent = m.audioIncluded ? '오디오 포함' : '오디오 포함X';
+  // 모든 모델 동일하게 '오디오' 단순 표시 (체크박스 상태로 구분)
+  txt.textContent = '오디오';
 }
 
 function onVidDurChange(i) {
@@ -8769,8 +8768,7 @@ async function generateCutVideo(i) {
       '</div>' +
       '<div style="border-top:1px solid var(--line);padding-top:10px;background:rgba(200,160,74,.08);padding:10px;margin:0 -8px">' +
         '<div style="font-size:12px;color:var(--ink3)">예상 비용</div>' +
-        '<div style="font-size:20px;font-weight:800;color:var(--gold);margin-top:2px">' + (Math.round(totalPts * 10) / 10).toFixed(1) + ' P' +
-          ' <span style="font-size:11px;color:var(--ink3);font-weight:500">(~$' + estCost + ')</span></div>' +
+        '<div style="font-size:20px;font-weight:800;color:var(--gold);margin-top:2px">' + (Math.round(totalPts * 10) / 10).toFixed(1) + ' P</div>' +
       '</div>' +
     '</div>'
   );
