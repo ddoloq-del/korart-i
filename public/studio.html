@@ -3070,26 +3070,26 @@ function getAccessToken() {
 const SCENES = {
   // style: 이미지 프롬프트 (4컷 생성 시) — 풍부한 키워드로 분위기 명확히
   // vidStyle: 영상 프롬프트 (5초 영상 생성 시) — 510자 cap 안에서 동작하도록 핵심만
-  romance:    {name:'로맨스',     vidStyle:'warm golden hour, romantic, soft bokeh',          style:'warm golden hour lighting, romantic atmosphere, soft bokeh, shallow depth of field, Korean drama aesthetic', angles:['Two Shot','Medium Close-up (MCU)','Shallow Depth of Field close-up','Eye-Level Shot']},
-  tension:    {name:'긴장',       vidStyle:'high contrast shadows, cold tones',                style:'high contrast dramatic shadows, intense cold tones, sharp cinematic focus', angles:['Over-the-Shoulder (OTS)','Extreme Close-up (ECU)','Dutch Angle','Point of View (POV)']},
-  breakup:    {name:'이별',       vidStyle:'melancholic rain, blue-gray tones',                style:'melancholic rainy atmosphere, blue-gray tones, emotional soft lighting', angles:['Wide Shot','Medium Close-up (MCU)','Close-up (CU)','Rack Focus']},
-  climax:     {name:'감정 절정',  vidStyle:'extreme emotion, dramatic light, tears',            style:'extreme emotional expression, dramatic lighting, high contrast tears', angles:['Extreme Close-up (ECU)','Close-up (CU)','Low Angle','Zoom-in']},
-  suspense:   {name:'서스펜스',   vidStyle:'dark ominous, noir desaturated',                    style:'dark ominous atmosphere, heavy shadows, noir desaturated tones', angles:['Dutch Angle','Point of View (POV)','Extreme Close-up (ECU)','Low Angle']},
-  mellow:     {name:'막장',       vidStyle:'melodramatic, theatrical, vivid',                  style:'melodramatic exaggerated emotion, theatrical lighting, vivid colors', angles:['Two Shot','Close-up (CU)','Low Angle','Zoom-in']},
-  action:     {name:'액션',       vidStyle:'dynamic motion blur, sharp action',                style:'dynamic motion blur, high contrast, sharp cinematic action, dramatic angles', angles:['Low Angle','Wide Shot','Extreme Close-up (ECU)','Dolly Zoom']},
-  slice:      {name:'일상',       vidStyle:'natural warm tones, candid',                       style:'natural warm tones, candid daily life, soft comfortable lighting', angles:['Full Shot (FS)','Medium Close-up (MCU)','Two Shot','Eye-Level Shot']},
-  commercial: {name:'광고',       vidStyle:'bright commercial, premium polished',              style:'clean bright commercial lighting, vibrant product focus, polished cinematic style, premium aesthetic', angles:['Macro Shot','Medium Close-up (MCU)','Establishing Shot','Rack Focus']},
-  vlog:       {name:'개인방송',   vidStyle:'casual selfie, warm intimate',                      style:'casual selfie-style lighting, warm friendly tone, intimate handheld feel, vlog aesthetic', angles:['Eye-Level Shot','Medium Close-up (MCU)','Point of View (POV)','Single Shot']},
-  flashback:  {name:'회상',       vidStyle:'nostalgic dreamy haze, soft focus',                style:'nostalgic warm fading tones, soft dreamy haze, vintage film grain, soft focus', angles:['Shallow Depth of Field','Wide Shot','Medium Close-up (MCU)','Slow Motion']},
-  heaven:     {name:'천국',       vidStyle:'heavenly bright haze, ethereal glow',              style:'ethereal heavenly atmosphere, blinding bright white light, soft hazy glow, divine god rays, dreamy mist, overexposed highlights, cinematic celestial aesthetic, holy diffused lighting', angles:['Wide Shot','Low Angle','Medium Close-up (MCU)','Rack Focus']},
-  confession: {name:'고백',       vidStyle:'intimate warm, trembling, golden glow',            style:'intimate soft lighting, intense emotional warmth, trembling intensity, golden glow', angles:['Extreme Close-up (ECU)','Close-up (CU)','Two Shot','Eye-Level Shot']},
-  horror:     {name:'공포',       vidStyle:'dark unsettling, deep shadows, eerie',             style:'dark unsettling atmosphere, deep shadows, eerie cold tones, suspenseful framing', angles:['Dutch Angle','Extreme Close-up (ECU)','Point of View (POV)','Worm\'s Eye View']},
-  foodie:     {name:'먹방',       vidStyle:'appetizing close-up, ASMR',                        style:'appetizing food close-up lighting, warm tasty colors, mouth-watering visual, ASMR-friendly framing', angles:['Bird\'s Eye View','Macro Shot','Medium Close-up (MCU)','Extreme Close-up (ECU)']},
-  travel:     {name:'풍경',       vidStyle:'breathtaking landscape, golden hour',              style:'breathtaking scenic landscape, vast natural beauty, golden hour lighting, cinematic travel aesthetic', angles:['Wide Shot','Establishing Shot','Drone Shot','Bird\'s Eye View']},
-  fitness:    {name:'운동',       vidStyle:'energetic motion, athletic, sweat',                style:'energetic dynamic motion, sweat-drenched intensity, sharp athletic focus, gym aesthetic', angles:['Low Angle','Full Shot (FS)','Extreme Close-up (ECU)','Tracking Shot']},
-  dance:      {name:'댄스',       vidStyle:'rhythmic K-pop choreo, vibrant',                   style:'rhythmic K-pop choreography, vibrant studio lighting, dynamic synchronized movement', angles:['Wide Shot','Full Shot (FS)','Low Angle','Crane Shot']},
-  interview:  {name:'인터뷰',     vidStyle:'documentary, natural, focused',                    style:'professional documentary lighting, natural setting, focused conversation, talking-head style', angles:['Bust Shot','Medium Close-up (MCU)','Dirty Single','Over-the-Shoulder (OTS)']},
-  mv:         {name:'뮤직비디오', vidStyle:'stylized cinematic, rhythmic',                     style:'stylized music video aesthetic, dramatic lighting, rhythmic visual flow, cinematic look', angles:['Wide Shot','Crane Shot','Extreme Close-up (ECU)','Slow Motion']},
+  romance:    {name:'로맨스',     group:'drama',      vidStyle:'warm golden hour, romantic, soft bokeh',          style:'warm golden hour lighting, romantic atmosphere, soft bokeh, shallow depth of field, Korean drama aesthetic', angles:['Two Shot','Medium Close-up (MCU)','Shallow Depth of Field close-up','Eye-Level Shot']},
+  tension:    {name:'긴장',       group:'thriller',   vidStyle:'high contrast shadows, cold tones',                style:'high contrast dramatic shadows, intense cold tones, sharp cinematic focus', angles:['Over-the-Shoulder (OTS)','Extreme Close-up (ECU)','Dutch Angle','Point of View (POV)']},
+  breakup:    {name:'이별',       group:'drama',      vidStyle:'melancholic rain, blue-gray tones',                style:'melancholic rainy atmosphere, blue-gray tones, emotional soft lighting', angles:['Wide Shot','Medium Close-up (MCU)','Close-up (CU)','Rack Focus']},
+  climax:     {name:'감정 절정',  group:'drama',      vidStyle:'extreme emotion, dramatic light, tears',            style:'extreme emotional expression, dramatic lighting, high contrast tears', angles:['Extreme Close-up (ECU)','Close-up (CU)','Low Angle','Zoom-in']},
+  suspense:   {name:'서스펜스',   group:'thriller',   vidStyle:'dark ominous, noir desaturated',                    style:'dark ominous atmosphere, heavy shadows, noir desaturated tones', angles:['Dutch Angle','Point of View (POV)','Extreme Close-up (ECU)','Low Angle']},
+  mellow:     {name:'막장',       group:'drama',      vidStyle:'melodramatic, theatrical, vivid',                  style:'melodramatic exaggerated emotion, theatrical lighting, vivid colors', angles:['Two Shot','Close-up (CU)','Low Angle','Zoom-in']},
+  action:     {name:'액션',       group:'thriller',   vidStyle:'dynamic motion blur, sharp action',                style:'dynamic motion blur, high contrast, sharp cinematic action, dramatic angles', angles:['Low Angle','Wide Shot','Extreme Close-up (ECU)','Dolly Zoom']},
+  slice:      {name:'일상',       group:'content',    vidStyle:'natural warm tones, candid',                       style:'natural warm tones, candid daily life, soft comfortable lighting', angles:['Full Shot (FS)','Medium Close-up (MCU)','Two Shot','Eye-Level Shot']},
+  commercial: {name:'광고',       group:'commercial', vidStyle:'bright commercial, premium polished',              style:'clean bright commercial lighting, vibrant product focus, polished cinematic style, premium aesthetic', angles:['Macro Shot','Medium Close-up (MCU)','Establishing Shot','Rack Focus']},
+  vlog:       {name:'개인방송',   group:'content',    vidStyle:'casual selfie, warm intimate',                      style:'casual selfie-style lighting, warm friendly tone, intimate handheld feel, vlog aesthetic', angles:['Eye-Level Shot','Medium Close-up (MCU)','Point of View (POV)','Single Shot']},
+  flashback:  {name:'회상',       group:'drama',      vidStyle:'nostalgic dreamy haze, soft focus',                style:'nostalgic warm fading tones, soft dreamy haze, vintage film grain, soft focus', angles:['Shallow Depth of Field','Wide Shot','Medium Close-up (MCU)','Slow Motion']},
+  heaven:     {name:'천국',       group:'lifestyle',  vidStyle:'heavenly bright haze, ethereal glow',              style:'ethereal heavenly atmosphere, blinding bright white light, soft hazy glow, divine god rays, dreamy mist, overexposed highlights, cinematic celestial aesthetic, holy diffused lighting', angles:['Wide Shot','Low Angle','Medium Close-up (MCU)','Rack Focus']},
+  confession: {name:'고백',       group:'drama',      vidStyle:'intimate warm, trembling, golden glow',            style:'intimate soft lighting, intense emotional warmth, trembling intensity, golden glow', angles:['Extreme Close-up (ECU)','Close-up (CU)','Two Shot','Eye-Level Shot']},
+  horror:     {name:'공포',       group:'thriller',   vidStyle:'dark unsettling, deep shadows, eerie',             style:'dark unsettling atmosphere, deep shadows, eerie cold tones, suspenseful framing', angles:['Dutch Angle','Extreme Close-up (ECU)','Point of View (POV)','Worm\'s Eye View']},
+  foodie:     {name:'먹방',       group:'content',    vidStyle:'appetizing close-up, ASMR',                        style:'appetizing food close-up lighting, warm tasty colors, mouth-watering visual, ASMR-friendly framing', angles:['Bird\'s Eye View','Macro Shot','Medium Close-up (MCU)','Extreme Close-up (ECU)']},
+  travel:     {name:'풍경',       group:'lifestyle',  vidStyle:'breathtaking landscape, golden hour',              style:'breathtaking scenic landscape, vast natural beauty, golden hour lighting, cinematic travel aesthetic', angles:['Wide Shot','Establishing Shot','Drone Shot','Bird\'s Eye View']},
+  fitness:    {name:'운동',       group:'lifestyle',  vidStyle:'energetic motion, athletic, sweat',                style:'energetic dynamic motion, sweat-drenched intensity, sharp athletic focus, gym aesthetic', angles:['Low Angle','Full Shot (FS)','Extreme Close-up (ECU)','Tracking Shot']},
+  dance:      {name:'댄스',       group:'lifestyle',  vidStyle:'rhythmic K-pop choreo, vibrant',                   style:'rhythmic K-pop choreography, vibrant studio lighting, dynamic synchronized movement', angles:['Wide Shot','Full Shot (FS)','Low Angle','Crane Shot']},
+  interview:  {name:'인터뷰',     group:'content',    vidStyle:'documentary, natural, focused',                    style:'professional documentary lighting, natural setting, focused conversation, talking-head style', angles:['Bust Shot','Medium Close-up (MCU)','Dirty Single','Over-the-Shoulder (OTS)']},
+  mv:         {name:'뮤직비디오', group:'commercial', vidStyle:'stylized cinematic, rhythmic',                     style:'stylized music video aesthetic, dramatic lighting, rhythmic visual flow, cinematic look', angles:['Wide Shot','Crane Shot','Extreme Close-up (ECU)','Slow Motion']},
 };
 
 
@@ -3097,6 +3097,15 @@ const SCENES = {
 //  IMAGE MODE DATA — 이미지 모드 전용 데이터 (영상 모드와 완전 분리)
 //  ?mode=image 일 때만 사용
 // ════════════════════════════════════════════════════════════
+
+// 영상 모드 카테고리 그룹 정의 (탭 UI용)
+const SCENE_GROUPS = {
+  drama:      { ko: '드라마',       en: 'DRAMA' },
+  thriller:   { ko: '스릴러',     en: 'THRILLER' },
+  content:    { ko: '콘텐츠',     en: 'CONTENT' },
+  lifestyle:  { ko: '라이프스타일', en: 'LIFESTYLE' },
+  commercial: { ko: '광고/MV',     en: 'COMMERCIAL' },
+};
 
 // 이미지 모드 카테고리 그룹 정의 (탭 UI용)
 const IMAGE_SCENE_GROUPS = {
@@ -7103,8 +7112,26 @@ function renderScenes() {
     horror:'#dc2626', foodie:'#facc15', travel:'#5eead4', fitness:'#a3e635',
     dance:'#ec4899', interview:'#7dd3fc', mv:'#a855f7',
   };
+  // 활성 카테고리 이불 초기화 (기본: drama)
+  if (typeof S.activeVidCategory === 'undefined') S.activeVidCategory = 'drama';
+  // 카테고리 탭 HTML 생성
+  const tabsHtml = `
+    <div id="vidCatTabs" style="grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line)">
+      ${Object.entries(SCENE_GROUPS).map(([key, g]) => {
+        const active = S.activeVidCategory === key;
+        const bg = active ? 'rgba(244,114,182,.12)' : 'transparent';
+        const border = active ? 'var(--pink)' : 'var(--line)';
+        const color = active ? 'var(--pink)' : 'var(--ink2)';
+        const fontWeight = active ? '800' : '600';
+        return `<div onclick="selectVidCategory('${key}')" style="cursor:pointer;padding:8px 16px;background:${bg};border:1.5px solid ${border};color:${color};font-weight:${fontWeight};font-size:12px;letter-spacing:.02em;transition:all .15s">${g.ko}</div>`;
+      }).join('')}
+    </div>
+  `;
+
   const customs = loadSceneLib();
-  let html = defaults.map(s => {
+  // 현재 카테고리에 속하는 씬만 필터
+  const filteredDefaults = defaults.filter(s => (SCENES[s.key] && SCENES[s.key].group) === S.activeVidCategory);
+  let html = tabsHtml + filteredDefaults.map(s => {
     const sc = SCENES[s.key] || {};
     const vidStyle = sc.vidStyle || '';
     const cam = (sc.angles || []).slice(0,3).join(' \u00b7 ');
@@ -7117,6 +7144,12 @@ function renderScenes() {
     return `<div class="scene-card${S.scene===('custom_'+s.id)?' active':''}" onclick="selScene('custom_${s.id}',this)"><div onclick="event.stopPropagation();deleteSceneFromLib(${s.id})" style="position:absolute;top:6px;right:6px;width:20px;height:20px;background:rgba(0,0,0,.55);border:1px solid var(--line2);color:var(--ink2);font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3">✕</div><div class="sc-cat">CUSTOM</div><div class="sc-title-block"><div class="sc-name">${escHtml(s.name)}</div>${vidStyle ? `<div class="sc-vidstyle">${escHtml(vidStyle)}</div>` : ''}</div>${cam ? `<div class="sc-cam">${cam}</div>` : ''}</div>`;
   }).join('');
   grid.innerHTML = html;
+}
+
+// 영상 모드 카테고리 선택
+function selectVidCategory(catKey) {
+  S.activeVidCategory = catKey;
+  renderScenes();
 }
 
 function selScene(key, el) {
