@@ -1760,7 +1760,7 @@ select option:hover {
   </div>
 
 <div class="panel" id="panel0">
-    <div class="panel-step-bar">
+    <div class="panel-step-bar" id="panel0Nav">
       <button class="btn" onclick="tryGoStep(0)">뒤로</button>
       <div class="step-indicator" id="globalSteps0"></div>
       <button class="btn btn-primary" onclick="tryGoStep(2)">다음</button>
@@ -1837,6 +1837,17 @@ select option:hover {
         <button class="btn btn-sm" onclick="saveSceneDetailToCloud()" title="씬 상세 설정을 클라우드에 저장" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">+ 클라우드 저장</button>
         <button class="btn btn-sm btn-ghost" onclick="openSceneDetailPicker()" title="저장된 씬 상세 불러오기">클라우드 불러오기</button>
         <button class="btn btn-sm btn-ghost" onclick="backToSceneStepA()">분위기 다시 고르기</button>
+      </div>
+    </div>
+
+    <!-- 이미지 모드 전용: 비율 선택 (영상 모드에선 숨김) -->
+    <div class="field" id="imgRatioField" style="display:none;margin-bottom:18px;padding:14px 18px;background:var(--bg2);border:1px solid var(--line);border-radius:0">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <label style="margin:0;font-size:13px;font-weight:700;color:var(--cream)">📐 이미지 비율</label>
+          <span style="font-size:10px;color:var(--ink3)">SNS 플랫폼에 맞는 화면 비율을 선택하세요 (기본: 16:9 가로)</span>
+        </div>
+        <div id="imgRatioChips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
       </div>
     </div>
 
@@ -1980,7 +1991,7 @@ select option:hover {
 
   <!-- ══ STEP 2: 4컷 생성 ══ -->
   <div class="panel" id="panel2">
-    <div class="panel-step-bar">
+    <div class="panel-step-bar" id="panel2Nav">
       <button class="btn" onclick="tryGoStep(3)">뒤로</button>
       <div class="step-indicator" id="globalSteps2"></div>
       <div style="display:flex;gap:6px">
@@ -3910,22 +3921,36 @@ function updateVidCost() {}
 // ════════════════════════════════════════════════════════════
 //  STEP NAV
 // ════════════════════════════════════════════════════════════
-// logical step (0-5) → 실제 panel 매핑
-// 0 → panelRatio (비율), 1 → panel0 (아바타), 2 → panel1+stepA (아바타·씬), 3 → panel1+stepB (씬 상세), 4 → panel2 (4컷), 5 → panel3 (영상)
+// 영상 모드 (6단계) — logical step (0-5) → 실제 panel 매핑
+// 0 → panelRatio (비율), 1 → panel0 (아바타), 2 → panel1+stepA, 3 → panel1+stepB, 4 → panel2 (4컷), 5 → panel3 (영상)
+// 이미지 모드 (4단계) — logical step (0-3) → 실제 panel 매핑
+// 0 → panel0 (아바타), 1 → panel1+stepA, 2 → panel1+stepB, 3 → panel2 (4컷)
 function goStep(n) {
-  // 이미지 모드: step 5 차단 (안전장치)
-  if (_IS_IMG_MODE && n >= 5) {
+  // 이미지 모드: 단계 범위 차단 (안전장치)
+  if (_IS_IMG_MODE && n >= 4) {
     toast('이미지 모드는 4컷까지만');
     return;
   }
-  const STEP_PANEL_ID = ['panelRatio', 'panel0', 'panel1', 'panel1', 'panel2', 'panel3'];
+  // 영상 모드: 기존 그대로
+  if (!_IS_IMG_MODE && n >= 5) {
+    // 영상 모드 step 5는 정상 (영상 패널)
+  }
+
+  // 이미지 모드는 panelRatio 스킵 → step 인덱스 1만큼 시프트해서 영상 모드 매핑 재사용
+  const STEP_PANEL_ID_VIDEO = ['panelRatio', 'panel0', 'panel1', 'panel1', 'panel2', 'panel3'];
+  const STEP_PANEL_ID_IMAGE = ['panel0', 'panel1', 'panel1', 'panel2'];
+  const STEP_PANEL_ID = _IS_IMG_MODE ? STEP_PANEL_ID_IMAGE : STEP_PANEL_ID_VIDEO;
   const targetId = STEP_PANEL_ID[n];
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('show', p.id === targetId));
   S._currentStep = n;
   renderGlobalSteps(n);
 
+  // 내부적으로는 영상 모드 기준 step 번호로 변환해서 기존 분기 재사용
+  // 이미지 모드 0→1, 1→2, 2→3, 3→4 로 매핑 (panelRatio 없으니 +1)
+  const _vStep = _IS_IMG_MODE ? (n + 1) : n;
+
   // 4컷 패널 진입 시 quad CSS aspect-ratio 적용
-  if (n === 4) {
+  if (_vStep === 4) {
     // 이미지 모드 UI 갱신 (영상 버튼 -> 완료 버튼)
     if (typeof _applyImageModeUI === 'function') _applyImageModeUI();
     const quad = document.getElementById('quad');
@@ -3945,19 +3970,19 @@ function goStep(n) {
   }
 
   // 영상 패널 진입 시 컷 카드 렌더링 (4컷 없이 도달해도 빈 슬롯 표시 + 불러오기 가능)
-  if (n === 5) {
+  if (_vStep === 5) {
     if (typeof renderVidCards === 'function') renderVidCards();
     if (typeof updateMergeBtn === 'function') updateMergeBtn();
   }
 
-  // panel1 안의 sub-step 토글 (step 2 = sceneStepA, step 3 = sceneStepB)
-  if (n === 2) {
+  // panel1 안의 sub-step 토글 (vStep 2 = sceneStepA, vStep 3 = sceneStepB)
+  if (_vStep === 2) {
     document.getElementById('sceneStepA').style.display = 'block';
     document.getElementById('sceneStepB').style.display = 'none';
     renderStep1Avatars();
     renderScenes();
     updateScenePanelHeader('A');
-  } else if (n === 3) {
+  } else if (_vStep === 3) {
     document.getElementById('sceneStepA').style.display = 'none';
     document.getElementById('sceneStepB').style.display = 'block';
     const sc = SCENES[S.scene];
@@ -3973,21 +3998,32 @@ function goStep(n) {
     // 추가 fail-safe — panel-num 직접 04로 강제
     const __numEl = document.getElementById('panel1Num');
     if (__numEl) __numEl.textContent = '04';
+    // 이미지 모드: 씬 상세 진입 시 비율 칩 렌더링
+    if (_IS_IMG_MODE && typeof renderImgRatioChips === 'function') {
+      renderImgRatioChips();
+    }
   }
   // panel1 step-bar 좌/우 버튼 동적 변경
   const navWrap = document.getElementById('panel1Nav');
-  if (navWrap && (n === 2 || n === 3)) {
-    if (n === 2) {
+  if (navWrap && (_vStep === 2 || _vStep === 3)) {
+    // 이미지 모드는 step 번호가 다름 (영상의 2→이미지의 1, 영상의 3→이미지의 2 등)
+    if (_vStep === 2) {
+      // 씬 선택 → 뒤로:아바타, 다음:씬 상세
+      const backStep = _IS_IMG_MODE ? 0 : 1;
+      const nextStep = _IS_IMG_MODE ? 2 : 3;
       navWrap.innerHTML = `
-        <button class="btn" onclick="tryGoStep(1)">뒤로</button>
+        <button class="btn" onclick="tryGoStep(${backStep})">뒤로</button>
         <div class="step-indicator" id="globalSteps1"></div>
-        <button class="btn btn-primary" onclick="tryGoStep(3)">다음</button>
+        <button class="btn btn-primary" onclick="tryGoStep(${nextStep})">다음</button>
       `;
     } else {
+      // 씬 상세 → 뒤로:씬 선택, 다음:4컷
+      const backStep = _IS_IMG_MODE ? 1 : 2;
+      const nextStep = _IS_IMG_MODE ? 3 : 4;
       navWrap.innerHTML = `
-        <button class="btn" onclick="tryGoStep(2)">뒤로</button>
+        <button class="btn" onclick="tryGoStep(${backStep})">뒤로</button>
         <div class="step-indicator" id="globalSteps1"></div>
-        <button class="btn btn-primary" onclick="tryGoStep(4)">4컷 생성으로</button>
+        <button class="btn btn-primary" onclick="tryGoStep(${nextStep})">4컷 생성으로</button>
       `;
     }
     renderGlobalSteps(n);
@@ -4025,13 +4061,14 @@ function updateScenePanelHeader(sub) {
 // 4단계 인디케이터를 모든 panel에 동일하게 렌더
 // 작업 모드 — URL 파라미터 ?mode=image 또는 ?mode=video (기본 video)
 const _MODE = (new URLSearchParams(location.search)).get('mode') === 'image' ? 'image' : 'video';
-// 이미지 모드는 5단계 (영상 제외), 영상 모드는 6단계
+// 이미지 모드는 4단계 (비율/영상 제외 — 비율은 씬 상세로 이동)
+// 영상 모드는 6단계 (비율/아바타/씬선택/씬상세/4컷/영상) — 기존 그대로
 const _IS_IMG_MODE = (_MODE === 'image');
 const STEP_LABELS = _IS_IMG_MODE
-  ? ['비율', '아바타', '씬 선택', '씬 상세', '4컷']
+  ? ['아바타', '씬 선택', '씬 상세', '4컷']
   : ['비율', '아바타', '씬 선택', '씬 상세', '4컷', '영상'];
-const _MAX_STEPS = STEP_LABELS.length;  // 5 또는 6
-// 이미지 모드 진입 시 페이지 타이틀 즉시 변경
+const _MAX_STEPS = STEP_LABELS.length;  // 4 또는 6
+// 이미지 모드 진입 시 페이지 타이틀 즉시 변경 + 기본 비율 16:9
 if (_IS_IMG_MODE) {
   document.title = 'Korart-i 스튜디오 (이미지 모드) — 4컷 K-콘텐츠 생성';
 }
@@ -4045,6 +4082,41 @@ const ASPECT_RATIOS = [
   { value: '1:1',  size: '1080×1080', purpose: '인스타 피드', badge: null,
     klingRatio: '1:1',  imgSize: { width: 1024, height: 1024 }, gridSize: { width: 1024, height: 1024 } },
 ];
+
+// 이미지 모드 전용 — 씬 상세 안의 비율 칩 (panelRatio 단계 제거 대체 UI)
+function renderImgRatioChips() {
+  if (!_IS_IMG_MODE) return;
+  const field = document.getElementById('imgRatioField');
+  const wrap = document.getElementById('imgRatioChips');
+  if (!field || !wrap) return;
+  field.style.display = 'block';
+  wrap.innerHTML = ASPECT_RATIOS.map(r => {
+    const active = S.aspectRatio === r.value;
+    const labelMap = { '16:9': '가로', '9:16': '세로', '1:1': '정사각' };
+    const sub = labelMap[r.value] || '';
+    const bg = active ? 'rgba(94,234,212,.18)' : 'var(--bg3)';
+    const border = active ? 'var(--teal)' : 'var(--line)';
+    const color = active ? 'var(--teal)' : 'var(--ink2)';
+    const fontWeight = active ? '800' : '600';
+    return `<div onclick="selectImgRatio('${r.value}')" style="cursor:pointer;padding:8px 14px;background:${bg};border:1.5px solid ${border};color:${color};font-weight:${fontWeight};font-size:12px;letter-spacing:.02em;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:72px;transition:all .15s">
+      <span style="font-size:13px">${r.value}</span>
+      <span style="font-size:9px;opacity:.85">${sub}</span>
+    </div>`;
+  }).join('');
+}
+
+// 이미지 모드 비율 선택 (씬 상세 안에서)
+function selectImgRatio(value) {
+  S.aspectRatio = value;
+  renderImgRatioChips();
+  // 4컷 quad CSS aspect-ratio 갱신 (이미 4컷 패널 진입했을 수도 있음)
+  const quad = document.getElementById('quad');
+  if (quad) quad.style.aspectRatio = getQuadCssAspect();
+  // 화질 힌트 갱신
+  if (typeof updateImgQualityHint === 'function') updateImgQualityHint();
+  toast(`📐 ${value} 선택됨`, 1000);
+}
+
 // 비율 카드 렌더
 
 function renderRatioGrid() {
@@ -4116,6 +4188,15 @@ async function selectAspectRatio(value) {
 function _applyImageModeUI() {
   if (!_IS_IMG_MODE) return;
 
+  // panel2 nav의 '뒤로' 버튼 — 영상모드 tryGoStep(3) → 이미지모드 tryGoStep(2) (씬 상세)
+  const panel2Nav = document.getElementById('panel2Nav');
+  if (panel2Nav) {
+    const backBtn = panel2Nav.querySelector('button.btn:not(.btn-primary):not(.btn-ghost):not(.btn-sm)');
+    if (backBtn && backBtn.textContent.includes('뒤로')) {
+      backBtn.onclick = function() { tryGoStep(2); };
+    }
+  }
+
   // panel2 안의 goVidBtn -> '4컷 작업 완료'로
   const goVidBtn = document.getElementById('goVidBtn');
   if (goVidBtn) {
@@ -4181,8 +4262,8 @@ function renderGlobalSteps(currentStep) {
 
 // 검증을 거쳐 step 이동 (앞으로 갈 때만 검증, 뒤로는 자유)
 async function tryGoStep(n) {
-  // 이미지 모드: step 5 (영상) 차단
-  if (_IS_IMG_MODE && n >= 5) {
+  // 이미지 모드: step 4+ 차단 (4컷이 마지막)
+  if (_IS_IMG_MODE && n >= 4) {
     toast('이미지 모드는 4컷 그리드까지만 작업합니다');
     return;
   }
@@ -4217,25 +4298,32 @@ async function tryGoStep(n) {
 // 각 단계별 검증 (비어있는 항목 배열 반환)
 function validateStep(step) {
   const missing = [];
-  if (step === 0) {
-    // 0: 비율 — 선택해야 함
+  // 이미지 모드: step 번호가 1만큼 작음 (panelRatio 없음)
+  // 이미지 모드 step 0=아바타, 1=씬선택, 2=씬상세, 3=4컷 → 영상 모드 1,2,3,4와 동일 검증
+  // 이미지 모드는 비율 검증을 씬 상세 (step 2)에서 수행
+  const _vStep = _IS_IMG_MODE ? (step + 1) : step;
+
+  if (!_IS_IMG_MODE && _vStep === 0) {
+    // 영상 모드 0: 비율 — 선택해야 함
     if (!S.aspectRatio) missing.push('영상 비율');
-  } else if (step === 1) {
+  } else if (_vStep === 1) {
     // 1: 아바타 — 1명 이상 저장
     const lib = loadAvatarLib();
     if (!lib.length) missing.push('저장된 아바타 (1명 이상)');
-  } else if (step === 2) {
+  } else if (_vStep === 2) {
     // 2: 씬 선택 — 씬 분위기만
     if (!S.scene)          missing.push('씬 분위기');
-  } else if (step === 3) {
+  } else if (_vStep === 3) {
     // 3: 씬 상세 설정 — 출연 아바타 + 계절/시간/날씨/장소/앵글
+    // 이미지 모드는 비율도 여기서 검증
+    if (_IS_IMG_MODE && !S.aspectRatio) missing.push('이미지 비율');
     if (!S.avatars.length) missing.push('등장 아바타');
     if (!S.season)    missing.push('계절');
     if (!S.timeofday) missing.push('시간대');
     if (!S.weather)   missing.push('날씨');
     if (!S.location)  missing.push('장소');
     if (S.angles.filter(Boolean).length < 4) missing.push('카메라 앵글 4개');
-  } else if (step === 4) {
+  } else if (_vStep === 4) {
     // 4: 4컷 — 스킵 허용 (4컷 이미지 없어도 6단계에서 영상 불러오기 가능)
     // 최소 하나라도 승인된 컷이 있으면 잠금 해제. 아무것도 없으면 (다 안 만들어도) 그대로 통과 — 6단계에서 영상만 불러와서 통합 가능
   }
@@ -4243,11 +4331,15 @@ function validateStep(step) {
 }
 
 function goSceneStepB() {
-  tryGoStep(2);
+  // 영상 모드: step 2(씬 선택) → 3(씬 상세)
+  // 이미지 모드: step 1(씬 선택) → 2(씬 상세)
+  tryGoStep(_IS_IMG_MODE ? 2 : 3);
 }
 
 function backToSceneStepA() {
-  tryGoStep(1);
+  // 씬 상세에서 씬 선택으로 돌아가기 (분위기 다시 고르기)
+  // 영상 모드: step 3 → 2 / 이미지 모드: step 2 → 1
+  tryGoStep(_IS_IMG_MODE ? 1 : 2);
 }
 
 function uncastAvatar(libId) {
@@ -10214,6 +10306,27 @@ renderSavedAvatars();
 renderScenes();
 renderAngleSlots();
 renderStep1Avatars();
+
+// ── 이미지 모드: panelRatio 스킵, 비율 기본값 16:9, 첫 화면을 panel0(아바타)으로 ──
+if (_IS_IMG_MODE) {
+  // 비율 기본값 자동 설정 (씬 상세에서 변경 가능)
+  if (!S.aspectRatio) S.aspectRatio = '16:9';
+  // panelRatio가 처음 보이지 않게 .show 제거 + panel0에 .show 부여
+  const _ratioPanel = document.getElementById('panelRatio');
+  if (_ratioPanel) _ratioPanel.classList.remove('show');
+  const _panel0 = document.getElementById('panel0');
+  if (_panel0) _panel0.classList.add('show');
+  // panel0 navbar 갱신 — 뒤로(이미지 모드 step -1 = 없음) 숨기고, 다음을 step 1(씬 선택)로
+  const _panel0Nav = document.getElementById('panel0Nav');
+  if (_panel0Nav) {
+    _panel0Nav.innerHTML = `
+      <button class="btn" onclick="goHome()">홈으로</button>
+      <div class="step-indicator" id="globalSteps0"></div>
+      <button class="btn btn-primary" onclick="tryGoStep(1)">다음</button>
+    `;
+  }
+}
+
 S._currentStep = 0;
 renderGlobalSteps(0);
 renderRatioGrid();
