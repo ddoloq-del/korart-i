@@ -1863,63 +1863,72 @@ select option:hover {
 
     <!-- ════════ 이미지 모드 전용 폼 (영상 모드에선 숨김) ════════ -->
     <div id="imageModeForm" style="display:none">
-      <!-- 시대 배경 (이미지 모드용 - sceneStepA의 chip 재사용 안 하고 여기 새로 렌더) -->
-      <div class="field" style="margin-bottom:14px">
-        <label style="margin:0 0 8px 0;font-size:14px;font-weight:700;display:block">🕰️ 시대 배경 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
-        <div id="imgEraChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-      </div>
+      <!-- 2열 그리드 (영상 모드 sceneStepB와 동일 레이아웃) -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
 
-      <!-- 무드 -->
-      <div class="field" style="margin-bottom:14px">
-        <label style="margin:0 0 8px 0;font-size:14px;font-weight:700;display:block">🎨 무드 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
-        <div id="imgMoodChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-      </div>
+        <!-- ── 좌측 ── -->
+        <div>
+          <!-- 무드 -->
+          <div class="field" style="margin-bottom:14px">
+            <label style="margin:0 0 8px 0;font-size:13px;font-weight:700;display:block">무드 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
+            <div id="imgMoodChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+            <input type="text" id="imgMoodCustom" placeholder="개인 설정: 자유롭게 입력 (예: 파스텔 톤 + 차가운 조명)"
+                   style="margin-top:8px;width:100%;background:var(--bg3);border:1px solid var(--line);padding:6px 10px;color:var(--ink);font-size:11px;font-family:inherit">
+          </div>
 
-      <!-- 장소 -->
-      <div class="field" style="margin-bottom:14px">
-        <label style="margin:0 0 8px 0;font-size:14px;font-weight:700;display:block">📍 장소 <span style="font-size:10px;color:var(--ink3);font-weight:400">(씬에 따라 자동 추천)</span></label>
-        <div id="imgLocChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-      </div>
+          <!-- 장소 -->
+          <div class="field" style="margin-bottom:14px">
+            <label style="margin:0 0 8px 0;font-size:13px;font-weight:700;display:block">장소 <span style="font-size:10px;color:var(--ink3);font-weight:400">(씬에 따라 자동 추천)</span></label>
+            <div id="imgLocChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+            <input type="text" id="imgLocCustom" placeholder="개인 설정: 자유롭게 입력 (예: 한강 야경 카페)"
+                   style="margin-top:8px;width:100%;background:var(--bg3);border:1px solid var(--line);padding:6px 10px;color:var(--ink);font-size:11px;font-family:inherit">
+          </div>
 
-      <!-- 4컷 변주 스타일 (다중 선택) -->
-      <div class="field" style="margin-bottom:14px">
-        <label style="margin:0 0 8px 0;font-size:14px;font-weight:700;display:block">📸 4컷 변주 스타일 <span style="font-size:10px;color:var(--ink3);font-weight:400">(여러 개 선택 가능)</span></label>
-        <div id="imgVariationChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-        <div style="font-size:10px;color:var(--ink3);margin-top:6px">선택한 변주 스타일들이 조합되어 4컷에 적용됩니다.</div>
-      </div>
+          <!-- 4컷 변주 스타일 (다중 선택) -->
+          <div class="field" style="margin-bottom:14px">
+            <label style="margin:0 0 8px 0;font-size:13px;font-weight:700;display:block">4컷 변주 스타일 <span style="font-size:10px;color:var(--ink3);font-weight:400">(여러 개 선택 가능)</span></label>
+            <div id="imgVariationChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+            <input type="text" id="imgVariationCustom" placeholder="개인 설정: 자유롭게 입력 (예: 머리카락 색깔만 4가지)"
+                   style="margin-top:8px;width:100%;background:var(--bg3);border:1px solid var(--line);padding:6px 10px;color:var(--ink);font-size:11px;font-family:inherit">
+            <div style="font-size:10px;color:var(--ink3);margin-top:6px">선택한 변주 + 개인 설정이 조합되어 4컷에 적용됩니다.</div>
+          </div>
 
-      <!-- 컷별 추가 설명 (선택) -->
-      <div class="field" style="margin-bottom:14px">
-        <label style="margin:0 0 8px 0;font-size:14px;font-weight:700;display:block">✏️ 컷별 추가 설명 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
-        <div id="imgCutDescriptions" style="display:flex;flex-direction:column;gap:6px"></div>
-      </div>
-
-      <!-- 참고 이미지 (영상 모드와 동일한 ID 재사용 — continueRefField는 영상 모드에 있어서 같이 보임) -->
-      <!-- 추가 프롬프트 (영상 모드와 동일한 ID 재사용 — extraPrompt는 영상 모드에 있음) -->
-      <!-- 따라서 이미지 모드에선 이 두 영역을 영상 모드 그리드 안에서 그대로 사용 -->
-      <div class="field" style="margin-bottom:14px">
-        <label style="margin:0 0 5px 0;font-size:14px;font-weight:700;display:block">💬 추가 프롬프트 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
-        <textarea id="imgExtraPrompt" rows="2" placeholder="예: warm sunset light, holding a coffee cup" style="width:100%;background:var(--bg3);border:1px solid var(--line);padding:8px;color:var(--ink);font-size:12px;font-family:inherit;resize:vertical"></textarea>
-      </div>
-
-      <!-- 참고 이미지 -->
-      <div class="field" id="imgContinueRefField" style="margin-bottom:14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
-          <label style="margin:0;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700">
-            📎 참고 이미지 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span>
-          </label>
-          <button class="btn btn-sm btn-ghost" id="imgContinueRefClearBtn" onclick="clearContinueRef()" style="display:none">제거</button>
-        </div>
-        <div style="font-size:10px;color:var(--ink3);margin-bottom:6px;line-height:1.5">참고할 이미지를 첨부하면 배경·마감·조명·스타일을 참고해서 생성합니다.</div>
-        <div style="display:flex;gap:6px;align-items:flex-start">
-          <div id="imgContinueRefPreview" style="width:120px;aspect-ratio:16/9;background:var(--bg3);border:1px dashed var(--line2);border-radius: 0;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:24px;flex-shrink:0;overflow:hidden"></div>
-          <div style="flex:1;display:flex;flex-direction:column;gap:6px;align-items:flex-start">
-            <button class="btn btn-sm" onclick="document.getElementById('imgContinueRefUpload').click()" style="width:auto;padding:6px 14px;white-space:nowrap">파일 업로드</button>
-            <div style="font-size:9px;color:var(--ink3);line-height:1.4">이전에 다운로드한 <strong>4컷 그리드</strong> 또는 <strong>단일 컷</strong> 이미지를 올려주세요.</div>
-            <input type="file" id="imgContinueRefUpload" accept="image/*" style="display:none" onchange="uploadContinueRef(event)">
+          <!-- 참고 이미지 -->
+          <div class="field" id="imgContinueRefField" style="margin-bottom:14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+              <label style="margin:0;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700">
+                참고 이미지 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span>
+              </label>
+              <button class="btn btn-sm btn-ghost" id="imgContinueRefClearBtn" onclick="clearContinueRef()" style="display:none">제거</button>
+            </div>
+            <div style="font-size:10px;color:var(--ink3);margin-bottom:6px;line-height:1.5">참고할 이미지를 첨부하면 배경·마감·조명·스타일을 참고해서 생성합니다.</div>
+            <div style="display:flex;gap:6px;align-items:flex-start">
+              <div id="imgContinueRefPreview" style="width:120px;aspect-ratio:16/9;background:var(--bg3);border:1px dashed var(--line2);border-radius: 0;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:24px;flex-shrink:0;overflow:hidden"></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:6px;align-items:flex-start">
+                <button class="btn btn-sm" onclick="document.getElementById('imgContinueRefUpload').click()" style="width:auto;padding:6px 14px;white-space:nowrap">파일 업로드</button>
+                <div style="font-size:9px;color:var(--ink3);line-height:1.4">이전에 다운로드한 <strong>4컷 그리드</strong> 또는 <strong>단일 컷</strong> 이미지를 올려주세요.</div>
+                <input type="file" id="imgContinueRefUpload" accept="image/*" style="display:none" onchange="uploadContinueRef(event)">
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+
+        <!-- ── 우측 ── -->
+        <div>
+          <!-- 컷별 추가 설명 -->
+          <div class="field" style="margin-bottom:14px">
+            <label style="margin:0 0 8px 0;font-size:13px;font-weight:700;display:block">컷별 추가 설명 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
+            <div id="imgCutDescriptions" style="display:flex;flex-direction:column;gap:6px"></div>
+          </div>
+
+          <!-- 추가 프롬프트 -->
+          <div class="field" style="margin-bottom:14px">
+            <label style="margin:0 0 5px 0;font-size:13px;font-weight:700;display:block">추가 프롬프트 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
+            <textarea id="imgExtraPrompt" rows="3" placeholder="예: warm sunset light, holding a coffee cup" style="width:100%;background:var(--bg3);border:1px solid var(--line);padding:8px;color:var(--ink);font-size:12px;font-family:inherit;resize:vertical"></textarea>
+          </div>
+        </div>
+
+      </div><!-- /grid -->
     </div>
     <!-- ════════ /이미지 모드 전용 폼 ════════ -->
 
@@ -3045,12 +3054,12 @@ const SCENES = {
 
 // 이미지 모드 카테고리 그룹 정의 (탭 UI용)
 const IMAGE_SCENE_GROUPS = {
-  editorial: { ko: '화보',         icon: '📸', color: '#f472b6' },
-  id:        { ko: '증명사진',     icon: '🪪', color: '#60a5fa' },
-  job:       { ko: '직업 체험',     icon: '💼', color: '#fbbf24' },
-  lifestyle: { ko: '라이프스타일', icon: '🌿', color: '#4ade80' },
-  concept:   { ko: '컨셉 사진',     icon: '🎭', color: '#a78bfa' },
-  art:       { ko: '아트 사진',     icon: '🎨', color: '#dc2626' },
+  editorial: { ko: '화보' },
+  id:        { ko: '증명사진' },
+  job:       { ko: '직업 체험' },
+  lifestyle: { ko: '라이프스타일' },
+  concept:   { ko: '컨셉 사진' },
+  art:       { ko: '아트 사진' },
 };
 
 // 이미지 모드 16씬 — 영상 모드 SCENES와 별개 (앵글 없음, 카테고리 그룹 포함)
@@ -4426,11 +4435,16 @@ async function _finishImageMode() {
 }
 
 function renderGlobalSteps(currentStep) {
-  // 인디케이터 — 모드에 따라 5단계 (이미지) 또는 6단계 (영상)
+  // 인디케이터 — 모드에 따라 4단계 (이미지) 또는 6단계 (영상)
   const containers = ['globalStepsR', 'globalSteps0', 'globalSteps1', 'globalSteps2', 'globalSteps3'];
   containers.forEach(id => {
     const wrap = document.getElementById(id);
     if (!wrap) return;
+    // 이미지 모드: 4단계 좌우 한 줄로 (줄바꿈 방지)
+    if (_IS_IMG_MODE) {
+      wrap.style.flexWrap = 'nowrap';
+      wrap.style.whiteSpace = 'nowrap';
+    }
     let inner = '';
     for (let s = 0; s < _MAX_STEPS; s++) {
       const cls = s === currentStep ? 'active' : (s < currentStep ? 'done' : '');
@@ -6473,17 +6487,26 @@ function selectEra(key) {
 // 이미지 모드 상태 (S 객체에 추가 — JS는 동적이라 OK)
 // S.imgActiveCategory : 현재 선택된 카테고리 그룹 키 (예: 'editorial')
 // S.imgMood           : 선택된 무드 키 (예: 'mood_chic')
+// S.imgMoodCustom     : 무드 자유 입력 (개인 설정)
 // S.imgLocation       : 선택된 장소 키 (영상 모드 S.location과 별도)
+// S.imgLocationCustom : 장소 자유 입력 (개인 설정)
 // S.imgVariations     : 선택된 변주 키 배열 (다중 선택, 예: ['pose','lighting'])
+// S.imgVariationCustom: 변주 자유 입력 (개인 설정)
 // S.imgCutDescriptions: 컷별 추가 설명 배열 (4개)
+// 이미지 모드는 시대 배경을 항상 'modern'(현대극) 고정으로 사용
 
 function ensureImageModeState() {
   if (!_IS_IMG_MODE) return;
   if (typeof S.imgActiveCategory === 'undefined') S.imgActiveCategory = 'editorial';
   if (typeof S.imgMood === 'undefined')           S.imgMood = '';
+  if (typeof S.imgMoodCustom === 'undefined')     S.imgMoodCustom = '';
   if (typeof S.imgLocation === 'undefined')       S.imgLocation = '';
+  if (typeof S.imgLocationCustom === 'undefined') S.imgLocationCustom = '';
   if (!Array.isArray(S.imgVariations))            S.imgVariations = [];
+  if (typeof S.imgVariationCustom === 'undefined')S.imgVariationCustom = '';
   if (!Array.isArray(S.imgCutDescriptions))       S.imgCutDescriptions = ['','','',''];
+  // 시대 배경은 이미지 모드에서 현대극 고정
+  S.era = 'modern';
 }
 
 // 카테고리 탭 + 포토카드 그리드 렌더 (sceneStepA의 sceneGrid 영역에 그림)
@@ -6492,50 +6515,42 @@ function renderImageScenes() {
   const grid = document.getElementById('sceneGrid');
   if (!grid) return;
 
-  // 이미지 모드: sceneStepA의 시대 배경 필드 숨김 (씬 상세에서 처리)
+  // 이미지 모드: sceneStepA의 시대 배경 필드 숨김 (현대극 고정)
   const eraField = document.getElementById('sceneStepAEraField');
   if (eraField) eraField.style.display = 'none';
 
-  // 카테고리 탭 (그리드 위에 배치)
+  // 카테고리 탭 (그리드 위에 배치) — 이모지/색깔 없이 단순 텍스트 칩
   const tabsHtml = `
-    <div id="imgCatTabs" style="grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line)">
+    <div id="imgCatTabs" style="grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line)">
       ${Object.entries(IMAGE_SCENE_GROUPS).map(([key, g]) => {
         const active = S.imgActiveCategory === key;
-        const bg = active ? `${g.color}22` : 'transparent';
-        const border = active ? g.color : 'var(--line)';
-        const color = active ? g.color : 'var(--ink2)';
+        const bg = active ? 'rgba(99,102,241,.12)' : 'transparent';
+        const border = active ? 'var(--pink)' : 'var(--line)';
+        const color = active ? 'var(--pink)' : 'var(--ink2)';
         const fontWeight = active ? '800' : '600';
-        return `<div onclick="selectImgCategory('${key}')" style="cursor:pointer;padding:8px 14px;background:${bg};border:1.5px solid ${border};color:${color};font-weight:${fontWeight};font-size:12px;display:flex;align-items:center;gap:6px;letter-spacing:.02em;transition:all .15s">
-          <span style="font-size:14px">${g.icon}</span>
-          <span>${g.ko}</span>
-        </div>`;
+        return `<div onclick="selectImgCategory('${key}')" style="cursor:pointer;padding:8px 16px;background:${bg};border:1.5px solid ${border};color:${color};font-weight:${fontWeight};font-size:12px;letter-spacing:.02em;transition:all .15s">${g.ko}</div>`;
       }).join('')}
     </div>
   `;
 
-  // 포토카드 그리드 (현재 선택된 카테고리만 표시)
+  // 포토카드 그리드 (현재 선택된 카테고리만 표시) — 영상 모드 scene-card 디자인 그대로 사용
   const cards = Object.entries(SCENES_IMAGE)
     .filter(([k, sc]) => sc.group === S.imgActiveCategory)
     .map(([key, sc]) => {
-      const group = IMAGE_SCENE_GROUPS[sc.group];
       const isActive = S.scene === key;
-      const color = group?.color || '#818cf8';
-      const icon = group?.icon || '🎨';
-      // 그라디언트 + 아이콘 썸네일 (MVP — 후에 실제 이미지로 교체 예정)
-      const gradient = `linear-gradient(135deg, ${color}, ${color}88, ${color}44)`;
-      return `<div class="scene-card${isActive ? ' active' : ''}" onclick="selImgScene('${key}',this)" style="position:relative;overflow:hidden;display:flex;flex-direction:column;cursor:pointer">
-        <div style="aspect-ratio:1/1;background:${gradient};display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
-          <span style="font-size:54px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.4))">${icon}</span>
-          <div style="position:absolute;top:8px;left:8px;font-size:9px;font-weight:800;letter-spacing:1.5px;color:rgba(255,255,255,.95);text-shadow:0 1px 3px rgba(0,0,0,.6);background:rgba(0,0,0,.25);padding:3px 7px;backdrop-filter:blur(4px)">${sc.catLabel}</div>
-        </div>
-        <div style="padding:10px 12px;background:var(--bg2)">
-          <div class="sc-name" style="font-size:14px;font-weight:800;color:var(--cream);letter-spacing:-.01em">${sc.name}</div>
+      // 짧은 스타일 한 줄 (style 키워드 앞 3개)
+      const shortStyle = (sc.style || '').split(',').slice(0, 3).map(s => s.trim()).join(', ');
+      return `<div class="scene-card${isActive ? ' active' : ''}" onclick="selImgScene('${key}',this)">
+        <div class="sc-cat">${sc.catLabel}</div>
+        <div class="sc-title-block">
+          <div class="sc-name">${sc.name}</div>
+          ${shortStyle ? `<div class="sc-vidstyle">${shortStyle}</div>` : ''}
         </div>
       </div>`;
     }).join('');
 
   grid.innerHTML = tabsHtml + cards;
-  // 그리드 컬럼 수 조정 (포토카드는 좀 더 큰 사이즈 — 3열 유지)
+  // 그리드 컬럼 — 영상 모드와 동일한 3열
   grid.style.gridTemplateColumns = 'repeat(3,1fr)';
 }
 
@@ -6569,32 +6584,7 @@ function selImgScene(key, el) {
   }, 300);
 }
 
-// 시대 칩 렌더 (이미지 모드 — sceneStepB 안의 imgEraChips 영역)
-function renderImgEraChips() {
-  ensureImageModeState();
-  const wrap = document.getElementById('imgEraChips');
-  if (!wrap) return;
-  // 영상 모드의 ERA_GROUPS 재사용 (현대극/사극/레트로/해외여행)
-  // 단, 이미지 모드에선 단순히 그룹 키로만 칩 표시 (드롭다운은 생략 — 단순화)
-  const groups = ['modern', 'historical', 'retro', 'travel'];
-  wrap.innerHTML = groups.map(gKey => {
-    const g = ERA_GROUPS[gKey];
-    if (!g) return '';
-    const isActive = (ERAS[S.era]?.group === gKey);
-    const bg = isActive ? 'rgba(94,234,212,.18)' : 'var(--bg3)';
-    const border = isActive ? 'var(--teal)' : 'var(--line)';
-    const color = isActive ? 'var(--teal)' : 'var(--ink2)';
-    return `<div onclick="selectImgEra('${gKey}')" style="cursor:pointer;padding:6px 12px;background:${bg};border:1.5px solid ${border};color:${color};font-weight:${isActive?'800':'600'};font-size:12px;letter-spacing:.02em">${g.ko}</div>`;
-  }).join('');
-}
-
-function selectImgEra(groupKey) {
-  // 그룹의 기본 키로 설정
-  const g = ERA_GROUPS[groupKey];
-  if (!g) return;
-  S.era = g.defaultKey;
-  renderImgEraChips();
-}
+// 시대 칩 함수는 삭제됨 — 이미지 모드는 현대극(modern) 고정
 
 // 무드 칩 렌더
 function renderImgMoodChips() {
@@ -6697,19 +6687,25 @@ function renderImageModeForm() {
   // 비율 칩 (Phase 1에서 추가됨, 씬 상세 상단 imgRatioField 안)
   if (typeof renderImgRatioChips === 'function') renderImgRatioChips();
 
-  renderImgEraChips();
   renderImgMoodChips();
   renderImgLocChips();
   renderImgVariationChips();
   renderImgCutDescriptions();
 
-  // 추가 프롬프트 textarea 동기화
-  const extraEl = document.getElementById('imgExtraPrompt');
-  if (extraEl) extraEl.value = S.imgExtraPromptValue || '';
-  if (extraEl && !extraEl._bound) {
-    extraEl.addEventListener('input', () => { S.imgExtraPromptValue = extraEl.value; });
-    extraEl._bound = true;
-  }
+  // 자유 입력칸 동기화 + 이벤트 바인딩 (1회만)
+  const bindCustom = (id, key) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = S[key] || '';
+    if (!el._bound) {
+      el.addEventListener('input', () => { S[key] = el.value; });
+      el._bound = true;
+    }
+  };
+  bindCustom('imgMoodCustom',      'imgMoodCustom');
+  bindCustom('imgLocCustom',       'imgLocationCustom');
+  bindCustom('imgVariationCustom', 'imgVariationCustom');
+  bindCustom('imgExtraPrompt',     'imgExtraPromptValue');
 }
 
 // 영상 모드 폼 보이기 / 이미지 모드 폼 숨기기 (영상 모드일 때 호출)
@@ -7801,15 +7797,28 @@ function buildImagePromptImageMode() {
     return trimmed ? `Panel ${i+1}: ${trimmed}` : '';
   }).filter(Boolean).join(' | ');
 
-  // 변주 키워드 조합 (다중 선택)
-  const variations = (S.imgVariations || [])
-    .map(k => IMAGE_VARIATIONS[k]?.promptHint)
-    .filter(Boolean)
-    .join('; ');
+  // 무드: 칩 키워드 + 자유 입력 (둘 다 있으면 같이)
+  const moodParts = [];
+  if (IMAGE_MOODS[S.imgMood]?.keywords) moodParts.push(IMAGE_MOODS[S.imgMood].keywords);
+  if ((S.imgMoodCustom || '').trim())   moodParts.push(S.imgMoodCustom.trim());
+  const moodKeywords = moodParts.join(', ');
 
-  const moodKeywords = IMAGE_MOODS[S.imgMood]?.keywords || '';
-  const locEn = IMAGE_LOCATIONS[S.imgLocation]?.en || '';
-  const eraKeyword = ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern;
+  // 장소: 칩 영문 + 자유 입력
+  const locParts = [];
+  if (IMAGE_LOCATIONS[S.imgLocation]?.en)   locParts.push(IMAGE_LOCATIONS[S.imgLocation].en);
+  if ((S.imgLocationCustom || '').trim())   locParts.push(S.imgLocationCustom.trim());
+  const locStr = locParts.join(', ');
+
+  // 변주: 칩 키워드들 + 자유 입력
+  const varParts = (S.imgVariations || [])
+    .map(k => IMAGE_VARIATIONS[k]?.promptHint)
+    .filter(Boolean);
+  if ((S.imgVariationCustom || '').trim()) varParts.push(S.imgVariationCustom.trim());
+  const variations = varParts.join('; ');
+
+  // 시대 — 이미지 모드는 현대극(modern) 고정
+  const eraKeyword = ERA_KEYWORDS.modern;
+
   const extraEl = document.getElementById('imgExtraPrompt');
   const extra = (extraEl?.value || S.imgExtraPromptValue || '').trim();
 
@@ -7820,7 +7829,7 @@ ${petDesc ? 'PETS: ' + petDesc + '.' : ''}
 ${productDesc ? 'PRODUCTS: ' + productDesc + '.' : ''}
 SCENE STYLE: ${sc.style}.
 ${moodKeywords ? 'MOOD: ' + moodKeywords + '.' : ''}
-${locEn ? 'LOCATION: ' + locEn + '.' : ''}
+${locStr ? 'LOCATION: ' + locStr + '.' : ''}
 TIME PERIOD: ${eraKeyword}.
 ${variations ? '4-PANEL VARIATIONS: ' + variations + '.' : '4-PANEL VARIATIONS: natural variety of best shots, slight subtle variations.'}
 ${cutDescs ? 'CUT DETAILS: ' + cutDescs + '.' : ''}
@@ -7925,14 +7934,35 @@ async function buildImagePromptImageModeForApi() {
   }));
   const cutDescs = cutDescsArr.filter(Boolean).join(' | ');
 
-  const variations = (S.imgVariations || [])
-    .map(k => IMAGE_VARIATIONS[k]?.promptHint)
-    .filter(Boolean)
-    .join('; ');
+  // 자유 입력 한글 번역 (있을 때만)
+  const moodCustomKo = (S.imgMoodCustom || '').trim();
+  const moodCustomEn = moodCustomKo ? await translateKoToEn(moodCustomKo) : '';
+  const locCustomKo = (S.imgLocationCustom || '').trim();
+  const locCustomEn = locCustomKo ? await translateKoToEn(locCustomKo) : '';
+  const varCustomKo = (S.imgVariationCustom || '').trim();
+  const varCustomEn = varCustomKo ? await translateKoToEn(varCustomKo) : '';
 
-  const moodKeywords = IMAGE_MOODS[S.imgMood]?.keywords || '';
-  const locEn = IMAGE_LOCATIONS[S.imgLocation]?.en || '';
-  const eraKeyword = ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern;
+  // 무드: 칩 + 자유 입력
+  const moodParts = [];
+  if (IMAGE_MOODS[S.imgMood]?.keywords) moodParts.push(IMAGE_MOODS[S.imgMood].keywords);
+  if (moodCustomEn) moodParts.push(moodCustomEn);
+  const moodKeywords = moodParts.join(', ');
+
+  // 장소: 칩 영문 + 자유 입력
+  const locParts = [];
+  if (IMAGE_LOCATIONS[S.imgLocation]?.en) locParts.push(IMAGE_LOCATIONS[S.imgLocation].en);
+  if (locCustomEn) locParts.push(locCustomEn);
+  const locEn = locParts.join(', ');
+
+  // 변주: 칩 + 자유 입력
+  const varParts = (S.imgVariations || [])
+    .map(k => IMAGE_VARIATIONS[k]?.promptHint)
+    .filter(Boolean);
+  if (varCustomEn) varParts.push(varCustomEn);
+  const variations = varParts.join('; ');
+
+  // 시대 — 이미지 모드는 현대극(modern) 고정
+  const eraKeyword = ERA_KEYWORDS.modern;
 
   const extraEl = document.getElementById('imgExtraPrompt');
   const extraRaw = (extraEl?.value || S.imgExtraPromptValue || '').trim();
