@@ -8442,7 +8442,7 @@ function switchCutsMode(mode) {
     : '4개 중 하나만 골라 단독 생성합니다 (나머지는 그대로 유지)';
   const btn = document.getElementById('genImgBtn');
   if (btn && !btn.disabled) {
-    btn.innerHTML = mode === '4cut' ? '4컷 생성' : `컷 ${_oneCutIdx + 1} 생성`;
+    btn.innerHTML = '생성';
   }
 }
 
@@ -8461,14 +8461,13 @@ function selectOneCutIdx(i, el) {
     info.innerHTML = `<strong style="color:var(--gold)">컷 ${i+1}</strong> · ${angle}${desc ? ' · ' + desc : ''}<br><span style="color:var(--ink3)">선택한 컷만 생성하고 나머지는 유지됩니다.</span>`;
   }
   const btn = document.getElementById('genImgBtn');
-  if (btn && !btn.disabled) btn.innerHTML = `컷 ${i+1} 생성`;
+  if (btn && !btn.disabled) btn.innerHTML = '생성';
 }
 
 // 모드에 따라 generateImage 또는 generateOneCut 호출
 async function generateByMode() {
-  if (_cutsMode === '1cut') {
-    return generateOneCut();
-  }
+  // 스케치 모드는 4컷 전용 이라 기에 그냥 건너뛰 내려가게 생략 (1컷 일때도 4컷과 동일한 흐름으로 진행)
+
   // 스케치 모드: GPT Low 자동 (확인 팝업 포함)
   if (S.imgMode === 'sketch') {
     const ar = S.aspectRatio || '16:9';
@@ -8520,7 +8519,8 @@ async function generateByMode() {
      </div>`
   );
   if (!ok) return;
-  return generateImage();
+  // 1컷 모드면 generateOneCut, 아니면 generateImage
+  return _cutsMode === '1cut' ? generateOneCut() : generateImage();
 }
 
 // ============================================================
@@ -8621,7 +8621,7 @@ function onImgModeChange() {
   // 모드 바뀌면 생성 버튼 라벨도 갱신
   const btn = document.getElementById('genImgBtn');
   if (btn && !btn.disabled) {
-    btn.textContent = (S.imgMode === 'sketch') ? 'Low로 스케치 시작' : '4컷 생성';
+    btn.textContent = (S.imgMode === 'sketch') ? 'Low로 스케치 시작' : '생성';
   }
   // 업그레이드 버튼 영역 초기화 (모드 바뀌면 이전 결과 무효)
   const upWrap = document.getElementById('sketchUpgradeWrap');
@@ -8848,21 +8848,13 @@ async function generateOneCut() {
     return;
   }
 
-  // 모델 선택
-  const picked = await pickModel('img');
-  if (!picked) return;
-
-  const confirmOk = await showConfirm(
-    `이 모델로 컷 ${i+1} 생성`,
-    `<div style="padding:8px 0">
-       <div style="font-size:14px;font-weight:700;color:var(--cream);margin-bottom:6px">${picked.label}</div>
-       <div style="font-size:12px;color:var(--ink2);margin-bottom:14px">${picked.sub}</div>
-       <div style="font-size:13px;color:var(--ink2)">컷 ${i+1}만 단독으로 생성합니다. 나머지 컷은 유지됩니다.</div>
-     </div>`
-  );
-  if (!confirmOk) return;
-
-  const model = picked.value;
+  // 모델은 generateByMode에서 이미 선택됨 → imgAiSel에서 직접 읽음
+  const _picked = (typeof getSelectedImgAi === 'function') ? getSelectedImgAi() : null;
+  if (!_picked) {
+    toast('AI를 선택해주세요');
+    return;
+  }
+  const model = _picked.value;
   const btn = document.getElementById('genImgBtn');
   btn.disabled = true;
   btn.innerHTML = '<div class="spin"></div> 생성 중...';
@@ -8892,13 +8884,18 @@ async function generateOneCut() {
   }
   const useRef = refImgs.length > 0;
 
-  // 단일 컷 프롬프트 빌드
+  // 단일 컷 프롬프트 빌드 (이미지 모드와 영상 모드 분기)
   let prompt;
   try {
-    prompt = await buildOneCutPromptForApi(i);
+    if (_IS_IMG_MODE) {
+      // 이미지 모드의 씬은 SCENES_IMAGE에 있으므로 이미지 모드 빌더 사용
+      prompt = await buildImagePromptImageModeForApi();
+    } else {
+      prompt = await buildOneCutPromptForApi(i);
+    }
   } catch (e) {
     log('err', '프롬프트 빌드 실패: ' + e.message);
-    prompt = buildOneCutPrompt(i);
+    prompt = _IS_IMG_MODE ? buildImagePromptImageMode() : buildOneCutPrompt(i);
   }
 
   log('info', `1컷 생성 시작 — 컷 ${i+1}, ${model}${useRef ? ' (' + refImgs.length + '개 레퍼런스)' : ''}`);
@@ -8946,7 +8943,7 @@ async function generateOneCut() {
     renderQuad();  // placeholder 복원
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `컷 ${i+1} 생성`;
+    btn.innerHTML = '생성';
   }
 }
 
@@ -9127,7 +9124,7 @@ async function generateImage() {
     document.getElementById('quad').innerHTML = `<div style="grid-column:1/-1;grid-row:1/-1;display:flex;align-items:center;justify-content:center;color:var(--red);font-size:12px">생성 실패. 다시 시도해주세요.</div>`;
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '🎨 4컷 이미지 생성';
+    btn.innerHTML = '생성';
   }
 }
 
