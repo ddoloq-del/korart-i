@@ -4788,10 +4788,10 @@ function renderStep1Avatars() {
   if (moreBtn) {
     if (_totalCards > 10) {
       moreBtn.style.display = '';
-      // 기본 접힘 상태 (2줄까지만 보응, ~270px)
+      // 기본 접힘 상태 (1줄만 보응, 두번째 줄부터 가림)
       if (!wrap._expanded) {
-        wrap.style.maxHeight = '270px';
-        moreBtn.innerHTML = '▼ 더보기 (' + (_totalCards - 10) + '개 더)';
+        wrap.style.maxHeight = '145px';
+        moreBtn.innerHTML = '▼ 더보기 (' + (_totalCards - 5) + '개 표시 안됨)';
       } else {
         wrap.style.maxHeight = 'none';
         moreBtn.innerHTML = '▲ 접기';
