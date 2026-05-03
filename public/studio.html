@@ -10038,6 +10038,11 @@ async function generateCutVideo(i) {
       finalPrompt = finalPrompt.slice(0, 507) + '...';
     }
 
+    // 나레이션이면 인물이 말하지 않도록 네거티브 키워드 주가
+    const isNarrator = (speaker === 'narrator-woman' || speaker === 'narrator-man');
+    const negPrompt = isNarrator
+      ? KLING_NEGATIVE_PROMPT + ', talking, speaking, lip sync, mouth movement, mouth opening, lips moving, person speaking, character talking'
+      : KLING_NEGATIVE_PROMPT;
     let body;
     if (model.includes('v3') || model.includes('o3')) {
       // Kling v3/o3: multi_prompt 사용 (prompt 단수 X)
@@ -10045,12 +10050,12 @@ async function generateCutVideo(i) {
         multi_prompt: [{
           prompt: finalPrompt,
           duration: String(dur),
-          negative_prompt: KLING_NEGATIVE_PROMPT,
+          negative_prompt: negPrompt,
         }],
         start_image_url: imgUrl,
         aspect_ratio: getVideoAspectRatio(),
         generate_audio: audio,
-        negative_prompt: KLING_NEGATIVE_PROMPT,
+        negative_prompt: negPrompt,
       };
     } else {
       // 기타: prompt 단수 + image_url + duration
@@ -10062,7 +10067,7 @@ async function generateCutVideo(i) {
         image_url: imgUrl,
         duration: durStr,
         aspect_ratio: getVideoAspectRatio(),
-        negative_prompt: KLING_NEGATIVE_PROMPT,
+        negative_prompt: negPrompt,
       };
       // 모델별 resolution 추가 — S.vidResolutions[i]에서 가져옴 (해상도 select와 동기화)
       const r = (typeof getSelectedVidResolution === 'function') ? getSelectedVidResolution(i) : null;
