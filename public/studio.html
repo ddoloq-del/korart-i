@@ -1915,23 +1915,6 @@ select option:hover {
             </div>
           </div>
 
-          <!-- 인와 인증사진(id) 전용 필드 -->
-          <div id="imgIdFields" style="display:none">
-            <div id="imgIdRatioInfo" style="font-size:11px;color:var(--gold);background:rgba(255,184,77,0.08);border:1px solid rgba(255,184,77,0.3);padding:8px 12px;margin-bottom:14px;line-height:1.5"></div>
-            <div class="field" style="margin-bottom:14px">
-              <label style="margin:0 0 8px 0;font-size:13px;font-weight:700;display:block">배경색 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
-              <div id="imgIdBgChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-            </div>
-            <div class="field" style="margin-bottom:14px">
-              <label style="margin:0 0 8px 0;font-size:13px;font-weight:700;display:block">의상 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
-              <div id="imgIdOutfitChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-            </div>
-            <div class="field" style="margin-bottom:14px">
-              <label style="margin:0 0 8px 0;font-size:13px;font-weight:700;display:block">헤어 <span style="font-size:10px;color:var(--ink3);font-weight:400">(선택)</span></label>
-              <div id="imgIdHairChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-            </div>
-          </div>
-
           <!-- 장소 -->
           <div class="field" style="margin-bottom:14px">
             <label style="margin:0 0 8px 0;font-size:13px;font-weight:700;display:block">장소 <span style="font-size:10px;color:var(--ink3);font-weight:400">(씬에 따라 자동 추천)</span></label>
@@ -3129,12 +3112,9 @@ const SCENES_IMAGE = {
   cinematic:    { name:'시네마틱',    group:'editorial', catLabel:'CINEMATIC',     style:'cinematic film still, anamorphic lens flare, moody atmospheric lighting, movie poster aesthetic, dramatic color grading' },
   vintage_film: { name:'빈티지 필름', group:'editorial', catLabel:'VINTAGE FILM',  style:'analog film photography, Kodak Portra warmth, faded retro tones, soft film grain, 70s 80s aesthetic, nostalgic mood' },
 
-  // ── 증명사진 (5) ──
-  id_passport:  { name:'여권사진', group:'id', catLabel:'PASSPORT 35×45mm', idRatio:'7:9', idBg:'white', style:'official passport photo, pure white background, neutral expression with closed mouth, frontal head and shoulders shot, sharp focus, even soft lighting, no shadows on face, no glasses glare, ears visible, head centered and straight, ICAO compliant, sharp passport quality' },
-  id_official:  { name:'주민증/면허증', group:'id', catLabel:'OFFICIAL ID 35×45mm', idRatio:'7:9', idBg:'white', style:'Korean government ID photo (jumin/license style), pure white background, neutral relaxed expression, frontal composition, soft even studio lighting, head and shoulders, sharp official document quality' },
-  id_resume:    { name:'이력서', group:'id', catLabel:'RESUME 30×40mm', idRatio:'3:4', idBg:'light_gray', style:'Korean resume photo (banmyeongham 3:4), clean light gray background, slight gentle confident smile, neat business attire, polished professional headshot, sharp focus, soft even lighting, head and shoulders shot' },
-  id_corporate: { name:'취업/링크드인', group:'id', catLabel:'PROFESSIONAL', idRatio:'3:4', idBg:'light_blue', style:'professional corporate headshot, soft light blue gradient background, confident warm approachable smile, business suit, polished modern corporate style, LinkedIn profile aesthetic, soft directional lighting' },
-  id_business:  { name:'명함판', group:'id', catLabel:'BUSINESS CARD 50×70mm', idRatio:'5:7', idBg:'gradient', style:'business card portrait photo, subtle gradient background, professional confident pose, business attire, polished commercial photography style, soft studio lighting, half body or head and shoulders' },
+  // ── 증명사진 (2) ──
+  id_passport:  { name:'여권/공무원', group:'id',        catLabel:'PASSPORT',      style:'clean white background, formal ID photo, neutral expression, sharp focus, even soft lighting, official document photo, frontal composition' },
+  id_resume:    { name:'취업/링크드인',group:'id',        catLabel:'PROFESSIONAL',  style:'professional headshot, soft gradient background, confident warm smile, business attire, polished corporate style, LinkedIn profile aesthetic' },
 
   // ── 직업 체험 (4) ──
   job_doctor:   { name:'의사',       group:'job',       catLabel:'DOCTOR',        style:'white doctor coat, hospital setting, stethoscope around neck, professional medical photography, confident clinical atmosphere, clean bright lighting' },
@@ -3221,10 +3201,7 @@ const SCENE_DEFAULTS = {
   cinematic:     { location: 'urban_night',    mood: 'mood_dramatic', variation: 'composition' },
   vintage_film:  { location: 'cafe',           mood: 'mood_calm',     variation: 'expression' },
   id_passport:   { location: 'plain_white',    mood: 'mood_bright',   variation: 'same' },
-  id_official:   { location: 'plain_white',    mood: 'mood_bright',   variation: 'same' },
-  id_resume:     { location: 'soft_gradient',  mood: 'mood_chic',     variation: 'same' },
-  id_corporate:  { location: 'soft_gradient',  mood: 'mood_chic',     variation: 'same' },
-  id_business:   { location: 'soft_gradient',  mood: 'mood_chic',     variation: 'same' },
+  id_resume:     { location: 'soft_gradient',  mood: 'mood_chic',     variation: 'expression' },
   job_doctor:    { location: 'hospital',       mood: 'mood_chic',     variation: 'pose' },
   job_lawyer:    { location: 'office',         mood: 'mood_chic',     variation: 'pose' },
   job_chef:      { location: 'kitchen',        mood: 'mood_chic',     variation: 'pose' },
@@ -6609,10 +6586,6 @@ function ensureImageModeState() {
   if (typeof S.imgVariationCustom === 'undefined')S.imgVariationCustom = '';
   if (!Array.isArray(S.imgCutDescriptions))       S.imgCutDescriptions = ['','','',''];
   if (!Array.isArray(S.imgCutAngles))             S.imgCutAngles       = ['','','',''];
-  // 인증사진(id) 전용 state
-  if (typeof S.imgIdBg === 'undefined')            S.imgIdBg     = '';
-  if (typeof S.imgIdOutfit === 'undefined')        S.imgIdOutfit = '';
-  if (typeof S.imgIdHair === 'undefined')          S.imgIdHair   = '';
   // 시대 배경은 이미지 모드에서 현대극 고정
   S.era = 'modern';
 }
@@ -6765,76 +6738,6 @@ function toggleImgVariation(key) {
 }
 
 // 화보(editorial) 카테고리에서만 계절/시간대/날씨 필드 표시
-// id 전용 데이터 + 칩 렌더링 + 토글
-const ID_BG_OPTIONS = {
-  white:       { ko: '흰색',     en: 'pure white background (#FFFFFF), studio lit, no shadows' },
-  light_gray:  { ko: '연 회색', en: 'light gray background (#E5E5E5), soft even lighting' },
-  light_blue:  { ko: '연파랑', en: 'light blue background (#E8F0FF), gentle gradient' },
-  beige:       { ko: '베이지', en: 'warm beige background (#F2EAD8), soft and neutral' },
-  gradient:    { ko: '그라데이션', en: 'subtle dark to light gradient backdrop, professional studio' },
-};
-const ID_OUTFIT_OPTIONS = {
-  suit_navy:   { ko: '네이비 정장', en: 'navy blue business suit with white shirt, tie' },
-  suit_black:  { ko: '검은 정장', en: 'black business suit with white shirt, formal' },
-  suit_gray:   { ko: '회색 정장', en: 'light gray business suit with white shirt' },
-  shirt_white: { ko: '흰 셔츠', en: 'crisp white dress shirt, simple and clean' },
-  shirt_blue:  { ko: '블라우스', en: 'modest formal blouse, neat collar' },
-  knit:        { ko: '단정한 니트', en: 'simple solid color knit top, neat and tidy' },
-};
-const ID_HAIR_OPTIONS = {
-  neat:        { ko: '단정하게 정돈', en: 'neatly groomed hair, well-combed and tidy' },
-  ponytail:    { ko: '포니테일', en: 'neat ponytail, hair pulled back cleanly' },
-  updo:        { ko: '올림머리', en: 'professional updo, hair pulled up neatly' },
-  down_neat:   { ko: '단정 내림머리', en: 'hair down but neatly styled, smooth and tidy' },
-  asis:        { ko: '아바타 그대로', en: '' },
-};
-
-function _renderIdChips(wrapId, options, currentVal, onclickFn) {
-  const wrap = document.getElementById(wrapId);
-  if (!wrap) return;
-  wrap.innerHTML = Object.entries(options).map(([key, opt]) => {
-    const isActive = currentVal === key;
-    return `<div class="chip${isActive ? ' active' : ''}" onclick="${onclickFn}('${key}')" style="padding:6px 12px;border:1px solid ${isActive ? 'var(--pink)' : 'var(--line2)'};background:${isActive ? 'rgba(255,107,157,0.1)' : 'var(--bg3)'};color:${isActive ? 'var(--cream)' : 'var(--ink2)'};cursor:pointer;font-size:11px;border-radius:0;transition:.15s">${opt.ko}</div>`;
-  }).join('');
-}
-function renderImgIdBgChips()     { _renderIdChips('imgIdBgChips', ID_BG_OPTIONS, S.imgIdBg, 'selImgIdBg'); }
-function renderImgIdOutfitChips() { _renderIdChips('imgIdOutfitChips', ID_OUTFIT_OPTIONS, S.imgIdOutfit, 'selImgIdOutfit'); }
-function renderImgIdHairChips()   { _renderIdChips('imgIdHairChips', ID_HAIR_OPTIONS, S.imgIdHair, 'selImgIdHair'); }
-
-function selImgIdBg(key)     { S.imgIdBg = (S.imgIdBg === key) ? '' : key; renderImgIdBgChips(); }
-function selImgIdOutfit(key) { S.imgIdOutfit = (S.imgIdOutfit === key) ? '' : key; renderImgIdOutfitChips(); }
-function selImgIdHair(key)   { S.imgIdHair = (S.imgIdHair === key) ? '' : key; renderImgIdHairChips(); }
-
-function updateImgIdFields() {
-  const sc = (typeof SCENES_IMAGE !== 'undefined') ? SCENES_IMAGE[S.scene] : null;
-  const isId = sc && sc.group === 'id';
-  const idWrap = document.getElementById('imgIdFields');
-  if (idWrap) idWrap.style.display = isId ? '' : 'none';
-  const moodEl = document.querySelector('#imageModeForm #imgMoodChips');
-  if (moodEl) { const f = moodEl.closest('.field'); if (f) f.style.display = isId ? 'none' : ''; }
-  const locEl = document.querySelector('#imageModeForm #imgLocChips');
-  if (locEl) { const f = locEl.closest('.field'); if (f) f.style.display = isId ? 'none' : ''; }
-  const varEl = document.querySelector('#imageModeForm #imgVariationChips');
-  if (varEl) { const f = varEl.closest('.field'); if (f) f.style.display = isId ? 'none' : ''; }
-  const refEl = document.getElementById('imgContinueRefField');
-  if (refEl) refEl.style.display = isId ? 'none' : '';
-  const ratioEl = document.getElementById('imgRatioField');
-  if (ratioEl) ratioEl.style.display = isId ? 'none' : '';
-  if (isId) {
-    const info = document.getElementById('imgIdRatioInfo');
-    if (info && sc) {
-      const r = sc.idRatio || '7:9';
-      const sizeMap = {'7:9': '35×45mm (여권/주민증 규격)', '3:4': '30×40mm (증명사진 규격)', '5:7': '50×70mm (명함판 규격)'};
-      info.innerHTML = `선택한 씬에 맞게 <strong>세로 비율 ${r}</strong> 자동 적용 · ${sizeMap[r] || ''}`;
-    }
-    if (sc && sc.idBg && !S.imgIdBg) S.imgIdBg = sc.idBg;
-    renderImgIdBgChips();
-    renderImgIdOutfitChips();
-    renderImgIdHairChips();
-    if (sc && sc.idRatio) S.aspectRatio = sc.idRatio;
-  }
-}
-
 function updateImgEditorialFields() {
   const wrap = document.getElementById('imgEditorialFields');
   if (!wrap) return;
@@ -6959,7 +6862,6 @@ function renderImageModeForm() {
   renderImgVariationChips();
   renderImgCutDescriptions();
   updateImgEditorialFields();
-  updateImgIdFields();
 
   // 자유 입력칸 동기화 + 이벤트 바인딩 (1회만)
   const bindCustom = (id, key) => {
@@ -8053,43 +7955,9 @@ function _imgBuildSubjectLock(nPerson, nPet, nProd) {
 }
 
 // 이미지 모드 프롬프트 빌더 (sync) — 영상 모드와 분리
-// 인증사진 전용 프롬프트 빌더 — 단순한 구조, 배경색/의상/헤어만 반영
-function _buildIdPrompt(sc) {
-  const { charDesc, petDesc, productDesc, nPerson, nPet, nProd } = _imgBuildAvatarDescriptions();
-  const subjectLock = _imgBuildSubjectLock(nPerson, nPet, nProd);
-  // 배경색 (사용자 선택 우선, 없으면 씬 기본값)
-  const bgKey = S.imgIdBg || sc.idBg || 'white';
-  const bgEn = (typeof ID_BG_OPTIONS !== 'undefined' && ID_BG_OPTIONS[bgKey]?.en) || 'pure white background';
-  // 의상
-  const outfitEn = (S.imgIdOutfit && typeof ID_OUTFIT_OPTIONS !== 'undefined' && ID_OUTFIT_OPTIONS[S.imgIdOutfit]?.en) || '';
-  // 헤어 (아바타 그대로가 아니거나 설정 안 했으면 아바타 헤어 따름)
-  let hairEn = '';
-  if (S.imgIdHair && S.imgIdHair !== 'asis' && typeof ID_HAIR_OPTIONS !== 'undefined') {
-    hairEn = ID_HAIR_OPTIONS[S.imgIdHair]?.en || '';
-  }
-  // 비율
-  const ratio = sc.idRatio || '7:9';
-  const extraEl = document.getElementById('imgExtraPrompt');
-  const extra = (extraEl?.value || S.imgExtraPromptValue || '').trim();
-
-  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. This is a Korean ID/identification photo style across all 4 panels.
-SUBJECTS: ${subjectLock}
-${charDesc ? 'CHARACTERS: ' + charDesc + '.' : ''}
-ID PHOTO STYLE: ${sc.style}.
-BACKGROUND: ${bgEn}.
-${outfitEn ? 'OUTFIT: ' + outfitEn + '. Same exact outfit on all 4 panels.' : 'OUTFIT: keep clean and formal, identical across all panels.'}
-${hairEn ? 'HAIRSTYLE: ' + hairEn + '. Same hairstyle on all 4 panels.' : ''}
-ASPECT RATIO: ${ratio} (vertical Korean ID photo proportions).
-COMPOSITION: head and shoulders, frontal view, eyes looking straight at camera, head centered, even soft studio lighting with no harsh shadows.
-4-PANEL VARIATION: 4 nearly identical ID-style shots with very subtle variations in expression (neutral, slight smile, soft natural, gentle confident) but identical pose, framing, outfit, hair and background.
-${extra ? 'ADDITIONAL: ' + extra + '.' : ''}
-All 4 panels must be sharp, professional Korean ID photo quality, no filters, no artistic effects.`.trim();
-}
-
 function buildImagePromptImageMode() {
   const sc = SCENES_IMAGE[S.scene];
-  if (!sc) return '';
-  if (sc.group === 'id') return _buildIdPrompt(sc); // 안전장치 (이미지 모드 씬이 아니면 빈 문자열)
+  if (!sc) return ''; // 안전장치 (이미지 모드 씬이 아니면 빈 문자열)
 
   const { charDesc, petDesc, productDesc, nPerson, nPet, nProd } = _imgBuildAvatarDescriptions();
   const subjectLock = _imgBuildSubjectLock(nPerson, nPet, nProd);
@@ -8149,9 +8017,6 @@ All 4 panels share consistent subjects and core concept. High-quality profession
 
 // 이미지 모드 프롬프트 빌더 (async — API용, 한글 번역 포함)
 async function buildImagePromptImageModeForApi() {
-  // 인증사진(id) 카테고리는 번역 필요 없으니 즉시 반환
-  const _scId = (typeof SCENES_IMAGE !== 'undefined') ? SCENES_IMAGE[S.scene] : null;
-  if (_scId && _scId.group === 'id') return _buildIdPrompt(_scId);
   const sc = SCENES_IMAGE[S.scene];
   if (!sc) return '';
 
