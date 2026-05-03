@@ -3165,11 +3165,11 @@ const IMAGE_MOODS = {
 // promptHint: 4컷 생성 프롬프트에 추가될 키워드
 const IMAGE_VARIATIONS = {
   default:     { ko: '기본 4종 변주', desc: '자연스러운 베스트샷',     promptHint: 'natural variety of best shots, slight subtle variations' },
-  pose:        { ko: '포즈 다양화',   desc: '서있기/앉기/기대기 등',    promptHint: 'varied poses across cuts (standing, sitting, leaning, walking)' },
-  expression:  { ko: '표정 다양화',   desc: '미소/진지/웃음 등',        promptHint: 'varied facial expressions across cuts (smile, serious, laugh, contemplative)' },
+  pose:        { ko: '포즈 다양화',   desc: '서있기/앉기/기대기/걷기',  promptHint: 'distinctly different poses across all 4 cuts: one standing pose, one fully seated pose (clearly sitting on a chair, bench, floor or steps), one leaning or relaxed pose, one walking or dynamic pose. Each pose must be visually distinct and clearly identifiable, do not repeat the same pose' },
+  expression:  { ko: '표정 다양화',   desc: '미소/시크/놀람/장난기/사색/웃음',  promptHint: 'highly varied and distinct facial expressions across all 4 cuts, pick 4 different ones from: gentle smile, intense serious gaze, surprised wide-eyed, playful mischievous wink, contemplative thoughtful, bright laughter with teeth, cool chic look, soft melancholic. Each cut must show a clearly different emotion, do not repeat similar expressions' },
   lighting:    { ko: '조명 다양화',   desc: '자연광/역광/측광 등',      promptHint: 'varied lighting across cuts (natural, backlight, side light, high contrast)' },
-  outfit:      { ko: '의상 다양화',   desc: '같은 씬 다른 옷차림',      promptHint: 'four different outfits matching the scene concept' },
-  same:        { ko: '모두 같은 컷',  desc: '4컷 거의 동일',           promptHint: 'four nearly identical shots, consistent pose and framing' },
+  outfit:      { ko: '의상 통일화',   desc: '4컷 모두 같은 옷',         promptHint: 'identical outfit across all cuts, exact same clothing and accessories on every panel, ensure outfit consistency' },
+  same:        { ko: '모두 같은 컨셉',desc: '4컷 동일한 컨셉/스타일',  promptHint: 'all 4 cuts share the same overall concept, mood, color palette and styling theme, while allowing natural micro-variations in pose and expression' },
 };
 
 // 이미지 모드 전용 장소 (영상 모드 LOCATIONS_BY_ERA에 없는 것들 추가)
