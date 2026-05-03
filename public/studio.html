@@ -1813,7 +1813,7 @@ select option:hover {
       <div class="field">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <label style="margin:0;font-size:14px;font-weight:700">씬 분위기를 선택하세요</label>
-          <div style="display:flex;align-items:center;gap:8px"><button class="btn btn-sm" onclick="openMyCustomSceneModal()" title="나만의 씬 분위기 만들기" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">+ 나만의 씬 분위기 만들기</button>
+          <div id="customSceneActions" style="display:flex;align-items:center;gap:8px"><button class="btn btn-sm" onclick="openMyCustomSceneModal()" title="나만의 씬 분위기 만들기" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">+ 나만의 씬 분위기 만들기</button>
           <button class="btn btn-sm btn-ghost" onclick="openScenePicker()" title="클라우드에 저장한 나만의 씬 분위기 불러오기">클라우드 불러오기</button></div>
         </div>
         <div class="scene-grid" id="sceneGrid" style="grid-template-columns:repeat(3,1fr);gap:14px"></div>
@@ -4578,7 +4578,7 @@ function renderStep1Avatars() {
   const inSceneIds = new Set(S.avatars.map(a => a._libId || a.id));
 
   if (!lib.length) {
-    wrap.innerHTML = '<div style="color:var(--ink3);font-size:11px;padding:14px;text-align:center;width:100%">저장된 아바타가 없습니다. <span onclick="goStep(0)" style="color:var(--gold);cursor:pointer;text-decoration:underline">아바타 페이지에서</span> 먼저 만들어주세요.</div>';
+    wrap.style.display = 'flex'; wrap.style.alignItems = 'center'; wrap.style.justifyContent = 'center'; wrap.innerHTML = '<div style="color:var(--ink3);font-size:12px;padding:14px;text-align:center;width:100%;line-height:1.6">저장된 아바타가 없습니다. <span onclick="goToAvatarStep()" style="color:var(--gold);cursor:pointer;text-decoration:underline">아바타 페이지에서</span> 먼저 만들어주세요.</div>';
     return;
   }
 
@@ -6527,6 +6527,9 @@ function renderImageScenes() {
   // 이미지 모드: sceneStepA의 시대 배경 필드 숨김 (현대극 고정)
   const eraField = document.getElementById('sceneStepAEraField');
   if (eraField) eraField.style.display = 'none';
+  // 이미지 모드: 아예 16씬만 사용 → 나만의 씬/클라우드 불러오기 버튼 숨김
+  const customActions = document.getElementById('customSceneActions');
+  if (customActions) customActions.style.display = 'none';
 
   // 카테고리 탭 (그리드 위에 배치) — 이모지/색깔 없이 단순 텍스트 칩
   const tabsHtml = `
