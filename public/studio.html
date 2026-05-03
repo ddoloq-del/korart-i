@@ -1855,7 +1855,10 @@ select option:hover {
     <div class="field" style="margin-bottom:24px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <label style="margin:0;font-size:13px;font-weight:700">등장 아바타 선택하기</label>
-        <button class="btn btn-sm btn-ghost" onclick="goToAvatarStep()">+ 아바타 추가</button>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm" onclick="openAvatarPicker()" title="클라우드에 저장한 아바타 불러오기" style="background:rgba(94,234,212,.12);border-color:var(--teal);color:var(--teal)">☁️ 클라우드 불러오기</button>
+          <button class="btn btn-sm btn-ghost" onclick="openAvatarModal()">+ 아바타 추가</button>
+        </div>
       </div>
       <div id="step1CatTabs" class="cat-tabs"></div>
       <div id="step1AvatarChips" style="display:flex;flex-wrap:wrap;gap:10px;padding:12px;background:var(--bg2);border:1px solid var(--line);border-radius: 0;min-height:50px"></div>
@@ -4342,7 +4345,7 @@ const _MODE = (new URLSearchParams(location.search)).get('mode') === 'image' ? '
 // 영상 모드는 6단계 (비율/아바타/씬선택/씬상세/4컷/영상) — 기존 그대로
 const _IS_IMG_MODE = (_MODE === 'image');
 const STEP_LABELS = _IS_IMG_MODE
-  ? ['아바타', '씬 선택', '씬 상세', '4컷']
+  ? ['씬 선택', '씬 상세', '4컷']
   : ['비율', '아바타', '씬 선택', '씬 상세', '4컷', '영상'];
 const _MAX_STEPS = STEP_LABELS.length;  // 4 또는 6
 // 이미지 모드 진입 시 페이지 타이틀 즉시 변경 + 기본 비율 16:9
@@ -4520,23 +4523,26 @@ async function _finishImageMode() {
 function renderGlobalSteps(currentStep) {
   // 인디케이터 — 모드에 따라 4단계 (이미지) 또는 6단계 (영상)
   const containers = ['globalStepsR', 'globalSteps0', 'globalSteps1', 'globalSteps2', 'globalSteps3'];
+  // 이미지 모드는 step 0(비율) + step 1(아바타) 사용 안 함 → step 1부터 시작 (UI에서는 01,02,03으로 표시)
+  const stepStart = _IS_IMG_MODE ? 1 : 0;
   containers.forEach(id => {
     const wrap = document.getElementById(id);
     if (!wrap) return;
-    // 이미지 모드: 4단계 좌우 한 줄로 (줄바꿈 방지)
     if (_IS_IMG_MODE) {
       wrap.style.flexWrap = 'nowrap';
       wrap.style.whiteSpace = 'nowrap';
     }
     let inner = '';
-    for (let s = 0; s < _MAX_STEPS; s++) {
+    let labelIdx = 0;
+    for (let s = stepStart; s < stepStart + _MAX_STEPS; s++) {
       const cls = s === currentStep ? 'active' : (s < currentStep ? 'done' : '');
       inner += `
         <div class="step-ind-item ${cls}" onclick="tryGoStep(${s})" style="cursor:pointer">
-          <div class="step-ind-num">${s + 1}</div>
-          <span>${STEP_LABELS[s]}</span>
+          <div class="step-ind-num">${labelIdx + 1}</div>
+          <span>${STEP_LABELS[labelIdx]}</span>
         </div>`;
-      if (s < _MAX_STEPS - 1) inner += '<div class="step-ind-line ' + (s < currentStep ? 'done' : '') + '"></div>';
+      if (labelIdx < _MAX_STEPS - 1) inner += '<div class="step-ind-line ' + (s < currentStep ? 'done' : '') + '"></div>';
+      labelIdx++;
     }
     wrap.innerHTML = inner;
   });
@@ -4544,9 +4550,9 @@ function renderGlobalSteps(currentStep) {
 
 // 검증을 거쳐 step 이동 (앞으로 갈 때만 검증, 뒤로는 자유)
 async function tryGoStep(n) {
-  // 이미지 모드: step 4+ 차단 (4컷이 마지막)
-  if (_IS_IMG_MODE && n >= 4) {
-    toast('이미지 모드는 4컷 그리드까지만 작업합니다');
+  // 이미지 모드: step 0(비율) + step 4+(영상) 차단
+  if (_IS_IMG_MODE && (n === 0 || n >= 4)) {
+    if (n >= 4) toast('이미지 모드는 4컷 그리드까지만 작업합니다');
     return;
   }
   const cur = S._currentStep ?? 0;
@@ -4658,7 +4664,7 @@ function renderStep1Avatars() {
   const inSceneIds = new Set(S.avatars.map(a => a._libId || a.id));
 
   if (!lib.length) {
-    wrap.style.display = 'flex'; wrap.style.alignItems = 'center'; wrap.style.justifyContent = 'center'; wrap.innerHTML = '<div style="color:var(--ink3);font-size:12px;padding:14px;text-align:center;width:100%;line-height:1.6">저장된 아바타가 없습니다. <span onclick="goToAvatarStep()" style="color:var(--gold);cursor:pointer;text-decoration:underline">아바타 페이지에서</span> 먼저 만들어주세요.</div>';
+    wrap.style.display = 'flex'; wrap.style.alignItems = 'center'; wrap.style.justifyContent = 'center'; wrap.innerHTML = '<div style="color:var(--ink3);font-size:12px;padding:14px;text-align:center;width:100%;line-height:1.6">저장된 아바타가 없습니다. <span onclick="openAvatarModal()" style="color:var(--gold);cursor:pointer;text-decoration:underline">여기서 생성</span> 먼저 만들어주세요.</div>';
     return;
   }
 
@@ -4666,6 +4672,15 @@ function renderStep1Avatars() {
   wrap.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
   wrap.style.gap = '8px';
 
+  // 카드 리스트 끝에 붙이는 + 점선 카드 (아바타 추가 모달)
+  const _addCardHtml = `
+    <div onclick="openAvatarModal()" style="background:var(--bg2);border:2px dashed var(--line2);border-radius:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;aspect-ratio:1;transition:.15s;color:var(--ink3)"
+         onmouseover="this.style.borderColor='var(--pink)';this.style.color='var(--pink)';this.style.background='rgba(255,107,157,.04)'"
+         onmouseout="this.style.borderColor='var(--line2)';this.style.color='var(--ink3)';this.style.background='var(--bg2)'">
+      <div style="font-size:36px;line-height:1;margin-bottom:8px;font-weight:300">+</div>
+      <div style="font-size:11px;font-weight:600;text-align:center;padding:0 12px;line-height:1.4">아바타 추가</div>
+    </div>
+  `;
   wrap.innerHTML = lib.map(av => {
     const isCast = inSceneIds.has(av.id);
     const ageShort = (av.age || '').includes('teenager') ? '10대'
@@ -4763,7 +4778,7 @@ function renderStep1Avatars() {
         ` : ''}
       </div>
     `;
-  }).join('');
+  }).join('') + _addCardHtml;
 }
 
 // 의상 설정
@@ -11340,33 +11355,28 @@ renderScenes();
 renderAngleSlots();
 renderStep1Avatars();
 
-// ── 이미지 모드: panelRatio 스킵, 비율 기본값 16:9, 첫 화면을 panel0(아바타)으로 ──
+// ── 이미지 모드: 3단계 압축 — panelRatio + panel0(아바타) 둘 다 스킵, panel1(씬 선택)부터 시작 ──
 if (_IS_IMG_MODE) {
-  // 비율 기본값 자동 설정 (씬 상세에서 변경 가능)
+  // 비율 기본값 자동 설정
   if (!S.aspectRatio) S.aspectRatio = '16:9';
-  // panelRatio가 처음 보이지 않게 .show 제거 + panel0에 .show 부여
+  // panelRatio + panel0 둘 다 숨기고 panel1에 .show 부여
   const _ratioPanel = document.getElementById('panelRatio');
   if (_ratioPanel) _ratioPanel.classList.remove('show');
   const _panel0 = document.getElementById('panel0');
-  if (_panel0) _panel0.classList.add('show');
-  // panel0 navbar 갱신 — 뒤로(이미지 모드 step -1 = 없음) 숨기고, 다음을 step 1(씬 선택)로
-  const _panel0Nav = document.getElementById('panel0Nav');
-  if (_panel0Nav) {
-    _panel0Nav.innerHTML = `
-      <button class="btn" onclick="goHome()">홈으로</button>
-      <div class="step-indicator" id="globalSteps0"></div>
-      <button class="btn btn-primary" onclick="tryGoStep(1)">다음</button>
-    `;
-  }
-  // 단계 숫자 갱신: 이미지 모드는 panel0=01, panel2=04 (panel1은 updateScenePanelHeader에서 처리)
-  const _p0Num = document.getElementById('panel0Num');
-  if (_p0Num) _p0Num.textContent = '01';
+  if (_panel0) _panel0.classList.remove('show');
+  const _panel1 = document.getElementById('panel1');
+  if (_panel1) _panel1.classList.add('show');
+  // 단계 숫자 갱신: 이미지 모드는 panel1=01, panel2=03 (panel0 사용 안 함)
+  const _p1Num = document.getElementById('panel1Num');
+  if (_p1Num) _p1Num.textContent = '01';
   const _p2Num = document.getElementById('panel2Num');
-  if (_p2Num) _p2Num.textContent = '04';
+  if (_p2Num) _p2Num.textContent = '03';
+  S._currentStep = 1;  // 첫 단계가 panel1
 }
 
-S._currentStep = 0;
-renderGlobalSteps(0);
+// 이미지 모드는 위에서 step 1로 설정됨 — 영상 모드만 step 0
+if (!_IS_IMG_MODE) S._currentStep = 0;
+renderGlobalSteps(S._currentStep);
 renderRatioGrid();
 
 // 씬 설정 변경 시 프롬프트 실시간 업데이트
