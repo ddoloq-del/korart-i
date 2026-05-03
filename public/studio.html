@@ -7965,7 +7965,9 @@ function buildImagePromptImageMode() {
       parts.push(`${angle} composition${meta.ko ? ' (' + meta.ko + ')' : ''}`);
     }
     if (trimmed) parts.push(trimmed);
-    return parts.length ? `Panel ${i+1}: ${parts.join(', ')}` : '';
+    // 그리드 위치 명시 (추출 조제와 일치)
+    const PANEL_POSITIONS = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+    return parts.length ? `Panel ${i+1} (${PANEL_POSITIONS[i]}): ${parts.join(', ')}` : '';
   }).filter(Boolean).join(' | ');
 
   // 무드: 칩 키워드 + 자유 입력 (둘 다 있으면 같이)
@@ -7993,7 +7995,7 @@ function buildImagePromptImageMode() {
   const extraEl = document.getElementById('imgExtraPrompt');
   const extra = (extraEl?.value || S.imgExtraPromptValue || '').trim();
 
-  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Each panel shows variations of the same concept.
+  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Panel positions are FIXED: Panel 1 = top-left, Panel 2 = top-right, Panel 3 = bottom-left, Panel 4 = bottom-right. Each panel shows variations of the same concept.
 SUBJECTS: ${subjectLock}
 ${charDesc ? 'CHARACTERS: ' + charDesc + '.' : ''}
 ${petDesc ? 'PETS: ' + petDesc + '.' : ''}
@@ -8147,7 +8149,7 @@ async function buildImagePromptImageModeForApi() {
   const extraRaw = (extraEl?.value || S.imgExtraPromptValue || '').trim();
   const extraEn = extraRaw ? await translateKoToEn(extraRaw) : '';
 
-  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Each panel shows variations of the same concept.
+  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Panel positions are FIXED: Panel 1 = top-left, Panel 2 = top-right, Panel 3 = bottom-left, Panel 4 = bottom-right. Each panel shows variations of the same concept.
 SUBJECTS: ${subjectLock}
 ${charDesc ? 'CHARACTERS: ' + charDesc + '.' : ''}
 ${petDesc ? 'PETS: ' + petDesc + '.' : ''}
@@ -8233,7 +8235,9 @@ function buildImagePrompt() {
     personDesc = `${S.personCount} person${S.personCount>1?'s':''} in the scene`;
     if (S.passerby) personDesc += `, with ${S.passerbyDensity}`;
   }
-  const angleDesc = S.angles.filter(Boolean).map((a,i) => { const d = (S.cutDescriptions && S.cutDescriptions[i] || '').trim(); return `Panel ${i+1}: ${a}${d ? ' (' + d + ')' : ''}`;}).join(' | ');
+  // 그리드 위치 명시 (추출 조제와 일치) — GPT가 읞의 할당 안 하도록
+  const PANEL_POSITIONS = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+  const angleDesc = S.angles.filter(Boolean).map((a,i) => { const d = (S.cutDescriptions && S.cutDescriptions[i] || '').trim(); return `Panel ${i+1} (${PANEL_POSITIONS[i]}): ${a}${d ? ' (' + d + ')' : ''}`;}).join(' | ');
   const extra = document.getElementById('extraPrompt')?.value.trim() || '';
 
   // 인원수 강제 명시 — AI가 추가 인물 만들어내지 못하게
@@ -8249,7 +8253,7 @@ function buildImagePrompt() {
       ' visible. NO additional people, NO extra characters, NO bystanders, NO romantic partners unless specified.'
     : 'NO people, NO characters visible.';
 
-  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Each panel shows the SAME Korean drama scene from a DIFFERENT camera angle.
+  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Panel positions are FIXED: Panel 1 = top-left, Panel 2 = top-right, Panel 3 = bottom-left, Panel 4 = bottom-right. Each panel shows the SAME Korean drama scene from a DIFFERENT camera angle.
 SUBJECTS: ${subjectLock}
 ${charDesc ? 'CHARACTERS: ' + charDesc + '.' : ''}
 ${petDesc ? 'PETS: ' + petDesc + '.' : ''}
@@ -8365,7 +8369,9 @@ async function buildImagePromptForApi() {
     personDesc = `${S.personCount} person${S.personCount>1?'s':''} in the scene`;
     if (S.passerby) personDesc += `, with ${S.passerbyDensity}`;
   }
-  const angleDesc = S.angles.filter(Boolean).map((a,i) => { const d = (S.cutDescriptions && S.cutDescriptions[i] || '').trim(); return `Panel ${i+1}: ${a}${d ? ' (' + d + ')' : ''}`;}).join(' | ');
+  // 그리드 위치 명시 (추출 조제와 일치) — GPT가 읞의 할당 안 하도록
+  const PANEL_POSITIONS = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+  const angleDesc = S.angles.filter(Boolean).map((a,i) => { const d = (S.cutDescriptions && S.cutDescriptions[i] || '').trim(); return `Panel ${i+1} (${PANEL_POSITIONS[i]}): ${a}${d ? ' (' + d + ')' : ''}`;}).join(' | ');
 
   // 인원수 강제 명시 — AI가 추가 인물 만들어내지 못하게
   const nPerson = personAvs.length;
@@ -8380,7 +8386,7 @@ async function buildImagePromptForApi() {
       ' visible. NO additional people, NO extra characters, NO bystanders, NO romantic partners unless specified.'
     : 'NO people, NO characters visible.';
 
-  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Each panel shows the SAME Korean drama scene from a DIFFERENT camera angle.
+  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Panel positions are FIXED: Panel 1 = top-left, Panel 2 = top-right, Panel 3 = bottom-left, Panel 4 = bottom-right. Each panel shows the SAME Korean drama scene from a DIFFERENT camera angle.
 SUBJECTS: ${subjectLock}
 ${charDesc ? 'CHARACTERS: ' + charDesc + '.' : ''}
 ${petDesc ? 'PETS: ' + petDesc + '.' : ''}
@@ -8760,7 +8766,7 @@ async function upgradeSketch(targetQuality) {
   // 프롬프트 — 업그레이드용 추가 키워드
   let basePrompt;
   try { basePrompt = await buildImagePromptForApi(); } catch (e) { basePrompt = buildImagePrompt(); }
-  const upgradePrompt = basePrompt + '\n\nUPGRADE INSTRUCTIONS: Preserve the composition, character poses, camera angles, and overall layout from the previous result (last reference image). Enhance details, sharpen edges, improve textures and lighting quality. Keep the 4-panel grid structure identical.';
+  const upgradePrompt = basePrompt + '\n\nUPGRADE INSTRUCTIONS: Preserve the EXACT composition, character poses, camera angles, panel order, and overall layout from the previous result (last reference image). Panel positions MUST remain fixed: Panel 1 stays top-left, Panel 2 stays top-right, Panel 3 stays bottom-left, Panel 4 stays bottom-right. Do NOT rearrange or swap panels. Only enhance details, sharpen edges, improve textures and lighting quality.';
 
   // imgModel select를 해당 quality로 강제
   const imgSel = document.getElementById('imgModel');
