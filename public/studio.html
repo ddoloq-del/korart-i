@@ -6832,23 +6832,6 @@ function updateImgIdFields() {
     renderImgIdOutfitChips();
     renderImgIdHairChips();
     if (sc && sc.idRatio) S.aspectRatio = sc.idRatio;
-    // 1컷 모드 강제 전환
-    if (typeof _cutsMode !== 'undefined' && _cutsMode !== '1cut' && typeof switchCutsMode === 'function') {
-      switchCutsMode('1cut');
-    }
-  }
-  // 4컷 탭 UI 활성/비활성
-  const tab4 = document.querySelector('.cuts-tab[data-mode="4cut"]');
-  if (tab4) {
-    if (isId) {
-      tab4.style.opacity = '0.4';
-      tab4.style.cursor = 'not-allowed';
-      tab4.title = '증명사진은 1컷 모드만 지원됩니다';
-    } else {
-      tab4.style.opacity = '';
-      tab4.style.cursor = 'pointer';
-      tab4.title = '';
-    }
   }
 }
 
@@ -8572,12 +8555,6 @@ let _cutsMode = '4cut';   // 4cut | 1cut
 let _oneCutIdx = 0;        // 1컷 모드에서 선택한 컷 인덱스 (0~3)
 
 function switchCutsMode(mode) {
-  // 증명사진(id) 카테고리는 1컷 모드로 강제 (4컷 선택 차단)
-  const _scIdCheck = (typeof SCENES_IMAGE !== 'undefined' && S && S.scene) ? SCENES_IMAGE[S.scene] : null;
-  if (_scIdCheck && _scIdCheck.group === 'id' && mode === '4cut') {
-    if (typeof toast === 'function') toast('증명사진은 1컷 모드만 지원됩니다');
-    mode = '1cut';
-  }
   _cutsMode = mode;
   // 탭 active 표시
   document.querySelectorAll('.cuts-tab').forEach(t => {
