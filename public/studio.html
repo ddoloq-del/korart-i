@@ -6767,7 +6767,7 @@ function renderImageScenes() {
       const shortStyle = (sc.style || '').split(',').slice(0, 3).map(s => s.trim()).join(', ');
       // bgImage 있으면 사진 배경 적용 (가독성 위해 어두운 오버레이)
       const bgStyle = sc.bgImage
-        ? `background-image:linear-gradient(rgba(10,10,12,.55),rgba(10,10,12,.85)),url('${sc.bgImage}');background-size:cover;background-position:center;`
+        ? `background-image:linear-gradient(rgba(10,10,12,.35),rgba(10,10,12,.65)),url('${sc.bgImage}');background-size:cover;background-position:center;`
         : '';
       return `<div class="scene-card${isActive ? ' active' : ''}" onclick="selImgScene('${key}',this)" style="${bgStyle}">
         <div class="sc-cat">${sc.catLabel}</div>
@@ -7160,7 +7160,7 @@ function renderScenes() {
     const cat = SCENE_CAT[s.key] || s.key.toUpperCase();
     // bgImage 있으면 배경 이미지 + 어로운 오버레이 (가독성)
     const bgStyle = sc.bgImage
-      ? `background-image:linear-gradient(rgba(10,10,12,.55), rgba(10,10,12,.85)), url('${sc.bgImage}');background-size:cover;background-position:center`
+      ? `background-image:linear-gradient(rgba(10,10,12,.35), rgba(10,10,12,.65)), url('${sc.bgImage}');background-size:cover;background-position:center`
       : '';
     return `<div class="scene-card${S.scene===s.key?' active':''}" onclick="selScene('${s.key}',this)" style="${bgStyle}"><div class="sc-cat" style="color:${SCENE_COLOR[s.key] || '#818cf8'}">${cat}</div><div class="sc-title-block"><div class="sc-name">${s.name}</div>${vidStyle ? `<div class="sc-vidstyle">${vidStyle}</div>` : ''}</div>${cam ? `<div class="sc-cam">${cam}</div>` : ''}</div>`;
   }).join('');
