@@ -3109,7 +3109,7 @@ const SCENES_IMAGE = {
   // ── 화보 (3) ──
   magazine:     { name:'잡지 화보',   group:'editorial', catLabel:'EDITORIAL',     style:'high fashion editorial photography, professional studio lighting, Vogue magazine aesthetic, sharp clean composition, premium glossy finish' },
   cinematic:    { name:'시네마틱',    group:'editorial', catLabel:'CINEMATIC',     style:'cinematic film still, anamorphic lens flare, moody atmospheric lighting, movie poster aesthetic, dramatic color grading' },
-  vintage_film: { name:'빈티지 필름', group:'editorial', catLabel:'VINTAGE FILM',  style:'analog film photography, Kodak Portra warmth, faded retro tones, soft film grain, 70s 80s aesthetic, nostalgic mood' },
+  vintage_film: { name:'빈티지 필름', group:'editorial', catLabel:'VINTAGE FILM',  bgImage:'/images/scenes/vintage_film.png', style:'analog film photography, Kodak Portra warmth, faded retro tones, soft film grain, 70s 80s aesthetic, nostalgic mood' },
 
   // ── 직업 체험 (4) ──
   job_doctor:   { name:'의사',       group:'job',       catLabel:'DOCTOR',        style:'white doctor coat, hospital setting, stethoscope around neck, professional medical photography, confident clinical atmosphere, clean bright lighting' },
@@ -6617,7 +6617,11 @@ function renderImageScenes() {
       const isActive = S.scene === key;
       // 짧은 스타일 한 줄 (style 키워드 앞 3개)
       const shortStyle = (sc.style || '').split(',').slice(0, 3).map(s => s.trim()).join(', ');
-      return `<div class="scene-card${isActive ? ' active' : ''}" onclick="selImgScene('${key}',this)">
+      // bgImage 있으면 사진 배경 적용 (가독성 위해 어두운 오버레이)
+      const bgStyle = sc.bgImage
+        ? `background-image:linear-gradient(rgba(10,10,12,.55),rgba(10,10,12,.85)),url('${sc.bgImage}');background-size:cover;background-position:center;`
+        : '';
+      return `<div class="scene-card${isActive ? ' active' : ''}" onclick="selImgScene('${key}',this)" style="${bgStyle}">
         <div class="sc-cat">${sc.catLabel}</div>
         <div class="sc-title-block">
           <div class="sc-name">${sc.name}</div>
