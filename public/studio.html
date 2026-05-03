@@ -1828,8 +1828,8 @@ select option:hover {
         <span style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700">선택된 씬</span>
         <span id="selectedSceneLabel" style="font-size:18px;font-weight:800;color:var(--pink);letter-spacing:-.02em">—</span>
       </div>
-      <div style="width:1px;height:32px;background:var(--line)"></div>
-      <div style="display:flex;flex-direction:column;gap:4px">
+      <div id="sceneStepBEraDivider" style="width:1px;height:32px;background:var(--line)"></div>
+      <div id="sceneStepBEraField" style="display:flex;flex-direction:column;gap:4px">
         <span style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700">시대 배경</span>
         <span id="selectedEraLabel" style="font-size:14px;font-weight:700;color:var(--cream);letter-spacing:-.01em">현대극</span>
       </div>
@@ -3110,10 +3110,10 @@ const SCENES_IMAGE = {
   vintage_film: { name:'빈티지 필름', group:'editorial', catLabel:'VINTAGE FILM',  bgImage:'/images/scenes/vintage_film.png', style:'analog film photography, Kodak Portra warmth, faded retro tones, soft film grain, 70s 80s aesthetic, nostalgic mood' },
 
   // ── 직업 체험 (4) ──
-  job_doctor:   { name:'의사',       group:'job',       catLabel:'DOCTOR',        style:'white doctor coat, hospital setting, stethoscope around neck, professional medical photography, confident clinical atmosphere, clean bright lighting' },
-  job_lawyer:   { name:'변호사',     group:'job',       catLabel:'LAWYER',        style:'sharp tailored business suit, law office with bookshelves, authoritative confident posture, dramatic professional lighting, legal documents on desk' },
-  job_chef:     { name:'셰프',       group:'job',       catLabel:'CHEF',          style:'chef whites uniform with apron, professional restaurant kitchen, dramatic culinary lighting, focused expert expression, stainless steel appliances' },
-  job_flight:   { name:'승무원',     group:'job',       catLabel:'FLIGHT CREW',   style:'airline flight attendant uniform, airport terminal or airplane interior, polished friendly aesthetic, neat hair and makeup, professional service smile' },
+  job_doctor:   { name:'의사',       group:'job',       catLabel:'DOCTOR',        bgImage:'/images/scenes/job_doctor.png',        style:'white doctor coat, hospital setting, stethoscope around neck, professional medical photography, confident clinical atmosphere, clean bright lighting' },
+  job_lawyer:   { name:'변호사',     group:'job',       catLabel:'LAWYER',        bgImage:'/images/scenes/job_lawyer.png',        style:'sharp tailored business suit, law office with bookshelves, authoritative confident posture, dramatic professional lighting, legal documents on desk' },
+  job_chef:     { name:'셰프',       group:'job',       catLabel:'CHEF',          bgImage:'/images/scenes/job_chef.png',          style:'chef whites uniform with apron, professional restaurant kitchen, dramatic culinary lighting, focused expert expression, stainless steel appliances' },
+  job_flight:   { name:'승무원',     group:'job',       catLabel:'FLIGHT CREW',   bgImage:'/images/scenes/job_flight.png',   style:'airline flight attendant uniform, airport terminal or airplane interior, polished friendly aesthetic, neat hair and makeup, professional service smile' },
 
   // ── 라이프스타일 (3) ──
   life_sns:     { name:'SNS 프로필', group:'lifestyle', catLabel:'INSTAGRAM',     style:'trendy Instagram aesthetic, soft natural window light, Korean cafe vibe, casual chic outfit, candid lifestyle moment, warm pastel tones' },
@@ -6615,9 +6615,13 @@ function renderImageScenes() {
   const grid = document.getElementById('sceneGrid');
   if (!grid) return;
 
-  // 이미지 모드: sceneStepA의 시대 배경 필드 숨김 (현대극 고정)
+  // 이미지 모드: 시대 배경 필드 숨김 (현대극 고정) — 2단계 + 3단계 둘 다
   const eraField = document.getElementById('sceneStepAEraField');
   if (eraField) eraField.style.display = 'none';
+  const eraFieldB = document.getElementById('sceneStepBEraField');
+  if (eraFieldB) eraFieldB.style.display = 'none';
+  const eraDividerB = document.getElementById('sceneStepBEraDivider');
+  if (eraDividerB) eraDividerB.style.display = 'none';
   // 이미지 모드: 아예 16씬만 사용 → 나만의 씬/클라우드 불러오기 버튼 숨김
   const customActions = document.getElementById('customSceneActions');
   if (customActions) customActions.style.display = 'none';
@@ -6673,6 +6677,13 @@ function selImgScene(key, el) {
   ensureImageModeState();
   document.querySelectorAll('.scene-card').forEach(c => c.classList.remove('active'));
   if (el) el.classList.add('active');
+  // 씬 전환 시 선택한 아바타 초기화 (직업 체험과 화보가 부르는 아바타가 다름)
+  if (S.scene !== key) {
+    S.avatars = [];
+    S.avatarCuts = {};
+    S.continueRefDataUrl = '';
+    S.continueRefPubUrl = '';
+  }
   S.scene = key;
 
   // 자동 추천값 적용 (사용자가 변경 가능)
