@@ -9107,7 +9107,12 @@ async function generateOneCut() {
   try {
     // 비율에 맞는 사이즈
     const sizeStr = getOneCutImgSize();
-    const url = await callFalImage(falKey, model, prompt, sizeStr, refImgs.length ? refImgs : null);
+    // 레퍼런스 없음 → /edit 제거 (text-to-image 폴백)
+    const modelToUse = useRef ? model : model.replace('/edit', '');
+    if (!useRef && modelToUse !== model) {
+      log('info', `레퍼런스 없음 → ${model} → ${modelToUse} (text-to-image 모드)`);
+    }
+    const url = await callFalImage(falKey, modelToUse, prompt, sizeStr, refImgs.length ? refImgs : null);
 
     // 다운로드 -> dataURL
     const r = await fetch(url);
