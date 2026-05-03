@@ -3208,6 +3208,46 @@ const SCENE_DEFAULTS = {
   art_double:    { location: 'studio',         mood: 'mood_dreamy',   variation: 'composition' },
 };
 
+// 직업 체험 씬별 4컷 테마 (자동 적용, 사용자가 아바타나 사진만 넣으면 주어진 테마로 생성)
+const JOB_THEMES = {
+  job_doctor: {
+    location: 'hospital',
+    cuts: [
+      { angle: 'Medium Shot',     desc: '환자를 진단하는 작면, 청진기로 진료 중인 진지한 표정' },
+      { angle: 'Close-up (CU)',   desc: '의료 차트를 자세히 검토하는 집중한 작면' },
+      { angle: 'Cowboy Shot',     desc: '흰 의사 가운을 입고 청진기를 목에 걸고 정면을 응시하는 자신감 있는 제스처' },
+      { angle: 'Full Shot (FS)',  desc: '수술복과 수술모를 입고 수술실로 들어가는 작면' },
+    ]
+  },
+  job_lawyer: {
+    location: 'office',
+    cuts: [
+      { angle: 'Cowboy Shot',     desc: '맞춤 와이셔츠를 입고 거대한 책장 앞에서 자신감 있게 섰 모습' },
+      { angle: 'Medium Shot',     desc: '법률 서류를 검토하며 메모를 작성하는 진지한 작면' },
+      { angle: 'Low Angle',       desc: '후광이 비추는 집무실에서 아래에서 위로 찍은 위엄 있는 중족' },
+      { angle: 'Bust Shot',       desc: '법정에서 변론하는 듯한 단호한 표정의 정면 초상' },
+    ]
+  },
+  job_chef: {
+    location: 'kitchen',
+    cuts: [
+      { angle: 'Medium Shot',     desc: '서브 키친에서 불과 연기 속에서 요리하는 역동적인 제스처' },
+      { angle: 'Close-up (CU)',   desc: '요리를 정교하게 플레이팅하는 손끝 클로즈업' },
+      { angle: 'Cowboy Shot',     desc: '셐프 유니폼과 앞치를 입고 팔짝 낀 정면 자세' },
+      { angle: 'Full Shot (FS)',  desc: '완성된 요리를 들고 손님에게 서빙하는 전신 작면' },
+    ]
+  },
+  job_flight: {
+    location: 'airport',
+    cuts: [
+      { angle: 'Cowboy Shot',     desc: '항공사 유니폼과 모자를 입고 이름표를 달고 정면을 응시하는 친절한 미소' },
+      { angle: 'Medium Shot',     desc: '기내 통로에서 승객에게 안내하는 업무 중인 자세' },
+      { angle: 'Close-up (CU)',   desc: '유니폼 어깨 장식과 리본 세부 클로즈업' },
+      { angle: 'Full Shot (FS)',  desc: '공항 터미널에서 캐리어를 끌고 걸어가는 전신 작면' },
+    ]
+  },
+};
+
 // 씬 키 → 어느 SCENES 객체에서 찾을지 헬퍼 (이미지 모드에서 SCENES_IMAGE 우선 조회)
 // 영상 모드에선 항상 SCENES만 사용 (이 함수 호출 안 함)
 function getImageScene(key) {
@@ -6653,10 +6693,19 @@ function selImgScene(key, el) {
   const defaults = SCENE_DEFAULTS[key];
   if (defaults) {
     if (!S.imgMood) S.imgMood = defaults.mood;
-    else S.imgMood = defaults.mood;  // 씬 바꾸면 추천값으로 갱신
+    else S.imgMood = defaults.mood;
     S.imgLocation = defaults.location;
-    // 변주는 추천값 1개로 시작 (다중 선택은 사용자가 추가 가능)
     S.imgVariations = [defaults.variation];
+  }
+  // 직업 체험 죠마: 4컷 앵글+설명 자동 채움 + 장소 고정
+  if (typeof JOB_THEMES !== 'undefined' && JOB_THEMES[key]) {
+    const theme = JOB_THEMES[key];
+    if (theme.location) S.imgLocation = theme.location;
+    if (Array.isArray(theme.cuts)) {
+      S.angles = theme.cuts.map(c => c.angle || '');
+      S.imgCutDescriptions = theme.cuts.map(c => c.desc || '');
+      S.cutDescriptions = S.imgCutDescriptions.slice();
+    }
   }
 
   // 자동으로 씬 상세로 이동 (영상 모드의 selScene과 같은 동작)
@@ -6741,6 +6790,18 @@ function updateImgEditorialFields() {
   const sc = (typeof SCENES_IMAGE !== 'undefined') ? SCENES_IMAGE[S.scene] : null;
   const isEditorial = sc && sc.group === 'editorial';
   wrap.style.display = isEditorial ? '' : 'none';
+}
+
+// 직업 체험 카테고리 필드 토글 (무드/장소/변주 숨기기)
+function updateImgJobFields() {
+  const sc = (typeof SCENES_IMAGE !== 'undefined') ? SCENES_IMAGE[S.scene] : null;
+  const isJob = sc && sc.group === 'job';
+  const moodEl = document.querySelector('#imageModeForm #imgMoodChips');
+  if (moodEl) { const f = moodEl.closest('.field'); if (f) f.style.display = isJob ? 'none' : ''; }
+  const locEl = document.querySelector('#imageModeForm #imgLocChips');
+  if (locEl) { const f = locEl.closest('.field'); if (f) f.style.display = isJob ? 'none' : ''; }
+  const varEl = document.querySelector('#imageModeForm #imgVariationChips');
+  if (varEl) { const f = varEl.closest('.field'); if (f) f.style.display = isJob ? 'none' : ''; }
 }
 
 // 컷별 앵글 + 설명 렌더 (4개)
@@ -6859,6 +6920,7 @@ function renderImageModeForm() {
   renderImgVariationChips();
   renderImgCutDescriptions();
   updateImgEditorialFields();
+  updateImgJobFields();
 
   // 자유 입력칸 동기화 + 이벤트 바인딩 (1회만)
   const bindCustom = (id, key) => {
