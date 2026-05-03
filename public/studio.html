@@ -4788,13 +4788,30 @@ function renderStep1Avatars() {
   if (moreBtn) {
     if (_totalCards > 10) {
       moreBtn.style.display = '';
-      // 기본 접힘 상태 (1줄만 보응, 두번째 줄부터 가림)
       if (!wrap._expanded) {
-        wrap.style.maxHeight = '145px';
-        moreBtn.innerHTML = '▼ 더보기 (' + (_totalCards - 5) + '개 표시 안됨)';
+        // 접힘: 1줄만 보응 — 첫 줄에 출연 카드가 있으면 그 높이만큼 늘림
+        // requestAnimationFrame으로 DOM 렌더링 후 실제 카드 높이 측정
+        wrap.style.maxHeight = 'none';  // 임시로 제거 후 측정
+        requestAnimationFrame(() => {
+          const cards = wrap.querySelectorAll(':scope > div');
+          if (cards.length === 0) return;
+          // 첫 줄 카드들의 top 위치 (같은 줄이면 top 일치)
+          const firstTop = cards[0].offsetTop;
+          let maxBottomFirstRow = 0;
+          for (const c of cards) {
+            // 첫 줄에 속한 카드만 (top이 거의 같음 — 허용오차 5px)
+            if (Math.abs(c.offsetTop - firstTop) > 5) break;
+            const bottom = c.offsetTop + c.offsetHeight;
+            if (bottom > maxBottomFirstRow) maxBottomFirstRow = bottom;
+          }
+          // wrap padding(12px) 반영 — maxBottomFirstRow에 아래 padding 12px 더함
+          wrap.style.maxHeight = (maxBottomFirstRow + 12) + 'px';
+        });
+        moreBtn.innerHTML = '(' + (_totalCards - 5) + '개 표시 안됨)';
       } else {
+        // 펼침: 전체 마지막 줄까지 모두 보응 (출연 카드로 인해 높이 다른 경우도 자동 적응)
         wrap.style.maxHeight = 'none';
-        moreBtn.innerHTML = '▲ 접기';
+        moreBtn.innerHTML = '접기';
       }
     } else {
       moreBtn.style.display = 'none';
