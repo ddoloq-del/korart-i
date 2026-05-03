@@ -9279,8 +9279,11 @@ async function generateImage() {
     </div>`;
 
   try {
-    // useRef false이면 /edit 모델에서 /edit 제거 (image_urls 필수 거절 방지)
+    // 레퍼런스 없음 → /edit 제거 (GPT/나노바나나 둘 다 text-to-image 폴백)
     const modelToUse = useRef ? model : model.replace('/edit', '');
+    if (!useRef && modelToUse !== model) {
+      log('info', `레퍼런스 없음 → ${model} → ${modelToUse} (text-to-image 모드)`);
+    }
     const url = useRef
       ? await callFalImageWithRef(falKey, model, prompt, getGridSize(), refImgs)
         : await callFalImage(falKey, modelToUse, prompt, getGridSize());
