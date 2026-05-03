@@ -10008,39 +10008,10 @@ async function generateCutVideo(i) {
   try {
     let finalPrompt = prompt;
 
-    // 감정 지시문 추가 — 나레이션이면 인물 표정 대신 나레이터 보이스 톤에만 적용
-    const isNarrator = (speaker === 'narrator-woman' || speaker === 'narrator-man');
+    // 감정 지시문 추가 (대사보다 먼저 추가 — 일반 자세/표정을 명시)
     if (emotion && emotionMap[emotion]) {
-      if (isNarrator) {
-        // 나레이션 + 감정 매칙: 인물은 침멀, 보이스만 톤 반영 (shouting/crying 같은 입 움직임 유도은 제외)
-        const narrTone = {
-          angry: 'angry intense voice tone',
-          shouting: 'loud powerful voice tone',
-          sad: 'sad melancholic voice tone',
-          crying: 'tearful emotional voice tone',
-          calm: 'calm soothing voice tone',
-          happy: 'cheerful warm voice tone',
-          excited: 'excited energetic voice tone',
-          funny: 'playful light voice tone',
-          surprised: 'surprised astonished voice tone',
-          scared: 'fearful tense voice tone',
-          shy: 'soft gentle voice tone',
-          longing: 'longing wistful voice tone',
-          serious: 'serious grave voice tone',
-          romantic: 'tender romantic voice tone',
-        };
-        // 인물 표정은 자연스러운 상태 유지 (감정 표정 주입 안함)
-        finalPrompt += ` Person keeps natural expression with mouth completely closed and still.`;
-        log('info', `감정(나레이터 톤): ${emotion}`);
-        // 보이스 톤은 아래 speakerLabel에 붙여서 내보냄
-        finalPrompt += ` ${narrTone[emotion] || ''}.`;
-      } else {
-        finalPrompt += ` ${emotionMap[emotion]}.`;
-        log('info', `감정: ${emotion}`);
-      }
-    } else if (isNarrator) {
-      // 감정 없는 나레이션일 때도 인물 입 움직임 막음
-      finalPrompt += ` Person keeps natural expression with mouth completely closed and still.`;
+      finalPrompt += ` ${emotionMap[emotion]}.`;
+      log('info', `감정: ${emotion}`);
     }
 
     if (script) {
@@ -10051,9 +10022,9 @@ async function generateCutVideo(i) {
       } else if (speaker === 'man') {
         speakerLabel = 'Man speaks Korean line, lips visible';
       } else if (speaker === 'narrator-woman') {
-        speakerLabel = 'IMPORTANT: Female off-screen voice-over narration only. Person in the image must NOT speak. Lips and mouth completely closed and motionless throughout. No lip sync. Voice comes from outside the frame'; 
+        speakerLabel = 'Female narrator voice-over (no visible speaker)';
       } else if (speaker === 'narrator-man') {
-        speakerLabel = 'IMPORTANT: Male off-screen voice-over narration only. Person in the image must NOT speak. Lips and mouth completely closed and motionless throughout. No lip sync. Voice comes from outside the frame';
+        speakerLabel = 'Male narrator voice-over (no visible speaker)';
       } else {
         speakerLabel = 'Character speaks Korean line';
       }
