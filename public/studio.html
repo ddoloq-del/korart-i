@@ -8367,6 +8367,68 @@ ${extraEn ? 'ADDITIONAL: ' + extraEn + '.' : ''}
 All 4 panels share consistent subjects and core concept. High-quality professional photography.`.trim();
 }
 
+// 이미지 모드 1컷 프롬프트 빌더 — 단일 패널으로 생성
+async function buildImagePromptOneCutImageModeForApi(cutIdx) {
+  ensureImageModeState();
+  const sc = SCENES_IMAGE[S.scene] || {};
+  if (!sc) return '';
+  let charDesc = '';
+  let petDesc = '';
+  let productDesc = '';
+  if (S.avatars && S.avatars.length) {
+    const inThisCut = (S.avatars || []).filter(av => {
+      const libId = av._libId || av.id;
+      const cuts = S.avatarCuts && S.avatarCuts[libId];
+      return !cuts || (Array.isArray(cuts) && cuts.includes(cutIdx));
+    });
+    const persons = inThisCut.filter(av => (av.category || 'person') === 'person');
+    const pets = inThisCut.filter(av => av.category === 'pet');
+    const products = inThisCut.filter(av => av.category === 'product');
+    const buildPersonLine = async (av) => {
+      const nameEn = await translateKoToEn(av.name);
+      const parts = [];
+      if (av.gender) parts.push(av.gender);
+      if (av.age)    parts.push(av.age);
+      if (av.body)   parts.push(av.body.split(',')[0]);
+      if (av.height) parts.push(av.height);
+      if (av.look)   parts.push(av.look.split(',')[0]);
+      const sceneHair = av.sceneHair && av.sceneHair.trim();
+      if (sceneHair) parts.push(sceneHair);
+      else if (av.hair) parts.push(await translateKoToEn(av.hair));
+      const extraEn = av.extra ? await translateKoToEn(av.extra) : '';
+      if (extraEn) parts.push(extraEn);
+      const desc = parts.length ? ` (${parts.join(', ')})` : '';
+      return `${nameEn}${desc}`;
+    };
+    if (persons.length) charDesc = (await Promise.all(persons.map(buildPersonLine))).join('; ');
+    if (pets.length) petDesc = pets.map(p => p.name).join(', ');
+    if (products.length) productDesc = products.map(p => p.name).join(', ');
+  }
+  const angle = (S.imgCutAngles && S.imgCutAngles[cutIdx]) || (S.angles && S.angles[cutIdx]) || '';
+  const cutDescRaw = (S.imgCutDescriptions && S.imgCutDescriptions[cutIdx]) || (S.cutDescriptions && S.cutDescriptions[cutIdx]) || '';
+  const cutDescEn = cutDescRaw ? await translateKoToEn(cutDescRaw) : '';
+  const moodKeywords = (S.imgMood && IMAGE_MOODS[S.imgMood]) ? IMAGE_MOODS[S.imgMood].en : '';
+  const locEn = (S.imgLocation && IMAGE_LOCATIONS[S.imgLocation]) ? IMAGE_LOCATIONS[S.imgLocation].en : '';
+  const eraKeyword = ERA_KEYWORDS.modern;
+  const extraEl = document.getElementById('imgExtraPrompt');
+  const extraRaw = (extraEl?.value || S.imgExtraPromptValue || '').trim();
+  const extraEn = extraRaw ? await translateKoToEn(extraRaw) : '';
+  const subjectLock = (charDesc || petDesc || productDesc) ? 'preserve subjects exactly' : 'compose around the scene';
+  return `Create a single high-quality photograph (no panels, no grid, no collage). One single full-frame image only.
+SUBJECTS: ${subjectLock}
+${charDesc ? 'CHARACTERS: ' + charDesc + '.' : ''}
+${petDesc ? 'PETS: ' + petDesc + '.' : ''}
+${productDesc ? 'PRODUCTS: ' + productDesc + '.' : ''}
+${angle ? 'CAMERA ANGLE: ' + angle + '.' : ''}
+${cutDescEn ? 'SHOT DETAILS: ' + cutDescEn + '.' : ''}
+SCENE STYLE: ${sc.style || ''}.
+${moodKeywords ? 'MOOD: ' + moodKeywords + '.' : ''}
+${locEn ? 'LOCATION: ' + locEn + '.' : ''}
+TIME PERIOD: ${eraKeyword}.
+${extraEn ? 'ADDITIONAL: ' + extraEn + '.' : ''}
+High-quality professional photography. Single frame only — do NOT split into multiple panels or grid.`.trim();
+}
+
 // ────────────────────────────────────────────────────────────
 //  영상 모드 — 기존 함수 (수정 없음, 단 시작부에 분기만 추가)
 // ────────────────────────────────────────────────────────────
@@ -9088,8 +9150,8 @@ async function generateOneCut() {
   let prompt;
   try {
     if (_IS_IMG_MODE) {
-      // 이미지 모드의 씬은 SCENES_IMAGE에 있으므로 이미지 모드 빌더 사용
-      prompt = await buildImagePromptImageModeForApi();
+      // 이미지 모드 1컷 빌더 (채택된 컷의 앵글/설명만 사용, 4컷 분할 안 함)
+      prompt = await buildImagePromptOneCutImageModeForApi(i);
     } else {
       prompt = await buildOneCutPromptForApi(i);
     }
@@ -9144,7 +9206,11 @@ async function generateOneCut() {
     toast(`✅ 컷 ${i+1} 생성 완료!`);
   } catch (e) {
     log('err', '1컷 생성 실패: ' + e.message);
-    toast('❌ ' + e.message);
+    if (_isContentPolicyError(e.message)) {
+      _showContentPolicyAlert(e.message);
+    } else {
+      toast('❌ ' + e.message);
+    }
     renderQuad();  // placeholder 복원
   } finally {
     btn.disabled = false;
@@ -9330,7 +9396,11 @@ async function generateImage() {
     toast('✅ 이미지 생성 완료!');
   } catch(e) {
     log('err', '이미지 생성 실패: ' + e.message);
-    toast('❌ ' + e.message);
+    if (_isContentPolicyError(e.message)) {
+      _showContentPolicyAlert(e.message);
+    } else {
+      toast('❌ ' + e.message);
+    }
     document.getElementById('quad').innerHTML = `<div style="grid-column:1/-1;grid-row:1/-1;display:flex;align-items:center;justify-content:center;color:var(--red);font-size:12px">생성 실패. 다시 시도해주세요.</div>`;
   } finally {
     btn.disabled = false;
@@ -10327,6 +10397,33 @@ async function _falImageQueue(model, body, statusEl) {
     }
   }
   return d;
+}
+
+// 폴리시 위반 에러 감지 (GPT/fal이 부절한 이유)
+function _isContentPolicyError(errMsg) {
+  if (!errMsg) return false;
+  const lower = String(errMsg).toLowerCase();
+  return lower.includes('content_policy') || lower.includes('safety') || lower.includes('moderation') ||
+         lower.includes('not safe') || lower.includes('policy violation') || lower.includes('refused') ||
+         lower.includes('inappropriate') || lower.includes('explicit') || lower.includes('sensitive') ||
+         lower.includes('your request was rejected') || lower.includes('cannot create') ||
+         lower.includes('declined to') || lower.includes('blocked');
+}
+
+// 친화적 팝업 표시 (콘텐츠 정책 위반)
+async function _showContentPolicyAlert(detail) {
+  const msg = `<div style="padding:6px 0">
+    <div style="font-size:14px;color:var(--cream);margin-bottom:10px">생성 불가능한 콘텐츠를 요청하셨습니다.</div>
+    <div style="font-size:12px;color:var(--ink2);line-height:1.5">AI 모델의 콘텐츠 정삱에 맞지 않는 요청의는 생성되지 않습니다.</div>
+    <div style="font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.5">성적/폭력적/유명인 등 민감 콘텐츠는 제외하고 다시 시도해주세요. 나노바나나 모델은 정책이 다르니 다른 AI로 시도도 가능합니다.</div>
+  </div>`;
+  if (typeof showAlert === 'function') {
+    await showAlert('콘텐츠 정삱 안내', msg);
+  } else if (typeof showConfirm === 'function') {
+    await showConfirm('콘텐츠 정삱 안내', msg);
+  } else {
+    alert('생성 불가능한 콘텐츠를 요청하셨습니다.');
+  }
 }
 
 async function callFalImage(key, model, prompt, size, refImageUrl) {
