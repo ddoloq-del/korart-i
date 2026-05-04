@@ -31,7 +31,7 @@ img{display:block}
 .subnav-item{font-size:14px;font-weight:700;color:var(--ink-dim);height:100%;display:flex;align-items:center;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap;cursor:pointer;text-decoration:none}
 .subnav-item:hover{color:var(--ink)}
 .subnav-item.active{color:var(--ink);border-color:var(--accent)}
-.main{max-width:1400px;margin:0 auto;padding:32px 24px;display:grid;grid-template-columns:1fr 320px;gap:32px}
+.main{max-width:1400px;margin:0 auto;padding:32px 24px}
 .hero{position:relative;border-radius:0;padding:48px;margin-bottom:32px;overflow:hidden;background:radial-gradient(ellipse at top right,rgba(167,139,250,.25),transparent 60%),radial-gradient(ellipse at bottom left,rgba(99,102,241,.25),transparent 60%),linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#4c1d95 100%);border:1px solid var(--line-lit);min-height:280px;display:flex;align-items:center}
 .hero-content{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.18fr);gap:32px;align-items:center;width:100%;max-width:none}
 .hero-content > .hero-left{min-width:0}
@@ -58,19 +58,30 @@ img{display:block}
 .compare-past .prompt-text{display:block;background:rgba(0,0,0,.25);padding:8px 10px;margin-top:6px;font-family:ui-monospace,Menlo,monospace;font-size:10px;line-height:1.5;color:rgba(255,255,255,.55);max-height:84px;overflow:hidden;border-left:2px solid rgba(255,255,255,.25)}
 .compare-now strong{color:#c4b5fd;font-weight:800}
 .compare-now .badge-step{display:inline-block;background:rgba(196,181,253,.15);border:1px solid rgba(196,181,253,.4);padding:2px 8px;font-size:10px;font-weight:700;color:#c4b5fd;margin:2px 3px 0 0}
-.content-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.content-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
 .content-title{font-size:20px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:baseline;gap:12px}
 .content-subtitle{font-size:12px;color:var(--ink-dimmer);font-weight:500}
-.sort-tabs{display:flex;align-items:center;gap:14px;font-size:13px;color:var(--ink-dim)}
-.sort-tabs .active{color:var(--ink);font-weight:700}
-.sort-tabs .divider{color:var(--line-lit)}
-.sort-tabs span:not(.divider):hover{color:var(--ink);cursor:pointer}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.content-actions{display:flex;align-items:center;gap:12px}
+.sort-toggle{display:inline-flex;background:var(--bg-2);border:1px solid var(--line);padding:3px}
+.sort-toggle button{padding:7px 16px;font-size:12px;font-weight:700;color:var(--ink-dim);background:transparent;border:none;cursor:pointer;transition:all .15s}
+.sort-toggle button.active{background:var(--ink);color:#fff}
+.sort-toggle button:not(.active):hover{color:var(--ink)}
+.publish-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:linear-gradient(135deg,var(--accent),var(--gold));color:#fff;font-weight:800;font-size:13px;border:none;cursor:pointer;transition:transform .15s,box-shadow .15s;letter-spacing:-.01em}
+.publish-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(99,102,241,.4)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
 .card{background:var(--bg-2);border:1px solid var(--line);border-radius:0;overflow:hidden;cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s}
 .card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 10px 30px rgba(99,102,241,.15)}
-.card-img-wrap{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--bg-3)}
-.card-img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.card-img-wrap{position:relative;aspect-ratio:16/9;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center}
+.card-img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;transition:transform .5s}
+.card-img.fit-cover{width:100%;height:100%;object-fit:cover}
 .card:hover .card-img{transform:scale(1.05)}
+.card-aspect-badge{position:absolute;bottom:12px;left:12px;background:rgba(0,0,0,.7);color:#fff;font-size:9px;font-weight:800;letter-spacing:.06em;padding:3px 7px;border-radius:0;backdrop-filter:blur(8px)}
+.empty-state{grid-column:1/-1;padding:60px 24px;text-align:center;background:var(--bg-2);border:1px dashed var(--line-lit)}
+.empty-icon{width:56px;height:56px;background:var(--bg-3);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:var(--ink-dimmer)}
+.empty-title{font-size:16px;font-weight:800;margin-bottom:6px;color:var(--ink)}
+.empty-desc{font-size:13px;color:var(--ink-dim);line-height:1.6;margin-bottom:18px}
+.empty-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:linear-gradient(135deg,var(--accent),var(--gold));color:#fff;font-weight:800;font-size:13px;border:none;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.empty-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(99,102,241,.4)}
 .card-tag{position:absolute;top:12px;left:12px;background:rgba(99,102,241,.9);color:#fff;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:0;backdrop-filter:blur(10px)}
 .card-video-badge{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);width:28px;height:28px;border-radius:0;display:flex;align-items:center;justify-content:center;color:#fff}
 .card-body{padding:16px}
@@ -83,44 +94,54 @@ img{display:block}
 .card-stat{display:flex;align-items:center;gap:4px}
 .load-more-btn{margin-top:32px;width:100%;padding:14px;background:var(--bg-2);border:1px solid var(--line-lit);border-radius:0;font-size:13px;font-weight:700;color:#1a1a1a;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s,color .15s}
 .load-more-btn:hover{background:var(--bg-3);color:var(--ink)}
-.sidebar{display:flex;flex-direction:column;gap:20px}
-.sb-card{background:var(--bg-2);border:1px solid var(--line);border-radius:0;padding:24px;position:relative;overflow:hidden}
-.sb-card-decor{position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:radial-gradient(circle,var(--accent-soft),transparent);border-radius:0;filter:blur(20px)}
-.login-card{text-align:center}
-.login-icon{width:56px;height:56px;border-radius:0;background:linear-gradient(135deg,var(--accent),var(--gold));display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;color:#fff;box-shadow:0 4px 20px rgba(99,102,241,.3)}
-.login-title{font-size:16px;font-weight:800;margin-bottom:6px;letter-spacing:-.01em;position:relative;z-index:2}
-.login-desc{font-size:12px;color:var(--ink-dim);margin-bottom:22px;line-height:1.6;position:relative;z-index:2}
-.login-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--accent),var(--accent-hover));border-radius:0;font-weight:800;font-size:13px;color:#fff;margin-bottom:14px;position:relative;z-index:2;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 12px rgba(99,102,241,.35)}
-.login-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(99,102,241,.5)}
-.login-links{display:flex;justify-content:center;gap:16px;font-size:11px;color:var(--ink-dimmer);position:relative;z-index:2}
-.login-links span:hover{color:var(--ink);cursor:pointer}
-.login-links .dot{width:3px;height:3px;background:var(--ink-dimmer);border-radius:0;align-self:center}
-.trending-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.trending-title{font-size:13px;font-weight:800;display:flex;align-items:center;gap:6px}
-.trending-more{font-size:10px;color:var(--ink-dimmer);cursor:pointer}
-.trending-more:hover{color:var(--ink-dim)}
-.trending-list{display:flex;flex-direction:column;gap:10px}
-.trending-item{display:flex;align-items:center;gap:12px;padding:6px 4px;border-radius:0;cursor:pointer;transition:background .15s}
-.trending-item:hover{background:var(--bg-3)}
-.trending-rank{font-size:13px;font-weight:900;width:16px;flex-shrink:0}
-.trending-rank.top{color:var(--gold)}
-.trending-rank.normal{color:var(--ink-dimmer)}
-.trending-name{font-size:12px;color:var(--ink);font-weight:600}
-.tools-card{background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(167,139,250,.06));border:1px solid rgba(99,102,241,.2)}
-.tools-title{font-size:13px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:6px;color:var(--gold)}
-.tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.tool-item{background:var(--bg-2);border:1px solid var(--line);padding:14px 10px;border-radius:0;text-align:center;cursor:pointer;transition:border-color .15s,background .15s,transform .15s}
-.tool-item:hover{border-color:var(--accent);background:var(--bg-3);transform:translateY(-2px)}
-.tool-icon{color:var(--accent);margin-bottom:6px;display:flex;justify-content:center}
-.tool-label{font-size:11px;font-weight:700;color:var(--ink)}
+/* 게시 모달 */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px}
+.modal-overlay.active{display:flex}
+.modal{background:#fff;border:1px solid var(--line);max-width:720px;width:100%;max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:18px;font-weight:900;letter-spacing:-.02em;color:var(--ink);display:flex;align-items:center;gap:10px}
+.modal-close{width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--ink-dim);background:transparent;border:none;cursor:pointer}
+.modal-close:hover{background:var(--bg-3);color:var(--ink)}
+.modal-body{padding:20px 24px;overflow-y:auto;flex:1}
+.reward-banner{background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(167,139,250,.08));border:1px solid rgba(99,102,241,.25);padding:14px 16px;margin-bottom:18px;display:flex;align-items:center;gap:14px}
+.reward-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),var(--gold));color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.reward-text{font-size:12px;line-height:1.55;color:var(--ink-dim)}
+.reward-text strong{color:var(--accent);font-weight:800}
+.modal-tabs{display:flex;gap:4px;background:var(--bg-2);border:1px solid var(--line);padding:3px;margin-bottom:14px}
+.modal-tab{flex:1;padding:9px 14px;font-size:13px;font-weight:700;color:var(--ink-dim);background:transparent;border:none;cursor:pointer;text-align:center}
+.modal-tab.active{background:var(--ink);color:#fff}
+.modal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.modal-asset{position:relative;aspect-ratio:1;background:#000;border:2px solid var(--line);cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;transition:border-color .15s}
+.modal-asset:hover{border-color:var(--accent)}
+.modal-asset.selected{border-color:var(--accent);box-shadow:inset 0 0 0 3px rgba(99,102,241,.3)}
+.modal-asset.selected::after{content:'✓';position:absolute;top:6px;right:6px;width:22px;height:22px;background:var(--accent);color:#fff;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.modal-asset img,.modal-asset video{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
+.modal-asset .type-badge{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.7);color:#fff;font-size:9px;font-weight:800;padding:2px 6px;backdrop-filter:blur(4px)}
+.modal-empty{grid-column:1/-1;padding:40px 20px;text-align:center;color:var(--ink-dim);font-size:13px;border:1px dashed var(--line-lit);background:var(--bg-2)}
+.modal-empty a{color:var(--accent);font-weight:700;text-decoration:underline}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:14px;background:var(--bg-2);flex-wrap:wrap}
+.modal-footer-info{font-size:12px;color:var(--ink-dim)}
+.modal-footer-info strong{color:var(--accent);font-weight:800}
+.modal-footer-actions{display:flex;gap:10px}
+.modal-btn-cancel{padding:10px 18px;background:transparent;border:1px solid var(--line-lit);color:var(--ink-dim);font-size:13px;font-weight:700;cursor:pointer}
+.modal-btn-cancel:hover{color:var(--ink);border-color:var(--ink-dim)}
+.modal-btn-publish{padding:10px 22px;background:linear-gradient(135deg,var(--accent),var(--accent-hover));color:#fff;font-size:13px;font-weight:800;border:none;cursor:pointer;transition:box-shadow .15s,transform .15s}
+.modal-btn-publish:disabled{background:var(--bg-4);color:var(--ink-dimmer);cursor:not-allowed}
+.modal-btn-publish:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(99,102,241,.4)}
+.publish-form{margin-top:16px;display:none}
+.publish-form.active{display:block}
+.publish-field{margin-bottom:12px}
+.publish-field label{display:block;font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.publish-field input{width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--line);color:var(--ink);font-family:inherit;font-size:13px;border-radius:0}
+.publish-field input:focus{outline:none;border-color:var(--accent)}
 .footer{background:var(--bg);border-top:1px solid var(--line);padding:40px 0;margin-top:60px}
 .footer-inner{max-width:1400px;margin:0 auto;padding:0 24px}
 .footer-links{display:flex;flex-wrap:wrap;gap:32px;margin-bottom:20px;font-size:12px;font-weight:700;color:var(--ink-dim)}
 .footer-links a:hover{color:var(--ink)}
 .footer-links .strong{color:var(--ink)}
 .footer-info{font-size:11px;color:var(--ink-dimmer);line-height:1.8}
-@media (max-width:1024px){.main{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.hero-content{grid-template-columns:1fr;gap:24px}.compare-table{font-size:11px}}
-@media (max-width:768px){.gnb-inner{padding:0 16px;height:56px}.gnb-left{gap:0}.main{padding:20px 16px}.grid{grid-template-columns:1fr}.hero{padding:28px 24px;min-height:auto}.hero-title{font-size:28px}.content-title{font-size:18px}.footer-links{gap:18px;font-size:11px}.compare-table{grid-template-columns:60px 1fr 1fr;font-size:10px}.compare-cell{padding:10px}.compare-past .prompt-text{font-size:9px;max-height:60px}}
+@media (max-width:1024px){.grid{grid-template-columns:repeat(2,1fr)}.hero-content{grid-template-columns:1fr;gap:24px}.compare-table{font-size:11px}.modal-grid{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:768px){.gnb-inner{padding:0 16px;height:56px}.gnb-left{gap:0}.main{padding:20px 16px}.grid{grid-template-columns:1fr}.hero{padding:28px 24px;min-height:auto}.hero-title{font-size:28px}.content-title{font-size:18px}.footer-links{gap:18px;font-size:11px}.compare-table{grid-template-columns:60px 1fr 1fr;font-size:10px}.compare-cell{padding:10px}.compare-past .prompt-text{font-size:9px;max-height:60px}.modal-grid{grid-template-columns:repeat(2,1fr)}}
 .icon-sm{width:16px;height:16px}
 .icon-md{width:20px;height:20px}
 .icon-lg{width:28px;height:28px}
@@ -184,45 +205,59 @@ img{display:block}
 
     <div class="content-header">
       <h3 class="content-title">트렌딩 콘텐츠 <span class="content-subtitle">실시간 인기 작품</span></h3>
-      <div class="sort-tabs">
-        <span class="active">인기순</span>
-        <span class="divider">|</span>
-        <span>최신순</span>
-        <span class="divider">|</span>
-        <span>팔로잉</span>
+      <div class="content-actions">
+        <div class="sort-toggle">
+          <button class="active" data-sort="popular">인기순</button>
+          <button data-sort="recent">최신순</button>
+        </div>
+        <button class="publish-btn" id="publishBtn"><i data-lucide="plus" class="icon-sm"></i>게시</button>
       </div>
     </div>
 
     <div class="grid" id="grid"></div>
-
-    <button class="load-more-btn">더 많은 콘텐츠 보기 <i data-lucide="chevron-right" class="icon-sm"></i></button>
   </section>
-
-  <aside class="sidebar">
-    <div class="sb-card login-card">
-      <div class="sb-card-decor"></div>
-      <div class="login-icon"><i data-lucide="zap" class="icon-lg"></i></div>
-      <h4 class="login-title">상상을 작품으로</h4>
-      <p class="login-desc">지금 로그인하고 당신의 아이디어를<br>고화질 AI 아트로 변환해보세요.</p>
-      <button class="login-btn">창작 시작하기</button>
-      <div class="login-links">
-        <span>아이디 찾기</span>
-        <span class="dot"></span>
-        <span>회원가입</span>
-      </div>
-    </div>
-
-    <div class="sb-card tools-card">
-      <h4 class="tools-title"><i data-lucide="sparkles" class="icon-sm"></i>크리에이터 도구</h4>
-      <div class="tools-grid">
-        <div class="tool-item"><div class="tool-icon"><i data-lucide="image" class="icon-md"></i></div><div class="tool-label">이미지 생성</div></div>
-        <div class="tool-item"><div class="tool-icon"><i data-lucide="video" class="icon-md"></i></div><div class="tool-label">영상 생성</div></div>
-        <div class="tool-item"><div class="tool-icon"><i data-lucide="layout-grid" class="icon-md"></i></div><div class="tool-label">내 자료</div></div>
-        <div class="tool-item"><div class="tool-icon"><i data-lucide="users" class="icon-md"></i></div><div class="tool-label">커뮤니티</div></div>
-      </div>
-    </div>
-  </aside>
 </main>
+
+<!-- 게시 모달 -->
+<div class="modal-overlay" id="publishModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title"><i data-lucide="upload" class="icon-md" style="color:var(--accent)"></i>클라우드 자료 게시</h3>
+      <button class="modal-close" id="modalClose"><i data-lucide="x" class="icon-md"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="reward-banner">
+        <div class="reward-icon"><i data-lucide="gift" class="icon-md"></i></div>
+        <div class="reward-text">
+          게시하면 포인트를 드려요. 이미지 <strong>0.5P</strong> · 영상 <strong>1P</strong>.<br>
+          <span style="color:var(--ink-dimmer)">클라우드(내 자료)에 저장된 작품만 게시할 수 있습니다.</span>
+        </div>
+      </div>
+      <div class="modal-tabs">
+        <button class="modal-tab active" data-asset-type="image">이미지</button>
+        <button class="modal-tab" data-asset-type="video">영상</button>
+      </div>
+      <div class="modal-grid" id="modalAssetGrid"></div>
+      <div class="publish-form" id="publishForm">
+        <div class="publish-field">
+          <label>제목</label>
+          <input type="text" id="pubTitle" placeholder="작품 제목을 입력하세요" maxlength="60">
+        </div>
+        <div class="publish-field">
+          <label>태그 (선택)</label>
+          <input type="text" id="pubTag" placeholder="예: 풍경, 인물, 도시" maxlength="20">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="modal-footer-info" id="modalFooterInfo">작품을 선택하세요</div>
+      <div class="modal-footer-actions">
+        <button class="modal-btn-cancel" id="modalCancel">취소</button>
+        <button class="modal-btn-publish" id="modalPublish" disabled>게시하기</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <footer class="footer">
   <div class="footer-inner">
@@ -242,36 +277,184 @@ img{display:block}
 </footer>
 
 <script>
-const mockContent = [
-  { id:1, type:'image', title:'한국의 사계절을 담은 수묵화 AI',     user:'ArtMaster',    likes:'1.2k', views:'4.5k', tag:'풍경',  img:'https://images.unsplash.com/photo-1578926375605-eaf7559b1458?w=800&auto=format&fit=crop' },
-  { id:2, type:'video', title:'서울 밤거리 사이버펑크 60fps',       user:'NeoSeoul',     likes:'3.4k', views:'12k',  tag:'도시',  img:'https://images.unsplash.com/photo-1538332576228-eb5b4c4de6f5?w=800&auto=format&fit=crop' },
-  { id:3, type:'image', title:'K-Pop 아이돌 스타일 캐릭터 생성',     user:'K-Gen',        likes:'890',  views:'2.1k', tag:'인물',  img:'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop' },
-  { id:4, type:'image', title:'전통 자개장 무늬 패턴 디자인',         user:'Heritage',     likes:'2.1k', views:'5.6k', tag:'디자인', img:'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=800&auto=format&fit=crop' },
-  { id:5, type:'video', title:'제주도 푸른 바다 드론 시뮬레이션',     user:'JejuAI',       likes:'1.5k', views:'8.9k', tag:'자연',  img:'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop' },
-  { id:6, type:'image', title:'미래지향적 한복 패션 화보',           user:'FutureHanbok', likes:'5.6k', views:'20k',  tag:'패션',  img:'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=800&auto=format&fit=crop' },
-];
-document.getElementById('grid').innerHTML = mockContent.map(item => `
-  <div class="card">
-    <div class="card-img-wrap">
-      <img class="card-img" src="${item.img}" alt="${item.title}">
-      <div class="card-tag">${item.tag}</div>
-      ${item.type === 'video' ? '<div class="card-video-badge"><i data-lucide="video" class="icon-sm"></i></div>' : ''}
-    </div>
-    <div class="card-body">
-      <h4 class="card-title">${item.title}</h4>
-      <div class="card-meta">
-        <div class="card-user"><div class="card-avatar"></div><span class="card-username">${item.user}</span></div>
-        <div class="card-stats">
-          <div class="card-stat"><i data-lucide="heart" class="icon-sm"></i>${item.likes}</div>
-          <div class="card-stat"><i data-lucide="eye" class="icon-sm"></i>${item.views}</div>
+/* 트렌딩 그리드 + 게시 로직
+   카드 컴셉 보존: { id, type, title, user, likes, views, tag, img, aspect }
+   aspect: '16:9' | '1:1' | '9:16'
+   게시 localStorage 'korart_published' */
+
+const mockContent = [];
+let currentSort = 'popular';
+let currentAssetType = 'image';
+let selectedAsset = null;
+
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  let list = [...mockContent];
+  if (currentSort === 'recent') {
+    list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  } else {
+    list.sort((a, b) => (parseFloat(b.likes) || 0) - (parseFloat(a.likes) || 0));
+  }
+  if (!list.length) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon"><i data-lucide="image-off" class="icon-lg"></i></div>
+        <h4 class="empty-title">아직 게시된 작품이 없어요</h4>
+        <p class="empty-desc">첫 번째 작품을 공유해보세요.<br>이미지 0.5P · 영상 1P의 리워드가 지급됩니다.</p>
+        <button class="empty-btn" onclick="openPublishModal()"><i data-lucide="plus" class="icon-sm"></i>클라우드 자료 게시</button>
+      </div>`;
+    lucide.createIcons();
+    return;
+  }
+  grid.innerHTML = list.map(item => {
+    const isCover = item.aspect === '16:9';
+    return `
+    <div class="card">
+      <div class="card-img-wrap">
+        <img class="card-img${isCover ? ' fit-cover' : ''}" src="${item.img}" alt="${item.title}">
+        ${item.tag ? `<div class="card-tag">${item.tag}</div>` : ''}
+        ${item.type === 'video' ? '<div class="card-video-badge"><i data-lucide="video" class="icon-sm"></i></div>' : ''}
+        <div class="card-aspect-badge">${item.aspect || '16:9'}</div>
+      </div>
+      <div class="card-body">
+        <h4 class="card-title">${item.title}</h4>
+        <div class="card-meta">
+          <div class="card-user"><div class="card-avatar"></div><span class="card-username">${item.user}</span></div>
+          <div class="card-stats">
+            <div class="card-stat"><i data-lucide="heart" class="icon-sm"></i>${item.likes || 0}</div>
+            <div class="card-stat"><i data-lucide="eye" class="icon-sm"></i>${item.views || 0}</div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-`).join('');
+    </div>`;
+  }).join('');
+  lucide.createIcons();
+}
 
-// subnav 클릭은 a href로 자동 페이지 이동 — JS 토글 불필요
+document.querySelectorAll('.sort-toggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sort-toggle button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentSort = btn.dataset.sort;
+    renderGrid();
+  });
+});
 
+function openPublishModal() {
+  document.getElementById('publishModal').classList.add('active');
+  selectedAsset = null;
+  document.getElementById('publishForm').classList.remove('active');
+  document.getElementById('pubTitle').value = '';
+  document.getElementById('pubTag').value = '';
+  loadAssets();
+  updateFooter();
+  document.body.style.overflow = 'hidden';
+}
+
+function closePublishModal() {
+  document.getElementById('publishModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('publishBtn').addEventListener('click', openPublishModal);
+document.getElementById('modalClose').addEventListener('click', closePublishModal);
+document.getElementById('modalCancel').addEventListener('click', closePublishModal);
+document.getElementById('publishModal').addEventListener('click', (e) => {
+  if (e.target.id === 'publishModal') closePublishModal();
+});
+
+document.querySelectorAll('.modal-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentAssetType = tab.dataset.assetType;
+    selectedAsset = null;
+    document.getElementById('publishForm').classList.remove('active');
+    loadAssets();
+    updateFooter();
+  });
+});
+
+function getCloudAssets() {
+  try { return JSON.parse(localStorage.getItem('korart_cloud_assets') || '[]'); }
+  catch (e) { return []; }
+}
+
+function loadAssets() {
+  const grid = document.getElementById('modalAssetGrid');
+  const all = getCloudAssets();
+  const filtered = all.filter(a => a.type === currentAssetType);
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="modal-empty">
+      클라우드에 저장된 ${currentAssetType === 'image' ? '이미지' : '영상'}이 없습니다.<br>
+      <a href="/studio.html?mode=${currentAssetType}">스튜디오에서 새로 만들기 →</a>
+    </div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(a => `
+    <div class="modal-asset" data-asset-id="${a.id}">
+      <span class="type-badge">${a.aspect || '16:9'}</span>
+      ${a.type === 'image' ? `<img src="${a.url}" alt="asset">` : `<video src="${a.url}" muted></video>`}
+    </div>`).join('');
+  document.querySelectorAll('.modal-asset').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.modal-asset').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedAsset = filtered.find(a => a.id === el.dataset.assetId);
+      document.getElementById('publishForm').classList.add('active');
+      updateFooter();
+    });
+  });
+}
+
+function updateFooter() {
+  const info = document.getElementById('modalFooterInfo');
+  const btn = document.getElementById('modalPublish');
+  if (!selectedAsset) {
+    info.innerHTML = '작품을 선택하세요';
+    btn.disabled = true;
+    return;
+  }
+  const reward = selectedAsset.type === 'image' ? '0.5P' : '1P';
+  info.innerHTML = `게시 완료 시 <strong>+${reward}</strong> 지급`;
+  btn.disabled = false;
+}
+
+document.getElementById('modalPublish').addEventListener('click', () => {
+  if (!selectedAsset) return;
+  const title = document.getElementById('pubTitle').value.trim();
+  if (!title) { alert('제목을 입력해주세요'); return; }
+  const tag = document.getElementById('pubTag').value.trim() || '기타';
+  const reward = selectedAsset.type === 'image' ? 0.5 : 1;
+  const newPost = {
+    id: 'p_' + Date.now(),
+    type: selectedAsset.type,
+    title, user: '나', likes: 0, views: 0,
+    tag, img: selectedAsset.url,
+    aspect: selectedAsset.aspect || '16:9',
+    createdAt: Date.now()
+  };
+  try {
+    const list = JSON.parse(localStorage.getItem('korart_published') || '[]');
+    list.unshift(newPost);
+    localStorage.setItem('korart_published', JSON.stringify(list));
+  } catch (e) { console.warn(e); }
+  try {
+    const cur = parseFloat(localStorage.getItem('korart_points') || '0');
+    localStorage.setItem('korart_points', String(cur + reward));
+  } catch (e) {}
+  alert(`게시 완료! +${reward}P 지급되었습니다.`);
+  closePublishModal();
+  mockContent.unshift(newPost);
+  renderGrid();
+});
+
+try {
+  const saved = JSON.parse(localStorage.getItem('korart_published') || '[]');
+  saved.forEach(p => mockContent.push(p));
+} catch (e) {}
+
+renderGrid();
 lucide.createIcons();
 </script>
 </body>
