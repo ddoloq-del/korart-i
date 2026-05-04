@@ -4917,7 +4917,7 @@ function updateAvatarSceneHairCustom(libId, value) {
 // === 시대 맞춤 헤어 옵션 (4단계 씬에서) ===
 // 현재 시대 그룹 + modern (옵션 다양성)
 function getSceneHairOptions(gender) {
-  const list = HAIR_STYLES[gender] || HAIR_STYLES['Korean man'];
+  const list = HAIR_STYLES[gender] || (gender && gender.toLowerCase().includes('woman') ? HAIR_STYLES['Korean woman'] : HAIR_STYLES['Korean man']);
   const eraKey = S.era || 'modern';
   const group = (typeof ERAS !== 'undefined' && ERAS[eraKey] && ERAS[eraKey].group) || 'modern';
   return list.filter(h => h.era === group || h.era === 'modern');
@@ -5972,7 +5972,8 @@ function openAvatarModal(editId) {
       document.getElementById('avSkinCustom').value = '';
       document.querySelectorAll('#avSkinSegs .seg').forEach(s => s.classList.toggle('active', s.dataset.skin === av.skin));
       if (typeof updateAvSkinSelected === 'function') updateAvSkinSelected();
-      const matchHair = (HAIR_STYLES[av.gender] || []).find(h => h.en === av.hair);
+      const _hairList2 = HAIR_STYLES[av.gender] || (av.gender && av.gender.toLowerCase().includes('woman') ? HAIR_STYLES['Korean woman'] : HAIR_STYLES['Korean man']) || [];
+  const matchHair = _hairList2.find(h => h.en === av.hair);
       if (matchHair) {
         document.querySelectorAll('#avHairSegs .seg').forEach(s => {
           s.classList.toggle('active', s.dataset.hairEn === av.hair);
@@ -8293,6 +8294,24 @@ async function buildImagePromptImageModeForApi() {
       return av.name + ': ' + parts.filter(Boolean).join(', ');
     }).join(' | ');
   }
+
+  // 컷별 출연 매핑
+  const _personNames = await Promise.all(personAvs.map(async av => await translateKoToEn(av.name)));
+  const panelCastLines = [];
+  for (let cutIdx = 0; cutIdx < 4; cutIdx++) {
+    const inThisCut = personAvs.filter((av) => {
+      const libId = av._libId || av.id;
+      const cuts = S.avatarCuts && S.avatarCuts[libId];
+      return !cuts || (Array.isArray(cuts) && cuts.includes(cutIdx));
+    });
+    const namesInPanel = inThisCut.map(av => _personNames[personAvs.indexOf(av)]).filter(Boolean);
+    if (namesInPanel.length) {
+      panelCastLines.push(`PANEL ${cutIdx + 1} CHARACTERS: ${namesInPanel.join(', ')}`);
+    } else if (personAvs.length) {
+      panelCastLines.push(`PANEL ${cutIdx + 1} CHARACTERS: (no character, scene only)`);
+    }
+  }
+  const panelCastDesc = panelCastLines.join('. ');
   let petDesc = '';
   if (petAvs.length) {
     const speciesEn = { dog:'dog', cat:'cat', rabbit:'rabbit', hamster:'hamster', bird:'bird', other:'pet' };
@@ -8396,6 +8415,7 @@ async function buildImagePromptImageModeForApi() {
   return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Panel positions are FIXED: Panel 1 = top-left, Panel 2 = top-right, Panel 3 = bottom-left, Panel 4 = bottom-right. Each panel shows variations of the same concept.
 SUBJECTS: ${subjectLock}
 ${charDesc ? 'CHARACTERS: ' + charDesc + '.' : ''}
+${panelCastDesc ? panelCastDesc + '. (Strictly follow this per-panel cast - do NOT include other characters in panels they are not assigned to.)' : ''}
 ${petDesc ? 'PETS: ' + petDesc + '.' : ''}
 ${productDesc ? 'PRODUCTS: ' + productDesc + '.' : ''}
 SCENE STYLE: ${sc.style}.
@@ -10534,10 +10554,7 @@ async function callFalImage(key, model, prompt, size, refImageUrl) {
 
   // queue 방식으로 호출
   log('info', 'body 키: ' + Object.keys(body).join(', '));
-  log('info', 'image_urls 개수: ' + (body.image_urls || []).length);
-  if ((body.image_urls || []).length === 0) {
-    throw new Error('body.image_urls가 비어있음');
-  }
+  if (body.image_urls) log('info', 'image_urls 개수: ' + body.image_urls.length);
   const statusEl = document.getElementById('quad');
   const d = await _falImageQueue(model, body, statusEl);
   const url = d?.images?.[0]?.url || d?.image?.url || d?.url;
