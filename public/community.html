@@ -48,19 +48,16 @@ img{display:block}
 .hero-decor{position:absolute;right:-50px;bottom:-50px;width:280px;height:280px;background:radial-gradient(circle,rgba(167,139,250,.4),transparent 70%);border-radius:50%;filter:blur(40px)}
 
 /* 과거 vs 현재 비교 표 */
-.compare-table{background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.18);display:grid;grid-template-columns:120px 1fr 1fr;font-size:12px;color:rgba(255,255,255,.92)}
-.compare-cell{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.12);border-right:1px solid rgba(255,255,255,.08);min-width:0;word-break:keep-all}
+.compare-table{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);display:grid;grid-template-columns:72px 1fr 1fr;font-size:12px;color:rgba(255,255,255,.92);overflow:hidden}
+.compare-cell{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1);border-right:1px solid rgba(255,255,255,.1);min-width:0;word-break:keep-all}
 .compare-cell:nth-child(3n){border-right:none}
 .compare-table > .compare-cell:nth-last-child(-n+3){border-bottom:none}
-.compare-head{background:rgba(255,255,255,.1);font-weight:800;font-size:11px;letter-spacing:.08em;text-transform:uppercase;text-align:center;color:#fff}
-.compare-head.past{color:rgba(255,180,180,.95)}
-.compare-head.now{color:#c4b5fd}
-.compare-row-label{background:rgba(0,0,0,.18);font-weight:700;font-size:11px;color:rgba(255,255,255,.7);letter-spacing:.04em;display:flex;align-items:center}
-.compare-past{color:rgba(255,255,255,.65);font-size:11px;line-height:1.5;font-style:italic;font-family:'Pretendard Variable',Pretendard,sans-serif}
-.compare-past .prompt-text{display:block;background:rgba(0,0,0,.25);padding:8px;font-family:ui-monospace,Menlo,monospace;font-size:10px;line-height:1.5;color:rgba(255,200,200,.7);max-height:90px;overflow:hidden;font-style:normal;border-left:2px solid #f87171}
-.compare-now{color:#fff;font-size:12px;line-height:1.55;font-weight:600}
-.compare-now strong{color:#c4b5fd;font-weight:900}
-.compare-now .badge-step{display:inline-block;background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.5);padding:2px 8px;font-size:10px;font-weight:700;color:#c4b5fd;margin-right:4px}
+.compare-head{background:rgba(255,255,255,.06);font-weight:700;font-size:12px;letter-spacing:.04em;text-align:center;color:rgba(255,255,255,.95);padding:10px 8px}
+.compare-row-label{background:rgba(0,0,0,.2);font-weight:700;font-size:11px;color:rgba(255,255,255,.85);letter-spacing:.02em;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px 6px}
+.compare-past, .compare-now{font-size:12px;line-height:1.55;color:rgba(255,255,255,.9);font-weight:500}
+.compare-past .prompt-text{display:block;background:rgba(0,0,0,.25);padding:8px 10px;margin-top:6px;font-family:ui-monospace,Menlo,monospace;font-size:10px;line-height:1.5;color:rgba(255,255,255,.55);max-height:84px;overflow:hidden;border-left:2px solid rgba(255,255,255,.25)}
+.compare-now strong{color:#c4b5fd;font-weight:800}
+.compare-now .badge-step{display:inline-block;background:rgba(196,181,253,.15);border:1px solid rgba(196,181,253,.4);padding:2px 8px;font-size:10px;font-weight:700;color:#c4b5fd;margin:2px 3px 0 0}
 .content-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
 .content-title{font-size:20px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:baseline;gap:12px}
 .content-subtitle{font-size:12px;color:var(--ink-dimmer);font-weight:500}
@@ -123,7 +120,7 @@ img{display:block}
 .footer-links .strong{color:var(--ink)}
 .footer-info{font-size:11px;color:var(--ink-dimmer);line-height:1.8}
 @media (max-width:1024px){.main{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.hero-content{grid-template-columns:1fr;gap:24px}.compare-table{font-size:11px}}
-@media (max-width:768px){.gnb-inner{padding:0 16px;height:56px}.gnb-left{gap:0}.main{padding:20px 16px}.grid{grid-template-columns:1fr}.hero{padding:28px 24px;min-height:auto}.hero-title{font-size:28px}.content-title{font-size:18px}.footer-links{gap:18px;font-size:11px}.compare-table{grid-template-columns:80px 1fr 1fr;font-size:10px}.compare-cell{padding:10px}.compare-past .prompt-text{font-size:9px;max-height:60px}}
+@media (max-width:768px){.gnb-inner{padding:0 16px;height:56px}.gnb-left{gap:0}.main{padding:20px 16px}.grid{grid-template-columns:1fr}.hero{padding:28px 24px;min-height:auto}.hero-title{font-size:28px}.content-title{font-size:18px}.footer-links{gap:18px;font-size:11px}.compare-table{grid-template-columns:60px 1fr 1fr;font-size:10px}.compare-cell{padding:10px}.compare-past .prompt-text{font-size:9px;max-height:60px}}
 .icon-sm{width:16px;height:16px}
 .icon-md{width:20px;height:20px}
 .icon-lg{width:28px;height:28px}
@@ -170,16 +167,16 @@ img{display:block}
         <div class="hero-right">
           <div class="compare-table">
             <div class="compare-cell compare-head"></div>
-            <div class="compare-cell compare-head past">과거</div>
-            <div class="compare-cell compare-head now">현재</div>
+            <div class="compare-cell compare-head">과거</div>
+            <div class="compare-cell compare-head">현재</div>
 
-            <div class="compare-cell compare-row-label">입력 방식</div>
-            <div class="compare-cell compare-past">영어 프롬프트 500자 직접 작성<span class="prompt-text">"a young Korean woman in her early 20s with long black hair, wearing a beige trench coat, walking through cherry blossoms in Seoul during golden hour, soft natural lighting, shallow depth of field, cinematic film grain, anamorphic lens flare, Kodak Portra 400 color grading, dreamy atmospheric haze..."</span></div>
+            <div class="compare-cell compare-row-label">입력<br>방식</div>
+            <div class="compare-cell compare-past">영어 프롬프트 500자 직접 작성<span class="prompt-text">"a young Korean woman in her early 20s with long black hair, wearing a beige trench coat, walking through cherry blossoms in Seoul during golden hour, soft natural lighting, shallow depth of field, cinematic film grain..."</span></div>
             <div class="compare-cell compare-now">마우스 클릭만으로 완성<br><span class="badge-step">씬</span><span class="badge-step">앵글</span><span class="badge-step">장소</span><span class="badge-step">인물</span></div>
 
-            <div class="compare-cell compare-row-label">진행 흐름</div>
-            <div class="compare-cell compare-past">프롬프트 입력 → 바로 영상 생성<br>→ 결과 마음에 안 들면 재시도·재시도...</div>
-            <div class="compare-cell compare-now">이미지 4컷으로 <strong>초안 확인</strong> →<br>원하는 구도 확정 후 <strong>영상 생성</strong></div>
+            <div class="compare-cell compare-row-label">진행<br>흐름</div>
+            <div class="compare-cell compare-past">프롬프트 입력 → 바로 영상 생성<br>→ 마음에 안 들면 재시도·재시도...</div>
+            <div class="compare-cell compare-now">이미지 4컷으로 <strong>초안 확인</strong> →<br>구도 확정 후 <strong>영상 생성</strong></div>
           </div>
         </div>
       </div>
