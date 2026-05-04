@@ -312,6 +312,7 @@ img{display:block}
       <div class="pd-points-value" id="pdPoints">0<span class="pt-unit">P</span></div>
     </div>
     <div class="pd-menu">
+      <a class="pd-item" href="/subscription.html" style="text-decoration:none"><i data-lucide="sparkles" class="icon-sm"></i>포인트 충전/구독</a>
       <button class="pd-item" id="pdProfileBtn"><i data-lucide="user" class="icon-sm"></i>회원정보</button>
       <button class="pd-item danger" id="pdLogoutBtn"><i data-lucide="log-out" class="icon-sm"></i>로그아웃</button>
     </div>
@@ -1545,6 +1546,16 @@ async function loadCommunityPosts() {
     setTimeout(loadCommunityPosts, 300);
     return;
   }
+  // currentUser 준비될 때까지 최대 2초 대기 (로그인한 사용자의 마이그레이션을 위해)
+  let waitCount = 0;
+  while (!currentUser && waitCount < 20) {
+    await new Promise(r => setTimeout(r, 100));
+    waitCount++;
+  }
+
+  // 기존 localStorage 게시물을 server로 마이그레이션 (1회)
+  await migrateLocalPostsIfAny();
+
   try {
     const { data, error } = await sb
       .from('community_posts')
@@ -1579,7 +1590,8 @@ async function loadCommunityPosts() {
         tag: row.tag,
         img: row.asset_url,
         aspect: row.aspect || '16:9',
-        createdAt: new Date(row.created_at).getTime()
+        createdAt: new Date(row.created_at).getTime(),
+        ownerId: row.user_id
       });
     });
     renderGrid();
@@ -1588,6 +1600,50 @@ async function loadCommunityPosts() {
     console.warn('[community] 로드 예외:', e);
     renderGrid();
     lucide.createIcons();
+  }
+}
+
+// localStorage에 있는 이전 게시물을 server로 1회 마이그레이션
+async function migrateLocalPostsIfAny() {
+  // 이미 마이그레이션했으면 스킵
+  if (localStorage.getItem('korart_local_migrated') === '1') return;
+  if (!sb || !currentUser) return;
+  let local = [];
+  try { local = JSON.parse(localStorage.getItem('korart_published') || '[]'); } catch (e) { return; }
+  if (!local.length) {
+    localStorage.setItem('korart_local_migrated', '1');
+    return;
+  }
+
+  console.log('[community] localStorage 게시물 ' + local.length + '건 마이그레이션 시작');
+  const meta = currentUser.user_metadata || {};
+  const nickname = meta.name || meta.full_name || (currentUser.email ? currentUser.email.split('@')[0] : '익명');
+  const avatar = meta.avatar_url || meta.picture || null;
+
+  let migrated = 0;
+  for (const p of local) {
+    if (!p.img || !p.title) continue;
+    try {
+      const { error } = await sb.from('community_posts').insert({
+        user_id: currentUser.id,
+        asset_url: p.img,
+        type: p.type || 'image',
+        aspect: p.aspect || '16:9',
+        title: p.title,
+        tag: p.tag || null,
+        user_nickname: nickname,
+        user_avatar: avatar,
+        likes: p.likes || 0,
+        views: p.views || 0
+      });
+      if (!error) migrated++;
+    } catch (e) { console.warn('[migrate] 실패:', e.message); }
+  }
+  console.log('[community] 마이그레이션 완료: ' + migrated + '건');
+  localStorage.setItem('korart_local_migrated', '1');
+  // localStorage 정리 (서버에 올라가서 더 이상 필요 없음)
+  if (migrated > 0) {
+    localStorage.removeItem('korart_published');
   }
 }
 

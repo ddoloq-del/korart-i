@@ -1230,6 +1230,10 @@ select option:hover {
 .korart-gnb-right { display: flex; align-items: center; gap: 8px; }
 .korart-icon-btn { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #666; background: none; border: none; cursor: pointer; transition: background .15s; }
 .korart-icon-btn:hover { background: #f5f5f5; color: #1a1a1a; }
+/* GNB 포인트 배지 — 클릭 시 구독 페이지로 */
+.korart-points-pill { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; background: linear-gradient(135deg, rgba(99,102,241,.08), rgba(167,139,250,.08)); border: 1px solid rgba(99,102,241,.25); color: #4f46e5; font-family: 'JetBrains Mono', 'Pretendard', monospace; font-size: 13px; font-weight: 800; cursor: pointer; transition: all .15s; text-decoration: none; letter-spacing: -.01em; white-space: nowrap; }
+.korart-points-pill:hover { background: linear-gradient(135deg, rgba(99,102,241,.18), rgba(167,139,250,.18)); border-color: #6366f1; transform: translateY(-1px); }
+.korart-points-pill svg { color: #6366f1; }
 .korart-avatar-btn { width: 34px; height: 34px; border-radius: 0; border: none; background: linear-gradient(135deg, #6366f1, #a78bfa); display: flex; align-items: center; justify-content: center; margin-left: 4px; color: #fff; cursor: pointer; position: relative; overflow: hidden; padding: 0; }
 .korart-avatar-btn svg { width: 18px; height: 18px; stroke-width: 2.2; }
 .korart-avatar-btn.logged-in { border-radius: 50%; background: var(--bg3); overflow: hidden; }
@@ -1788,6 +1792,11 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
       <a class="korart-logo" href="/community.html"><img src="/logo.png" alt="코라티" style="height:40px;width:auto;display:block"></a>
     </div>
     <div class="korart-gnb-right">
+      <a class="korart-points-pill" href="/subscription.html" id="gnbPointsPill" title="포인트 / 구독">
+        <i data-lucide="sparkles" style="width:14px;height:14px"></i>
+        <span id="gnbPointsValue">—</span>
+        <span style="opacity:.6;font-size:10px;font-weight:600">P</span>
+      </a>
       <button class="korart-icon-btn" title="알림"><i data-lucide="bell"></i></button>
       <button class="korart-icon-btn" title="메뉴"><i data-lucide="layout-grid"></i></button>
       <button class="korart-avatar-btn" id="avatarBtn" title="프로필"><i data-lucide="user-round"></i></button>
@@ -2932,13 +2941,44 @@ async function callWorkerFal(endpointPath, opts = {}) {
     headers,
     body: opts.body ? JSON.stringify(opts.body) : undefined,
   });
-  // 포인트 부족 처리
+  // 포인트 부족 처리 — 구독 페이지 안내 추가
   if (r.status === 402) {
     const data = await r.json();
+    if (confirm(`포인트가 부족해요!\n\n현재 잔액: ${data.balance.toLocaleString()} P\n필요: ${data.required.toLocaleString()} P\n\n구독 페이지로 이동할까요?`)) {
+      window.location.href = '/subscription.html';
+    }
     throw new Error('포인트 부족 (' + data.balance + ' / 필요 ' + data.required + ')');
   }
   if (r.status === 401) {
     throw new Error('로그인이 필요합니다');
+  }
+  // X-Points-Remaining 헤더가 있으면 즉시 UI 갱신
+  const remaining = r.headers.get('X-Points-Remaining');
+  const charged = r.headers.get('X-Points-Charged');
+  const unlimited = r.headers.get('X-Unlimited') === '1';
+  if (remaining !== null) {
+    const pts = parseFloat(remaining);
+    if (!isNaN(pts)) {
+      // 모든 포인트 UI 즉시 업데이트
+      const targets = ['userPoints', 'gnbPointsValue', 'pdPoints', 'pmPoints'];
+      targets.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (unlimited) {
+          if (id === 'gnbPointsValue') el.textContent = '∞';
+          else el.innerHTML = '<span style="color:var(--gold);font-weight:700">∞ P</span>';
+        } else {
+          if (id === 'gnbPointsValue') el.textContent = pts.toLocaleString();
+          else if (id === 'pdPoints') el.innerHTML = pts.toLocaleString() + '<span class="pt-unit">P</span>';
+          else if (id === 'pmPoints') el.textContent = pts.toLocaleString() + ' P';
+          else el.innerHTML = '<span style="color:var(--gold);font-weight:700">' + pts.toLocaleString() + ' P</span>';
+        }
+      });
+      // 차감되었을 때만 toast 알림
+      if (charged && parseFloat(charged) > 0 && typeof showToast === 'function') {
+        showToast(`-${charged}P 차감 · 잔액 ${pts.toLocaleString()}P`);
+      }
+    }
   }
   return r;
 }
@@ -2982,18 +3022,28 @@ async function fetchMyPoints() {
 async function updatePointsDisplay() {
   const me = await fetchMyPoints();
   console.log('[Points] fetchMyPoints result:', me);
-  const el = document.getElementById('userPoints');
-  if (!el) { console.warn('[Points] userPoints element not found'); return; }
-  if (!me) {
-    console.warn('[Points] me is null - JWT 또는 profile 문제');
-    el.innerHTML = '<span style="color:var(--ink3);font-size:10px">- P</span>';
-    return;
-  }
-  if (me.unlimited) {
-    el.innerHTML = '<span style="color:var(--gold);font-weight:700">∞ P</span> <span style="font-size:9px;color:var(--ink3)">(무제한)</span>';
-  } else {
-    el.innerHTML = '<span style="color:var(--gold);font-weight:700">' + me.points.toLocaleString() + ' P</span>';
-  }
+
+  // 구 GNB userPoints (이제 없음) + 새 GNB gnbPointsValue + 드롭다운 pdPoints + 회원정보 pmPoints 모두 갱신
+  const targets = ['userPoints', 'gnbPointsValue', 'pdPoints', 'pmPoints'];
+
+  targets.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (!me) {
+      if (id === 'gnbPointsValue') el.textContent = '—';
+      else el.innerHTML = '<span style="color:var(--ink3);font-size:10px">— P</span>';
+      return;
+    }
+    if (me.unlimited) {
+      if (id === 'gnbPointsValue') el.textContent = '∞';
+      else el.innerHTML = '<span style="color:var(--gold);font-weight:700">∞ P</span> <span style="font-size:9px;color:var(--ink3)">(무제한)</span>';
+    } else {
+      if (id === 'gnbPointsValue') el.textContent = me.points.toLocaleString();
+      else if (id === 'pdPoints') el.innerHTML = me.points.toLocaleString() + '<span class="pt-unit">P</span>';
+      else if (id === 'pmPoints') el.textContent = me.points.toLocaleString() + ' P';
+      else el.innerHTML = '<span style="color:var(--gold);font-weight:700">' + me.points.toLocaleString() + ' P</span>';
+    }
+  });
 }
 
 // DOMContentLoaded 또는 sb 준비되면 자동 호출
