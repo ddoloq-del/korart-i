@@ -42,6 +42,7 @@ img{display:block}
 .hero-cta-alt:hover{background:rgba(255,255,255,.1);border-color:#fff;box-shadow:none}
 .hero-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
 .hero-sub{font-size:15px;color:rgba(255,255,255,.85);line-height:1.65;margin-bottom:24px;max-width:560px}
+.hero-grad{background:linear-gradient(135deg,#a78bfa 0%,#c084fc 50%,#e0a4ff 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;font-weight:900}
 .hero-decor{position:absolute;right:-50px;bottom:-50px;width:280px;height:280px;background:radial-gradient(circle,rgba(167,139,250,.4),transparent 70%);border-radius:50%;filter:blur(40px)}
 .content-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
 .content-title{font-size:20px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:baseline;gap:12px}
@@ -128,8 +129,8 @@ img{display:block}
 <nav class="subnav">
   <div class="subnav-inner" id="subnav">
     <a class="subnav-item active" href="/community.html">홈</a>
+    <a class="subnav-item" href="/studio.html?mode=video">영상 생성</a>
     <a class="subnav-item" href="/studio.html?mode=image">이미지 생성</a>
-    <a class="subnav-item" href="/studio.html?mode=video">비디오 생성</a>
     <a class="subnav-item" href="/mypage.html">내 자료</a>
     <a class="subnav-item" href="/community.html">커뮤니티</a>
   </div>
@@ -140,12 +141,12 @@ img{display:block}
     <div class="hero">
       <div class="hero-decor"></div>
       <div class="hero-content">
-        <div class="hero-badge"><i data-lucide="sparkles" class="icon-sm"></i><span>Premium Creative AI</span></div>
-        <h2 class="hero-title">프롬프트 없이 클릭만으로<br>나만의 영상 완성.</h2>
+        <div class="hero-badge"><span>최신 이미지/영상 생성 AI 제공</span></div>
+        <h2 class="hero-title">프롬프트 없이 클릭만으로<br>나만의 <span class="hero-grad">영상/이미지</span> 생성 완성.</h2>
         <p class="hero-sub">선택과 상세 설정으로 K-콘텐츠 영상 메이킹.<br>AI가 4컷 미리보기로 확인시켜주고, 영상까지 한 번에.</p>
         <div class="hero-ctas">
+          <a class="hero-cta" href="/studio.html?mode=video"><i data-lucide="video" class="icon-sm"></i> 영상 생성 →</a>
           <a class="hero-cta" href="/studio.html?mode=image"><i data-lucide="image" class="icon-sm"></i> 이미지 생성 →</a>
-          <a class="hero-cta hero-cta-alt" href="/studio.html?mode=video"><i data-lucide="video" class="icon-sm"></i> 영상 생성 →</a>
         </div>
       </div>
     </div>
