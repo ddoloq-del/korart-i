@@ -4766,9 +4766,9 @@ function renderStep1Avatars() {
             <div style="font-size:9px;color:var(--ink3)">${av.gender === 'Korean man' ? '남' : av.gender === 'Korean woman' ? '여' : '?'}${ageShort ? ' · ' + ageShort : ''}</div>
           </div>
         </div>
-        ${isCast ? `
+        ${isCast && (!av.category || av.category === 'person') ? `
           <div style="padding:8px 10px 10px;border-top:1px solid rgba(200,160,74,.25);background:rgba(0,0,0,.18)">
-            <!-- 의상 드롭다운 -->
+            <!-- 의상 드롭다운 (사람 카테고리만) -->
             <div style="margin-bottom:8px">
               <label style="font-size:9px;color:${(outfit && outfit.trim()) ? 'var(--gold)' : 'var(--ink3)'};font-weight:700;letter-spacing:.05em;display:block;margin-bottom:3px">
                 의상${(outfit && outfit.trim()) ? ' ✓' : ''}
