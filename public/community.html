@@ -1314,7 +1314,7 @@ function renderGrid() {
   lucide.createIcons();
 }
 
-// 본인 게시물 삭제 (soft delete)
+// 본인 게시물 삭제 (hard delete — RLS visibility 문제 회피)
 async function deletePost(postId, event) {
   event.stopPropagation();
   if (!confirm('이 게시물을 삭제하시겠어요?\n삭제된 게시물은 복구할 수 없어요.')) return;
@@ -1324,7 +1324,7 @@ async function deletePost(postId, event) {
   }
   try {
     const { error } = await sb.from('community_posts')
-      .update({ is_deleted: true, updated_at: new Date().toISOString() })
+      .delete()
       .eq('id', postId)
       .eq('user_id', currentUser.id);
     if (error) {
