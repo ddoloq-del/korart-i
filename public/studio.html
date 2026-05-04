@@ -2871,6 +2871,7 @@ let currentSession = null;
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' },
   });
   window.__sb = sb;
+  window.sb = sb;  // KorartiAuth IIFE에서 재사용 가능하도록 즉시 노출
   try {
     const { data: { session } } = await sb.auth.getSession();
     if (session) {
@@ -12065,7 +12066,8 @@ function resetMerge() {
     return;
   }
 
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  // 외부 sb (authBootstrap에서 생성된 것) 재사용 — 세션 분리 및 OAuth 콜백 충돌 방지
+  const sb = window.sb || window.__sb || window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
@@ -12073,6 +12075,8 @@ function resetMerge() {
       flowType: 'pkce'
     }
   });
+  // window.sb 설정 보장 (외부에서 필요하면)
+  if (!window.sb) window.sb = sb;
 
   // --- 상태 ---
   let currentUser = null;
