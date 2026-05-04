@@ -180,6 +180,12 @@ img{display:block}
 .card-img.fit-cover{width:100%;height:100%;object-fit:cover}
 .card:hover .card-img{transform:scale(1.05)}
 .card-aspect-badge{position:absolute;bottom:12px;left:12px;background:rgba(0,0,0,.7);color:#fff;font-size:9px;font-weight:800;letter-spacing:.06em;padding:3px 7px;border-radius:0;backdrop-filter:blur(8px)}
+.card-delete-btn{position:absolute;top:8px;right:8px;width:32px;height:32px;background:rgba(0,0,0,.7);border:none;color:#fff;cursor:pointer;display:none;align-items:center;justify-content:center;border-radius:0;transition:background .15s;z-index:5}
+.card:hover .card-delete-btn{display:flex}
+.card-delete-btn:hover{background:#dc2626}
+.card-delete-btn svg{width:16px;height:16px}
+.card-img-wrap{position:relative}
+img.card-avatar{width:24px;height:24px;border-radius:50%;object-fit:cover;display:inline-block;vertical-align:middle}
 .empty-state{grid-column:1/-1;padding:60px 24px;text-align:center;background:var(--bg-2);border:1px dashed var(--line-lit)}
 .empty-icon{width:56px;height:56px;background:var(--bg-3);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:var(--ink-dimmer)}
 .empty-title{font-size:16px;font-weight:800;margin-bottom:6px;color:var(--ink)}
@@ -1277,22 +1283,24 @@ function renderGrid() {
   grid.innerHTML = pageList.map(item => {
     const isCover = item.aspect === '16:9';
     const isVideo = item.type === 'video';
+    const isMine = currentUser && item.ownerId === currentUser.id;
     // 영상은 <video>, 이미지는 <img>
     const mediaHtml = isVideo
       ? `<video class="card-img${isCover ? ' fit-cover' : ''}" src="${item.img}" muted playsinline preload="metadata" onmouseenter="this.play()" onmouseleave="this.pause()"></video>`
       : `<img class="card-img${isCover ? ' fit-cover' : ''}" src="${item.img}" alt="${item.title}">`;
     return `
-    <div class="card">
+    <div class="card" data-post-id="${item.id}">
       <div class="card-img-wrap">
         ${mediaHtml}
         ${item.tag ? `<div class="card-tag">${item.tag}</div>` : ''}
         ${isVideo ? '<div class="card-video-badge"><i data-lucide="video" class="icon-sm"></i></div>' : ''}
         <div class="card-aspect-badge">${item.aspect || '16:9'}</div>
+        ${isMine ? `<button class="card-delete-btn" onclick="deletePost('${item.id}', event)" title="게시물 삭제"><i data-lucide="trash-2" class="icon-sm"></i></button>` : ''}
       </div>
       <div class="card-body">
         <h4 class="card-title">${item.title}</h4>
         <div class="card-meta">
-          <div class="card-user"><div class="card-avatar"></div><span class="card-username">${item.user}</span></div>
+          <div class="card-user">${item.avatar ? `<img src="${item.avatar}" class="card-avatar" referrerpolicy="no-referrer">` : '<div class="card-avatar"></div>'}<span class="card-username">${item.user}</span></div>
           <div class="card-stats">
             <div class="card-stat"><i data-lucide="heart" class="icon-sm"></i>${item.likes || 0}</div>
             <div class="card-stat"><i data-lucide="eye" class="icon-sm"></i>${item.views || 0}</div>
@@ -1304,6 +1312,32 @@ function renderGrid() {
   // 페이지네이션 렌더
   renderPagination(list.length);
   lucide.createIcons();
+}
+
+// 본인 게시물 삭제 (soft delete)
+async function deletePost(postId, event) {
+  event.stopPropagation();
+  if (!confirm('이 게시물을 삭제하시겠어요?\n삭제된 게시물은 복구할 수 없어요.')) return;
+  if (!sb || !currentUser) {
+    alert('로그인이 필요해요.');
+    return;
+  }
+  try {
+    const { error } = await sb.from('community_posts')
+      .update({ is_deleted: true, updated_at: new Date().toISOString() })
+      .eq('id', postId)
+      .eq('user_id', currentUser.id);
+    if (error) {
+      alert('삭제 실패: ' + error.message);
+      return;
+    }
+    // mockContent에서 즉시 제거
+    const idx = mockContent.findIndex(p => p.id === postId);
+    if (idx >= 0) mockContent.splice(idx, 1);
+    renderGrid();
+  } catch (e) {
+    alert('삭제 오류: ' + e.message);
+  }
 }
 
 document.querySelectorAll('.sort-toggle button').forEach(btn => {
