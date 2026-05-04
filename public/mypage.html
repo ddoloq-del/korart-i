@@ -158,29 +158,7 @@ body {
 
 /* ── Hero greeting ── */
 .hero {
-  margin-bottom: 56px;
-}
-.hero-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--pink);
-  font-weight: 600;
-  margin-bottom: 18px;
-  padding: 9px 18px;
-  border: 1px solid rgba(99, 102, 241, 0.45);
-  background: rgba(2, 6, 23, 0.6);
-}
-.hero-eyebrow::before {
-  content: '';
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 8px rgba(74, 222, 128, .8);
+  margin-bottom: 32px;
 }
 .hero h1 {
   font-size: clamp(28px, 4vw, 44px);
@@ -201,6 +179,34 @@ body {
   font-size: 16px;
   color: var(--ink2);
   max-width: 560px;
+}
+
+/* ── Big main tabs (내 자료 / 거래 이력) ── */
+.main-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--line);
+  margin-bottom: 32px;
+}
+.main-tab {
+  padding: 16px 28px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink3);
+  border: none;
+  background: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: color .15s, border-color .15s;
+  font-family: inherit;
+  letter-spacing: -.01em;
+}
+.main-tab:hover { color: var(--ink2); }
+.main-tab.active {
+  color: var(--pink);
+  border-bottom-color: var(--pink);
+  font-weight: 800;
 }
 
 /* ── Two big action buttons ── */
@@ -543,7 +549,6 @@ body {
     <a class="korart-subnav-item" href="/studio.html?mode=video">비디오 생성</a>
     <a class="korart-subnav-item active" href="/mypage.html">내 자료</a>
     <a class="korart-subnav-item" href="/community.html">커뮤니티</a>
-    <a class="korart-subnav-item" href="#">이벤트</a>
   </div>
 </nav>
 <!-- ══ Topbar removed (공유 GNB가 대신 함) ══ -->
@@ -553,36 +558,18 @@ body {
 
   <!-- Hero -->
   <div class="hero">
-    <div class="hero-eyebrow">My Page</div>
     <h1>안녕하세요, <em id="heroNickname">사용자</em>님</h1>
     <p>지금까지 만든 자료와 거래 이력을 한 눈에 확인하세요.</p>
   </div>
 
-  <!-- Two action buttons -->
-  <div class="action-grid">
-    <div class="action-card" onclick="showAssetSection()">
-      <div class="action-icon" style="font-size:28px;font-family:'JetBrains Mono',monospace;color:var(--gold);font-weight:800">[ ARCHIVE ]</div>
-      <div>
-        <div class="action-cat">LIBRARY · ARCHIVE</div>
-        <h3>내 자료 보기</h3>
-      </div>
-      <p>지금까지 만들어 클라우드에 저장한 아바타·4컷·영상을 모아볼 수 있어요.</p>
-      <div class="arrow">↓</div>
-    </div>
-
-    <div class="action-card" onclick="showTxSection()">
-      <div class="action-icon" style="font-size:28px;font-family:'JetBrains Mono',monospace;color:var(--teal);font-weight:800">[ HISTORY ]</div>
-      <div>
-        <div class="action-cat">POINTS · TRANSACTIONS</div>
-        <h3>거래 이력</h3>
-      </div>
-      <p>포인트 충전·사용·환불 내역을 시간순으로 확인할 수 있어요.</p>
-      <div class="arrow">↓</div>
-    </div>
+  <!-- Big main tabs -->
+  <div class="main-tabs">
+    <button class="main-tab active" id="tabAsset" onclick="switchMainTab('asset')">내 자료</button>
+    <button class="main-tab" id="tabTx" onclick="switchMainTab('tx')">거래 이력</button>
   </div>
 
-  <!-- Asset section (initially hidden, toggles by 내 자료 보기 click) -->
-  <div class="asset-section" id="assetSection">
+  <!-- Asset section (기본 노출 — 내 자료 탭) -->
+  <div class="asset-section active" id="assetSection">
     <div class="asset-header">
       <div class="asset-title">내 자료</div>
       <button class="btn btn-sm btn-ghost" onclick="refreshAllCounts()">새로고침</button>
@@ -726,6 +713,9 @@ async function onLoginReady() {
 
   // 카운트 업데이트
   refreshAllCounts();
+
+  // 기본 탭(내 자료) 철 로드 — 아바타 그리드 자동 표시
+  if (typeof loadAssetType === 'function') loadAssetType('avatar');
 }
 
 // ============================================
@@ -800,6 +790,29 @@ async function refreshAllCounts() {
 // ============================================================
 //  거래 이력
 // ============================================================
+function switchMainTab(tab) {
+  // 탭 버튼 active 상태 동기화
+  document.getElementById('tabAsset').classList.toggle('active', tab === 'asset');
+  document.getElementById('tabTx').classList.toggle('active', tab === 'tx');
+  // 섹션 표시 전환
+  const asset = document.getElementById('assetSection');
+  const tx = document.getElementById('txSection');
+  if (tab === 'asset') {
+    asset.classList.add('active');
+    asset.style.display = '';
+    tx.classList.remove('active');
+    tx.style.display = 'none';
+    // 철 로드 시 아바타 탭 자동 로드
+    if (typeof loadAssetType === 'function' && currentUser) loadAssetType(_currentType || 'avatar');
+  } else {
+    asset.classList.remove('active');
+    asset.style.display = 'none';
+    tx.classList.add('active');
+    tx.style.display = 'block';
+    if (typeof loadTransactions === 'function' && currentUser) loadTransactions();
+  }
+}
+
 function showTxSection() {
   const section = document.getElementById('txSection');
   if (!section) return;
