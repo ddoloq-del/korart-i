@@ -10499,9 +10499,23 @@ async function generateCutVideo(i) {
     status.textContent = `fal.ai 요청 중 (${dur}초 예상)...`;
     log('info', `body: ${JSON.stringify(body).slice(0,200)}`);
 
+    // 이미지 생성 포인트: data-cpm × 42 (비치가 이미 정해둔 공식, line 5761 참고)
+    const _imgEstPoints = (function() {
+      try {
+        const sel = document.getElementById('imgModel');
+        const opt = sel ? sel.options[sel.selectedIndex] : null;
+        const cpm = opt ? parseFloat(opt.dataset.cpm || '0') : 0;
+        return Math.max(1, Math.ceil(cpm * 42));
+      } catch (e) { return 0; }
+    })();
+
     const r = await fetch('/fal-proxy/' + model, {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + (await getSupabaseJWT()), 'Content-Type': 'application/json' },
+      headers: {
+        'Authorization': 'Bearer ' + (await getSupabaseJWT()),
+        'Content-Type': 'application/json',
+        'X-Estimated-Points': String(_imgEstPoints)
+      },
       body: JSON.stringify(body),
     });
 
@@ -10620,10 +10634,28 @@ function getQuadCssAspect() {
 // /fal-proxy POST -> IN_QUEUE -> /fal-proxy-abs 폴링 -> COMPLETED -> 결과 fetch
 async function _falImageQueue(model, body, statusEl) {
   const jwt = await getSupabaseJWT();
+
+  // 영상 생성 포인트 추정: data-points-on/off × duration
+  const _vidEstPoints = (function() {
+    try {
+      const sel = document.getElementById('vidModel');
+      const opt = sel ? sel.querySelector('option[value="' + model + '"]') : null;
+      if (!opt) return 10;  // 기본 10P
+      const audioOn = (body && (body.audio_enabled || body.generate_audio || body.with_audio)) ? true : false;
+      const ppsec = parseFloat(audioOn ? (opt.dataset.pointsOn || '5') : (opt.dataset.pointsOff || '4')) || 5;
+      const dur = parseFloat(body && body.duration ? body.duration : 5) || 5;
+      return Math.max(1, Math.ceil(ppsec * dur));
+    } catch (e) { return 10; }
+  })();
+
   // 1단계: queue 제출
   const submitRes = await fetch('/fal-proxy/' + model, {
     method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + jwt, 'Content-Type': 'application/json' },
+    headers: {
+      'Authorization': 'Bearer ' + jwt,
+      'Content-Type': 'application/json',
+      'X-Estimated-Points': String(_vidEstPoints)
+    },
     body: JSON.stringify(body),
   });
   if (!submitRes.ok) {
