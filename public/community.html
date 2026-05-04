@@ -49,10 +49,13 @@ img{display:block}
 .pd-item.danger:hover{background:#fef2f2;color:#b91c1c}
 .pd-item.danger svg{color:#dc2626}
 
+.sb-link{color:var(--ink-dim);text-decoration:none;cursor:pointer;transition:color .15s}
+.sb-link:hover{color:var(--accent);text-decoration:underline}
+
 /* 인증 모달 */
 .auth-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px}
 .auth-modal-overlay.active{display:flex}
-.auth-modal{background:#fff;border:1px solid var(--line);max-width:400px;width:100%;padding:36px 32px;position:relative}
+.auth-modal{background:#fff;border:1px solid var(--line);max-width:420px;width:100%;padding:36px 28px 24px;position:relative;max-height:90vh;overflow-y:auto}
 .auth-close{position:absolute;top:14px;right:14px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--ink-dim);background:transparent;border:none;cursor:pointer}
 .auth-close:hover{background:var(--bg-3);color:var(--ink)}
 .auth-title{font-size:22px;font-weight:900;color:var(--ink);text-align:center;margin-bottom:6px;letter-spacing:-.02em}
@@ -65,6 +68,29 @@ img{display:block}
 .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--line)}
 .auth-terms{text-align:center;font-size:10px;color:var(--ink-dimmer);margin-top:18px;line-height:1.6}
 .auth-terms a{color:var(--ink-dim);text-decoration:underline}
+
+/* 인증 모달 새 입력 폼 */
+.auth-form-field{margin-bottom:12px}
+.auth-form-field label{display:block;font-size:11px;font-weight:700;color:var(--ink-dim);margin-bottom:5px;letter-spacing:.02em}
+.auth-form-field input{width:100%;padding:10px 12px;border:1px solid var(--line);background:#fff;color:var(--ink);font-family:inherit;font-size:13px;border-radius:0;transition:border-color .15s}
+.auth-form-field input:focus{outline:none;border-color:var(--accent)}
+.auth-forgot-wrap{display:flex;justify-content:flex-end;margin:-4px 0 12px}
+.auth-forgot-link{font-size:11px;color:var(--ink-dim);cursor:pointer;text-decoration:none}
+.auth-forgot-link:hover{color:var(--accent);text-decoration:underline}
+.auth-submit-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--accent),var(--gold));color:#fff;border:none;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;margin-bottom:8px;transition:opacity .15s,transform .15s}
+.auth-submit-btn:hover:not(:disabled){opacity:.92;transform:translateY(-1px)}
+.auth-submit-btn:disabled{opacity:.6;cursor:not-allowed}
+.auth-error{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;padding:8px 10px;font-size:11px;margin-bottom:12px;font-weight:600;line-height:1.5}
+.auth-success{background:#f0fdf4;border:1px solid #86efac;color:#166534;padding:8px 10px;font-size:11px;margin-bottom:12px;font-weight:600;line-height:1.5}
+.auth-switch-text{text-align:center;font-size:12px;color:var(--ink-dim);margin-top:14px}
+.auth-switch-text a{color:var(--accent);font-weight:700;cursor:pointer;margin-left:4px}
+.auth-switch-text a:hover{text-decoration:underline}
+.auth-consent-mini{background:var(--bg-2);border:1px solid var(--line);padding:10px 12px;margin-bottom:12px}
+.auth-consent-row{display:flex;align-items:flex-start;gap:8px;font-size:11px;color:var(--ink-dim);padding:5px 0;cursor:pointer;line-height:1.5}
+.auth-consent-row input{margin-top:2px;flex-shrink:0;cursor:pointer}
+.auth-consent-row strong{color:var(--ink);font-weight:700}
+.auth-consent-row a{color:var(--accent);text-decoration:none}
+.auth-req{color:#dc2626;font-weight:700}
 
 /* 회원정보 모달 */
 .profile-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px}
@@ -292,25 +318,121 @@ img{display:block}
   </div>
 </header>
 
-<!-- 인증 모달 (로그인) -->
+<!-- 인증 모달 (로그인/회원가입/비번찾기 통합) -->
 <div class="auth-modal-overlay" id="authModal">
   <div class="auth-modal">
     <button class="auth-close" id="authClose"><i data-lucide="x" class="icon-md"></i></button>
-    <h2 class="auth-title">로그인</h2>
-    <p class="auth-sub">Korart-i에 오신 것을 환영합니다</p>
-    <button class="auth-btn" id="googleLoginBtn">
-      <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.26c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
-      Google로 계속하기
-    </button>
-    <button class="auth-btn kakao" id="kakaoLoginBtn">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="#000"><path d="M12 3C6.48 3 2 6.58 2 11c0 2.84 1.85 5.34 4.66 6.79l-1.18 4.31c-.1.37.31.67.62.45L11.4 19.5c.2.02.4.03.6.03 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/></svg>
-      카카오로 계속하기
-    </button>
-    <div class="auth-divider">또는</div>
-    <button class="auth-btn" id="emailLoginBtn">
-      <i data-lucide="mail" class="icon-sm"></i>
-      이메일로 로그인
-    </button>
+
+    <!-- === 로그인 뷰 === -->
+    <div id="authViewLogin">
+      <h2 class="auth-title">로그인</h2>
+      <p class="auth-sub">Korart-i에 오신 것을 환영합니다</p>
+
+      <div class="auth-error" id="authLoginError" style="display:none"></div>
+
+      <div class="auth-form-field">
+        <label for="loginEmail">이메일</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="auth-form-field">
+        <label for="loginPassword">비밀번호</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <div class="auth-forgot-wrap">
+        <a class="auth-forgot-link" onclick="switchAuthView('forgot')">비밀번호를 잊으셨나요?</a>
+      </div>
+
+      <button class="auth-submit-btn" id="loginSubmitBtn" onclick="handleEmailLogin()">로그인</button>
+
+      <div class="auth-divider">또는</div>
+
+      <button class="auth-btn" id="googleLoginBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Google로 계속하기
+      </button>
+      <button class="auth-btn kakao" id="kakaoLoginBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#000"><path d="M12 3C6.48 3 2 6.58 2 11c0 2.84 1.85 5.34 4.66 6.79l-1.18 4.31c-.1.37.31.67.62.45L11.36 19.6c.21.02.42.04.64.04 5.52 0 10-3.58 10-8s-4.48-8-10-8"/></svg>
+        카카오로 계속하기
+      </button>
+
+      <div class="auth-switch-text">
+        아직 계정이 없으신가요?
+        <a onclick="switchAuthView('signup')">회원가입</a>
+      </div>
+    </div>
+
+    <!-- === 회원가입 뷰 === -->
+    <div id="authViewSignup" style="display:none">
+      <h2 class="auth-title">회원가입</h2>
+      <p class="auth-sub">이메일 인증 후 바로 이용하실 수 있어요</p>
+
+      <div class="auth-error" id="authSignupError" style="display:none"></div>
+
+      <div class="auth-form-field">
+        <label for="signupName">이름</label>
+        <input type="text" id="signupName" placeholder="홍길동" maxlength="40" autocomplete="name">
+      </div>
+      <div class="auth-form-field">
+        <label for="signupNickname">닉네임</label>
+        <input type="text" id="signupNickname" placeholder="2~16자, 한글/영문/숫자" maxlength="16" autocomplete="off">
+      </div>
+      <div class="auth-form-field">
+        <label for="signupEmail">이메일</label>
+        <input type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="auth-form-field">
+        <label for="signupPassword">비밀번호</label>
+        <input type="password" id="signupPassword" placeholder="8자 이상 (영문+숫자)" autocomplete="new-password">
+      </div>
+
+      <div class="auth-consent-mini">
+        <label class="auth-consent-row">
+          <input type="checkbox" id="signupAgreeAll" onchange="toggleAllConsents(this)"> <strong>전체 동의</strong>
+        </label>
+        <label class="auth-consent-row">
+          <input type="checkbox" id="signupAgreeAge" data-required="1"> <span class="auth-req">[필수]</span> 만 14세 이상입니다
+        </label>
+        <label class="auth-consent-row">
+          <input type="checkbox" id="signupAgreeTerms" data-required="1"> <span class="auth-req">[필수]</span> <a href="/terms.html" target="_blank">이용약관</a> 동의
+        </label>
+        <label class="auth-consent-row">
+          <input type="checkbox" id="signupAgreePrivacy" data-required="1"> <span class="auth-req">[필수]</span> <a href="/privacy.html" target="_blank">개인정보 처리</a> 동의
+        </label>
+      </div>
+
+      <button class="auth-submit-btn" id="signupSubmitBtn" onclick="handleEmailSignup()">가입하고 인증 메일 받기</button>
+
+      <div class="auth-switch-text">
+        이미 계정이 있으신가요?
+        <a onclick="switchAuthView('login')">로그인</a>
+      </div>
+    </div>
+
+    <!-- === 비밀번호 찾기 뷰 === -->
+    <div id="authViewForgot" style="display:none">
+      <h2 class="auth-title">비밀번호 찾기</h2>
+      <p class="auth-sub">등록하신 이메일을 입력하면<br>재설정 링크를 보내드려요</p>
+
+      <div class="auth-error" id="authForgotError" style="display:none"></div>
+      <div class="auth-success" id="authForgotSuccess" style="display:none"></div>
+
+      <div class="auth-form-field">
+        <label for="forgotEmail">이메일</label>
+        <input type="email" id="forgotEmail" placeholder="you@example.com" autocomplete="email">
+      </div>
+
+      <button class="auth-submit-btn" id="forgotSubmitBtn" onclick="handleForgotPassword()">재설정 메일 받기</button>
+
+      <div class="auth-switch-text">
+        <a onclick="switchAuthView('login')">← 로그인으로 돌아가기</a>
+      </div>
+    </div>
+
     <p class="auth-terms">
       가입하시면 <a href="/terms.html">이용약관</a>과 <a href="/privacy.html">개인정보처리방침</a>에 동의하게 됩니다
     </p>
@@ -504,7 +626,23 @@ function initAuth() {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' }
   });
   checkSession();
-  sb.auth.onAuthStateChange((_event, session) => {
+  sb.auth.onAuthStateChange(async (_event, session) => {
+    // 비밀번호 재설정 링크 클릭 시 (Supabase 메일의 링크를 타고 온 경우)
+    if (_event === 'PASSWORD_RECOVERY') {
+      const newPw = prompt('새 비밀번호를 입력하세요 (8자 이상):');
+      if (!newPw || newPw.length < 8) {
+        alert('비밀번호는 8자 이상이어야 합니다.');
+        return;
+      }
+      try {
+        const { error } = await sb.auth.updateUser({ password: newPw });
+        if (error) { alert('비밀번호 변경 실패: ' + error.message); return; }
+        alert('비밀번호가 변경되었습니다! 다시 로그인해주세요.');
+        await sb.auth.signOut();
+        window.location.href = '/community.html';
+      } catch (e) { alert('오류: ' + e.message); }
+      return;
+    }
     currentUser = session?.user || null;
     renderAuthState();
   });
@@ -583,13 +721,28 @@ function renderSidebarLoginCard() {
       <p class="login-desc">지금 로그인하고 당신의 아이디어를<br>고화질 AI 아트로 변환해보세요.</p>
       <button class="login-btn" id="sidebarLoginBtn">창작 시작하기</button>
       <div class="login-links">
-        <span>아이디 찾기</span>
+        <a class="sb-link" id="sidebarForgotLink" style="cursor:pointer">비밀번호 찾기</a>
         <span class="dot"></span>
-        <span>회원가입</span>
+        <a class="sb-link" id="sidebarSignupLink" style="cursor:pointer">회원가입</a>
       </div>
     `;
     const sb2 = document.getElementById('sidebarLoginBtn');
     if (sb2) sb2.addEventListener('click', () => {
+      switchAuthView('login');
+      document.getElementById('authModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    });
+    // 비밀번호 찾기 링크
+    const fLink = document.getElementById('sidebarForgotLink');
+    if (fLink) fLink.addEventListener('click', () => {
+      switchAuthView('forgot');
+      document.getElementById('authModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    });
+    // 회원가입 링크
+    const sLink = document.getElementById('sidebarSignupLink');
+    if (sLink) sLink.addEventListener('click', () => {
+      switchAuthView('signup');
       document.getElementById('authModal').classList.add('active');
       document.body.style.overflow = 'hidden';
     });
@@ -703,6 +856,170 @@ document.getElementById('authModal').addEventListener('click', (e) => {
 function closeAuthModal() {
   document.getElementById('authModal').classList.remove('active');
   document.body.style.overflow = '';
+  // 모든 에러 메시지 숨기기
+  ['authLoginError','authSignupError','authForgotError','authForgotSuccess'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.style.display = 'none'; el.textContent = ''; }
+  });
+}
+
+/* 인증 모달 뷰 전환 (login/signup/forgot) */
+function switchAuthView(view) {
+  ['Login','Signup','Forgot'].forEach(v => {
+    const el = document.getElementById('authView' + v);
+    if (el) el.style.display = (v.toLowerCase() === view) ? 'block' : 'none';
+  });
+  // 에러/성공 메시지 초기화
+  ['authLoginError','authSignupError','authForgotError','authForgotSuccess'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.style.display = 'none'; el.textContent = ''; }
+  });
+}
+
+/* 회원가입 약관 전체 동의 토글 */
+function toggleAllConsents(allCheckbox) {
+  const checked = allCheckbox.checked;
+  ['signupAgreeAge','signupAgreeTerms','signupAgreePrivacy'].forEach(id => {
+    const cb = document.getElementById(id);
+    if (cb) cb.checked = checked;
+  });
+}
+
+/* 에러 표시 헬퍼 */
+function showAuthError(viewKey, msg) {
+  const el = document.getElementById('auth' + viewKey + 'Error');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+function hideAuthError(viewKey) {
+  const el = document.getElementById('auth' + viewKey + 'Error');
+  if (el) { el.style.display = 'none'; el.textContent = ''; }
+}
+
+/* 이메일 로그인 처리 */
+async function handleEmailLogin() {
+  if (!sb) { alert('인증 시스템 로딩 중...'); return; }
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  hideAuthError('Login');
+
+  if (!email || !password) {
+    showAuthError('Login', '이메일과 비밀번호를 모두 입력해주세요.');
+    return;
+  }
+
+  const btn = document.getElementById('loginSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = '로그인 중...';
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) {
+      let msg = error.message;
+      if (msg.includes('Invalid login credentials')) msg = '이메일 또는 비밀번호가 일치하지 않습니다.';
+      else if (msg.includes('Email not confirmed')) msg = '이메일 인증을 완료해주세요. 메일함을 확인하세요.';
+      showAuthError('Login', msg);
+      return;
+    }
+    // 성공 - 모달 닫기 + 페이지 새로고침
+    closeAuthModal();
+    window.location.reload();
+  } catch (e) {
+    showAuthError('Login', '로그인 실패: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '로그인';
+  }
+}
+
+/* 이메일 회원가입 처리 */
+async function handleEmailSignup() {
+  if (!sb) { alert('인증 시스템 로딩 중...'); return; }
+  const name = document.getElementById('signupName').value.trim();
+  const nickname = document.getElementById('signupNickname').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  hideAuthError('Signup');
+
+  // 입력 검증
+  if (!name) { showAuthError('Signup', '이름을 입력해주세요.'); return; }
+  if (!nickname || nickname.length < 2) { showAuthError('Signup', '닉네임은 2자 이상이어야 합니다.'); return; }
+  if (!/^[가-힣a-zA-Z0-9_]+$/.test(nickname)) { showAuthError('Signup', '닉네임은 한글/영문/숫자/_ 만 가능합니다.'); return; }
+  if (!email || !email.includes('@')) { showAuthError('Signup', '올바른 이메일을 입력해주세요.'); return; }
+  if (!password || password.length < 8) { showAuthError('Signup', '비밀번호는 8자 이상이어야 합니다.'); return; }
+
+  // 필수 약관 동의 확인
+  const required = ['signupAgreeAge','signupAgreeTerms','signupAgreePrivacy'];
+  for (const id of required) {
+    const cb = document.getElementById(id);
+    if (!cb || !cb.checked) {
+      showAuthError('Signup', '필수 약관에 모두 동의해주세요.');
+      return;
+    }
+  }
+
+  const btn = document.getElementById('signupSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = '가입 처리 중...';
+  try {
+    const { data, error } = await sb.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { name, nickname, full_name: name },
+        emailRedirectTo: window.location.origin + '/community.html'
+      }
+    });
+    if (error) {
+      let msg = error.message;
+      if (msg.includes('already registered') || msg.includes('User already')) msg = '이미 가입된 이메일입니다. 로그인해주세요.';
+      showAuthError('Signup', msg);
+      return;
+    }
+    // 가입 성공 - 인증 메일 발송됨 안내
+    alert('가입 신청이 완료되었습니다!\n\n' + email + '로 인증 메일을 발송했어요.\n메일함을 확인하고 인증 링크를 클릭해주세요.');
+    switchAuthView('login');
+    document.getElementById('loginEmail').value = email;
+  } catch (e) {
+    showAuthError('Signup', '회원가입 실패: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '가입하고 인증 메일 받기';
+  }
+}
+
+/* 비밀번호 재설정 메일 발송 */
+async function handleForgotPassword() {
+  if (!sb) { alert('인증 시스템 로딩 중...'); return; }
+  const email = document.getElementById('forgotEmail').value.trim();
+  hideAuthError('Forgot');
+  document.getElementById('authForgotSuccess').style.display = 'none';
+
+  if (!email || !email.includes('@')) {
+    showAuthError('Forgot', '올바른 이메일을 입력해주세요.');
+    return;
+  }
+
+  const btn = document.getElementById('forgotSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = '메일 발송 중...';
+  try {
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/community.html?reset=1'
+    });
+    if (error) {
+      showAuthError('Forgot', error.message);
+      return;
+    }
+    // 성공 메시지
+    const okEl = document.getElementById('authForgotSuccess');
+    okEl.innerHTML = '✓ ' + email + '로 재설정 링크를 보냈어요.<br>메일함을 확인하고 링크를 클릭해주세요.';
+    okEl.style.display = 'block';
+    document.getElementById('forgotEmail').value = '';
+  } catch (e) {
+    showAuthError('Forgot', '메일 발송 실패: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '재설정 메일 받기';
+  }
 }
 
 document.getElementById('googleLoginBtn').addEventListener('click', async () => {
@@ -723,10 +1040,6 @@ document.getElementById('kakaoLoginBtn').addEventListener('click', async () => {
       options: { redirectTo: window.location.origin + '/community.html' }
     });
   } catch (e) { alert('카카오 로그인 실패: ' + e.message); }
-});
-
-document.getElementById('emailLoginBtn').addEventListener('click', () => {
-  window.location.href = '/studio.html?login=1';
 });
 
 /* 로그아웃 */

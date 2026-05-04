@@ -420,6 +420,15 @@ export default {
       // ─────────────────────────────────────────
       // 페이지 라우트
       // ─────────────────────────────────────────
+      // 루트 / → community.html (홈 = 커뮤니티)
+      if (url.pathname === '/' || url.pathname === '/index' || url.pathname === '/index.html') {
+        const assetUrl = new URL('/community.html', request.url);
+        return await env.ASSETS.fetch(new Request(assetUrl.toString(), { method: 'GET', headers: request.headers }));
+      }
+      if (url.pathname === '/community' || url.pathname === '/community/') {
+        const assetUrl = new URL('/community.html', request.url);
+        return await env.ASSETS.fetch(new Request(assetUrl.toString(), { method: 'GET', headers: request.headers }));
+      }
       if (url.pathname === '/studio-drama' || url.pathname === '/studio-drama/' || url.pathname === '/studio-drama.html') {
         const assetUrl = new URL('/studio-drama.html', request.url);
         return await env.ASSETS.fetch(new Request(assetUrl.toString(), { method: 'GET', headers: request.headers }));
