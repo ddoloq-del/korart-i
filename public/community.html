@@ -1654,9 +1654,24 @@ async function migrateLocalPostsIfAny() {
   const nickname = meta.name || meta.full_name || (currentUser.email ? currentUser.email.split('@')[0] : '익명');
   const avatar = meta.avatar_url || meta.picture || null;
 
+  // 중복 방지 — 이미 같은 asset_url로 게시된 게 있으면 스킵
+  const urls = local.map(p => p.img).filter(Boolean);
+  let existingUrls = new Set();
+  if (urls.length > 0) {
+    try {
+      const { data: existing } = await sb.from('community_posts')
+        .select('asset_url')
+        .eq('user_id', currentUser.id)
+        .in('asset_url', urls);
+      existing?.forEach(r => existingUrls.add(r.asset_url));
+    } catch (e) {}
+  }
+
   let migrated = 0;
+  let skipped = 0;
   for (const p of local) {
     if (!p.img || !p.title) continue;
+    if (existingUrls.has(p.img)) { skipped++; continue; }
     try {
       const { error } = await sb.from('community_posts').insert({
         user_id: currentUser.id,
@@ -1673,10 +1688,10 @@ async function migrateLocalPostsIfAny() {
       if (!error) migrated++;
     } catch (e) { console.warn('[migrate] 실패:', e.message); }
   }
-  console.log('[community] 마이그레이션 완료: ' + migrated + '건');
+  console.log('[community] 마이그레이션 완료: ' + migrated + '건 새로, ' + skipped + '건 다른 기기에서 이미 올라감');
   localStorage.setItem('korart_local_migrated', '1');
   // localStorage 정리 (서버에 올라가서 더 이상 필요 없음)
-  if (migrated > 0) {
+  if (migrated > 0 || skipped > 0) {
     localStorage.removeItem('korart_published');
   }
 }
