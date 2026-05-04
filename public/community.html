@@ -1423,6 +1423,28 @@ function openPublishModal() {
   document.body.style.overflow = 'hidden';
 }
 
+// 다른 탭 (studio.html)에서 새 자료 저장 시 모달이 열려있으면 자동 갱신
+window.addEventListener('storage', (e) => {
+  if (e.key === 'korart_assets_updated') {
+    const modal = document.getElementById('publishModal');
+    if (modal && modal.classList.contains('active')) {
+      console.log('[community] 새 자료 감지 → 클라우드 자료 재로드');
+      loadAssets();
+    }
+  }
+});
+
+// 같은 탭 내에서도 적용하고 싶다면 BroadcastChannel 사용 (폴백)
+try {
+  const _bc = new BroadcastChannel('korart-assets');
+  _bc.addEventListener('message', (e) => {
+    if (e.data === 'updated') {
+      const modal = document.getElementById('publishModal');
+      if (modal && modal.classList.contains('active')) loadAssets();
+    }
+  });
+} catch(e) {}
+
 function closePublishModal() {
   document.getElementById('publishModal').classList.remove('active');
   document.body.style.overflow = '';

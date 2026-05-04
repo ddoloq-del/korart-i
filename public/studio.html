@@ -11080,6 +11080,9 @@ const KorartAssets = {
       throw new Error('DB 저장 실패: ' + dbErr.message);
     }
     log('ok', `[Assets] 저장 완료 (id: ${row.id})`);
+    // 다른 탭 (community.html 게시 모달)에 새 자료 추가 알림
+    try { localStorage.setItem('korart_assets_updated', Date.now() + ':' + row.id); } catch(e){}
+    try { new BroadcastChannel('korart-assets').postMessage('updated'); } catch(e){}
     return row;
   },
 
@@ -11094,6 +11097,8 @@ const KorartAssets = {
       file_size: 0,
     }).select().single();
     if (error) throw new Error('씬 저장 실패: ' + error.message);
+    try { localStorage.setItem('korart_assets_updated', Date.now() + ':' + row.id); } catch(e){}
+    try { new BroadcastChannel('korart-assets').postMessage('updated'); } catch(e){}
     return row;
   },
 
