@@ -1230,8 +1230,67 @@ select option:hover {
 .korart-gnb-right { display: flex; align-items: center; gap: 8px; }
 .korart-icon-btn { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #666; background: none; border: none; cursor: pointer; transition: background .15s; }
 .korart-icon-btn:hover { background: #f5f5f5; color: #1a1a1a; }
-.korart-avatar-btn { width: 34px; height: 34px; border-radius: 0; border: none; background: linear-gradient(135deg, #6366f1, #a78bfa); display: flex; align-items: center; justify-content: center; margin-left: 4px; color: #fff; cursor: pointer; }
+.korart-avatar-btn { width: 34px; height: 34px; border-radius: 0; border: none; background: linear-gradient(135deg, #6366f1, #a78bfa); display: flex; align-items: center; justify-content: center; margin-left: 4px; color: #fff; cursor: pointer; position: relative; overflow: hidden; padding: 0; }
 .korart-avatar-btn svg { width: 18px; height: 18px; stroke-width: 2.2; }
+.korart-avatar-btn.logged-in { border-radius: 50%; background: var(--bg3); overflow: hidden; }
+.korart-avatar-btn.logged-in img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* 프로필 드롭다운 + 로그인 + 회원정보 모달 */
+.profile-dropdown { position: absolute; top: 54px; right: 24px; background: #fff; border: 1px solid var(--line); min-width: 240px; z-index: 200; display: none; box-shadow: 0 12px 40px rgba(0,0,0,.12); }
+.profile-dropdown.active { display: block; }
+.pd-header { padding: 18px 18px 14px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; }
+.pd-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--bg3); overflow: hidden; flex-shrink: 0; }
+.pd-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pd-info { min-width: 0; flex: 1; }
+.pd-name { font-size: 14px; font-weight: 800; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pd-email { font-size: 11px; color: var(--ink3); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pd-points { padding: 14px 18px; border-bottom: 1px solid var(--line); background: linear-gradient(135deg, rgba(99,102,241,.06), rgba(167,139,250,.06)); }
+.pd-points-label { font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #6366f1; margin-bottom: 4px; }
+.pd-points-value { font-size: 18px; font-weight: 900; color: var(--ink); letter-spacing: -.02em; }
+.pd-points-value .pt-unit { font-size: 13px; color: #6366f1; font-weight: 700; margin-left: 3px; }
+.pd-menu { padding: 6px 0; }
+.pd-item { display: flex; align-items: center; gap: 10px; padding: 10px 18px; font-size: 13px; font-weight: 600; color: var(--ink2); background: none; border: none; cursor: pointer; width: 100%; text-align: left; font-family: inherit; }
+.pd-item:hover { background: var(--bg2); color: var(--ink); }
+.pd-item svg { width: 16px; height: 16px; color: var(--ink3); }
+.pd-item.danger { color: #dc2626; }
+.pd-item.danger:hover { background: #fef2f2; color: #b91c1c; }
+.pd-item.danger svg { color: #dc2626; }
+
+/* 인증 모달 */
+.auth-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+.auth-modal-overlay.active { display: flex; }
+.auth-modal { background: #fff; border: 1px solid var(--line); max-width: 400px; width: 100%; padding: 36px 32px; position: relative; }
+.auth-close { position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--ink2); background: transparent; border: none; cursor: pointer; }
+.auth-close:hover { background: var(--bg2); color: var(--ink); }
+.auth-title { font-size: 22px; font-weight: 900; color: var(--ink); text-align: center; margin-bottom: 6px; letter-spacing: -.02em; }
+.auth-sub { font-size: 12px; color: var(--ink2); text-align: center; margin-bottom: 24px; }
+.auth-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px 16px; border: 1px solid var(--line); background: #fff; color: var(--ink); font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; margin-bottom: 10px; transition: all .15s; }
+.auth-btn:hover { border-color: var(--ink2); transform: translateY(-1px); }
+.auth-btn.kakao { background: #FEE500; border-color: #FEE500; color: #000; }
+.auth-btn.kakao:hover { background: #FDD835; border-color: #FDD835; }
+.auth-divider { text-align: center; font-size: 11px; color: var(--ink3); margin: 18px 0; display: flex; align-items: center; gap: 10px; }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+/* 회원정보 모달 */
+.profile-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+.profile-modal-overlay.active { display: flex; }
+.profile-modal { background: #fff; border: 1px solid var(--line); max-width: 480px; width: 100%; max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; }
+.pm-header { padding: 20px 24px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+.pm-title { font-size: 18px; font-weight: 900; color: var(--ink); letter-spacing: -.02em; }
+.pm-close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--ink2); background: transparent; border: none; cursor: pointer; }
+.pm-close:hover { background: var(--bg2); color: var(--ink); }
+.pm-body { padding: 24px; overflow-y: auto; flex: 1; }
+.pm-section { margin-bottom: 24px; }
+.pm-section-title { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink3); margin-bottom: 10px; }
+.pm-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.pm-row:last-child { border-bottom: none; }
+.pm-row-label { font-size: 13px; color: var(--ink2); font-weight: 600; }
+.pm-row-value { font-size: 13px; color: var(--ink); font-weight: 700; }
+.pm-danger-zone { background: #fef2f2; border: 1px solid #fecaca; padding: 16px; margin-top: 24px; }
+.pm-danger-title { font-size: 12px; font-weight: 800; color: #b91c1c; margin-bottom: 8px; letter-spacing: -.01em; }
+.pm-danger-desc { font-size: 11px; color: #991b1b; line-height: 1.6; margin-bottom: 12px; }
+.pm-danger-btn { padding: 8px 16px; background: #fff; border: 1px solid #dc2626; color: #dc2626; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.pm-danger-btn:hover { background: #dc2626; color: #fff; }
 .korart-icon-btn { border-radius: 0; }
 .korart-icon-btn svg { width: 20px; height: 20px; stroke-width: 2; }
 .korart-subnav { background: #ffffff; border-bottom: 1px solid #ebebeb; }
@@ -1717,10 +1776,72 @@ select option:hover {
     <div class="korart-gnb-right">
       <button class="korart-icon-btn" title="알림"><i data-lucide="bell"></i></button>
       <button class="korart-icon-btn" title="메뉴"><i data-lucide="layout-grid"></i></button>
-      <button class="korart-avatar-btn" title="프로필"><i data-lucide="user-round"></i></button>
+      <button class="korart-avatar-btn" id="avatarBtn" title="프로필"><i data-lucide="user-round"></i></button>
+    </div>
+  </div>
+  <div class="profile-dropdown" id="profileDropdown">
+    <div class="pd-header">
+      <div class="pd-avatar" id="pdAvatar"></div>
+      <div class="pd-info">
+        <div class="pd-name" id="pdName">사용자</div>
+        <div class="pd-email" id="pdEmail"></div>
+      </div>
+    </div>
+    <div class="pd-points">
+      <div class="pd-points-label">남은 포인트</div>
+      <div class="pd-points-value" id="pdPoints">0<span class="pt-unit">P</span></div>
+    </div>
+    <div class="pd-menu">
+      <button class="pd-item" id="pdProfileBtn"><i data-lucide="user"></i>회원정보</button>
+      <button class="pd-item danger" id="pdLogoutBtn"><i data-lucide="log-out"></i>로그아웃</button>
     </div>
   </div>
 </header>
+
+<!-- 인증 모달 (로그인) -->
+<div class="auth-modal-overlay" id="authModal">
+  <div class="auth-modal">
+    <button class="auth-close" id="authClose"><i data-lucide="x"></i></button>
+    <h2 class="auth-title">로그인</h2>
+    <p class="auth-sub">Korart-i에 오신 것을 환영합니다</p>
+    <button class="auth-btn" id="googleLoginBtn">
+      <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.26c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+      Google로 계속하기
+    </button>
+    <button class="auth-btn kakao" id="kakaoLoginBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#000"><path d="M12 3C6.48 3 2 6.58 2 11c0 2.84 1.85 5.34 4.66 6.79l-1.18 4.31c-.1.37.31.67.62.45L11.4 19.5c.2.02.4.03.6.03 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/></svg>
+      카카오로 계속하기
+    </button>
+  </div>
+</div>
+
+<!-- 회원정보 모달 -->
+<div class="profile-modal-overlay" id="profileModal">
+  <div class="profile-modal">
+    <div class="pm-header">
+      <h3 class="pm-title">회원정보</h3>
+      <button class="pm-close" id="pmClose"><i data-lucide="x"></i></button>
+    </div>
+    <div class="pm-body">
+      <div class="pm-section">
+        <div class="pm-section-title">계정 정보</div>
+        <div class="pm-row"><span class="pm-row-label">이름</span><span class="pm-row-value" id="pmName">—</span></div>
+        <div class="pm-row"><span class="pm-row-label">이메일</span><span class="pm-row-value" id="pmEmail">—</span></div>
+        <div class="pm-row"><span class="pm-row-label">가입일</span><span class="pm-row-value" id="pmJoinDate">—</span></div>
+        <div class="pm-row"><span class="pm-row-label">로그인 방식</span><span class="pm-row-value" id="pmProvider">—</span></div>
+      </div>
+      <div class="pm-section">
+        <div class="pm-section-title">포인트</div>
+        <div class="pm-row"><span class="pm-row-label">현재 보유 포인트</span><span class="pm-row-value" id="pmPoints">0P</span></div>
+      </div>
+      <div class="pm-danger-zone">
+        <div class="pm-danger-title">⚠️ 회원 탈퇴</div>
+        <div class="pm-danger-desc">탈퇴 시 다음 정보가 영구 삭제됩니다: 계정, 보유 포인트, 게시한 작품, 클라우드 자료.<br>이 작업은 되돌릴 수 없습니다.</div>
+        <button class="pm-danger-btn" id="pmDeleteAccount">회원 탈퇴 신청</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <nav class="korart-subnav">
   <div class="korart-subnav-inner" id="korartSubnav">
@@ -13199,5 +13320,202 @@ function resetMerge() {
 })();
 </script>
 <script>if(typeof lucide!=="undefined"&&lucide.createIcons)lucide.createIcons();</script>
+
+<!-- ====== 공유 GNB 아바타 드롭다운 + 로그인 + 회원정보 (studio) ====== -->
+<script>
+(function() {
+  // KorartiAuth 또는 sb 객체 재사용
+  function getSb() { return window.sb || (window.KorartiAuth && window.KorartiAuth.client) || null; }
+  function getCurrentUser() {
+    if (window.currentUser) return window.currentUser;
+    if (window.KorartiAuth && window.KorartiAuth.user) return window.KorartiAuth.user;
+    return null;
+  }
+  async function getJWT() {
+    const _sb = getSb();
+    if (!_sb) return null;
+    try {
+      const { data } = await _sb.auth.getSession();
+      return data && data.session ? data.session.access_token : null;
+    } catch (e) { return null; }
+  }
+  async function fetchPoints() {
+    const jwt = await getJWT();
+    if (!jwt) return null;
+    try {
+      const r = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + jwt }});
+      if (!r.ok) return null;
+      return await r.json();
+    } catch (e) { return null; }
+  }
+
+  function renderAvatar() {
+    const u = getCurrentUser();
+    const btn = document.getElementById('avatarBtn');
+    if (!btn) return;
+    if (u) {
+      const meta = u.user_metadata || {};
+      const url = meta.avatar_url || meta.picture || '';
+      if (url) {
+        btn.classList.add('logged-in');
+        btn.innerHTML = '<img src="' + url + '" alt="avatar" referrerpolicy="no-referrer">';
+      } else {
+        btn.classList.remove('logged-in');
+        btn.innerHTML = '<i data-lucide="user-round"></i>';
+        if (window.lucide) lucide.createIcons();
+      }
+      const name = meta.name || meta.full_name || (u.email ? u.email.split('@')[0] : '사용자');
+      const ne = document.getElementById('pdName'); if (ne) ne.textContent = name;
+      const ee = document.getElementById('pdEmail'); if (ee) ee.textContent = u.email || '';
+      const av = document.getElementById('pdAvatar');
+      if (av) av.innerHTML = url ? '<img src="' + url + '" alt="avatar" referrerpolicy="no-referrer">' : '';
+    } else {
+      btn.classList.remove('logged-in');
+      btn.innerHTML = '<i data-lucide="user-round"></i>';
+      if (window.lucide) lucide.createIcons();
+    }
+  }
+
+  async function updatePoints() {
+    const me = await fetchPoints();
+    const el = document.getElementById('pdPoints');
+    if (!el) return;
+    if (!me) { el.innerHTML = '0<span class="pt-unit">P</span>'; return; }
+    if (me.unlimited) el.innerHTML = '∞<span class="pt-unit">P</span>';
+    else el.innerHTML = me.points.toLocaleString() + '<span class="pt-unit">P</span>';
+  }
+
+  function showAuthModal() {
+    document.getElementById('authModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeAuthModal() {
+    document.getElementById('authModal').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  async function openProfileModal() {
+    const u = getCurrentUser();
+    if (!u) return;
+    const meta = u.user_metadata || {};
+    const name = meta.name || meta.full_name || (u.email ? u.email.split('@')[0] : '—');
+    document.getElementById('pmName').textContent = name;
+    document.getElementById('pmEmail').textContent = u.email || '—';
+    document.getElementById('pmJoinDate').textContent = u.created_at ? new Date(u.created_at).toLocaleDateString('ko-KR') : '—';
+    const provider = (u.app_metadata && u.app_metadata.provider) || 'email';
+    const map = { google: 'Google', kakao: '카카오', email: '이메일' };
+    document.getElementById('pmProvider').textContent = map[provider] || provider;
+    const me = await fetchPoints();
+    document.getElementById('pmPoints').textContent = me ? (me.unlimited ? '∞P' : me.points.toLocaleString() + 'P') : '—';
+    document.getElementById('profileModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeProfileModal() {
+    document.getElementById('profileModal').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  // 이벤트 바인딩
+  function bind() {
+    const btn = document.getElementById('avatarBtn');
+    if (btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const u = getCurrentUser();
+        if (u) {
+          document.getElementById('profileDropdown').classList.toggle('active');
+          updatePoints();
+        } else {
+          showAuthModal();
+        }
+      });
+    }
+    document.addEventListener('click', function(e) {
+      const dd = document.getElementById('profileDropdown');
+      if (dd && !dd.contains(e.target) && !e.target.closest('#avatarBtn')) {
+        dd.classList.remove('active');
+      }
+    });
+    const ac = document.getElementById('authClose');
+    if (ac) ac.addEventListener('click', closeAuthModal);
+    const am = document.getElementById('authModal');
+    if (am) am.addEventListener('click', function(e) { if (e.target.id === 'authModal') closeAuthModal(); });
+
+    const gb = document.getElementById('googleLoginBtn');
+    if (gb) gb.addEventListener('click', async function() {
+      const _sb = getSb();
+      if (!_sb) { alert('인증 시스템 로딩 중...'); return; }
+      try {
+        await _sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href }});
+      } catch (e) { alert('Google 로그인 실패: ' + e.message); }
+    });
+    const kb = document.getElementById('kakaoLoginBtn');
+    if (kb) kb.addEventListener('click', async function() {
+      const _sb = getSb();
+      if (!_sb) { alert('인증 시스템 로딩 중...'); return; }
+      try {
+        await _sb.auth.signInWithOAuth({ provider: 'kakao', options: { redirectTo: window.location.href }});
+      } catch (e) { alert('카카오 로그인 실패: ' + e.message); }
+    });
+
+    const lo = document.getElementById('pdLogoutBtn');
+    if (lo) lo.addEventListener('click', async function() {
+      const _sb = getSb();
+      if (!_sb) return;
+      if (!confirm('로그아웃 하시겠어요?')) return;
+      await _sb.auth.signOut();
+      window.currentUser = null;
+      document.getElementById('profileDropdown').classList.remove('active');
+      window.location.reload();
+    });
+    const pb = document.getElementById('pdProfileBtn');
+    if (pb) pb.addEventListener('click', function() {
+      document.getElementById('profileDropdown').classList.remove('active');
+      openProfileModal();
+    });
+    const pmc = document.getElementById('pmClose');
+    if (pmc) pmc.addEventListener('click', closeProfileModal);
+    const pmm = document.getElementById('profileModal');
+    if (pmm) pmm.addEventListener('click', function(e) { if (e.target.id === 'profileModal') closeProfileModal(); });
+    const da = document.getElementById('pmDeleteAccount');
+    if (da) da.addEventListener('click', function() {
+      if (!confirm('정말로 회원 탈퇴하시겠어요?\n\n모든 데이터가 영구 삭제됩니다.')) return;
+      if (!confirm('마지막 확인입니다.\n\n되돌릴 수 없습니다.')) return;
+      alert('탈퇴 신청이 접수되었습니다. 고객센터로 안내가 전달됩니다.');
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const dd = document.getElementById('profileDropdown');
+        if (dd) dd.classList.remove('active');
+        const am = document.getElementById('authModal');
+        if (am && am.classList.contains('active')) closeAuthModal();
+        const pm = document.getElementById('profileModal');
+        if (pm && pm.classList.contains('active')) closeProfileModal();
+      }
+    });
+  }
+
+  // 세션 체크 후 아바타 렌더링 (KorartiAuth 준비 대기)
+  function pollUser(retries) {
+    const u = getCurrentUser();
+    if (u || retries <= 0) {
+      renderAvatar();
+      return;
+    }
+    setTimeout(() => pollUser(retries - 1), 200);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      bind();
+      pollUser(20);  // 최대 4초 대기
+    });
+  } else {
+    bind();
+    pollUser(20);
+  }
+})();
+</script>
 </body>
 </html>
