@@ -92,8 +92,10 @@ img{display:block}
 .subnav-item.active{color:var(--ink);border-color:var(--accent)}
 .main{max-width:1400px;margin:0 auto;padding:32px 24px;display:flex;flex-direction:column;gap:32px}
 .top-section{display:grid;grid-template-columns:1fr 320px;gap:32px;align-items:stretch}
-.top-section > section{min-width:0}
-.top-section > aside{min-width:0}
+.top-section > section{min-width:0;display:flex;flex-direction:column}
+.top-section > section > .hero{flex:1}
+.top-section > aside{min-width:0;display:flex;flex-direction:column}
+.top-section > aside > .sb-card{flex:1;display:flex;flex-direction:column;justify-content:center}
 .trending-section{width:100%}
 .hero{position:relative;border-radius:0;padding:48px;margin-bottom:32px;overflow:hidden;background:radial-gradient(ellipse at top right,rgba(167,139,250,.25),transparent 60%),radial-gradient(ellipse at bottom left,rgba(99,102,241,.25),transparent 60%),linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#4c1d95 100%);border:1px solid var(--line-lit);min-height:280px;display:flex;align-items:center}
 .hero-content{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.18fr);gap:32px;align-items:center;width:100%;max-width:none}
@@ -137,6 +139,14 @@ img{display:block}
 .publish-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:linear-gradient(135deg,var(--accent),var(--gold));color:#fff;font-weight:800;font-size:13px;border:none;cursor:pointer;transition:transform .15s,box-shadow .15s;letter-spacing:-.01em}
 .publish-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(99,102,241,.4)}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+
+/* 페이지네이션 — 9개 이상 시 노출 */
+.pagination{display:flex;justify-content:center;align-items:center;gap:6px;margin:32px 0 8px;flex-wrap:wrap}
+.pagination button{min-width:36px;height:36px;padding:0 10px;background:var(--bg-2);border:1px solid var(--line);color:var(--ink-dim);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+.pagination button:hover:not(:disabled){border-color:var(--accent);color:var(--ink)}
+.pagination button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.pagination button:disabled{opacity:.4;cursor:not-allowed}
+.pagination .page-info{font-size:11px;color:var(--ink-dimmer);margin:0 8px;font-weight:600}
 .card{background:var(--bg-2);border:1px solid var(--line);border-radius:0;overflow:hidden;cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s}
 .card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 10px 30px rgba(99,102,241,.15)}
 .card-img-wrap{position:relative;aspect-ratio:16/9;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center}
@@ -411,6 +421,7 @@ img{display:block}
     </div>
 
     <div class="grid" id="grid"></div>
+    <div class="pagination" id="pagination" style="display:none"></div>
   </section>
 </main>
 
@@ -811,6 +822,56 @@ const mockContent = [];
 let currentSort = 'popular';
 let currentAssetType = 'image';
 let selectedAsset = null;
+let currentPage = 1;
+const PAGE_SIZE = 9;
+
+// 페이지 단위 자르기
+function paginate(list, page) {
+  const start = (page - 1) * PAGE_SIZE;
+  return list.slice(start, start + PAGE_SIZE);
+}
+
+// 페이지네이션 UI 렌더
+function renderPagination(totalItems) {
+  const pag = document.getElementById('pagination');
+  if (!pag) return;
+  // 9개 이하면 페이지네이션 숨김
+  if (totalItems <= PAGE_SIZE) {
+    pag.style.display = 'none';
+    pag.innerHTML = '';
+    return;
+  }
+  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+  pag.style.display = 'flex';
+  let html = '';
+  // 이전 버튼
+  html += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">‹</button>`;
+  // 페이지 번호 (최대 7개)
+  let startPage = Math.max(1, currentPage - 3);
+  let endPage = Math.min(totalPages, startPage + 6);
+  if (endPage - startPage < 6) startPage = Math.max(1, endPage - 6);
+  if (startPage > 1) {
+    html += `<button onclick="goToPage(1)">1</button>`;
+    if (startPage > 2) html += `<span class="page-info">…</span>`;
+  }
+  for (let i = startPage; i <= endPage; i++) {
+    html += `<button class="${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+  }
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) html += `<span class="page-info">…</span>`;
+    html += `<button onclick="goToPage(${totalPages})">${totalPages}</button>`;
+  }
+  // 다음 버튼
+  html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">›</button>`;
+  pag.innerHTML = html;
+}
+
+function goToPage(p) {
+  currentPage = p;
+  renderGrid();
+  // 트렌딩 섹션으로 스크롤
+  document.querySelector('.trending-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 function renderGrid() {
   const grid = document.getElementById('grid');
@@ -828,17 +889,28 @@ function renderGrid() {
         <p class="empty-desc">첫 번째 작품을 공유해보세요.<br>하루 이미지 5개, 영상 5개까지 게시할 수 있어요.</p>
         <button class="empty-btn" onclick="openPublishModal()"><i data-lucide="plus" class="icon-sm"></i>클라우드 자료 게시</button>
       </div>`;
+    document.getElementById('pagination').style.display = 'none';
     lucide.createIcons();
     return;
   }
-  grid.innerHTML = list.map(item => {
+  // 페이지 범위 보정 (필터/정렬 후 page 과각될 시)
+  const totalPages = Math.ceil(list.length / PAGE_SIZE);
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+  const pageList = paginate(list, currentPage);
+  grid.innerHTML = pageList.map(item => {
     const isCover = item.aspect === '16:9';
+    const isVideo = item.type === 'video';
+    // 영상은 <video>, 이미지는 <img>
+    const mediaHtml = isVideo
+      ? `<video class="card-img${isCover ? ' fit-cover' : ''}" src="${item.img}" muted playsinline preload="metadata" onmouseenter="this.play()" onmouseleave="this.pause()"></video>`
+      : `<img class="card-img${isCover ? ' fit-cover' : ''}" src="${item.img}" alt="${item.title}">`;
     return `
     <div class="card">
       <div class="card-img-wrap">
-        <img class="card-img${isCover ? ' fit-cover' : ''}" src="${item.img}" alt="${item.title}">
+        ${mediaHtml}
         ${item.tag ? `<div class="card-tag">${item.tag}</div>` : ''}
-        ${item.type === 'video' ? '<div class="card-video-badge"><i data-lucide="video" class="icon-sm"></i></div>' : ''}
+        ${isVideo ? '<div class="card-video-badge"><i data-lucide="video" class="icon-sm"></i></div>' : ''}
         <div class="card-aspect-badge">${item.aspect || '16:9'}</div>
       </div>
       <div class="card-body">
@@ -853,6 +925,8 @@ function renderGrid() {
       </div>
     </div>`;
   }).join('');
+  // 페이지네이션 렌더
+  renderPagination(list.length);
   lucide.createIcons();
 }
 
@@ -861,6 +935,7 @@ document.querySelectorAll('.sort-toggle button').forEach(btn => {
     document.querySelectorAll('.sort-toggle button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentSort = btn.dataset.sort;
+    currentPage = 1;  // 정렬 바뀌면 1페이지로
     renderGrid();
   });
 });

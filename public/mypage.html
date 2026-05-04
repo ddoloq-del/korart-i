@@ -684,6 +684,18 @@ body {
     </div>
   </div>
 
+  <!-- ══ Tx Section (동일 좌우 폭) ══ -->
+  <div class="asset-section" id="txSection" style="display:none">
+    <div class="asset-header">
+      <div class="asset-title">거래 이력</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:10px;color:var(--ink3)" id="txCount">—</span>
+        <button class="btn btn-sm btn-ghost" onclick="loadTransactions()">새로고침</button>
+      </div>
+    </div>
+    <div id="txContent" style="margin-top:14px"></div>
+  </div>
+
 </div>
 
 <!-- ══ Preview modal ══ -->
@@ -692,18 +704,6 @@ body {
     <button class="preview-modal-close" onclick="closePreview()">✕</button>
     <div class="preview-modal-body" id="previewBody"></div>
   </div>
-</div>
-
-<!-- ══ Tx Section (toggles) ══ -->
-<div class="asset-section" id="txSection" style="display:none">
-  <div class="asset-header" style="justify-content:center;gap:18px">
-    <div class="asset-title">거래 이력</div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <span style="font-size:10px;color:var(--ink3)" id="txCount">—</span>
-      <button class="btn btn-sm btn-ghost" onclick="loadTransactions()">새로고침</button>
-    </div>
-  </div>
-  <div id="txContent" style="margin-top:14px"></div>
 </div>
 
 <!-- ══ Toast ══ -->
