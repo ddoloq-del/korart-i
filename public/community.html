@@ -27,7 +27,7 @@ img{display:block}
 .subnav{background:var(--bg);border-bottom:1px solid var(--line)}
 .subnav-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:32px;height:52px;overflow-x:auto;scrollbar-width:none}
 .subnav-inner::-webkit-scrollbar{display:none}
-.subnav-item{font-size:14px;font-weight:700;color:var(--ink-dim);height:100%;display:flex;align-items:center;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap;cursor:pointer}
+.subnav-item{font-size:14px;font-weight:700;color:var(--ink-dim);height:100%;display:flex;align-items:center;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap;cursor:pointer;text-decoration:none}
 .subnav-item:hover{color:var(--ink)}
 .subnav-item.active{color:var(--ink);border-color:var(--accent)}
 .main{max-width:1200px;margin:0 auto;padding:32px 24px;display:grid;grid-template-columns:1fr 320px;gap:32px}
@@ -122,12 +122,12 @@ img{display:block}
 
 <nav class="subnav">
   <div class="subnav-inner" id="subnav">
-    <div class="subnav-item active">홈</div>
-    <div class="subnav-item">이미지 생성</div>
-    <div class="subnav-item">비디오 생성</div>
-    <div class="subnav-item">내 자료</div>
-    <div class="subnav-item">커뮤니티</div>
-    <div class="subnav-item">이벤트</div>
+    <a class="subnav-item active" href="/community.html">홈</a>
+    <a class="subnav-item" href="/studio.html?mode=image">이미지 생성</a>
+    <a class="subnav-item" href="/studio.html?mode=video">비디오 생성</a>
+    <a class="subnav-item" href="/mypage.html">내 자료</a>
+    <a class="subnav-item" href="/community.html">커뮤니티</a>
+    <a class="subnav-item" href="#">이벤트</a>
   </div>
 </nav>
 
@@ -247,12 +247,7 @@ document.getElementById('trending').innerHTML = trendingKeywords.map((kw, i) => 
   </li>
 `).join('');
 
-document.querySelectorAll('.subnav-item').forEach(el => {
-  el.addEventListener('click', () => {
-    document.querySelectorAll('.subnav-item').forEach(x => x.classList.remove('active'));
-    el.classList.add('active');
-  });
-});
+// subnav 클릭은 a href로 자동 페이지 이동 — JS 토글 불필요
 
 lucide.createIcons();
 </script>
