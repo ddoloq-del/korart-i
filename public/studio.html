@@ -21,15 +21,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
 :root {
   --bg:    #ffffff;
-  --bg2:   #fafafa;
-  --bg3:   #f5f5f5;
-  --bg4:   #ebebeb;
-  --line:  #ebebeb;
-  --line2: #d4d4d4;
-  --ink:   #1a1a1a;
-  --ink2:  #666666;
-  --ink3:  #999999;
-  --cream: #1a1a1a;
+  --bg2:   #f8fafc;
+  --bg3:   #e2e8f0;
+  --bg4:   #cbd5e1;
+  --line:  #cbd5e1;
+  --line2: #94a3b8;
+  --ink:   #0f172a;
+  --ink2:  #334155;
+  --ink3:  #64748b;
+  --cream: #0f172a;
   --pink:  #6366f1;
   --pink2: #4f46e5;
   --coral: #a78bfa;
@@ -136,7 +136,7 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius: 0;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--line2);background:var(--bg3);color:var(--ink);transition:.15s;letter-spacing:-.01em}
 .btn:hover{background:var(--bg4);border-color:var(--ink3)}
 .btn:disabled{opacity:.35;cursor:not-allowed}
-.btn-primary{background:var(--pink);border-color:transparent;color:#000;font-weight:700;box-shadow:0 4px 16px rgba(99,102,241,.25)}
+.btn-primary{background:var(--pink);border-color:transparent;color:#fff;font-weight:700;box-shadow:0 4px 16px rgba(99,102,241,.25)}
 .btn-primary:hover{background:var(--pink2);box-shadow:0 6px 20px rgba(99,102,241,.35)}
 .btn-primary:disabled{background:var(--bg3);border-color:var(--line);color:var(--ink3);box-shadow:none}
 .btn-sm{padding:5px 11px;font-size:11px}
@@ -1712,7 +1712,7 @@ select option:hover {
 <header class="korart-gnb">
   <div class="korart-gnb-inner">
     <div class="korart-gnb-left">
-      <a class="korart-logo" href="/community.html"><span>korart</span><span class="korart-logo-badge">AI</span></a>
+      <a class="korart-logo" href="/community.html"><img src="/logo.png" alt="코라티" style="height:32px;width:auto;display:block"></a>
     </div>
     <div class="korart-gnb-right">
       <button class="korart-icon-btn" title="알림"><i data-lucide="bell"></i></button>
