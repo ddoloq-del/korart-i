@@ -12,6 +12,7 @@
   <meta property="og:locale" content="ko_KR">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
 <style>
 :root {
@@ -51,7 +52,7 @@ body {
 
 /* ── Shared GNB+LNB (light, korart 통합 메뉴) ── */
 .korart-gnb { position: sticky; top: 0; z-index: 100; background: #ffffff; border-bottom: 1px solid #ebebeb; font-family: 'Pretendard', sans-serif; }
-.korart-gnb-inner { max-width: 1200px; margin: 0 auto; height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+.korart-gnb-inner { max-width: 1400px; margin: 0 auto; height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
 .korart-gnb-left { display: flex; align-items: center; gap: 32px; }
 .korart-logo { font-size: 22px; font-weight: 900; letter-spacing: -.03em; display: flex; align-items: center; gap: 6px; color: #1a1a1a; text-decoration: none; }
 .korart-logo-badge { font-size: 11px; font-weight: 800; background: linear-gradient(135deg, #6366f1, #a78bfa); color: #fff; padding: 3px 7px; border-radius: 4px; letter-spacing: .05em; }
@@ -60,7 +61,7 @@ body {
 .korart-icon-btn:hover { background: #f5f5f5; color: #1a1a1a; }
 .korart-avatar-btn { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #a78bfa); display: flex; align-items: center; justify-content: center; margin-left: 4px; color: #fff; cursor: pointer; }
 .korart-subnav { background: #ffffff; border-bottom: 1px solid #ebebeb; }
-.korart-subnav-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; gap: 32px; height: 52px; overflow-x: auto; scrollbar-width: none; }
+.korart-subnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; gap: 32px; height: 52px; overflow-x: auto; scrollbar-width: none; }
 .korart-subnav-inner::-webkit-scrollbar { display: none; }
 .korart-subnav-item { font-size: 14px; font-weight: 700; color: #666; height: 100%; display: flex; align-items: center; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; white-space: nowrap; cursor: pointer; text-decoration: none; }
 .korart-subnav-item:hover { color: #1a1a1a; }
@@ -524,9 +525,9 @@ body {
       <a class="korart-logo" href="/community.html"><span>korart</span><span class="korart-logo-badge">AI</span></a>
     </div>
     <div class="korart-gnb-right">
-      <button class="korart-icon-btn" title="알림">🔔</button>
-      <button class="korart-icon-btn" title="메뉴">⮚</button>
-      <button class="korart-avatar-btn" title="프로필">👤</button>
+      <button class="korart-icon-btn" title="알림"><i data-lucide="bell" style="width:20px;height:20px"></i></button>
+      <button class="korart-icon-btn" title="메뉴"><i data-lucide="layout-grid" style="width:20px;height:20px"></i></button>
+      <button class="korart-avatar-btn" title="프로필"><i data-lucide="user" style="width:16px;height:16px;color:#fff"></i></button>
     </div>
   </div>
 </header>
@@ -1234,6 +1235,9 @@ document.addEventListener('keydown', (e) => {
     closePreview();
   }
 });
+
+// Lucide 아이콘 초기화
+if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
 </script>
 
 </body>
