@@ -640,7 +640,7 @@ body {
     <a class="korart-subnav-item" href="/community.html">홈</a>
     <a class="korart-subnav-item" href="/studio.html?mode=video">영상 생성</a>
     <a class="korart-subnav-item" href="/studio.html?mode=image">이미지 생성</a>
-    <a class="korart-subnav-item active" href="/mypage.html">내 자료</a>
+    <a class="korart-subnav-item active" href="/mypage.html">내 자료/거래내역</a>
     <a class="korart-subnav-item" href="/community.html">커뮤니티</a>
   </div>
 </nav>
@@ -657,10 +657,11 @@ body {
 
   <!-- Big main tabs -->
   <div class="main-tabs">
-    <button class="main-tab active" id="tabAsset" onclick="switchMainTab('asset')">내 자료/거래내역</button>
+    <button class="main-tab active" id="tabAsset" onclick="switchMainTab('asset')">내 자료</button>
+    <button class="main-tab" id="tabTx" onclick="switchMainTab('tx')">거래 이력</button>
   </div>
 
-  <!-- Asset section (기본 노출 — 내 자료 + 거래내역 통합) -->
+  <!-- Asset section (기본 노출 — 내 자료 탭) -->
   <div class="asset-section active" id="assetSection">
     <div class="asset-header">
       <div class="asset-title">내 자료</div>
@@ -675,7 +676,6 @@ body {
       <button class="asset-tab" data-type="merged_video" onclick="switchAssetTab('merged_video')">통합 영상<span class="count" id="cnt-merged_video">0</span></button>
       <button class="asset-tab" data-type="scene" onclick="switchAssetTab('scene')">씬 설정<span class="count" id="cnt-scene">0</span></button>
       <button class="asset-tab" data-type="custom_scene" onclick="switchAssetTab('custom_scene')">나만의 씬<span class="count" id="cnt-custom_scene">0</span></button>
-      <button class="asset-tab" data-type="transactions" onclick="switchAssetTab('transactions')">거래내역</button>
     </div>
 
     <!-- asset grid -->
@@ -694,9 +694,16 @@ body {
   </div>
 </div>
 
-<!-- ==== Tx Section 제거됨 — 상단 통합 탭에 'transactions' 탭으로 이관 ==== -->
+<!-- ══ Tx Section (toggles) ══ -->
 <div class="asset-section" id="txSection" style="display:none">
-  <div id="txContent"></div>
+  <div class="asset-header" style="justify-content:center;gap:18px">
+    <div class="asset-title">거래 이력</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span style="font-size:10px;color:var(--ink3)" id="txCount">—</span>
+      <button class="btn btn-sm btn-ghost" onclick="loadTransactions()">새로고침</button>
+    </div>
+  </div>
+  <div id="txContent" style="margin-top:14px"></div>
 </div>
 
 <!-- ══ Toast ══ -->
@@ -926,9 +933,11 @@ function showTxSection() {
 }
 
 async function loadTransactions() {
-  const container = document.getElementById('assetContent');  // 동일 컨테이너 사용
+  const container = document.getElementById('txContent');
+  const countEl = document.getElementById('txCount');
   if (!container) return;
   container.innerHTML = '<div class="loading"><div class="spin"></div><div style="margin-top:12px">거래 이력 불러오는 중...</div></div>';
+  if (countEl) countEl.textContent = '—';
 
   // localStorage 에서 거래 내역 읽어오기 (테스트용)
   let localTxs = [];
@@ -955,6 +964,7 @@ async function loadTransactions() {
   try {
     const jwt = await getSupabaseJWT();
     if (!jwt) {
+      if (countEl) countEl.textContent = localTxs.length + '건';
       renderTransactions(localTxs);
       return;
     }
@@ -962,6 +972,7 @@ async function loadTransactions() {
       headers: { 'Authorization': 'Bearer ' + jwt },
     });
     if (!r.ok) {
+      if (countEl) countEl.textContent = localTxs.length + '건';
       renderTransactions(localTxs);
       return;
     }
@@ -970,8 +981,10 @@ async function loadTransactions() {
     const allTxs = [...serverTxs, ...localTxs].sort((a, b) => {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
+    if (countEl) countEl.textContent = allTxs.length + '건';
     renderTransactions(allTxs);
   } catch (e) {
+    if (countEl) countEl.textContent = localTxs.length + '건';
     renderTransactions(localTxs);
   }
 }
@@ -993,7 +1006,7 @@ function getTxTypeLabel(tx) {
 }
 
 function renderTransactions(transactions) {
-  const container = document.getElementById('assetContent');  // 동일 컨테이너
+  const container = document.getElementById('txContent');
   if (!container) return;
 
   if (!transactions.length) {
@@ -1086,11 +1099,6 @@ function switchAssetTab(type) {
   document.querySelectorAll('.asset-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.type === type);
   });
-  // 거래내역 탭이면 loadTransactions 호출
-  if (type === 'transactions') {
-    loadTransactions();
-    return;
-  }
   loadAssetType(type);
 }
 
