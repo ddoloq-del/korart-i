@@ -116,9 +116,11 @@ img{display:block}
 .compare-cell:nth-child(3n){border-right:none}
 .compare-table > .compare-cell:nth-last-child(-n+3){border-bottom:none}
 .compare-head{background:rgba(255,255,255,.06);font-weight:700;font-size:12px;letter-spacing:.04em;text-align:center;color:rgba(255,255,255,.95);padding:10px 8px}
-/* 현재 컬럼 강조 — 3n 번째(오른쪽) 섬 전체 */
-.compare-cell:nth-child(3n){border-left:2px solid #ef4444;background:rgba(239,68,68,.05)}
-.compare-head:nth-child(3n){background:rgba(239,68,68,.12);color:#fecaca;font-weight:800;border-left:2px solid #ef4444}
+/* 현재 컬럼 강조 — 3n 번째(오른쪽) 섬 전체: 사방 빨간 테두리 입힌 빨간 박스 */
+.compare-cell:nth-child(3n){border-left:2px solid #ef4444;border-right:2px solid #ef4444;background:rgba(239,68,68,.05)}
+.compare-head:nth-child(3n){background:rgba(239,68,68,.12);color:#fecaca;font-weight:800;border-top:2px solid #ef4444;border-left:2px solid #ef4444;border-right:2px solid #ef4444}
+/* 마지막 행의 현재 컬럼 섬은 하단 보더도 빨강 */
+.compare-table > .compare-cell:nth-last-child(1){border-bottom:2px solid #ef4444}
 .compare-row-label{background:rgba(0,0,0,.2);font-weight:700;font-size:11px;color:rgba(255,255,255,.85);letter-spacing:.02em;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px 4px}
 .compare-past, .compare-now{font-size:12px;line-height:1.55;color:rgba(255,255,255,.9);font-weight:500}
 .compare-past .prompt-text{display:block;background:rgba(0,0,0,.25);padding:8px 10px;margin-top:6px;font-family:ui-monospace,Menlo,monospace;font-size:10px;line-height:1.5;color:rgba(255,255,255,.55);max-height:84px;overflow:hidden;border-left:2px solid rgba(255,255,255,.25)}

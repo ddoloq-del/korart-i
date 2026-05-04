@@ -1906,7 +1906,7 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
 </select>
 
   <!-- ══ STEP 0 (NEW): 비율 선택 ══ -->
-  <div class="panel show" id="panelRatio">
+  <div class="panel" id="panelRatio">
     <div class="panel-step-bar">
       <button class="btn" onclick="goHome()">홈으로</button>
       <div class="step-indicator" id="globalStepsR"></div>
@@ -1962,8 +1962,8 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
 
       </div>
 
-  <!-- ══ STEP 1: 씬 설정 ══ -->
-  <div class="panel" id="panel1">
+  <!-- ══ STEP 1: 씬 설정 (기본 시작 팅 — 이미지/영상 모드 모두) ══ -->
+  <div class="panel show" id="panel1">
     <div class="panel-step-bar" id="panel1Nav">
       <button class="btn" onclick="tryGoStep(0)" id="panel1BackBtn" data-back-btn="1">뒤로</button>
       <div class="step-indicator" id="globalSteps1"></div>
@@ -1972,7 +1972,7 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
     <div class="panel-header" id="panel1Header">
       <span class="panel-num" id="panel1Num">01</span>
       <span class="panel-cat" id="panel1Cat">K-DRAMA / SCENE SELECT</span>
-      <h1 class="panel-title" id="panel1Title">내가 만들 영상 <span class="accent">씬</span> 선택</h1>
+      <h1 class="panel-title" id="panel1Title"></h1>
       <p class="panel-sub" id="panel1Subtxt">씬 분위기를 골라주세요.</p>
     </div>
 
