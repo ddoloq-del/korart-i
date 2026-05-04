@@ -48,6 +48,8 @@ body {
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.5;
+  /* 스크롤바 고정 — 자료 적고/많아짐에 따른 jumping 방지 */
+  overflow-y: scroll;
 }
 
 /* ── Shared GNB+LNB (light, korart 통합 메뉴) ── */
@@ -352,7 +354,8 @@ body {
   border-bottom: 1px solid var(--line);
   margin-bottom: 24px;
   flex-wrap: wrap;
-  overflow-x: auto;
+  /* 스크롤바 제거 — 답이 많으면 줄바꿒으로 자연 처리 */
+  overflow-x: visible;
 }
 .asset-tab {
   padding: 12px 18px;
@@ -654,11 +657,10 @@ body {
 
   <!-- Big main tabs -->
   <div class="main-tabs">
-    <button class="main-tab active" id="tabAsset" onclick="switchMainTab('asset')">내 자료</button>
-    <button class="main-tab" id="tabTx" onclick="switchMainTab('tx')">거래 이력</button>
+    <button class="main-tab active" id="tabAsset" onclick="switchMainTab('asset')">내 자료/거래내역</button>
   </div>
 
-  <!-- Asset section (기본 노출 — 내 자료 탭) -->
+  <!-- Asset section (기본 노출 — 내 자료 + 거래내역 통합) -->
   <div class="asset-section active" id="assetSection">
     <div class="asset-header">
       <div class="asset-title">내 자료</div>
@@ -673,6 +675,7 @@ body {
       <button class="asset-tab" data-type="merged_video" onclick="switchAssetTab('merged_video')">통합 영상<span class="count" id="cnt-merged_video">0</span></button>
       <button class="asset-tab" data-type="scene" onclick="switchAssetTab('scene')">씬 설정<span class="count" id="cnt-scene">0</span></button>
       <button class="asset-tab" data-type="custom_scene" onclick="switchAssetTab('custom_scene')">나만의 씬<span class="count" id="cnt-custom_scene">0</span></button>
+      <button class="asset-tab" data-type="transactions" onclick="switchAssetTab('transactions')">거래내역</button>
     </div>
 
     <!-- asset grid -->
@@ -691,16 +694,9 @@ body {
   </div>
 </div>
 
-<!-- ══ Tx Section (toggles) ══ -->
+<!-- ==== Tx Section 제거됨 — 상단 통합 탭에 'transactions' 탭으로 이관 ==== -->
 <div class="asset-section" id="txSection" style="display:none">
-  <div class="asset-header" style="justify-content:center;gap:18px">
-    <div class="asset-title">거래 이력</div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <span style="font-size:10px;color:var(--ink3)" id="txCount">—</span>
-      <button class="btn btn-sm btn-ghost" onclick="loadTransactions()">새로고침</button>
-    </div>
-  </div>
-  <div id="txContent" style="margin-top:14px"></div>
+  <div id="txContent"></div>
 </div>
 
 <!-- ══ Toast ══ -->
@@ -758,7 +754,7 @@ let currentSession = null;
 // ============================================================
 async function onLoginReady() {
   // 닉네임 표시 — profiles 테이블에서 가져오거나 user metadata에서
-  let nickname = '사용자';
+  let nickname = '';
   try {
     const { data: profile } = await sb
       .from('profiles')
@@ -767,20 +763,19 @@ async function onLoginReady() {
       .single();
     if (profile && profile.nickname) {
       nickname = profile.nickname;
-    } else if (currentUser.user_metadata?.full_name) {
-      nickname = currentUser.user_metadata.full_name;
-    } else if (currentUser.email) {
+    }
+  } catch (_) {}
+
+  // profiles 테이블에 없으면 user_metadata 폴리백
+  if (!nickname) {
+    const meta = currentUser.user_metadata || {};
+    nickname = meta.name || meta.full_name || meta.preferred_username || '';
+    if (!nickname && currentUser.email) {
       nickname = currentUser.email.split('@')[0];
     }
-  } catch (_) {
-    if (currentUser.user_metadata?.full_name) {
-      nickname = currentUser.user_metadata.full_name;
-    } else if (currentUser.email) {
-      nickname = currentUser.email.split('@')[0];
-    }
+    if (!nickname) nickname = '사용자';
   }
 
-  document.getElementById('userGreeting').innerHTML = `<strong>${escapeHtml(nickname)}</strong>`;
   document.getElementById('heroNickname').textContent = nickname;
 
   // 아바타 GNB 업데이트
@@ -923,11 +918,9 @@ function showTxSection() {
 }
 
 async function loadTransactions() {
-  const container = document.getElementById('txContent');
-  const countEl = document.getElementById('txCount');
+  const container = document.getElementById('assetContent');  // 동일 컨테이너 사용
   if (!container) return;
   container.innerHTML = '<div class="loading"><div class="spin"></div><div style="margin-top:12px">거래 이력 불러오는 중...</div></div>';
-  if (countEl) countEl.textContent = '—';
 
   // localStorage 에서 거래 내역 읽어오기 (테스트용)
   let localTxs = [];
@@ -940,7 +933,6 @@ async function loadTransactions() {
     localStorage.setItem('korart_points', '500000');
   }
   if (localTxs.length === 0) {
-    // 초기 적립 기록
     localTxs = [{
       id: 'tx_init',
       type: 'bonus',
@@ -955,8 +947,6 @@ async function loadTransactions() {
   try {
     const jwt = await getSupabaseJWT();
     if (!jwt) {
-      // 서버 없이 localStorage만 표시
-      if (countEl) countEl.textContent = localTxs.length + '건';
       renderTransactions(localTxs);
       return;
     }
@@ -964,22 +954,16 @@ async function loadTransactions() {
       headers: { 'Authorization': 'Bearer ' + jwt },
     });
     if (!r.ok) {
-      // 서버 실패 시 localStorage 폴리백
-      if (countEl) countEl.textContent = localTxs.length + '건';
       renderTransactions(localTxs);
       return;
     }
     const data = await r.json();
     let serverTxs = (data && Array.isArray(data.transactions)) ? data.transactions : [];
-    // 서버 + 로컬 합치고 createdAt 내림차순으로 정렬
     const allTxs = [...serverTxs, ...localTxs].sort((a, b) => {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
-    if (countEl) countEl.textContent = allTxs.length + '건';
     renderTransactions(allTxs);
   } catch (e) {
-    // 예외 시 로컬만 표시
-    if (countEl) countEl.textContent = localTxs.length + '건';
     renderTransactions(localTxs);
   }
 }
@@ -1001,7 +985,7 @@ function getTxTypeLabel(tx) {
 }
 
 function renderTransactions(transactions) {
-  const container = document.getElementById('txContent');
+  const container = document.getElementById('assetContent');  // 동일 컨테이너
   if (!container) return;
 
   if (!transactions.length) {
@@ -1094,6 +1078,11 @@ function switchAssetTab(type) {
   document.querySelectorAll('.asset-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.type === type);
   });
+  // 거래내역 탭이면 loadTransactions 호출
+  if (type === 'transactions') {
+    loadTransactions();
+    return;
+  }
   loadAssetType(type);
 }
 
