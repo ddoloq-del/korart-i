@@ -183,6 +183,54 @@ img{display:block}
 .card-delete-btn{position:absolute;top:8px;right:8px;width:32px;height:32px;background:rgba(0,0,0,.7);border:none;color:#fff;cursor:pointer;display:none;align-items:center;justify-content:center;border-radius:0;transition:background .15s;z-index:5}
 .card:hover .card-delete-btn{display:flex}
 .card-delete-btn:hover{background:#dc2626}
+.card-delete-btn.admin{background:rgba(220,38,38,.92)}
+.card-delete-btn.admin:hover{background:#991b1b}
+.card-admin-badge{position:absolute;top:8px;left:8px;background:rgba(220,38,38,.95);color:#fff;font-size:9px;font-weight:800;padding:3px 7px;letter-spacing:.04em;z-index:5}
+
+/* === Lightbox === */
+.lightbox-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);display:none;z-index:10000;overflow-y:auto}
+.lightbox-overlay.active{display:block}
+.lightbox-content{max-width:1200px;margin:32px auto;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);background:#fff;border:1px solid var(--line);min-height:520px}
+@media(max-width:900px){.lightbox-content{grid-template-columns:1fr;margin:0}}
+.lightbox-close{position:fixed;top:20px;right:20px;width:44px;height:44px;background:rgba(255,255,255,.95);border:1px solid var(--line);color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10001;transition:background .15s}
+.lightbox-close:hover{background:var(--bg-3)}
+.lightbox-media{background:#000;display:flex;align-items:center;justify-content:center;min-height:380px;max-height:85vh;overflow:hidden;position:relative}
+.lightbox-media img,.lightbox-media video{max-width:100%;max-height:85vh;width:auto;height:auto;object-fit:contain}
+.lightbox-side{padding:24px 28px;display:flex;flex-direction:column;gap:14px;max-height:85vh;overflow-y:auto;background:#fff;min-width:0}
+.lb-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.lb-user{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.lb-avatar{width:36px;height:36px;border-radius:50%;background:var(--bg-2);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--ink-dim)}
+.lb-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.lb-username{font-weight:800;color:var(--ink);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-tag{font-size:10px;color:var(--ink-dim);background:var(--bg-2);padding:3px 8px;border:1px solid var(--line);font-weight:600;flex-shrink:0}
+.lb-title{font-size:20px;font-weight:900;color:var(--ink);letter-spacing:-.02em;line-height:1.3;word-break:break-word}
+.lb-actions{display:flex;align-items:center;gap:6px;padding:6px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.lb-btn{display:inline-flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;color:var(--ink-dim);font-family:inherit;font-size:13px;font-weight:600;padding:8px 12px;transition:color .15s,background .15s}
+.lb-btn:hover{background:var(--bg-2);color:var(--ink)}
+.lb-btn.liked{color:#e11d48}
+.lb-btn.liked svg{fill:#e11d48;stroke:#e11d48}
+.lb-btn-delete{margin-left:auto;color:#dc2626}
+.lb-btn-delete:hover{background:#fef2f2;color:#b91c1c}
+.lb-comment-list{display:flex;flex-direction:column;gap:12px;max-height:340px;overflow-y:auto;padding-right:4px}
+.lb-comment{display:flex;gap:10px;padding:6px 0}
+.lb-comment-avatar{width:30px;height:30px;border-radius:50%;background:var(--bg-2);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--ink-dim)}
+.lb-comment-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.lb-comment-body{flex:1;min-width:0}
+.lb-comment-meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--ink-dim);margin-bottom:3px}
+.lb-comment-meta strong{color:var(--ink);font-weight:700;font-size:12px}
+.lb-comment-text{font-size:13px;color:var(--ink);line-height:1.5;word-break:break-word;white-space:pre-wrap}
+.lb-comment-delete{background:none;border:none;color:var(--ink-dimmer);cursor:pointer;font-size:11px;padding:2px 6px}
+.lb-comment-delete:hover{color:#dc2626}
+.lb-comment-empty{text-align:center;padding:24px 0;color:var(--ink-dimmer);font-size:12px}
+.lb-comment-form{display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--line)}
+.lb-comment-form textarea{flex:1;min-height:36px;max-height:100px;padding:8px 12px;border:1px solid var(--line);background:#fff;color:var(--ink);font-family:inherit;font-size:13px;resize:vertical;line-height:1.4}
+.lb-comment-form textarea:focus{outline:none;border-color:var(--accent)}
+.lb-comment-form button{padding:0 16px;background:var(--accent);color:#fff;border:none;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.lb-comment-form button:hover:not(:disabled){opacity:.9}
+.lb-comment-form button:disabled{opacity:.5;cursor:not-allowed}
+.lb-login-prompt{text-align:center;padding:14px;background:var(--bg-2);border:1px solid var(--line);font-size:12px;color:var(--ink-dim)}
+.lb-login-prompt a{color:var(--accent);font-weight:700;cursor:pointer}
+.lb-login-prompt a:hover{text-decoration:underline}
 .card-delete-btn svg{width:16px;height:16px}
 .card-img-wrap{position:relative}
 img.card-avatar{width:24px;height:24px;border-radius:50%;object-fit:cover;display:inline-block;vertical-align:middle}
@@ -617,6 +665,12 @@ img.card-avatar{width:24px;height:24px;border-radius:50%;object-fit:cover;displa
 /* ========== 인증 시스템 (공유) ========== */
 const SUPABASE_URL = 'https://hidtxdvncqrhjaiosiqd.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_LziYVaJBv9sazBKbos5_UQ_1ZVbEOJb';
+
+// 운영자 이메일 (이 계정은 모든 게시물/댓글 삭제 가능)
+const ADMIN_EMAILS = ['ddoloq@gmail.com'];
+function isAdmin() {
+  return currentUser && ADMIN_EMAILS.includes(currentUser.email);
+}
 let sb = null;
 let currentUser = null;
 
@@ -1284,26 +1338,29 @@ function renderGrid() {
     const isCover = item.aspect === '16:9';
     const isVideo = item.type === 'video';
     const isMine = currentUser && item.ownerId === currentUser.id;
+    const canDelete = isMine || isAdmin();
     // 영상은 <video>, 이미지는 <img>
     const mediaHtml = isVideo
       ? `<video class="card-img${isCover ? ' fit-cover' : ''}" src="${item.img}" muted playsinline preload="metadata" onmouseenter="this.play()" onmouseleave="this.pause()"></video>`
       : `<img class="card-img${isCover ? ' fit-cover' : ''}" src="${item.img}" alt="${item.title}">`;
+    const adminBadge = (isAdmin() && !isMine) ? '<span class="card-admin-badge" title="운영자 권한">관리자</span>' : '';
     return `
-    <div class="card" data-post-id="${item.id}">
+    <div class="card" data-post-id="${item.id}" onclick="openLightbox('${item.id}')">
       <div class="card-img-wrap">
         ${mediaHtml}
         ${item.tag ? `<div class="card-tag">${item.tag}</div>` : ''}
         ${isVideo ? '<div class="card-video-badge"><i data-lucide="video" class="icon-sm"></i></div>' : ''}
         <div class="card-aspect-badge">${item.aspect || '16:9'}</div>
-        ${isMine ? `<button class="card-delete-btn" onclick="deletePost('${item.id}', event)" title="게시물 삭제"><i data-lucide="trash-2" class="icon-sm"></i></button>` : ''}
+        ${canDelete ? `<button class="card-delete-btn ${!isMine ? 'admin' : ''}" onclick="deletePost('${item.id}', event)" title="${isMine ? '게시물 삭제' : '관리자 삭제'}"><i data-lucide="trash-2" class="icon-sm"></i></button>` : ''}
+        ${adminBadge}
       </div>
       <div class="card-body">
         <h4 class="card-title">${item.title}</h4>
         <div class="card-meta">
           <div class="card-user">${item.avatar ? `<img src="${item.avatar}" class="card-avatar" referrerpolicy="no-referrer">` : '<div class="card-avatar"></div>'}<span class="card-username">${item.user}</span></div>
           <div class="card-stats">
-            <div class="card-stat"><i data-lucide="heart" class="icon-sm"></i>${item.likes || 0}</div>
-            <div class="card-stat"><i data-lucide="eye" class="icon-sm"></i>${item.views || 0}</div>
+            <div class="card-stat"><i data-lucide="heart" class="icon-sm"></i><span data-likes-for="${item.id}">${item.likes || 0}</span></div>
+            <div class="card-stat"><i data-lucide="message-circle" class="icon-sm"></i><span data-comments-for="${item.id}">${item.comments_count || 0}</span></div>
           </div>
         </div>
       </div>
@@ -1314,19 +1371,22 @@ function renderGrid() {
   lucide.createIcons();
 }
 
-// 본인 게시물 삭제 (hard delete — RLS visibility 문제 회피)
+// 본인/관리자 게시물 삭제 (hard delete — RLS visibility 문제 회피)
 async function deletePost(postId, event) {
-  event.stopPropagation();
-  if (!confirm('이 게시물을 삭제하시겠어요?\n삭제된 게시물은 복구할 수 없어요.')) return;
+  if (event) event.stopPropagation();
+  const confirmMsg = isAdmin() ? '[관리자] 이 게시물을 삭제하시겠어요?\n삭제된 게시물은 복구할 수 없어요.' : '이 게시물을 삭제하시겠어요?\n삭제된 게시물은 복구할 수 없어요.';
+  if (!confirm(confirmMsg)) return;
   if (!sb || !currentUser) {
     alert('로그인이 필요해요.');
     return;
   }
   try {
-    const { error } = await sb.from('community_posts')
-      .delete()
-      .eq('id', postId)
-      .eq('user_id', currentUser.id);
+    let q = sb.from('community_posts').delete().eq('id', postId);
+    // 관리자는 user_id 조건 없이 삭제 가능 (RLS의 admin 정책 사용)
+    if (!isAdmin()) {
+      q = q.eq('user_id', currentUser.id);
+    }
+    const { error } = await q;
     if (error) {
       alert('삭제 실패: ' + error.message);
       return;
@@ -1335,6 +1395,8 @@ async function deletePost(postId, event) {
     const idx = mockContent.findIndex(p => p.id === postId);
     if (idx >= 0) mockContent.splice(idx, 1);
     renderGrid();
+    // lightbox 열려있으면 닫기
+    closeLightbox();
   } catch (e) {
     alert('삭제 오류: ' + e.message);
   }
@@ -1699,5 +1761,271 @@ async function migrateLocalPostsIfAny() {
 // 초기 호출 (sb 준비될 때까지 대기)
 loadCommunityPosts();
 </script>
+<!-- ══ Lightbox (큰 화면 팝업) ══ -->
+<div class="lightbox-overlay" id="lightbox" onclick="if(event.target===this)closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()" title="닫기"><i data-lucide="x" class="icon-md"></i></button>
+  <div class="lightbox-content">
+    <div class="lightbox-media" id="lbMedia"></div>
+    <div class="lightbox-side">
+      <div class="lb-header">
+        <div class="lb-user">
+          <div class="lb-avatar" id="lbAvatar"><i data-lucide="user" class="icon-sm"></i></div>
+          <div class="lb-username" id="lbUsername">사용자</div>
+        </div>
+        <div class="lb-tag" id="lbTag" style="display:none"></div>
+      </div>
+      <div class="lb-title" id="lbTitle">제목</div>
+      <div class="lb-actions">
+        <button class="lb-btn" id="lbLikeBtn" onclick="toggleLike()">
+          <i data-lucide="heart" class="icon-sm"></i>
+          <span id="lbLikeCount">0</span>
+        </button>
+        <button class="lb-btn">
+          <i data-lucide="message-circle" class="icon-sm"></i>
+          <span id="lbCommentCount">0</span>
+        </button>
+        <button class="lb-btn lb-btn-delete" id="lbDeleteBtn" style="display:none" onclick="deletePostFromLightbox()">
+          <i data-lucide="trash-2" class="icon-sm"></i>
+          삭제
+        </button>
+      </div>
+      <div class="lb-comments">
+        <div class="lb-comment-list" id="lbCommentList">
+          <div class="lb-comment-empty">댓글을 불러오는 중...</div>
+        </div>
+        <div id="lbCommentFormWrap"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Lightbox JS ══ -->
+<script>
+let _lbCurrentPostId = null;
+let _lbLikedByMe = false;
+
+async function openLightbox(postId) {
+  const post = mockContent.find(p => p.id === postId);
+  if (!post) return;
+  _lbCurrentPostId = postId;
+
+  // 미디어 렌더
+  const mediaEl = document.getElementById('lbMedia');
+  if (post.type === 'video') {
+    mediaEl.innerHTML = `<video src="${post.img}" controls autoplay loop playsinline></video>`;
+  } else {
+    mediaEl.innerHTML = `<img src="${post.img}" alt="${escapeText(post.title)}">`;
+  }
+
+  // 헤더
+  document.getElementById('lbAvatar').innerHTML = post.avatar
+    ? `<img src="${post.avatar}" referrerpolicy="no-referrer">`
+    : '<i data-lucide="user" class="icon-sm"></i>';
+  document.getElementById('lbUsername').textContent = post.user || '익명';
+  document.getElementById('lbTitle').textContent = post.title || '';
+  const tagEl = document.getElementById('lbTag');
+  if (post.tag) { tagEl.textContent = post.tag; tagEl.style.display = ''; }
+  else tagEl.style.display = 'none';
+
+  // 삭제 버튼 (본인 또는 운영자)
+  const isMine = currentUser && post.ownerId === currentUser.id;
+  const delBtn = document.getElementById('lbDeleteBtn');
+  if (isMine || isAdmin()) {
+    delBtn.style.display = '';
+    delBtn.innerHTML = `<i data-lucide="trash-2" class="icon-sm"></i> ${isMine ? '삭제' : '관리자 삭제'}`;
+  } else {
+    delBtn.style.display = 'none';
+  }
+
+  // 좋아요 카운트 + 본인 좋아요 여부
+  document.getElementById('lbLikeCount').textContent = post.likes || 0;
+  _lbLikedByMe = false;
+  document.getElementById('lbLikeBtn').classList.remove('liked');
+  if (currentUser) {
+    try {
+      const { data: myLike } = await sb.from('community_likes')
+        .select('user_id').eq('post_id', postId).eq('user_id', currentUser.id).maybeSingle();
+      _lbLikedByMe = !!myLike;
+      if (_lbLikedByMe) document.getElementById('lbLikeBtn').classList.add('liked');
+    } catch (e) {}
+  }
+
+  // 댓글 입력 폼 (비로그인 안내)
+  const formWrap = document.getElementById('lbCommentFormWrap');
+  if (currentUser) {
+    formWrap.innerHTML = `
+      <div class="lb-comment-form">
+        <textarea id="lbCommentInput" placeholder="댓글을 입력하세요 (최대 500자)" maxlength="500"></textarea>
+        <button onclick="submitComment()" id="lbCommentSubmit">등록</button>
+      </div>`;
+  } else {
+    formWrap.innerHTML = `
+      <div class="lb-login-prompt">
+        댓글을 작성하려면 <a onclick="closeLightbox(); document.getElementById(&quot;authModal&quot;).classList.add(&quot;active&quot;);">로그인</a>이 필요해요.
+      </div>`;
+  }
+
+  // 모달 표시
+  document.getElementById('lightbox').classList.add('active');
+  document.body.style.overflow = 'hidden';
+  if (window.lucide) lucide.createIcons();
+
+  // 댓글 로드
+  loadComments(postId);
+}
+
+function closeLightbox() {
+  const lb = document.getElementById('lightbox');
+  if (!lb || !lb.classList.contains('active')) return;
+  lb.classList.remove('active');
+  document.body.style.overflow = '';
+  const v = document.querySelector('#lbMedia video');
+  if (v) v.pause();
+  _lbCurrentPostId = null;
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeLightbox();
+});
+
+async function toggleLike() {
+  if (!currentUser) { alert('좋아요는 로그인 후 이용 가능해요.'); return; }
+  if (!_lbCurrentPostId) return;
+  const postId = _lbCurrentPostId;
+  const lbBtn = document.getElementById('lbLikeBtn');
+  const countEl = document.getElementById('lbLikeCount');
+
+  if (_lbLikedByMe) {
+    const { error } = await sb.from('community_likes').delete().eq('user_id', currentUser.id).eq('post_id', postId);
+    if (error) { alert('좋아요 취소 실패: ' + error.message); return; }
+    _lbLikedByMe = false;
+    lbBtn.classList.remove('liked');
+    const newCount = Math.max(0, (parseInt(countEl.textContent) || 0) - 1);
+    countEl.textContent = newCount;
+    const gridCount = document.querySelector(`[data-likes-for="${postId}"]`);
+    if (gridCount) gridCount.textContent = newCount;
+    sb.from('community_posts').update({ likes: newCount }).eq('id', postId).then(()=>{}).catch(()=>{});
+    const p = mockContent.find(p => p.id === postId);
+    if (p) p.likes = newCount;
+  } else {
+    const { error } = await sb.from('community_likes').insert({ user_id: currentUser.id, post_id: postId });
+    if (error) { alert('좋아요 실패: ' + error.message); return; }
+    _lbLikedByMe = true;
+    lbBtn.classList.add('liked');
+    const newCount = (parseInt(countEl.textContent) || 0) + 1;
+    countEl.textContent = newCount;
+    const gridCount = document.querySelector(`[data-likes-for="${postId}"]`);
+    if (gridCount) gridCount.textContent = newCount;
+    sb.from('community_posts').update({ likes: newCount }).eq('id', postId).then(()=>{}).catch(()=>{});
+    const p = mockContent.find(p => p.id === postId);
+    if (p) p.likes = newCount;
+  }
+}
+
+function formatTimeAgo(iso) {
+  const t = new Date(iso).getTime();
+  const diff = Date.now() - t;
+  if (diff < 60000) return '방금 전';
+  if (diff < 3600000) return Math.floor(diff / 60000) + '분 전';
+  if (diff < 86400000) return Math.floor(diff / 3600000) + '시간 전';
+  if (diff < 7 * 86400000) return Math.floor(diff / 86400000) + '일 전';
+  const date = new Date(iso);
+  return `${date.getMonth() + 1}월 ${date.getDate()}일`;
+}
+
+async function loadComments(postId) {
+  const listEl = document.getElementById('lbCommentList');
+  listEl.innerHTML = '<div class="lb-comment-empty">댓글을 불러오는 중...</div>';
+  const { data, error } = await sb.from('community_comments')
+    .select('*').eq('post_id', postId).eq('is_deleted', false).order('created_at', { ascending: true });
+  if (error) {
+    listEl.innerHTML = `<div class="lb-comment-empty">댓글 로드 실패: ${error.message}</div>`;
+    return;
+  }
+  const comments = data || [];
+  document.getElementById('lbCommentCount').textContent = comments.length;
+  const gridCount = document.querySelector(`[data-comments-for="${postId}"]`);
+  if (gridCount) gridCount.textContent = comments.length;
+
+  if (!comments.length) {
+    listEl.innerHTML = '<div class="lb-comment-empty">첫 번째 댓글을 남겨보세요!</div>';
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+  const post = mockContent.find(p => p.id === postId);
+  const postOwnerId = post?.ownerId;
+
+  listEl.innerHTML = comments.map(c => {
+    const canDelete = currentUser && (currentUser.id === c.user_id || currentUser.id === postOwnerId || isAdmin());
+    const deleteBtn = canDelete
+      ? `<button class="lb-comment-delete" onclick="deleteComment('${c.id}', '${postId}')" title="삭제">삭제</button>`
+      : '';
+    const avatarHtml = c.user_avatar
+      ? `<img src="${escapeText(c.user_avatar)}" referrerpolicy="no-referrer">`
+      : '<i data-lucide="user" class="icon-sm"></i>';
+    return `
+      <div class="lb-comment">
+        <div class="lb-comment-avatar">${avatarHtml}</div>
+        <div class="lb-comment-body">
+          <div class="lb-comment-meta">
+            <strong>${escapeText(c.user_nickname || '익명')}</strong>
+            <span>${formatTimeAgo(c.created_at)}</span>
+            ${deleteBtn}
+          </div>
+          <div class="lb-comment-text">${escapeText(c.content)}</div>
+        </div>
+      </div>`;
+  }).join('');
+  if (window.lucide) lucide.createIcons();
+}
+
+async function submitComment() {
+  if (!currentUser) { alert('로그인이 필요해요.'); return; }
+  if (!_lbCurrentPostId) return;
+  const input = document.getElementById('lbCommentInput');
+  const content = input.value.trim();
+  if (!content) return;
+  if (content.length > 500) { alert('댓글은 500자 이내로 작성해주세요.'); return; }
+
+  const btn = document.getElementById('lbCommentSubmit');
+  btn.disabled = true;
+  btn.textContent = '등록 중...';
+
+  const meta = currentUser.user_metadata || {};
+  const nickname = meta.name || meta.full_name || (currentUser.email ? currentUser.email.split('@')[0] : '익명');
+  const avatar = meta.avatar_url || meta.picture || null;
+
+  try {
+    const { error } = await sb.from('community_comments').insert({
+      post_id: _lbCurrentPostId,
+      user_id: currentUser.id,
+      content: content,
+      user_nickname: nickname,
+      user_avatar: avatar
+    });
+    if (error) { alert('댓글 등록 실패: ' + error.message); return; }
+    input.value = '';
+    await loadComments(_lbCurrentPostId);
+  } catch (e) {
+    alert('댓글 등록 오류: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '등록';
+  }
+}
+
+async function deleteComment(commentId, postId) {
+  if (!confirm('이 댓글을 삭제하시겠어요?')) return;
+  const { error } = await sb.from('community_comments').delete().eq('id', commentId);
+  if (error) { alert('삭제 실패: ' + error.message); return; }
+  await loadComments(postId);
+}
+
+async function deletePostFromLightbox() {
+  if (!_lbCurrentPostId) return;
+  await deletePost(_lbCurrentPostId, null);
+}
+</script>
+
 </body>
 </html>

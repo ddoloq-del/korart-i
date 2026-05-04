@@ -10499,11 +10499,20 @@ async function generateCutVideo(i) {
     status.textContent = `fal.ai 요청 중 (${dur}초 예상)...`;
     log('info', `body: ${JSON.stringify(body).slice(0,200)}`);
 
-    // 이미지 생성 포인트: data-cpm × 42 (비치가 이미 정해둔 공식, line 5761 참고)
+    // 이미지 생성 포인트 — #imgModel의 현재 선택된 option의 data-cpm × 42 (비캌가 이미 정해둔 공식, line 5761 참고)
     const _imgEstPoints = (function() {
       try {
         const sel = document.getElementById('imgModel');
-        const opt = sel ? sel.options[sel.selectedIndex] : null;
+        if (!sel) return 0;
+        // model + quality 일치하는 option 찾기 (model만 같은 option이 여러 개 있을 수 있으므로)
+        let opt = null;
+        const reqQuality = body && body.quality ? body.quality : null;
+        for (const o of sel.options) {
+          if (o.value === model) {
+            if (reqQuality && o.dataset.quality === reqQuality) { opt = o; break; }
+            if (!opt) opt = o;  // 폴백
+          }
+        }
         const cpm = opt ? parseFloat(opt.dataset.cpm || '0') : 0;
         return Math.max(1, Math.ceil(cpm * 42));
       } catch (e) { return 0; }
