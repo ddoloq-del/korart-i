@@ -1027,7 +1027,13 @@ document.getElementById('googleLoginBtn').addEventListener('click', async () => 
   try {
     await sb.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin + '/community.html' }
+      options: {
+        redirectTo: window.location.origin + '/community.html',
+        queryParams: {
+          prompt: 'select_account',
+          access_type: 'offline'
+        }
+      }
     });
   } catch (e) { alert('Google 로그인 실패: ' + e.message); }
 });
@@ -1037,7 +1043,9 @@ document.getElementById('kakaoLoginBtn').addEventListener('click', async () => {
   try {
     await sb.auth.signInWithOAuth({
       provider: 'kakao',
-      options: { redirectTo: window.location.origin + '/community.html' }
+      options: {
+        redirectTo: window.location.origin + '/community.html'
+      }
     });
   } catch (e) { alert('카카오 로그인 실패: ' + e.message); }
 });

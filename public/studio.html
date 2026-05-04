@@ -2889,6 +2889,8 @@ let currentSession = null;
     window.__currentUser = currentUser;
     window.__currentSession = currentSession;
     if (currentUser && typeof updatePointsDisplay === 'function') updatePointsDisplay();
+    // 아바타 UI 자동 갱신 (로그인/로그아웃 시)
+    if (typeof renderAvatar === 'function') renderAvatar();
   });
 }
 )();
@@ -13350,7 +13352,14 @@ function resetMerge() {
   // KorartiAuth 또는 sb 객체 재사용
   function getSb() { return window.sb || (window.KorartiAuth && window.KorartiAuth.client) || null; }
   function getCurrentUser() {
+    // 전역 currentUser 변수 장소 — authBootstrap에서는 currentUser/window.__currentUser에 저장
+    if (typeof currentUser !== 'undefined' && currentUser) return currentUser;
+    if (window.__currentUser) return window.__currentUser;
     if (window.currentUser) return window.currentUser;
+    if (window.KorartiAuth && typeof window.KorartiAuth.getUser === 'function') {
+      const u = window.KorartiAuth.getUser();
+      if (u) return u;
+    }
     if (window.KorartiAuth && window.KorartiAuth.user) return window.KorartiAuth.user;
     return null;
   }
