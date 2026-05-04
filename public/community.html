@@ -90,7 +90,7 @@ img{display:block}
 .subnav-item{font-size:14px;font-weight:700;color:var(--ink-dim);height:100%;display:flex;align-items:center;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap;cursor:pointer;text-decoration:none}
 .subnav-item:hover{color:var(--ink)}
 .subnav-item.active{color:var(--ink);border-color:var(--accent)}
-.main{max-width:1400px;margin:0 auto;padding:32px 24px}
+.main{max-width:1400px;margin:0 auto;padding:32px 24px;display:grid;grid-template-columns:1fr 320px;gap:32px}
 .hero{position:relative;border-radius:0;padding:48px;margin-bottom:32px;overflow:hidden;background:radial-gradient(ellipse at top right,rgba(167,139,250,.25),transparent 60%),radial-gradient(ellipse at bottom left,rgba(99,102,241,.25),transparent 60%),linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#4c1d95 100%);border:1px solid var(--line-lit);min-height:280px;display:flex;align-items:center}
 .hero-content{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.18fr);gap:32px;align-items:center;width:100%;max-width:none}
 .hero-content > .hero-left{min-width:0}
@@ -141,6 +141,38 @@ img{display:block}
 .empty-desc{font-size:13px;color:var(--ink-dim);line-height:1.6;margin-bottom:18px}
 .empty-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:linear-gradient(135deg,var(--accent),var(--gold));color:#fff;font-weight:800;font-size:13px;border:none;cursor:pointer;transition:transform .15s,box-shadow .15s}
 .empty-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(99,102,241,.4)}
+
+/* 사이드바 - 로그인 창구 + 도구 */
+.sidebar{display:flex;flex-direction:column;gap:20px}
+.sb-card{background:var(--bg-2);border:1px solid var(--line);border-radius:0;padding:24px;position:relative;overflow:hidden}
+.sb-card-decor{position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:radial-gradient(circle,var(--accent-soft),transparent);border-radius:0;filter:blur(20px)}
+.login-card{text-align:center}
+.login-icon{width:56px;height:56px;border-radius:0;background:linear-gradient(135deg,var(--accent),var(--gold));display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;color:#fff;box-shadow:0 4px 20px rgba(99,102,241,.3)}
+.login-title{font-size:16px;font-weight:800;margin-bottom:6px;letter-spacing:-.01em;position:relative;z-index:2}
+.login-desc{font-size:12px;color:var(--ink-dim);margin-bottom:22px;line-height:1.6;position:relative;z-index:2}
+.login-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--accent),var(--accent-hover));border-radius:0;font-weight:800;font-size:13px;color:#fff;margin-bottom:14px;position:relative;z-index:2;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 12px rgba(99,102,241,.35);border:none;cursor:pointer;font-family:inherit}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(99,102,241,.5)}
+.login-links{display:flex;justify-content:center;gap:16px;font-size:11px;color:var(--ink-dimmer);position:relative;z-index:2}
+.login-links span:hover{color:var(--ink);cursor:pointer}
+.login-links .dot{width:3px;height:3px;background:var(--ink-dimmer);border-radius:0;align-self:center}
+.login-card .lc-avatar{width:64px;height:64px;border-radius:50%;background:var(--bg-3);overflow:hidden;margin:0 auto 14px;position:relative;z-index:2}
+.login-card .lc-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.login-card .lc-name{font-size:16px;font-weight:800;color:var(--ink);margin-bottom:4px;position:relative;z-index:2}
+.login-card .lc-email{font-size:11px;color:var(--ink-dimmer);margin-bottom:18px;position:relative;z-index:2}
+.login-card .lc-points{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(167,139,250,.08));border:1px solid rgba(99,102,241,.25);padding:8px 14px;font-size:14px;font-weight:800;color:var(--accent);margin-bottom:18px;position:relative;z-index:2}
+.login-card .lc-actions{display:flex;flex-direction:column;gap:8px;position:relative;z-index:2}
+.login-card .lc-btn{padding:10px;background:transparent;border:1px solid var(--line);color:var(--ink-dim);font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;transition:all .15s}
+.login-card .lc-btn:hover{border-color:var(--ink);color:var(--ink)}
+.login-card .lc-btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent-hover));border-color:transparent;color:#fff}
+.login-card .lc-btn.primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(99,102,241,.4)}
+.login-card .lc-btn.danger:hover{border-color:#dc2626;color:#dc2626;background:#fef2f2}
+.tools-card{background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(167,139,250,.06));border:1px solid rgba(99,102,241,.2)}
+.tools-title{font-size:13px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:6px;color:var(--gold)}
+.tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tool-item{background:var(--bg-2);border:1px solid var(--line);padding:14px 10px;border-radius:0;text-align:center;cursor:pointer;transition:border-color .15s,background .15s,transform .15s;text-decoration:none;color:inherit;display:block}
+.tool-item:hover{border-color:var(--accent);background:var(--bg-3);transform:translateY(-2px)}
+.tool-icon{color:var(--accent);margin-bottom:6px;display:flex;justify-content:center}
+.tool-label{font-size:11px;font-weight:700;color:var(--ink)}
 .card-tag{position:absolute;top:12px;left:12px;background:rgba(99,102,241,.9);color:#fff;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:0;backdrop-filter:blur(10px)}
 .card-video-badge{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);width:28px;height:28px;border-radius:0;display:flex;align-items:center;justify-content:center;color:#fff}
 .card-body{padding:16px}
@@ -199,7 +231,7 @@ img{display:block}
 .footer-links a:hover{color:var(--ink)}
 .footer-links .strong{color:var(--ink)}
 .footer-info{font-size:11px;color:var(--ink-dimmer);line-height:1.8}
-@media (max-width:1024px){.grid{grid-template-columns:repeat(2,1fr)}.hero-content{grid-template-columns:1fr;gap:24px}.compare-table{font-size:11px}.modal-grid{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:1024px){.main{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.hero-content{grid-template-columns:1fr;gap:24px}.compare-table{font-size:11px}.modal-grid{grid-template-columns:repeat(3,1fr)}}
 @media (max-width:768px){.gnb-inner{padding:0 16px;height:56px}.gnb-left{gap:0}.main{padding:20px 16px}.grid{grid-template-columns:1fr}.hero{padding:28px 24px;min-height:auto}.hero-title{font-size:28px}.content-title{font-size:18px}.footer-links{gap:18px;font-size:11px}.compare-table{grid-template-columns:60px 1fr 1fr;font-size:10px}.compare-cell{padding:10px}.compare-past .prompt-text{font-size:9px;max-height:60px}.modal-grid{grid-template-columns:repeat(2,1fr)}}
 .icon-sm{width:16px;height:16px}
 .icon-md{width:20px;height:20px}
@@ -346,6 +378,32 @@ img{display:block}
 
     <div class="grid" id="grid"></div>
   </section>
+
+  <aside class="sidebar">
+    <!-- 로그인 창구 토글 (로그인 전: 창작 시작하기 / 후: 프로필 + 로그아웃) -->
+    <div class="sb-card login-card" id="sidebarLoginCard">
+      <div class="sb-card-decor"></div>
+      <div class="login-icon"><i data-lucide="zap" class="icon-lg"></i></div>
+      <h4 class="login-title">상상을 작품으로</h4>
+      <p class="login-desc">지금 로그인하고 당신의 아이디어를<br>고화질 AI 아트로 변환해보세요.</p>
+      <button class="login-btn" id="sidebarLoginBtn">창작 시작하기</button>
+      <div class="login-links">
+        <span>아이디 찾기</span>
+        <span class="dot"></span>
+        <span>회원가입</span>
+      </div>
+    </div>
+
+    <div class="sb-card tools-card">
+      <h4 class="tools-title"><i data-lucide="sparkles" class="icon-sm"></i>크리에이터 도구</h4>
+      <div class="tools-grid">
+        <a class="tool-item" href="/studio.html?mode=image"><div class="tool-icon"><i data-lucide="image" class="icon-md"></i></div><div class="tool-label">이미지 생성</div></a>
+        <a class="tool-item" href="/studio.html?mode=video"><div class="tool-icon"><i data-lucide="video" class="icon-md"></i></div><div class="tool-label">영상 생성</div></a>
+        <a class="tool-item" href="/mypage.html"><div class="tool-icon"><i data-lucide="layout-grid" class="icon-md"></i></div><div class="tool-label">내 자료</div></a>
+        <a class="tool-item" href="/community.html"><div class="tool-icon"><i data-lucide="users" class="icon-md"></i></div><div class="tool-label">커뮤니티</div></a>
+      </div>
+    </div>
+  </aside>
 </main>
 
 <!-- 게시 모달 -->
@@ -359,7 +417,7 @@ img{display:block}
       <div class="reward-banner">
         <div class="reward-icon"><i data-lucide="gift" class="icon-md"></i></div>
         <div class="reward-text">
-          게시하면 포인트를 드려요. 이미지 <strong>0.5P</strong> · 영상 <strong>1P</strong>.<br>
+          하루 게시 한도: 이미지 <strong>5개</strong> · 영상 <strong>5개</strong>.<br>
           <span style="color:var(--ink-dimmer)">클라우드(내 자료)에 저장된 작품만 게시할 수 있습니다.</span>
         </div>
       </div>
@@ -458,6 +516,66 @@ function renderAuthState() {
     btn.innerHTML = `<i data-lucide="user-round"></i>`;
     if (window.lucide) lucide.createIcons();
   }
+  // 사이드바 로그인 카드 동기화
+  renderSidebarLoginCard();
+}
+
+/* 사이드바 로그인 카드 - 로그인 전/후 토글 */
+function renderSidebarLoginCard() {
+  const card = document.getElementById('sidebarLoginCard');
+  if (!card) return;
+  if (currentUser) {
+    const meta = currentUser.user_metadata || {};
+    const name = meta.name || meta.full_name || (currentUser.email ? currentUser.email.split('@')[0] : '사용자');
+    const email = currentUser.email || '';
+    const avatar = meta.avatar_url || meta.picture || '';
+    card.innerHTML = `
+      <div class="sb-card-decor"></div>
+      <div class="lc-avatar">${avatar ? `<img src="${avatar}" alt="avatar" referrerpolicy="no-referrer">` : ''}</div>
+      <div class="lc-name">${escapeText(name)}</div>
+      <div class="lc-email">${escapeText(email)}</div>
+      <div class="lc-points">∞ P <span style="font-weight:600;color:var(--ink-dimmer);font-size:11px">무한 포인트</span></div>
+      <div class="lc-actions">
+        <a class="lc-btn primary" href="/studio.html?mode=image" style="text-decoration:none;text-align:center;display:block">이미지 생성 시작</a>
+        <a class="lc-btn" href="/mypage.html" style="text-decoration:none;text-align:center;display:block">내 자료</a>
+        <button class="lc-btn danger" id="sidebarLogoutBtn">로그아웃</button>
+      </div>
+    `;
+    const lo = document.getElementById('sidebarLogoutBtn');
+    if (lo) lo.addEventListener('click', async () => {
+      if (!sb) return;
+      if (!confirm('로그아웃 하시겠어요?')) return;
+      await sb.auth.signOut();
+      currentUser = null;
+      renderAuthState();
+    });
+  } else {
+    // 로그인 전: 원래 "창작 시작하기" 토글
+    card.innerHTML = `
+      <div class="sb-card-decor"></div>
+      <div class="login-icon"><i data-lucide="zap" class="icon-lg"></i></div>
+      <h4 class="login-title">상상을 작품으로</h4>
+      <p class="login-desc">지금 로그인하고 당신의 아이디어를<br>고화질 AI 아트로 변환해보세요.</p>
+      <button class="login-btn" id="sidebarLoginBtn">창작 시작하기</button>
+      <div class="login-links">
+        <span>아이디 찾기</span>
+        <span class="dot"></span>
+        <span>회원가입</span>
+      </div>
+    `;
+    const sb2 = document.getElementById('sidebarLoginBtn');
+    if (sb2) sb2.addEventListener('click', () => {
+      document.getElementById('authModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    });
+  }
+  if (window.lucide) lucide.createIcons();
+}
+
+/* HTML escape (XSS 방지) */
+function escapeText(s) {
+  if (typeof s !== 'string') s = String(s);
+  return s.replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 }
 
 function updateProfileDropdown() {
@@ -470,9 +588,8 @@ function updateProfileDropdown() {
   document.getElementById('pdEmail').textContent = email;
   const pdAvatar = document.getElementById('pdAvatar');
   pdAvatar.innerHTML = avatar ? `<img src="${avatar}" alt="avatar" referrerpolicy="no-referrer">` : '';
-  const points = parseFloat(localStorage.getItem('korart_points') || '0');
-  const pointsStr = (points % 1 === 0) ? points.toString() : points.toFixed(1);
-  document.getElementById('pdPoints').innerHTML = `${pointsStr}<span class="pt-unit">P</span>`;
+  // 포인트 무한 (크레딧 개념)
+  document.getElementById('pdPoints').innerHTML = `∞<span class="pt-unit">P</span>`;
 }
 
 /* 아바타 버튼 클릭 */
@@ -556,9 +673,8 @@ function openProfileModal() {
   const provider = currentUser.app_metadata?.provider || 'email';
   const providerMap = { google: 'Google', kakao: '카카오', email: '이메일' };
   document.getElementById('pmProvider').textContent = providerMap[provider] || provider;
-  const points = parseFloat(localStorage.getItem('korart_points') || '0');
-  const pointsStr = (points % 1 === 0) ? points.toString() : points.toFixed(1);
-  document.getElementById('pmPoints').textContent = pointsStr + 'P';
+  // 포인트 무한
+  document.getElementById('pmPoints').textContent = '∞P (무한)';
   let postCount = 0;
   try { postCount = (JSON.parse(localStorage.getItem('korart_published') || '[]')).length; } catch (e) {}
   document.getElementById('pmPostCount').textContent = postCount + '건';
@@ -596,9 +712,27 @@ loadSupabase(initAuth);
 
 <script>
 /* 트렌딩 그리드 + 게시 로직
-   카드 컴셉 보존: { id, type, title, user, likes, views, tag, img, aspect }
+   카드 컴셉 보존: { id, type, title, user, likes, views, tag, img, aspect, createdAt }
    aspect: '16:9' | '1:1' | '9:16'
-   게시 localStorage 'korart_published' */
+   게시 localStorage 'korart_published'
+   하루 게시 한도: 이미지 5개, 영상 5개 (rate limit) */
+
+const DAILY_LIMIT = 5;  // 이미지/영상 각각 하루 5개
+function getTodayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function getTodayPublishCount(type) {
+  try {
+    const list = JSON.parse(localStorage.getItem('korart_published') || '[]');
+    const today = getTodayKey();
+    return list.filter(p => p.type === type && getDateKey(p.createdAt) === today).length;
+  } catch (e) { return 0; }
+}
+function getDateKey(ts) {
+  const d = new Date(ts || 0);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 
 const mockContent = [];
 let currentSort = 'popular';
@@ -618,7 +752,7 @@ function renderGrid() {
       <div class="empty-state">
         <div class="empty-icon"><i data-lucide="image-off" class="icon-lg"></i></div>
         <h4 class="empty-title">아직 게시된 작품이 없어요</h4>
-        <p class="empty-desc">첫 번째 작품을 공유해보세요.<br>이미지 0.5P · 영상 1P의 리워드가 지급됩니다.</p>
+        <p class="empty-desc">첫 번째 작품을 공유해보세요.<br>하루 이미지 5개, 영상 5개까지 게시할 수 있어요.</p>
         <button class="empty-btn" onclick="openPublishModal()"><i data-lucide="plus" class="icon-sm"></i>클라우드 자료 게시</button>
       </div>`;
     lucide.createIcons();
@@ -728,22 +862,34 @@ function loadAssets() {
 function updateFooter() {
   const info = document.getElementById('modalFooterInfo');
   const btn = document.getElementById('modalPublish');
-  if (!selectedAsset) {
-    info.innerHTML = '작품을 선택하세요';
+  const todayCount = getTodayPublishCount(currentAssetType);
+  const remaining = DAILY_LIMIT - todayCount;
+  // 오늘 한도 초과
+  if (remaining <= 0) {
+    info.innerHTML = `⚠️ 오늘 ${currentAssetType === 'image' ? '이미지' : '영상'} 게시 한도(${DAILY_LIMIT}개)에 도달했어요`;
     btn.disabled = true;
     return;
   }
-  const reward = selectedAsset.type === 'image' ? '0.5P' : '1P';
-  info.innerHTML = `게시 완료 시 <strong>+${reward}</strong> 지급`;
+  if (!selectedAsset) {
+    info.innerHTML = `작품을 선택하세요 <span style="color:var(--ink-dimmer);font-size:11px">(오늘 ${remaining}/${DAILY_LIMIT}개 가능)</span>`;
+    btn.disabled = true;
+    return;
+  }
+  info.innerHTML = `게시 가능 <strong>${remaining}/${DAILY_LIMIT}</strong> (${currentAssetType === 'image' ? '이미지' : '영상'})`;
   btn.disabled = false;
 }
 
 document.getElementById('modalPublish').addEventListener('click', () => {
   if (!selectedAsset) return;
+  // 하루 한도 체크 (더블 안전)
+  const todayCount = getTodayPublishCount(selectedAsset.type);
+  if (todayCount >= DAILY_LIMIT) {
+    alert(`오늘 ${selectedAsset.type === 'image' ? '이미지' : '영상'} 게시 한도(${DAILY_LIMIT}개)에 도달했습니다. 내일 다시 시도해주세요.`);
+    return;
+  }
   const title = document.getElementById('pubTitle').value.trim();
   if (!title) { alert('제목을 입력해주세요'); return; }
   const tag = document.getElementById('pubTag').value.trim() || '기타';
-  const reward = selectedAsset.type === 'image' ? 0.5 : 1;
   const newPost = {
     id: 'p_' + Date.now(),
     type: selectedAsset.type,
@@ -757,11 +903,9 @@ document.getElementById('modalPublish').addEventListener('click', () => {
     list.unshift(newPost);
     localStorage.setItem('korart_published', JSON.stringify(list));
   } catch (e) { console.warn(e); }
-  try {
-    const cur = parseFloat(localStorage.getItem('korart_points') || '0');
-    localStorage.setItem('korart_points', String(cur + reward));
-  } catch (e) {}
-  alert(`게시 완료! +${reward}P 지급되었습니다.`);
+  // 포인트는 무한이므로 더 이상 적립하지 않음
+  const remaining = DAILY_LIMIT - getTodayPublishCount(selectedAsset.type) - 1;
+  alert(`게시 완료! 오늘 ${remaining}/${DAILY_LIMIT}개 남았습니다.`);
   closePublishModal();
   mockContent.unshift(newPost);
   renderGrid();

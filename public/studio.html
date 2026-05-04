@@ -13377,12 +13377,10 @@ function resetMerge() {
   }
 
   async function updatePoints() {
-    const me = await fetchPoints();
     const el = document.getElementById('pdPoints');
     if (!el) return;
-    if (!me) { el.innerHTML = '0<span class="pt-unit">P</span>'; return; }
-    if (me.unlimited) el.innerHTML = '∞<span class="pt-unit">P</span>';
-    else el.innerHTML = me.points.toLocaleString() + '<span class="pt-unit">P</span>';
+    // 포인트 무한 (크레딧 개념)
+    el.innerHTML = '∞<span class="pt-unit">P</span>';
   }
 
   function showAuthModal() {
@@ -13405,8 +13403,8 @@ function resetMerge() {
     const provider = (u.app_metadata && u.app_metadata.provider) || 'email';
     const map = { google: 'Google', kakao: '카카오', email: '이메일' };
     document.getElementById('pmProvider').textContent = map[provider] || provider;
-    const me = await fetchPoints();
-    document.getElementById('pmPoints').textContent = me ? (me.unlimited ? '∞P' : me.points.toLocaleString() + 'P') : '—';
+    // 포인트 무한
+    document.getElementById('pmPoints').textContent = '∞P (무한)';
     document.getElementById('profileModal').classList.add('active');
     document.body.style.overflow = 'hidden';
   }
