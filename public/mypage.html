@@ -800,10 +800,18 @@ async function onLoginReady() {
   updatePointsDisplay();
 
   // 카운트 업데이트
-  refreshAllCounts();
+  await refreshAllCounts();
 
-  // 기본 탭(내 자료) 철 로드 — 아바타 그리드 자동 표시
-  if (typeof loadAssetType === 'function') loadAssetType('avatar');
+  // 기본 탭(내 자료) 첫 로드 — 아바타 그리드 자동 표시
+  try {
+    if (typeof loadAssetType === 'function') {
+      await loadAssetType('avatar');
+    }
+  } catch (e) {
+    console.error('[onLoginReady] loadAssetType 실패:', e);
+    const c = document.getElementById('assetContent');
+    if (c) c.innerHTML = '<div class="loading" style="color:var(--red)">불러오기 실패: ' + (e.message || '알 수 없음') + '</div>';
+  }
 }
 
 // ============================================
@@ -890,7 +898,7 @@ function switchMainTab(tab) {
     asset.style.display = '';
     tx.classList.remove('active');
     tx.style.display = 'none';
-    // 철 로드 시 아바타 탭 자동 로드
+    // 첫 로드 시 아바타 탭 자동 로드
     if (typeof loadAssetType === 'function' && currentUser) loadAssetType(_currentType || 'avatar');
   } else {
     asset.classList.remove('active');
