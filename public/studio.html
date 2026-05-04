@@ -4749,7 +4749,10 @@ function renderStep1Avatars() {
     }
     return `
       <div style="background:${isCast?'rgba(200,160,74,.12)':'var(--bg2)'};border:2px solid ${isCast?'var(--gold)':'var(--line)'};border-radius: 0;overflow:hidden;transition:.15s;position:relative">
-        ${!isCast ? `<button onclick="event.stopPropagation();deleteAvatarFromLib(${av.id})" title="라이브리에서 제거" onmouseover="this.style.background='#ef4444';this.style.color='#fff'" onmouseout="this.style.background='rgba(0,0,0,.7)';this.style.color='var(--ink2)'" style="position:absolute;top:5px;right:5px;background:rgba(0,0,0,.7);border:1px solid var(--line2);color:var(--ink2);font-size:13px;font-weight:800;width:22px;height:22px;border-radius:0;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;z-index:3;transition:.15s">×</button>` : ''}
+        ${!isCast ? `<div style="position:absolute;top:5px;right:5px;display:flex;gap:4px;z-index:3">
+            <button onclick="event.stopPropagation();editAvatarInLib(${av.id})" title="수정" onmouseover="this.style.background='var(--gold)';this.style.color='#000'" onmouseout="this.style.background='rgba(0,0,0,.7)';this.style.color='var(--ink2)'" style="background:rgba(0,0,0,.7);border:1px solid var(--line2);color:var(--ink2);font-size:11px;font-weight:700;width:22px;height:22px;border-radius:0;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;transition:.15s">✏</button>
+            <button onclick="event.stopPropagation();deleteAvatarFromLib(${av.id})" title="라이브러리에서 제거" onmouseover="this.style.background='#ef4444';this.style.color='#fff'" onmouseout="this.style.background='rgba(0,0,0,.7)';this.style.color='var(--ink2)'" style="background:rgba(0,0,0,.7);border:1px solid var(--line2);color:var(--ink2);font-size:13px;font-weight:800;width:22px;height:22px;border-radius:0;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;transition:.15s">×</button>
+          </div>` : ''}
         ${isCast ? `<div style="position:absolute;top:5px;right:5px;display:flex;gap:4px;z-index:3">
             <button onclick="event.stopPropagation();uncastAvatar(${av.id})" title="출연 해제 — 이 아바타를 캐스팅에서 제외" onmouseover="this.style.background='#ef4444'" onmouseout="this.style.background='rgba(239,68,68,.85)'" style="background:rgba(239,68,68,.85);border:1px solid #ef4444;color:#fff;font-size:14px;font-weight:800;width:24px;height:24px;border-radius:0;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;box-shadow:0 2px 6px rgba(0,0,0,.5);transition:.15s">×</button>
             <div style="background:var(--gold);color:#000;font-size:9px;font-weight:800;padding:2px 6px;border-radius: 0;display:flex;align-items:center">${cutBadge}</div>
@@ -6983,12 +6986,9 @@ function openImgAnglePickerModal(cutIdx) {
     const ko = meta.ko || '';
     const use = meta.use || '';
     const isSelected = S.imgCutAngles[cutIdx] === angle;
-    // 다른 컷에서 이미 사용 중인지 확인
-    let usedByCut = -1;
-    for (let k = 0; k < 4; k++) {
-      if (k !== cutIdx && S.imgCutAngles[k] === angle) { usedByCut = k; break; }
-    }
-    const isDisabled = usedByCut >= 0;
+    // 중복 허용 — 화보 씬은 같은 앵글을 여러 컷에 사용 가능
+    const usedByCut = -1;
+    const isDisabled = false;
     const safeAngle = angle.replace(/'/g, "\\'").replace(/"/g, '&quot;');
     const onclickAttr = isDisabled ? '' : `onclick="selectImgAngleForCut('${safeAngle}')"`;
     const cursorStyle = isDisabled ? 'not-allowed' : 'pointer';
@@ -7016,14 +7016,7 @@ function selectImgAngleForCut(angleName) {
   if (_imgAnglePickerCutIdx < 0 || _imgAnglePickerCutIdx > 3) return;
   ensureImageModeState();
   // 중복 방지: 다른 컷에 이미 선택된 앵글이면 차단
-  if (angleName) {
-    for (let k = 0; k < 4; k++) {
-      if (k !== _imgAnglePickerCutIdx && S.imgCutAngles[k] === angleName) {
-        if (typeof toast === 'function') toast(`이 앵글은 CUT ${k+1}에서 사용 중입니다. 다른 앵글을 선택해주세요`);
-        return;
-      }
-    }
-  }
+  // 중복 허용
   S.imgCutAngles[_imgAnglePickerCutIdx] = angleName || '';
   // S.angles도 동기화 (4컷 프롬프트 빌드에서 사용)
   if (Array.isArray(S.angles)) S.angles[_imgAnglePickerCutIdx] = angleName || '';
@@ -10106,7 +10099,7 @@ async function generateCutVideo(i) {
   // 확인 모달 — 모든 옵션 표시
   const audioLabel = pickedV.audioFixed
     ? (pickedV.audioIncluded ? '포함 (모델 고정)' : '없음 (모델 고정)')
-    : (audio ? 'ON (+' + (pickedV.pointsOn - pickedV.pointsOff) + ' P/초)' : 'OFF');
+    : (audio ? 'ON (+' + (Math.round((pickedV.pointsOn - pickedV.pointsOff) * 10) / 10).toFixed(1) + ' P/초)' : 'OFF');
 
   const scriptLine = script
     ? '<div style="font-size:11px;color:var(--ink2);margin-top:4px">\u00b7 대사: <b>' + escHtml(script) + '</b>' + (speaker ? ' (' + speaker + ')' : '') + (emotion ? ' [' + emotion + ']' : '') + '</div>'
