@@ -111,11 +111,14 @@ img{display:block}
 .hero-decor{position:absolute;right:-50px;bottom:-50px;width:280px;height:280px;background:radial-gradient(circle,rgba(167,139,250,.4),transparent 70%);border-radius:50%;filter:blur(40px)}
 
 /* 과거 vs 현재 비교 표 */
-.compare-table{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);display:grid;grid-template-columns:56px 1fr 1fr;font-size:12px;color:rgba(255,255,255,.92);overflow:hidden}
+.compare-table{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);display:grid;grid-template-columns:56px 1fr 1fr;font-size:12px;color:rgba(255,255,255,.92);overflow:hidden;position:relative}
 .compare-cell{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.1);border-right:1px solid rgba(255,255,255,.1);min-width:0;word-break:keep-all}
 .compare-cell:nth-child(3n){border-right:none}
 .compare-table > .compare-cell:nth-last-child(-n+3){border-bottom:none}
 .compare-head{background:rgba(255,255,255,.06);font-weight:700;font-size:12px;letter-spacing:.04em;text-align:center;color:rgba(255,255,255,.95);padding:10px 8px}
+/* 현재 컬럼 강조 — 3n 번째(오른쪽) 섬 전체 */
+.compare-cell:nth-child(3n){border-left:2px solid #ef4444;background:rgba(239,68,68,.05)}
+.compare-head:nth-child(3n){background:rgba(239,68,68,.12);color:#fecaca;font-weight:800;border-left:2px solid #ef4444}
 .compare-row-label{background:rgba(0,0,0,.2);font-weight:700;font-size:11px;color:rgba(255,255,255,.85);letter-spacing:.02em;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px 4px}
 .compare-past, .compare-now{font-size:12px;line-height:1.55;color:rgba(255,255,255,.9);font-weight:500}
 .compare-past .prompt-text{display:block;background:rgba(0,0,0,.25);padding:8px 10px;margin-top:6px;font-family:ui-monospace,Menlo,monospace;font-size:10px;line-height:1.5;color:rgba(255,255,255,.55);max-height:84px;overflow:hidden;border-left:2px solid rgba(255,255,255,.25)}
@@ -540,12 +543,8 @@ function renderSidebarLoginCard() {
       <div class="lc-name">${escapeText(name)}</div>
       <div class="lc-email">${escapeText(email)}</div>
       <div class="lc-points">${pointsStr} P <span style="font-weight:600;color:var(--ink-dimmer);font-size:11px">포인트</span></div>
-      <div class="lc-actions-row">
-        <a class="lc-btn-mode video" href="/studio.html?mode=video"><i data-lucide="video" class="icon-sm"></i>영상 생성</a>
-        <a class="lc-btn-mode" href="/studio.html?mode=image"><i data-lucide="image" class="icon-sm"></i>이미지 생성</a>
-      </div>
       <div class="lc-actions">
-        <a class="lc-btn" href="/mypage.html" style="text-decoration:none;text-align:center;display:block">내 자료 · 거래 내역</a>
+        <button class="lc-btn" id="sidebarProfileBtn">회원정보</button>
         <button class="lc-btn danger" id="sidebarLogoutBtn">로그아웃</button>
       </div>
     `;
@@ -556,6 +555,11 @@ function renderSidebarLoginCard() {
       await sb.auth.signOut();
       currentUser = null;
       renderAuthState();
+    });
+    const profBtn = document.getElementById('sidebarProfileBtn');
+    if (profBtn) profBtn.addEventListener('click', () => {
+      // 상단 GNB의 회원정보 모달 재사용
+      if (typeof openProfileModal === 'function') openProfileModal();
     });
   } else {
     // 로그인 전: 원래 "창작 시작하기" 토글
@@ -895,14 +899,57 @@ document.querySelectorAll('.modal-tab').forEach(tab => {
 });
 
 function getCloudAssets() {
+  // 활성 동기: localStorage 폴리백용, 비동기는 loadAssetsFromSupabase 에서 쓴
   try { return JSON.parse(localStorage.getItem('korart_cloud_assets') || '[]'); }
   catch (e) { return []; }
 }
 
-function loadAssets() {
+// Supabase 에서 user_assets 로드 (studio에서 저장한 자료)
+async function fetchSupabaseAssets(typeFilter) {
+  if (!sb || !currentUser) return [];
+  try {
+    // typeFilter: 'image' 또는 'video' (UI 관점)
+    // user_assets.asset_type: 'avatar', 'cuts4' 등이 이미지에 해당, 'video', 'merged_video' 등이 영상에 해당
+    const imageTypes = ['cuts4', 'avatar'];
+    const videoTypes = ['video', 'merged_video'];
+    const types = typeFilter === 'image' ? imageTypes : videoTypes;
+    const { data, error } = await sb
+      .from('user_assets')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .in('asset_type', types)
+      .order('created_at', { ascending: false })
+      .limit(60);
+    if (error) throw error;
+    return (data || []).map(item => ({
+      id: item.id,
+      type: typeFilter,
+      url: item.asset_url || item.thumbnail_url || '',
+      title: item.title || '제목 없음',
+      aspect: item.aspect_ratio || '16:9',
+      asset_type: item.asset_type,
+      created_at: item.created_at
+    })).filter(a => a.url);
+  } catch (e) {
+    console.warn('[cloud-assets] supabase fetch 실패:', e);
+    return [];
+  }
+}
+
+async function loadAssets() {
   const grid = document.getElementById('modalAssetGrid');
-  const all = getCloudAssets();
-  const filtered = all.filter(a => a.type === currentAssetType);
+  grid.innerHTML = '<div class="modal-empty">클라우드 자료 불러오는 중...</div>';
+
+  // 1. Supabase 로드 (우선)
+  let supabaseAssets = await fetchSupabaseAssets(currentAssetType);
+  // 2. localStorage 폴리백
+  let localAssets = getCloudAssets().filter(a => a.type === currentAssetType);
+
+  // 이미 서버에 있는 id는 제외
+  const supaIds = new Set(supabaseAssets.map(a => a.id));
+  const localOnly = localAssets.filter(a => !supaIds.has(a.id));
+  const filtered = [...supabaseAssets, ...localOnly];
+
   if (!filtered.length) {
     grid.innerHTML = `<div class="modal-empty">
       클라우드에 저장된 ${currentAssetType === 'image' ? '이미지' : '영상'}이 없습니다.<br>
@@ -913,7 +960,7 @@ function loadAssets() {
   grid.innerHTML = filtered.map(a => `
     <div class="modal-asset" data-asset-id="${a.id}">
       <span class="type-badge">${a.aspect || '16:9'}</span>
-      ${a.type === 'image' ? `<img src="${a.url}" alt="asset">` : `<video src="${a.url}" muted></video>`}
+      ${a.type === 'image' ? `<img src="${a.url}" alt="asset" referrerpolicy="no-referrer">` : `<video src="${a.url}" muted></video>`}
     </div>`).join('');
   document.querySelectorAll('.modal-asset').forEach(el => {
     el.addEventListener('click', () => {

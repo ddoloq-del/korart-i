@@ -1299,11 +1299,25 @@ select option:hover {
 .korart-subnav-item { font-size: 14px; font-weight: 700; color: #666; height: 100%; display: flex; align-items: center; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; white-space: nowrap; cursor: pointer; text-decoration: none; }
 .korart-subnav-item:hover { color: #1a1a1a; }
 .korart-subnav-item.active { color: #1a1a1a; border-color: #6366f1; }
+/* CSS만으로 모드별 active — JS 토글 전의 깜박임 방지 */
+html[data-current-mode="image"] .korart-subnav-item[data-mode="image"],
+body[data-current-mode="image"] .korart-subnav-item[data-mode="image"] { color: #1a1a1a; border-color: #6366f1; }
+html[data-current-mode="video"] .korart-subnav-item[data-mode="video"],
+body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: #1a1a1a; border-color: #6366f1; }
 @media (max-width: 768px) {
   .korart-gnb-inner { padding: 0 16px; height: 56px; }
   .korart-gnb-left { gap: 0; }
 }
 </style>
+<script>
+// LNB active 깜박임 방지 — body 태그 렌더 전 data-current-mode 설정
+// document.documentElement에 임시로 설정 → body 렌더 후 이관
+(function(){
+  var p = new URLSearchParams(window.location.search);
+  var m = p.get('mode') || 'image';
+  document.documentElement.setAttribute('data-current-mode', m);
+})();
+</script>
 </head>
 <body>
 
@@ -1856,6 +1870,10 @@ select option:hover {
 (function(){
   var p = new URLSearchParams(window.location.search);
   var m = p.get('mode') || 'image';
+  // 기존 active 제거 (이전 권한 잘못 넘어온 경우 대비)
+  document.querySelectorAll('#korartSubnav .korart-subnav-item.active').forEach(function(el){
+    if (el.dataset.mode !== m) el.classList.remove('active');
+  });
   document.querySelectorAll('#korartSubnav .korart-subnav-item').forEach(function(el){
     if (el.dataset.mode === m) el.classList.add('active');
   });
