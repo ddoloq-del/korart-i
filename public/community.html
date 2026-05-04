@@ -116,7 +116,7 @@ img{display:block}
     <div class="gnb-right">
       <button class="icon-btn"><i data-lucide="bell" class="icon-md"></i></button>
       <button class="icon-btn"><i data-lucide="layout-grid" class="icon-md"></i></button>
-      <button class="avatar-btn"><i data-lucide="user" class="icon-sm"></i></button>
+      <button class="avatar-btn"><i data-lucide="user-round" class="icon-sm"></i></button>
     </div>
   </div>
 </header>
@@ -172,14 +172,6 @@ img{display:block}
       </div>
     </div>
 
-    <div class="sb-card">
-      <div class="trending-header">
-        <h4 class="trending-title"><i data-lucide="trending-up" class="icon-sm" style="color:var(--gold)"></i>인기 검색어</h4>
-        <span class="trending-more">전체보기</span>
-      </div>
-      <ul class="trending-list" id="trending"></ul>
-    </div>
-
     <div class="sb-card tools-card">
       <h4 class="tools-title"><i data-lucide="sparkles" class="icon-sm"></i>크리에이터 도구</h4>
       <div class="tools-grid">
@@ -218,8 +210,6 @@ const mockContent = [
   { id:5, type:'video', title:'제주도 푸른 바다 드론 시뮬레이션',     user:'JejuAI',       likes:'1.5k', views:'8.9k', tag:'자연',  img:'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop' },
   { id:6, type:'image', title:'미래지향적 한복 패션 화보',           user:'FutureHanbok', likes:'5.6k', views:'20k',  tag:'패션',  img:'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=800&auto=format&fit=crop' },
 ];
-const trendingKeywords = ['민트 그린 아트', '조선시대 판타지', '고퀄리티 실사', '애니메이션 스타일', '3D 입체 캐릭터'];
-
 document.getElementById('grid').innerHTML = mockContent.map(item => `
   <div class="card">
     <div class="card-img-wrap">
@@ -238,13 +228,6 @@ document.getElementById('grid').innerHTML = mockContent.map(item => `
       </div>
     </div>
   </div>
-`).join('');
-
-document.getElementById('trending').innerHTML = trendingKeywords.map((kw, i) => `
-  <li class="trending-item">
-    <span class="trending-rank ${i < 3 ? 'top' : 'normal'}">${i + 1}</span>
-    <span class="trending-name">${kw}</span>
-  </li>
 `).join('');
 
 // subnav 클릭은 a href로 자동 페이지 이동 — JS 토글 불필요
