@@ -13379,8 +13379,12 @@ function resetMerge() {
   async function updatePoints() {
     const el = document.getElementById('pdPoints');
     if (!el) return;
-    // 포인트 무한 (크레딧 개념)
-    el.innerHTML = '∞<span class="pt-unit">P</span>';
+    let points = parseFloat(localStorage.getItem('korart_points') || '0');
+    if (!points) {
+      localStorage.setItem('korart_points', '500000');
+      points = 500000;
+    }
+    el.innerHTML = points.toLocaleString() + '<span class="pt-unit">P</span>';
   }
 
   function showAuthModal() {
@@ -13403,8 +13407,12 @@ function resetMerge() {
     const provider = (u.app_metadata && u.app_metadata.provider) || 'email';
     const map = { google: 'Google', kakao: '카카오', email: '이메일' };
     document.getElementById('pmProvider').textContent = map[provider] || provider;
-    // 포인트 무한
-    document.getElementById('pmPoints').textContent = '∞P (무한)';
+    let points = parseFloat(localStorage.getItem('korart_points') || '0');
+    if (!points) {
+      localStorage.setItem('korart_points', '500000');
+      points = 500000;
+    }
+    document.getElementById('pmPoints').textContent = points.toLocaleString() + 'P';
     document.getElementById('profileModal').classList.add('active');
     document.body.style.overflow = 'hidden';
   }

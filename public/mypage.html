@@ -929,26 +929,58 @@ async function loadTransactions() {
   container.innerHTML = '<div class="loading"><div class="spin"></div><div style="margin-top:12px">거래 이력 불러오는 중...</div></div>';
   if (countEl) countEl.textContent = '—';
 
+  // localStorage 에서 거래 내역 읽어오기 (테스트용)
+  let localTxs = [];
+  try {
+    localTxs = JSON.parse(localStorage.getItem('korart_transactions') || '[]');
+  } catch (e) {}
+
+  // 포인트 50만 초기화 보장
+  if (!parseFloat(localStorage.getItem('korart_points') || '0')) {
+    localStorage.setItem('korart_points', '500000');
+  }
+  if (localTxs.length === 0) {
+    // 초기 적립 기록
+    localTxs = [{
+      id: 'tx_init',
+      type: 'bonus',
+      amount: 500000,
+      description: '테스트 포인트 적립',
+      balance_after: 500000,
+      created_at: new Date().toISOString()
+    }];
+    localStorage.setItem('korart_transactions', JSON.stringify(localTxs));
+  }
+
   try {
     const jwt = await getSupabaseJWT();
     if (!jwt) {
-      container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--ink3)">로그인이 필요합니다.</div>';
+      // 서버 없이 localStorage만 표시
+      if (countEl) countEl.textContent = localTxs.length + '건';
+      renderTransactions(localTxs);
       return;
     }
     const r = await fetch('/api/transactions?limit=100', {
       headers: { 'Authorization': 'Bearer ' + jwt },
     });
     if (!r.ok) {
-      const errText = await r.text();
-      container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--red)">불러오기 실패: ' + r.status + '</div>';
+      // 서버 실패 시 localStorage 폴리백
+      if (countEl) countEl.textContent = localTxs.length + '건';
+      renderTransactions(localTxs);
       return;
     }
     const data = await r.json();
-    const transactions = (data && Array.isArray(data.transactions)) ? data.transactions : [];
-    if (countEl) countEl.textContent = transactions.length + '건';
-    renderTransactions(transactions);
+    let serverTxs = (data && Array.isArray(data.transactions)) ? data.transactions : [];
+    // 서버 + 로컬 합치고 createdAt 내림차순으로 정렬
+    const allTxs = [...serverTxs, ...localTxs].sort((a, b) => {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+    if (countEl) countEl.textContent = allTxs.length + '건';
+    renderTransactions(allTxs);
   } catch (e) {
-    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--red)">오류: ' + (e.message || '알 수 없음') + '</div>';
+    // 예외 시 로컬만 표시
+    if (countEl) countEl.textContent = localTxs.length + '건';
+    renderTransactions(localTxs);
   }
 }
 
@@ -1334,8 +1366,13 @@ if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
   async function updateDropdownPoints() {
     const el = document.getElementById('pdPoints');
     if (!el) return;
-    // 포인트 무한 (크레딧 개념)
-    el.innerHTML = '∞<span class="pt-unit">P</span>';
+    // localStorage 에서 포인트 가져오기 (최초 50만 P)
+    let points = parseFloat(localStorage.getItem('korart_points') || '0');
+    if (!points) {
+      localStorage.setItem('korart_points', '500000');
+      points = 500000;
+    }
+    el.innerHTML = points.toLocaleString() + '<span class="pt-unit">P</span>';
   }
 
   async function openProfileModal() {
@@ -1349,8 +1386,13 @@ if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
     const provider = (currentUser.app_metadata && currentUser.app_metadata.provider) || 'email';
     const providerMap = { google: 'Google', kakao: '카카오', email: '이메일' };
     document.getElementById('pmProvider').textContent = providerMap[provider] || provider;
-    // 포인트 무한
-    document.getElementById('pmPoints').textContent = '∞P (무한)';
+    // 포인트
+    let points = parseFloat(localStorage.getItem('korart_points') || '0');
+    if (!points) {
+      localStorage.setItem('korart_points', '500000');
+      points = 500000;
+    }
+    document.getElementById('pmPoints').textContent = points.toLocaleString() + 'P';
     let postCount = 0;
     try { postCount = (JSON.parse(localStorage.getItem('korart_published') || '[]')).length; } catch (e) {}
     document.getElementById('pmPostCount').textContent = postCount + '건';

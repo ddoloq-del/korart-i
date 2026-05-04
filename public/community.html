@@ -90,7 +90,11 @@ img{display:block}
 .subnav-item{font-size:14px;font-weight:700;color:var(--ink-dim);height:100%;display:flex;align-items:center;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap;cursor:pointer;text-decoration:none}
 .subnav-item:hover{color:var(--ink)}
 .subnav-item.active{color:var(--ink);border-color:var(--accent)}
-.main{max-width:1400px;margin:0 auto;padding:32px 24px;display:grid;grid-template-columns:1fr 320px;gap:32px}
+.main{max-width:1400px;margin:0 auto;padding:32px 24px;display:flex;flex-direction:column;gap:32px}
+.top-section{display:grid;grid-template-columns:1fr 320px;gap:32px;align-items:stretch}
+.top-section > section{min-width:0}
+.top-section > aside{min-width:0}
+.trending-section{width:100%}
 .hero{position:relative;border-radius:0;padding:48px;margin-bottom:32px;overflow:hidden;background:radial-gradient(ellipse at top right,rgba(167,139,250,.25),transparent 60%),radial-gradient(ellipse at bottom left,rgba(99,102,241,.25),transparent 60%),linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#4c1d95 100%);border:1px solid var(--line-lit);min-height:280px;display:flex;align-items:center}
 .hero-content{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.18fr);gap:32px;align-items:center;width:100%;max-width:none}
 .hero-content > .hero-left{min-width:0}
@@ -161,12 +165,16 @@ img{display:block}
 .login-card .lc-email{font-size:11px;color:var(--ink-dimmer);margin-bottom:18px;position:relative;z-index:2}
 .login-card .lc-points{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(167,139,250,.08));border:1px solid rgba(99,102,241,.25);padding:8px 14px;font-size:14px;font-weight:800;color:var(--accent);margin-bottom:18px;position:relative;z-index:2}
 .login-card .lc-actions{display:flex;flex-direction:column;gap:8px;position:relative;z-index:2}
+.login-card .lc-actions-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;position:relative;z-index:2;margin-bottom:8px}
+.login-card .lc-actions-row a.lc-btn-mode{padding:14px 8px;background:linear-gradient(135deg,var(--accent),var(--accent-hover));border:none;color:#fff;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;transition:transform .15s,box-shadow .15s}
+.login-card .lc-actions-row a.lc-btn-mode:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(99,102,241,.4)}
+.login-card .lc-actions-row a.lc-btn-mode.video{background:linear-gradient(135deg,var(--gold),var(--accent))}
 .login-card .lc-btn{padding:10px;background:transparent;border:1px solid var(--line);color:var(--ink-dim);font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;transition:all .15s}
 .login-card .lc-btn:hover{border-color:var(--ink);color:var(--ink)}
 .login-card .lc-btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent-hover));border-color:transparent;color:#fff}
 .login-card .lc-btn.primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(99,102,241,.4)}
 .login-card .lc-btn.danger:hover{border-color:#dc2626;color:#dc2626;background:#fef2f2}
-.tools-card{background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(167,139,250,.06));border:1px solid rgba(99,102,241,.2)}
+.tools-card{background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(167,139,250,.06));border:1px solid rgba(99,102,241,.2);display:none}
 .tools-title{font-size:13px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:6px;color:var(--gold)}
 .tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .tool-item{background:var(--bg-2);border:1px solid var(--line);padding:14px 10px;border-radius:0;text-align:center;cursor:pointer;transition:border-color .15s,background .15s,transform .15s;text-decoration:none;color:inherit;display:block}
@@ -231,7 +239,7 @@ img{display:block}
 .footer-links a:hover{color:var(--ink)}
 .footer-links .strong{color:var(--ink)}
 .footer-info{font-size:11px;color:var(--ink-dimmer);line-height:1.8}
-@media (max-width:1024px){.main{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.hero-content{grid-template-columns:1fr;gap:24px}.compare-table{font-size:11px}.modal-grid{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:1024px){.main{padding:20px 16px}.top-section{grid-template-columns:1fr;gap:24px}.grid{grid-template-columns:repeat(2,1fr)}.hero-content{grid-template-columns:1fr;gap:24px}.compare-table{font-size:11px}.modal-grid{grid-template-columns:repeat(3,1fr)}}
 @media (max-width:768px){.gnb-inner{padding:0 16px;height:56px}.gnb-left{gap:0}.main{padding:20px 16px}.grid{grid-template-columns:1fr}.hero{padding:28px 24px;min-height:auto}.hero-title{font-size:28px}.content-title{font-size:18px}.footer-links{gap:18px;font-size:11px}.compare-table{grid-template-columns:60px 1fr 1fr;font-size:10px}.compare-cell{padding:10px}.compare-past .prompt-text{font-size:9px;max-height:60px}.modal-grid{grid-template-columns:repeat(2,1fr)}}
 .icon-sm{width:16px;height:16px}
 .icon-md{width:20px;height:20px}
@@ -334,8 +342,10 @@ img{display:block}
 </nav>
 
 <main class="main">
-  <section>
-    <div class="hero">
+  <!-- 위: Hero + 창작 시작하기 박스 (2-컬럼) -->
+  <div class="top-section">
+    <section>
+      <div class="hero" style="margin-bottom:0">
       <div class="hero-decor"></div>
       <div class="hero-content">
         <div class="hero-left">
@@ -363,8 +373,27 @@ img{display:block}
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
+    <aside class="sidebar">
+      <!-- 로그인 창구 -->
+      <div class="sb-card login-card" id="sidebarLoginCard">
+        <div class="sb-card-decor"></div>
+        <div class="login-icon"><i data-lucide="zap" class="icon-lg"></i></div>
+        <h4 class="login-title">상상을 작품으로</h4>
+        <p class="login-desc">지금 로그인하고 당신의 아이디어를<br>고화질 AI 아트로 변환해보세요.</p>
+        <button class="login-btn" id="sidebarLoginBtn">창작 시작하기</button>
+        <div class="login-links">
+          <span>아이디 찾기</span>
+          <span class="dot"></span>
+          <span>회원가입</span>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- 아래: 트렌딩 콘텐츠 풀폭 -->
+  <section class="trending-section">
     <div class="content-header">
       <h3 class="content-title">트렌딩 콘텐츠 <span class="content-subtitle">실시간 인기 작품</span></h3>
       <div class="content-actions">
@@ -378,32 +407,6 @@ img{display:block}
 
     <div class="grid" id="grid"></div>
   </section>
-
-  <aside class="sidebar">
-    <!-- 로그인 창구 토글 (로그인 전: 창작 시작하기 / 후: 프로필 + 로그아웃) -->
-    <div class="sb-card login-card" id="sidebarLoginCard">
-      <div class="sb-card-decor"></div>
-      <div class="login-icon"><i data-lucide="zap" class="icon-lg"></i></div>
-      <h4 class="login-title">상상을 작품으로</h4>
-      <p class="login-desc">지금 로그인하고 당신의 아이디어를<br>고화질 AI 아트로 변환해보세요.</p>
-      <button class="login-btn" id="sidebarLoginBtn">창작 시작하기</button>
-      <div class="login-links">
-        <span>아이디 찾기</span>
-        <span class="dot"></span>
-        <span>회원가입</span>
-      </div>
-    </div>
-
-    <div class="sb-card tools-card">
-      <h4 class="tools-title"><i data-lucide="sparkles" class="icon-sm"></i>크리에이터 도구</h4>
-      <div class="tools-grid">
-        <a class="tool-item" href="/studio.html?mode=image"><div class="tool-icon"><i data-lucide="image" class="icon-md"></i></div><div class="tool-label">이미지 생성</div></a>
-        <a class="tool-item" href="/studio.html?mode=video"><div class="tool-icon"><i data-lucide="video" class="icon-md"></i></div><div class="tool-label">영상 생성</div></a>
-        <a class="tool-item" href="/mypage.html"><div class="tool-icon"><i data-lucide="layout-grid" class="icon-md"></i></div><div class="tool-label">내 자료</div></a>
-        <a class="tool-item" href="/community.html"><div class="tool-icon"><i data-lucide="users" class="icon-md"></i></div><div class="tool-label">커뮤니티</div></a>
-      </div>
-    </div>
-  </aside>
 </main>
 
 <!-- 게시 모달 -->
@@ -529,15 +532,20 @@ function renderSidebarLoginCard() {
     const name = meta.name || meta.full_name || (currentUser.email ? currentUser.email.split('@')[0] : '사용자');
     const email = currentUser.email || '';
     const avatar = meta.avatar_url || meta.picture || '';
+    const points = getPoints();
+    const pointsStr = points.toLocaleString();
     card.innerHTML = `
       <div class="sb-card-decor"></div>
       <div class="lc-avatar">${avatar ? `<img src="${avatar}" alt="avatar" referrerpolicy="no-referrer">` : ''}</div>
       <div class="lc-name">${escapeText(name)}</div>
       <div class="lc-email">${escapeText(email)}</div>
-      <div class="lc-points">∞ P <span style="font-weight:600;color:var(--ink-dimmer);font-size:11px">무한 포인트</span></div>
+      <div class="lc-points">${pointsStr} P <span style="font-weight:600;color:var(--ink-dimmer);font-size:11px">포인트</span></div>
+      <div class="lc-actions-row">
+        <a class="lc-btn-mode video" href="/studio.html?mode=video"><i data-lucide="video" class="icon-sm"></i>영상 생성</a>
+        <a class="lc-btn-mode" href="/studio.html?mode=image"><i data-lucide="image" class="icon-sm"></i>이미지 생성</a>
+      </div>
       <div class="lc-actions">
-        <a class="lc-btn primary" href="/studio.html?mode=image" style="text-decoration:none;text-align:center;display:block">이미지 생성 시작</a>
-        <a class="lc-btn" href="/mypage.html" style="text-decoration:none;text-align:center;display:block">내 자료</a>
+        <a class="lc-btn" href="/mypage.html" style="text-decoration:none;text-align:center;display:block">내 자료 · 거래 내역</a>
         <button class="lc-btn danger" id="sidebarLogoutBtn">로그아웃</button>
       </div>
     `;
@@ -572,6 +580,63 @@ function renderSidebarLoginCard() {
   if (window.lucide) lucide.createIcons();
 }
 
+/* 포인트 관리 — 테스트용 기본 50만 P */
+function getPoints() {
+  const stored = localStorage.getItem('korart_points');
+  if (stored === null) {
+    // 최초 초기화 — 테스트용 50만 P
+    localStorage.setItem('korart_points', '500000');
+    return 500000;
+  }
+  return parseFloat(stored) || 0;
+}
+
+function setPoints(v) {
+  localStorage.setItem('korart_points', String(v));
+}
+
+function addTransaction(type, amount, description) {
+  try {
+    const list = JSON.parse(localStorage.getItem('korart_transactions') || '[]');
+    const balance_before = getPoints();
+    const balance_after = balance_before + amount;
+    list.unshift({
+      id: 'tx_' + Date.now(),
+      type,  // 'signup_bonus' | 'usage' | 'refund' | 'bonus' | 'admin_grant'
+      amount,  // 양수: 적립, 음수: 사용
+      description,
+      balance_after,
+      created_at: new Date().toISOString()
+    });
+    localStorage.setItem('korart_transactions', JSON.stringify(list));
+    setPoints(balance_after);
+  } catch (e) { console.warn('transaction add failed', e); }
+}
+
+// 상수: 포인트 초기화 시 거래 내역에 철 적립 기록
+function ensureInitialTransaction() {
+  try {
+    const list = JSON.parse(localStorage.getItem('korart_transactions') || '[]');
+    if (list.length === 0) {
+      // 초기 적립 기록
+      list.push({
+        id: 'tx_init',
+        type: 'bonus',
+        amount: 500000,
+        description: '테스트 포인트 적립',
+        balance_after: 500000,
+        created_at: new Date().toISOString()
+      });
+      localStorage.setItem('korart_transactions', JSON.stringify(list));
+      // 포인트 동기화
+      if (parseFloat(localStorage.getItem('korart_points') || '0') < 500000) {
+        localStorage.setItem('korart_points', '500000');
+      }
+    }
+  } catch (e) {}
+}
+ensureInitialTransaction();
+
 /* HTML escape (XSS 방지) */
 function escapeText(s) {
   if (typeof s !== 'string') s = String(s);
@@ -588,8 +653,9 @@ function updateProfileDropdown() {
   document.getElementById('pdEmail').textContent = email;
   const pdAvatar = document.getElementById('pdAvatar');
   pdAvatar.innerHTML = avatar ? `<img src="${avatar}" alt="avatar" referrerpolicy="no-referrer">` : '';
-  // 포인트 무한 (크레딧 개념)
-  document.getElementById('pdPoints').innerHTML = `∞<span class="pt-unit">P</span>`;
+  // 포인트 가져오기
+  const points = getPoints();
+  document.getElementById('pdPoints').innerHTML = `${points.toLocaleString()}<span class="pt-unit">P</span>`;
 }
 
 /* 아바타 버튼 클릭 */
@@ -673,8 +739,9 @@ function openProfileModal() {
   const provider = currentUser.app_metadata?.provider || 'email';
   const providerMap = { google: 'Google', kakao: '카카오', email: '이메일' };
   document.getElementById('pmProvider').textContent = providerMap[provider] || provider;
-  // 포인트 무한
-  document.getElementById('pmPoints').textContent = '∞P (무한)';
+  // 포인트
+  const points = getPoints();
+  document.getElementById('pmPoints').textContent = points.toLocaleString() + 'P';
   let postCount = 0;
   try { postCount = (JSON.parse(localStorage.getItem('korart_published') || '[]')).length; } catch (e) {}
   document.getElementById('pmPostCount').textContent = postCount + '건';
