@@ -11820,6 +11820,11 @@ if (_IS_IMG_MODE) {
 renderGlobalSteps(S._currentStep);
 renderRatioGrid();
 
+// 첫 로드 시 panel1 헤더 적용 (이미지/영상 모드별 제목 설정)
+if (typeof updateScenePanelHeader === 'function') {
+  updateScenePanelHeader('A');
+}
+
 // 씬 설정 변경 시 프롬프트 실시간 업데이트
 document.getElementById('extraPrompt')?.addEventListener('input', updatePromptPreview);
 document.getElementById('locCustomInput')?.addEventListener('input', updatePromptPreview);
