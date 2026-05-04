@@ -686,19 +686,29 @@ function renderSidebarLoginCard() {
     const name = meta.name || meta.full_name || (currentUser.email ? currentUser.email.split('@')[0] : '사용자');
     const email = currentUser.email || '';
     const avatar = meta.avatar_url || meta.picture || '';
-    const points = getPoints();
-    const pointsStr = points.toLocaleString();
     card.innerHTML = `
       <div class="sb-card-decor"></div>
       <div class="lc-avatar">${avatar ? `<img src="${avatar}" alt="avatar" referrerpolicy="no-referrer">` : ''}</div>
       <div class="lc-name">${escapeText(name)}</div>
       <div class="lc-email">${escapeText(email)}</div>
-      <div class="lc-points">${pointsStr} P <span style="font-weight:600;color:var(--ink-dimmer);font-size:11px">포인트</span></div>
+      <div class="lc-points" id="sbCardPoints"><span style="opacity:.5">— P</span></div>
       <div class="lc-actions">
         <button class="lc-btn" id="sidebarProfileBtn">회원정보</button>
         <button class="lc-btn danger" id="sidebarLogoutBtn">로그아웃</button>
       </div>
     `;
+    // 포인트 서버에서 로드
+    fetchServerPoints().then(me => {
+      const el = document.getElementById('sbCardPoints');
+      if (!el) return;
+      if (me && me.unlimited) {
+        el.innerHTML = `<span style="color:var(--accent);font-weight:800">∞ P</span> <span style="font-weight:600;color:var(--ink-dimmer);font-size:11px">포인트 (무제한)</span>`;
+      } else if (me) {
+        el.innerHTML = `${me.points.toLocaleString()} P <span style="font-weight:600;color:var(--ink-dimmer);font-size:11px">포인트</span>`;
+      } else {
+        el.innerHTML = `<span style="opacity:.5">— P</span>`;
+      }
+    });
     const lo = document.getElementById('sidebarLogoutBtn');
     if (lo) lo.addEventListener('click', async () => {
       if (!sb) return;
@@ -750,19 +760,40 @@ function renderSidebarLoginCard() {
   if (window.lucide) lucide.createIcons();
 }
 
-/* 포인트 관리 — 테스트용 기본 50만 P */
-function getPoints() {
-  const stored = localStorage.getItem('korart_points');
-  if (stored === null) {
-    // 최초 초기화 — 테스트용 50만 P
-    localStorage.setItem('korart_points', '500000');
-    return 500000;
+/* 포인트 관리 — server-side profiles.points 사용 (localStorage는 메모리 캐시용) */
+let _serverPointsCache = null;
+let _serverUnlimitedCache = false;
+
+async function fetchServerPoints() {
+  if (!sb || !currentUser) return null;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session?.access_token) return null;
+    const r = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + session.access_token } });
+    if (!r.ok) return null;
+    const me = await r.json();
+    _serverPointsCache = me.points;
+    _serverUnlimitedCache = !!me.unlimited;
+    return me;
+  } catch (e) {
+    console.warn('[points] fetch 실패:', e);
+    return null;
   }
-  return parseFloat(stored) || 0;
+}
+
+function getPoints() {
+  // 서버 캐시 있으면 그겁 사용
+  if (_serverPointsCache !== null) return _serverPointsCache;
+  // 아직 로드 안됨 — 0 반환 (UI에서 "—" 표시 유도)
+  return 0;
+}
+
+function isUnlimited() {
+  return _serverUnlimitedCache;
 }
 
 function setPoints(v) {
-  localStorage.setItem('korart_points', String(v));
+  _serverPointsCache = v;
 }
 
 function addTransaction(type, amount, description) {
@@ -823,9 +854,18 @@ function updateProfileDropdown() {
   document.getElementById('pdEmail').textContent = email;
   const pdAvatar = document.getElementById('pdAvatar');
   pdAvatar.innerHTML = avatar ? `<img src="${avatar}" alt="avatar" referrerpolicy="no-referrer">` : '';
-  // 포인트 가져오기
-  const points = getPoints();
-  document.getElementById('pdPoints').innerHTML = `${points.toLocaleString()}<span class="pt-unit">P</span>`;
+  // 포인트 표시 — 서버에서 가져오기
+  fetchServerPoints().then(me => {
+    const el = document.getElementById('pdPoints');
+    if (!el) return;
+    if (me && me.unlimited) {
+      el.innerHTML = `<span style="color:var(--gold);font-weight:800">∞</span> <span class="pt-unit">P</span>`;
+    } else if (me) {
+      el.innerHTML = `${me.points.toLocaleString()}<span class="pt-unit">P</span>`;
+    } else {
+      el.innerHTML = `<span style="opacity:.5">— P</span>`;
+    }
+  });
 }
 
 /* 아바타 버튼 클릭 */
@@ -1077,12 +1117,25 @@ function openProfileModal() {
   const provider = currentUser.app_metadata?.provider || 'email';
   const providerMap = { google: 'Google', kakao: '카카오', email: '이메일' };
   document.getElementById('pmProvider').textContent = providerMap[provider] || provider;
-  // 포인트
-  const points = getPoints();
-  document.getElementById('pmPoints').textContent = points.toLocaleString() + 'P';
+  // 포인트 — 서버에서 로드
+  fetchServerPoints().then(me => {
+    const el = document.getElementById('pmPoints');
+    if (!el) return;
+    if (me && me.unlimited) el.textContent = '∞ P (무제한)';
+    else if (me) el.textContent = me.points.toLocaleString() + ' P';
+    else el.textContent = '— P';
+  });
+  // 누적 게시 수 — 서버에서
   let postCount = 0;
-  try { postCount = (JSON.parse(localStorage.getItem('korart_published') || '[]')).length; } catch (e) {}
-  document.getElementById('pmPostCount').textContent = postCount + '건';
+  if (sb && currentUser) {
+    sb.from('community_posts').select('id', { count: 'exact', head: true })
+      .eq('user_id', currentUser.id)
+      .eq('is_deleted', false)
+      .then(({ count }) => {
+        document.getElementById('pmPostCount').textContent = (count || 0) + '건';
+      });
+  }
+  document.getElementById('pmPostCount').textContent = '—';
   document.getElementById('profileModal').classList.add('active');
   document.body.style.overflow = 'hidden';
 }
@@ -1391,10 +1444,14 @@ function updateFooter() {
   btn.disabled = false;
 }
 
-document.getElementById('modalPublish').addEventListener('click', () => {
+document.getElementById('modalPublish').addEventListener('click', async () => {
   if (!selectedAsset) return;
-  // 하루 한도 체크 (더블 안전)
-  const todayCount = getTodayPublishCount(selectedAsset.type);
+  if (!currentUser) {
+    alert('게시하려면 로그인이 필요해요.');
+    return;
+  }
+  // 하루 한도 체크 (서버 기준)
+  const todayCount = await getTodayServerPublishCount(selectedAsset.type);
   if (todayCount >= DAILY_LIMIT) {
     alert(`오늘 ${selectedAsset.type === 'image' ? '이미지' : '영상'} 게시 한도(${DAILY_LIMIT}개)에 도달했습니다. 내일 다시 시도해주세요.`);
     return;
@@ -1402,34 +1459,139 @@ document.getElementById('modalPublish').addEventListener('click', () => {
   const title = document.getElementById('pubTitle').value.trim();
   if (!title) { alert('제목을 입력해주세요'); return; }
   const tag = document.getElementById('pubTag').value.trim() || '기타';
-  const newPost = {
-    id: 'p_' + Date.now(),
-    type: selectedAsset.type,
-    title, user: '나', likes: 0, views: 0,
-    tag, img: selectedAsset.url,
-    aspect: selectedAsset.aspect || '16:9',
-    createdAt: Date.now()
-  };
+
+  const btn = document.getElementById('modalPublish');
+  btn.disabled = true;
+  btn.textContent = '게시 중...';
+
+  // 닉네임 + 아바타 캐시
+  const meta = currentUser.user_metadata || {};
+  const nickname = meta.name || meta.full_name || (currentUser.email ? currentUser.email.split('@')[0] : '익명');
+  const avatar = meta.avatar_url || meta.picture || null;
+
   try {
-    const list = JSON.parse(localStorage.getItem('korart_published') || '[]');
-    list.unshift(newPost);
-    localStorage.setItem('korart_published', JSON.stringify(list));
-  } catch (e) { console.warn(e); }
-  // 포인트는 무한이므로 더 이상 적립하지 않음
-  const remaining = DAILY_LIMIT - getTodayPublishCount(selectedAsset.type) - 1;
-  alert(`게시 완료! 오늘 ${remaining}/${DAILY_LIMIT}개 남았습니다.`);
-  closePublishModal();
-  mockContent.unshift(newPost);
-  renderGrid();
+    const { data, error } = await sb.from('community_posts').insert({
+      user_id: currentUser.id,
+      asset_id: selectedAsset.id || null,
+      asset_url: selectedAsset.url,
+      type: selectedAsset.type,
+      aspect: selectedAsset.aspect || '16:9',
+      title: title,
+      tag: tag,
+      user_nickname: nickname,
+      user_avatar: avatar
+    }).select().single();
+
+    if (error) {
+      // RLS 또는 테이블 오류 안내
+      if (error.message?.includes('not exist') || error.code === '42P01') {
+        alert('community_posts 테이블이 아직 생성되지 않았어요.\n관리자에게 문의해주세요.');
+      } else {
+        alert('게시 실패: ' + error.message);
+      }
+      return;
+    }
+
+    // 화면에 즉시 추가
+    const newPost = {
+      id: data.id,
+      type: data.type,
+      title: data.title,
+      user: data.user_nickname || '익명',
+      avatar: data.user_avatar,
+      likes: data.likes || 0,
+      views: data.views || 0,
+      tag: data.tag,
+      img: data.asset_url,
+      aspect: data.aspect || '16:9',
+      createdAt: new Date(data.created_at).getTime()
+    };
+    mockContent.unshift(newPost);
+    renderGrid();
+    closePublishModal();
+
+    const remaining = DAILY_LIMIT - todayCount - 1;
+    alert(`게시 완료! 오늘 ${remaining}/${DAILY_LIMIT}개 남았습니다.`);
+  } catch (e) {
+    alert('게시 실패: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '게시하기';
+  }
 });
 
-try {
-  const saved = JSON.parse(localStorage.getItem('korart_published') || '[]');
-  saved.forEach(p => mockContent.push(p));
-} catch (e) {}
+// 서버 기준 오늘 게시 개수 (community_posts 테이블 기준)
+async function getTodayServerPublishCount(type) {
+  if (!sb || !currentUser) return 0;
+  try {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const { count, error } = await sb
+      .from('community_posts')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', currentUser.id)
+      .eq('type', type)
+      .eq('is_deleted', false)
+      .gte('created_at', startOfDay.toISOString());
+    if (error) return 0;
+    return count || 0;
+  } catch (e) { return 0; }
+}
 
-renderGrid();
-lucide.createIcons();
+// Supabase에서 모든 게시물 로드 (전체 공유)
+async function loadCommunityPosts() {
+  if (!sb) {
+    setTimeout(loadCommunityPosts, 300);
+    return;
+  }
+  try {
+    const { data, error } = await sb
+      .from('community_posts')
+      .select('*')
+      .eq('is_deleted', false)
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (error) {
+      console.warn('[community] 게시물 로드 실패:', error.message);
+      // 테이블 없으면 localStorage 폴백 (개발 단계)
+      if (error.message?.includes('not exist') || error.code === '42P01') {
+        try {
+          const saved = JSON.parse(localStorage.getItem('korart_published') || '[]');
+          saved.forEach(p => mockContent.push(p));
+        } catch (e) {}
+      }
+      renderGrid();
+      lucide.createIcons();
+      return;
+    }
+    // mockContent 비우고 새로 채움
+    mockContent.length = 0;
+    (data || []).forEach(row => {
+      mockContent.push({
+        id: row.id,
+        type: row.type,
+        title: row.title,
+        user: row.user_nickname || '익명',
+        avatar: row.user_avatar,
+        likes: row.likes || 0,
+        views: row.views || 0,
+        tag: row.tag,
+        img: row.asset_url,
+        aspect: row.aspect || '16:9',
+        createdAt: new Date(row.created_at).getTime()
+      });
+    });
+    renderGrid();
+    lucide.createIcons();
+  } catch (e) {
+    console.warn('[community] 로드 예외:', e);
+    renderGrid();
+    lucide.createIcons();
+  }
+}
+
+// 초기 호출 (sb 준비될 때까지 대기)
+loadCommunityPosts();
 </script>
 </body>
 </html>
