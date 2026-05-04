@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>커뮤니티 — Korart AI</title>
+<title>구독 — Korart-i</title>
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <style>
@@ -285,6 +285,50 @@ img{display:block}
 .icon-sm{width:16px;height:16px}
 .icon-md{width:20px;height:20px}
 .icon-lg{width:28px;height:28px}
+
+/* === Subscription 페이지 === */
+.subscription-page{padding:32px 24px;display:flex;flex-direction:column;gap:48px;max-width:1200px;margin:0 auto}
+.sub-hero{text-align:center;padding:32px 0 16px}
+.sub-hero-eyebrow{font-size:11px;font-weight:800;letter-spacing:.18em;color:var(--accent);margin-bottom:14px;text-transform:uppercase}
+.sub-hero-title{font-size:clamp(28px,4vw,42px);font-weight:900;color:var(--ink);letter-spacing:-.025em;line-height:1.2;margin-bottom:18px}
+.sub-hero-title em{font-style:normal;background:linear-gradient(135deg,var(--accent),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub-hero-sub{font-size:14px;color:var(--ink-dim);line-height:1.7;max-width:640px;margin:0 auto}
+.sub-hero-sub strong{color:var(--ink);font-weight:700}
+
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:900px){.pricing-grid{grid-template-columns:1fr}}
+.price-card{background:#fff;border:1px solid var(--line);padding:32px 28px;display:flex;flex-direction:column;gap:14px;position:relative;transition:transform .2s,border-color .2s,box-shadow .2s}
+.price-card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 12px 32px rgba(99,102,241,.12)}
+.price-card.featured{border-color:var(--accent);border-width:2px;background:linear-gradient(180deg,#fff 0%,rgba(99,102,241,.03) 100%)}
+.price-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--accent),var(--gold));color:#fff;font-size:11px;font-weight:800;padding:5px 14px;letter-spacing:.04em}
+.price-icon{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--accent);font-weight:800;letter-spacing:.1em}
+.price-name{font-size:24px;font-weight:900;color:var(--ink);letter-spacing:-.02em}
+.price-tag{font-size:12px;color:var(--ink-dim);font-weight:600}
+.price-amount{font-size:38px;font-weight:900;color:var(--ink);letter-spacing:-.02em;margin-top:8px}
+.price-amount .unit{font-size:14px;font-weight:600;color:var(--ink-dim);margin-left:4px}
+.price-per{font-size:11px;color:var(--ink-dimmer);margin-top:-8px}
+.price-points{background:var(--bg-2);border:1px solid var(--line);padding:14px 16px;margin-top:6px}
+.price-points-label{font-size:10px;font-weight:700;color:var(--ink-dimmer);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.price-points-value{font-size:22px;font-weight:900;color:var(--accent);letter-spacing:-.02em}
+.price-points-value .pt-unit{font-size:11px;color:var(--ink-dim);margin-left:3px}
+.price-features{list-style:none;padding:0;margin:8px 0;display:flex;flex-direction:column;gap:8px}
+.price-features li{font-size:13px;color:var(--ink-dim);padding-left:18px;position:relative;line-height:1.5}
+.price-features li::before{content:"✓";position:absolute;left:0;color:var(--accent);font-weight:800}
+.price-cta{display:block;width:100%;padding:13px;background:var(--ink);color:#fff;border:none;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:-.01em;transition:opacity .15s,transform .15s;text-align:center;text-decoration:none}
+.price-cta:hover{opacity:.92;transform:translateY(-1px)}
+.price-card.featured .price-cta{background:linear-gradient(135deg,var(--accent),var(--gold))}
+
+.extra-points{background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(167,139,250,.06));border:1px solid var(--line);padding:32px 36px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.extra-points-label{font-size:10px;font-weight:800;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.extra-points-title{font-size:22px;font-weight:900;color:var(--ink);letter-spacing:-.02em;margin-bottom:8px}
+.extra-points-sub{font-size:13px;color:var(--ink-dim);line-height:1.6}
+.extra-points-rate{font-size:42px;font-weight:900;color:var(--ink);letter-spacing:-.02em;display:flex;align-items:baseline;gap:0}
+.extra-points-rate .rate-num{font-family:'JetBrains Mono',monospace;color:var(--accent)}
+.extra-points-rate .rate-unit{font-size:18px;color:var(--ink-dim);margin-left:3px;margin-right:8px;font-weight:700}
+.extra-points-rate .rate-equals{font-size:24px;color:var(--ink-dim);margin:0 8px;font-weight:700}
+
+.price-note{text-align:center;font-size:12px;color:var(--ink-dimmer);padding:16px 0;line-height:1.7}
+
 </style>
 </head>
 <body>
@@ -470,81 +514,111 @@ img{display:block}
 
 <nav class="subnav">
   <div class="subnav-inner" id="subnav">
-    <a class="subnav-item active" href="/community.html">홈</a>
+    <a class="subnav-item" href="/community.html">홈</a>
     <a class="subnav-item" href="/studio.html?mode=video">영상 생성</a>
     <a class="subnav-item" href="/studio.html?mode=image">이미지 생성</a>
     <a class="subnav-item" href="/mypage.html">내 자료/거래내역</a>
-    <a class="subnav-item" href="/subscription.html">구독</a>
+    <a class="subnav-item active" href="/subscription.html">구독</a>
     <a class="subnav-item" href="/community.html">커뮤니티</a>
   </div>
 </nav>
 
-<main class="main">
-  <!-- 위: Hero + 창작 시작하기 박스 (2-컬럼) -->
-  <div class="top-section">
-    <section>
-      <div class="hero" style="margin-bottom:0">
-      <div class="hero-decor"></div>
-      <div class="hero-content">
-        <div class="hero-left">
-          <div class="hero-badge"><span>최신 이미지/영상 생성 AI 제공</span></div>
-          <h2 class="hero-title">프롬프트 없이 클릭만으로<br>나만의 <span class="hero-grad">영상/이미지</span> 생성 완성.</h2>
-          <p class="hero-sub">선택과 상세 설정으로 K-콘텐츠 영상 메이킹.<br>AI가 4컷 미리보기로 확인시켜주고, 영상까지 한 번에.</p>
-          <div class="hero-ctas">
-            <a class="hero-cta" href="/studio.html?mode=video"><i data-lucide="video" class="icon-sm"></i> 영상 생성 →</a>
-            <a class="hero-cta" href="/studio.html?mode=image"><i data-lucide="image" class="icon-sm"></i> 이미지 생성 →</a>
-          </div>
-        </div>
-        <div class="hero-right">
-          <div class="compare-table">
-            <div class="compare-cell compare-head"></div>
-            <div class="compare-cell compare-head">과거</div>
-            <div class="compare-cell compare-head">현재</div>
+<main class="main subscription-page">
+  <section class="sub-hero">
+    <div class="sub-hero-eyebrow">SUBSCRIPTION</div>
+    <h1 class="sub-hero-title">구독으로 매달, <em>포인트로 자유롭게.</em></h1>
+    <p class="sub-hero-sub">
+      매달 일정 포인트가 충전되는 구독을 선택하세요.<br>
+      부족하면 언제든 추가 포인트를 따로 구매할 수 있습니다. <strong>1포인트 = 50원</strong> 단위.
+    </p>
+  </section>
 
-            <div class="compare-cell compare-row-label">입력<br>방식</div>
-            <div class="compare-cell compare-past">영어 프롬프트 500자 직접 작성<span class="prompt-text">"a young Korean woman in her early 20s with long black hair, wearing a beige trench coat, walking through cherry blossoms in Seoul during golden hour, soft natural lighting, shallow depth of field, cinematic film grain..."</span></div>
-            <div class="compare-cell compare-now">마우스 클릭만으로 완성<br><span class="badge-step">씬</span><span class="badge-step">앵글</span><span class="badge-step">장소</span><span class="badge-step">인물</span></div>
-
-            <div class="compare-cell compare-row-label">진행<br>흐름</div>
-            <div class="compare-cell compare-past">프롬프트 입력 → 바로 영상 생성<br>→ 마음에 안 들면 재시도·재시도...</div>
-            <div class="compare-cell compare-now">이미지 4컷으로 <strong>초안 확인</strong> →<br>구도 확정 후 <strong>영상 생성</strong></div>
-          </div>
-        </div>
+  <section class="pricing-grid">
+    <!-- Starter -->
+    <div class="price-card">
+      <div class="price-icon">i</div>
+      <div class="price-name">Starter</div>
+      <div class="price-tag">개인 크리에이터·실험용</div>
+      <div class="price-amount">29,000<span class="unit">원</span></div>
+      <div class="price-per">/ 월</div>
+      <div class="price-points">
+        <div class="price-points-label">매월 충전 포인트</div>
+        <div class="price-points-value">580<span class="pt-unit">P</span></div>
       </div>
-    </section>
-
-    <aside class="sidebar">
-      <!-- 로그인 창구 -->
-      <div class="sb-card login-card" id="sidebarLoginCard">
-        <div class="sb-card-decor"></div>
-        <div class="login-icon"><i data-lucide="zap" class="icon-lg"></i></div>
-        <h4 class="login-title">상상을 작품으로</h4>
-        <p class="login-desc">지금 로그인하고 당신의 아이디어를<br>고화질 AI 아트로 변환해보세요.</p>
-        <button class="login-btn" id="sidebarLoginBtn">창작 시작하기</button>
-        <div class="login-links">
-          <span>아이디 찾기</span>
-          <span class="dot"></span>
-          <span>회원가입</span>
-        </div>
-      </div>
-    </aside>
-  </div>
-
-  <!-- 아래: 트렌딩 콘텐츠 풀폭 -->
-  <section class="trending-section">
-    <div class="content-header">
-      <h3 class="content-title">트렌딩 콘텐츠 <span class="content-subtitle">실시간 인기 작품</span></h3>
-      <div class="content-actions">
-        <div class="sort-toggle">
-          <button class="active" data-sort="popular">인기순</button>
-          <button data-sort="recent">최신순</button>
-        </div>
-        <button class="publish-btn" id="publishBtn"><i data-lucide="plus" class="icon-sm"></i>게시</button>
-      </div>
+      <ul class="price-features">
+        <li>모든 씬 사용 가능</li>
+        <li>아바타 라이브러리 무제한</li>
+        <li>영상 1편당 약 50~150P 차감</li>
+        <li>720p · 9:16 쇼츠 변환</li>
+        <li>광고 등 상업 이용 가능</li>
+      </ul>
+      <button class="price-cta" data-plan="starter">구독 시작</button>
     </div>
 
-    <div class="grid" id="grid"></div>
-    <div class="pagination" id="pagination" style="display:none"></div>
+    <!-- Creator (추천) -->
+    <div class="price-card featured">
+      <div class="price-badge">추천</div>
+      <div class="price-icon">ii</div>
+      <div class="price-name">Creator</div>
+      <div class="price-tag">유튜버·인플루언서</div>
+      <div class="price-amount">59,000<span class="unit">원</span></div>
+      <div class="price-per">/ 월</div>
+      <div class="price-points">
+        <div class="price-points-label">매월 충전 포인트</div>
+        <div class="price-points-value">1,250<span class="pt-unit">P</span></div>
+      </div>
+      <ul class="price-features">
+        <li>Starter의 모든 기능</li>
+        <li>1080p 고화질 + 오디오</li>
+        <li>씬별 최적 모델 자동 선택</li>
+        <li>16:9 · 1:1 · 9:16 모두 지원</li>
+        <li>새 씬 우선 액세스</li>
+        <li>4컷 무료 재생성 무제한</li>
+      </ul>
+      <button class="price-cta" data-plan="creator">구독 시작</button>
+    </div>
+
+    <!-- Studio -->
+    <div class="price-card">
+      <div class="price-icon">iii</div>
+      <div class="price-name">Studio</div>
+      <div class="price-tag">에이전시·브랜드</div>
+      <div class="price-amount">99,000<span class="unit">원</span></div>
+      <div class="price-per">/ 월</div>
+      <div class="price-points">
+        <div class="price-points-label">매월 충전 포인트</div>
+        <div class="price-points-value">2,200<span class="pt-unit">P</span></div>
+      </div>
+      <ul class="price-features">
+        <li>Creator의 모든 기능</li>
+        <li>최고 품질 모델 고정</li>
+        <li>4K 업스케일 옵션</li>
+        <li>팀 협업 (최대 3명)</li>
+        <li>커스텀 씬 제작 신청 가능</li>
+        <li>우선 기술 지원</li>
+      </ul>
+      <button class="price-cta" data-plan="studio">구독 시작</button>
+    </div>
+  </section>
+
+  <section class="extra-points">
+    <div class="extra-points-info">
+      <div class="extra-points-label">Need More?</div>
+      <div class="extra-points-title">추가 포인트, 따로 구매</div>
+      <div class="extra-points-sub">
+        구독 포인트가 부족할 때 언제든 추가 충전.<br>
+        남은 포인트는 다음 달로 이월됩니다.
+      </div>
+    </div>
+    <div class="extra-points-rate">
+      <span class="rate-num">1</span><span class="rate-unit">P</span>
+      <span class="rate-equals">=</span>
+      <span class="rate-num">50</span><span class="rate-unit">원</span>
+    </div>
+  </section>
+
+  <section class="price-note">
+    구독 해지 언제든 가능 · 신용카드 · 토스페이 · 카카오페이 지원 · 영수증·세금계산서 발행
   </section>
 </main>
 
@@ -1593,6 +1667,24 @@ async function loadCommunityPosts() {
 
 // 초기 호출 (sb 준비될 때까지 대기)
 loadCommunityPosts();
+</script>
+
+<script>
+// 구독 버튼 핸들러 (결제 시스템 연동 전 임시)
+document.querySelectorAll('.price-cta[data-plan]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const plan = btn.dataset.plan;
+    const planNames = { starter: 'Starter (29,000원)', creator: 'Creator (59,000원)', studio: 'Studio (99,000원)' };
+    if (typeof currentUser === 'undefined' || !currentUser) {
+      alert('구독은 로그인 후 이용 가능합니다.');
+      // 로그인 모달 열기 시도
+      const am = document.getElementById('authModal');
+      if (am) am.classList.add('active');
+      return;
+    }
+    alert(planNames[plan] + ' 플랜 구독 기능은 곧 출시됩니다!\n결제 시스템(토스페이먼츠) 연동 후 활성화됩니다.');
+  });
+});
 </script>
 </body>
 </html>

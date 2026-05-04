@@ -429,6 +429,10 @@ export default {
         const assetUrl = new URL('/community.html', request.url);
         return await env.ASSETS.fetch(new Request(assetUrl.toString(), { method: 'GET', headers: request.headers }));
       }
+      if (url.pathname === '/subscription' || url.pathname === '/subscription/' || url.pathname === '/pricing') {
+        const assetUrl = new URL('/subscription.html', request.url);
+        return await env.ASSETS.fetch(new Request(assetUrl.toString(), { method: 'GET', headers: request.headers }));
+      }
       if (url.pathname === '/studio-drama' || url.pathname === '/studio-drama/' || url.pathname === '/studio-drama.html') {
         const assetUrl = new URL('/studio-drama.html', request.url);
         return await env.ASSETS.fetch(new Request(assetUrl.toString(), { method: 'GET', headers: request.headers }));
