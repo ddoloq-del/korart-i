@@ -10499,24 +10499,28 @@ async function generateCutVideo(i) {
     status.textContent = `fal.ai 요청 중 (${dur}초 예상)...`;
     log('info', `body: ${JSON.stringify(body).slice(0,200)}`);
 
-    // 이미지 생성 포인트 — #imgModel의 현재 선택된 option의 data-cpm × 42 (비캌가 이미 정해둔 공식, line 5761 참고)
+    // 이미지 생성 포인트 — 비캌가 정한 calcImgPoints() 함수 그대로 사용 (비용 안내 팝업과 동일)
     const _imgEstPoints = (function() {
       try {
+        if (typeof calcImgPoints !== 'function') return 0;
         const sel = document.getElementById('imgModel');
-        if (!sel) return 0;
-        // model + quality 일치하는 option 찾기 (model만 같은 option이 여러 개 있을 수 있으므로)
-        let opt = null;
-        const reqQuality = body && body.quality ? body.quality : null;
-        for (const o of sel.options) {
-          if (o.value === model) {
-            if (reqQuality && o.dataset.quality === reqQuality) { opt = o; break; }
-            if (!opt) opt = o;  // 폴백
+        let modelQuality = 'medium';
+        if (sel) {
+          for (const o of sel.options) {
+            if (o.value === model && o.selected) {
+              modelQuality = o.dataset.quality || modelQuality;
+              break;
+            }
           }
         }
-        const cpm = opt ? parseFloat(opt.dataset.cpm || '0') : 0;
-        return Math.max(1, Math.ceil(cpm * 42));
-      } catch (e) { return 0; }
+        const ar = (typeof S !== 'undefined' && S.aspectRatio) ? S.aspectRatio : '16:9';
+        const imgQ = (typeof getSelectedImgQuality === 'function') ? getSelectedImgQuality() : 'fhd';
+        const pts = calcImgPoints(model, modelQuality, ar, imgQ);
+        // 소수점 첫째 자리까지 그대로 (온전한 값 보존)
+        return Math.round((pts || 0) * 10) / 10;
+      } catch (e) { console.warn('[points] calcImgPoints 실패', e); return 0; }
     })();
+    log('info', `포인트 차감 예정: ${_imgEstPoints}P`);
 
     const r = await fetch('/fal-proxy/' + model, {
       method: 'POST',
@@ -10644,18 +10648,27 @@ function getQuadCssAspect() {
 async function _falImageQueue(model, body, statusEl) {
   const jwt = await getSupabaseJWT();
 
-  // 영상 생성 포인트 추정: data-points-on/off × duration
+  // 영상 생성 포인트 — calcVidPoints는 카드 인덱스 인자를 받으므로
+  // body.duration + audio_enabled 기반으로 직접 계산 (calcVidPoints 공식 동일)
   const _vidEstPoints = (function() {
     try {
       const sel = document.getElementById('vidModel');
-      const opt = sel ? sel.querySelector('option[value="' + model + '"]') : null;
-      if (!opt) return 10;  // 기본 10P
-      const audioOn = (body && (body.audio_enabled || body.generate_audio || body.with_audio)) ? true : false;
-      const ppsec = parseFloat(audioOn ? (opt.dataset.pointsOn || '5') : (opt.dataset.pointsOff || '4')) || 5;
+      if (!sel) return 0;
+      // model 일치하는 option 찾기
+      let opt = null;
+      for (const o of sel.options) {
+        if (o.value === model) { opt = o; break; }
+      }
+      if (!opt) return 0;
+      // body에서 audio 필드 확인 (audio_enabled / generate_audio / with_audio)
+      const audioOn = !!(body && (body.audio_enabled || body.generate_audio || body.with_audio));
+      const ppsec = parseFloat(audioOn ? (opt.dataset.pointsOn || '0') : (opt.dataset.pointsOff || '0')) || 0;
       const dur = parseFloat(body && body.duration ? body.duration : 5) || 5;
-      return Math.max(1, Math.ceil(ppsec * dur));
-    } catch (e) { return 10; }
+      // calcVidPoints와 동일: pts × dur (소수점 첫째까지)
+      return Math.round(ppsec * dur * 10) / 10;
+    } catch (e) { console.warn('[points] _vidEstPoints 실패', e); return 0; }
   })();
+  log('info', `포인트 차감 예정 (영상): ${_vidEstPoints}P`);
 
   // 1단계: queue 제출
   const submitRes = await fetch('/fal-proxy/' + model, {

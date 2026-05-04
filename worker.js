@@ -293,7 +293,7 @@ export default {
 
         let chargeResult = null;
         if (request.method === 'POST') {
-          const estPoints = parseInt(request.headers.get('X-Estimated-Points') || '0');
+          const estPoints = parseFloat(request.headers.get('X-Estimated-Points') || '0');
           if (estPoints > 0) {
             chargeResult = await chargePoints(env, user.id, estPoints, 'fal: ' + falPath, falPath, null, null);
             if (!chargeResult.ok) {
@@ -358,7 +358,7 @@ export default {
         // POST이면 포인트 차감 (생성 요청)
         let chargeResult = null;
         if (request.method === 'POST') {
-          const estPoints = parseInt(request.headers.get('X-Estimated-Points') || '0');
+          const estPoints = parseFloat(request.headers.get('X-Estimated-Points') || '0');
           if (estPoints > 0) {
             chargeResult = await chargePoints(
               env,
