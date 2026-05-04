@@ -33,11 +33,11 @@ img{display:block}
 .subnav-item.active{color:var(--ink);border-color:var(--accent)}
 .main{max-width:1400px;margin:0 auto;padding:32px 24px;display:grid;grid-template-columns:1fr 320px;gap:32px}
 .hero{position:relative;border-radius:0;padding:48px;margin-bottom:32px;overflow:hidden;background:radial-gradient(ellipse at top right,rgba(167,139,250,.25),transparent 60%),radial-gradient(ellipse at bottom left,rgba(99,102,241,.25),transparent 60%),linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#4c1d95 100%);border:1px solid var(--line-lit);min-height:280px;display:flex;align-items:center}
-.hero-content{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:48px;align-items:center;width:100%;max-width:none}
+.hero-content{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:32px;align-items:center;width:100%;max-width:none}
 .hero-content > .hero-left{min-width:0}
 .hero-content > .hero-right{min-width:0}
 .hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);padding:5px 12px;border-radius:0;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
-.hero-title{font-size:clamp(28px,3.2vw,44px);font-weight:900;line-height:1.2;letter-spacing:-.03em;margin-bottom:18px;color:#fff;word-break:keep-all}
+.hero-title{font-size:clamp(24px,2.5vw,34px);font-weight:900;line-height:1.2;letter-spacing:-.03em;margin-bottom:18px;color:#fff;word-break:keep-all}
 .hero-cta{display:inline-flex;align-items:center;gap:8px;background:#fff;color:#1a1a1a;padding:12px 24px;border-radius:0;font-weight:800;font-size:14px;transition:transform .15s,box-shadow .15s}
 .hero-cta:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(99,102,241,.4)}
 .hero-cta-alt{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.5)}
@@ -48,12 +48,12 @@ img{display:block}
 .hero-decor{position:absolute;right:-50px;bottom:-50px;width:280px;height:280px;background:radial-gradient(circle,rgba(167,139,250,.4),transparent 70%);border-radius:50%;filter:blur(40px)}
 
 /* 과거 vs 현재 비교 표 */
-.compare-table{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);display:grid;grid-template-columns:72px 1fr 1fr;font-size:12px;color:rgba(255,255,255,.92);overflow:hidden}
-.compare-cell{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1);border-right:1px solid rgba(255,255,255,.1);min-width:0;word-break:keep-all}
+.compare-table{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);display:grid;grid-template-columns:56px 1fr 1fr;font-size:12px;color:rgba(255,255,255,.92);overflow:hidden}
+.compare-cell{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.1);border-right:1px solid rgba(255,255,255,.1);min-width:0;word-break:keep-all}
 .compare-cell:nth-child(3n){border-right:none}
 .compare-table > .compare-cell:nth-last-child(-n+3){border-bottom:none}
 .compare-head{background:rgba(255,255,255,.06);font-weight:700;font-size:12px;letter-spacing:.04em;text-align:center;color:rgba(255,255,255,.95);padding:10px 8px}
-.compare-row-label{background:rgba(0,0,0,.2);font-weight:700;font-size:11px;color:rgba(255,255,255,.85);letter-spacing:.02em;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px 6px}
+.compare-row-label{background:rgba(0,0,0,.2);font-weight:700;font-size:11px;color:rgba(255,255,255,.85);letter-spacing:.02em;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px 4px}
 .compare-past, .compare-now{font-size:12px;line-height:1.55;color:rgba(255,255,255,.9);font-weight:500}
 .compare-past .prompt-text{display:block;background:rgba(0,0,0,.25);padding:8px 10px;margin-top:6px;font-family:ui-monospace,Menlo,monospace;font-size:10px;line-height:1.5;color:rgba(255,255,255,.55);max-height:84px;overflow:hidden;border-left:2px solid rgba(255,255,255,.25)}
 .compare-now strong{color:#c4b5fd;font-weight:800}
