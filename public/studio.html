@@ -3315,7 +3315,7 @@ const SCENES = {
   horror:     {name:'공포',       group:'thriller',   vidStyle:'dark unsettling, deep shadows, eerie',             style:'dark unsettling atmosphere, deep shadows, eerie cold tones, suspenseful framing', angles:['Dutch Angle','Extreme Close-up (ECU)','Point of View (POV)','Worm\'s Eye View'], bgImage:'/images/scenes/horror.png'},
   foodie:     {name:'먹방',       group:'content',    vidStyle:'appetizing close-up, ASMR',                        style:'appetizing food close-up lighting, warm tasty colors, mouth-watering visual, ASMR-friendly framing', angles:['Bird\'s Eye View','Macro Shot','Medium Close-up (MCU)','Extreme Close-up (ECU)']},
   travel:     {name:'풍경',       group:'lifestyle',  bgImage:'/images/scenes/travel.jpg',      vidStyle:'breathtaking landscape, golden hour',              style:'breathtaking scenic landscape, vast natural beauty, golden hour lighting, cinematic travel aesthetic', angles:['Wide Shot','Establishing Shot','Drone Shot','Bird\'s Eye View']},
-  fitness:    {name:'운동',       group:'lifestyle',  vidStyle:'energetic motion, athletic, sweat',                style:'energetic dynamic motion, sweat-drenched intensity, sharp athletic focus, gym aesthetic', angles:['Low Angle','Full Shot (FS)','Extreme Close-up (ECU)','Tracking Shot']},
+  fitness:    {name:'운동',       group:'lifestyle',  vidStyle:'energetic motion, athletic, sweat',                style:'energetic dynamic motion, sweat-drenched intensity, sharp athletic focus, gym aesthetic', angles:['Low Angle','Full Shot (FS)','Extreme Close-up (ECU)','Tracking Shot'], bgImage:'/images/scenes/fitness.png'},
   dance:      {name:'댄스',       group:'lifestyle',  vidStyle:'rhythmic K-pop choreo, vibrant',                   style:'rhythmic K-pop choreography, vibrant studio lighting, dynamic synchronized movement', angles:['Wide Shot','Full Shot (FS)','Low Angle','Crane Shot']},
   interview:  {name:'인터뷰',     group:'content',    vidStyle:'documentary, natural, focused',                    style:'professional documentary lighting, natural setting, focused conversation, talking-head style', angles:['Bust Shot','Medium Close-up (MCU)','Dirty Single','Over-the-Shoulder (OTS)']},
   mv:         {name:'뮤직비디오', group:'commercial', vidStyle:'stylized cinematic, rhythmic',                     style:'stylized music video aesthetic, dramatic lighting, rhythmic visual flow, cinematic look', angles:['Wide Shot','Crane Shot','Extreme Close-up (ECU)','Slow Motion']},
@@ -5116,13 +5116,23 @@ function setOutfitFromSelect(libId, val) {
 
 // === 4단계 헤어 드롭다운 (씬에서만 적용 — av.hair 라이브러리는 그대로) ===
 function setSceneHairFromSelect(libId, val) {
-  const cast = S.avatars.find(a => (a._libId || a.id) === libId);
-  if (!cast) return;
+  // libId는 onchange를 통해 string으로 온다. _libId/id는 number/string 섞일 수 있으므로 둘 다 비교
+  const cast = S.avatars.find(a => {
+    const aLib = a._libId != null ? String(a._libId) : null;
+    const aId  = a.id    != null ? String(a.id)    : null;
+    const target = String(libId);
+    return aLib === target || aId === target;
+  });
+  if (!cast) {
+    console.warn('[setSceneHairFromSelect] cast 못 찾음 — libId:', libId, 'avatars:', S.avatars.map(a => ({id:a.id, _libId:a._libId})));
+    return;
+  }
   if (val === '__custom__') {
     cast.sceneHair = ' ';
   } else {
     cast.sceneHair = val || '';
   }
+  console.log('[setSceneHairFromSelect] 적용 완료 — cast:', cast.name || cast.id, 'sceneHair:', cast.sceneHair);
   renderStep1Avatars();
   if (val === '__custom__') {
     setTimeout(() => {
@@ -5134,7 +5144,12 @@ function setSceneHairFromSelect(libId, val) {
 
 // 헤어 custom input 입력 시 (포커스 유지 — 재렌더 X)
 function updateAvatarSceneHairCustom(libId, value) {
-  const cast = S.avatars.find(a => (a._libId || a.id) === libId);
+  const cast = S.avatars.find(a => {
+    const aLib = a._libId != null ? String(a._libId) : null;
+    const aId  = a.id    != null ? String(a.id)    : null;
+    const target = String(libId);
+    return aLib === target || aId === target;
+  });
   if (!cast) return;
   cast.sceneHair = value || ' ';
 }
