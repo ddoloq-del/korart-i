@@ -252,7 +252,8 @@ export default {
       // ─────────────────────────────────────────
       // /fal-proxy-abs?url=<encoded>
       // queue.fal.run의 status_url/response_url 직접 프록시
-      // 포인트 검증 X (이미 submit 시점에 차감됨)
+      // ★ 폴링 응답이 FAILED/ERROR면 자동 환불 (검열·생성 실패 시 보호)
+      // ★ COMPLETED인데 결과 URL 없으면 환불
       // ─────────────────────────────────────────
       if (url.pathname === '/fal-proxy-abs') {
         const user = await getUserFromJWT(request, env);
@@ -277,9 +278,52 @@ export default {
           headers: proxyHeaders,
           body: request.method !== 'GET' && request.method !== 'HEAD' ? request.body : undefined,
         });
+
+        // 응답 body를 읽어서 FAILED/ERROR 또는 결과 누락 감지 (환불 처리)
+        // body를 한 번 읽으면 stream 소진되므로 text로 읽고 다시 Response 생성
+        const resContentType = falRes.headers.get('Content-Type') || 'application/json';
+        const bodyText = await falRes.text();
+
+        try {
+          // JSON일 때만 파싱 시도
+          if (resContentType.includes('json') && bodyText) {
+            const data = JSON.parse(bodyText);
+            const statusVal = data && data.status;
+            // request_id 추출 (환불 메모용)
+            const reqId = (data && data.request_id) || (() => {
+              // status_url path에서 추출 (e.g. /openai/.../requests/<id>/status)
+              const m = targetUrl.match(/\/requests\/([^/?]+)/);
+              return m ? m[1] : null;
+            })();
+
+            // ① FAILED / ERROR 상태
+            if (statusVal === 'FAILED' || statusVal === 'ERROR') {
+              await refundForRequest(env, user.id, reqId, 'fal status=' + statusVal);
+            }
+            // ② COMPLETED인데 결과 URL이 없는 경우 (검열로 결과 비어있음)
+            else if (statusVal === 'COMPLETED' || (!statusVal && (data.images || data.video || data.url || data.image))) {
+              // status_url이 아니라 response_url에서 받은 결과 응답
+              // status === 'COMPLETED' 면 폴링 응답, status 없으면 response 응답
+              const hasResult = !!(
+                (data.images && data.images.length > 0 && data.images[0].url) ||
+                (data.image && data.image.url) ||
+                (data.video && data.video.url) ||
+                data.url
+              );
+              // status === 'COMPLETED'인 폴링 응답에는 결과가 없을 수 있으므로 (response_url 따로 fetch)
+              // 진짜 결과 응답인 경우에만 검사 — status 없이 images/video/url 키 있는 경우
+              if (!statusVal && !hasResult) {
+                await refundForRequest(env, user.id, reqId, 'fal completed but no result (likely content moderation)');
+              }
+            }
+          }
+        } catch (e) {
+          // 파싱 실패는 무시 (환불 안 함, 정상 응답일 가능성 있음)
+        }
+
         const resHeaders = new Headers(corsHeaders);
-        resHeaders.set('Content-Type', falRes.headers.get('Content-Type') || 'application/json');
-        return new Response(falRes.body, { status: falRes.status, headers: resHeaders });
+        resHeaders.set('Content-Type', resContentType);
+        return new Response(bodyText, { status: falRes.status, headers: resHeaders });
       }
 
       // ─────────────────────────────────────────
@@ -409,14 +453,48 @@ export default {
           await refundPoints(env, user.id, chargeResult.charged, 'fal error ' + falRes.status + ': ' + falPath);
         }
 
+        // 응답 body를 한 번 읽어서 request_id 추출 → 거래 기록에 연결
+        const resContentType_p = falRes.headers.get('Content-Type') || 'application/json';
+        const bodyText_p = await falRes.text();
+
+        // POST 성공 + 차감했으면 fal request_id를 거래에 연결 (나중에 환불 시 매칭용)
+        if (request.method === 'POST' && falRes.ok && chargeResult && chargeResult.charged > 0) {
+          try {
+            if (resContentType_p.includes('json') && bodyText_p) {
+              const data_p = JSON.parse(bodyText_p);
+              const reqId_p = data_p && data_p.request_id;
+              if (reqId_p) {
+                // 방금 삽입된 거래 (fal_request_id가 null인 가장 최근 usage)에 request_id update
+                await fetch(
+                  env.SUPABASE_URL + '/rest/v1/point_transactions?user_id=eq.' + user.id +
+                  '&fal_endpoint=eq.' + encodeURIComponent(falPath) +
+                  '&fal_request_id=is.null&type=eq.usage&order=created_at.desc&limit=1',
+                  {
+                    method: 'PATCH',
+                    headers: {
+                      'apikey': env.SUPABASE_SERVICE_KEY,
+                      'Authorization': 'Bearer ' + env.SUPABASE_SERVICE_KEY,
+                      'Content-Type': 'application/json',
+                      'Prefer': 'return=minimal',
+                    },
+                    body: JSON.stringify({ fal_request_id: reqId_p }),
+                  }
+                );
+              }
+            }
+          } catch (e) {
+            // request_id 연결 실패시 무시 (차감/응답엔 영향 없음)
+          }
+        }
+
         const resHeaders = new Headers(corsHeaders);
-        resHeaders.set('Content-Type', falRes.headers.get('Content-Type') || 'application/json');
+        resHeaders.set('Content-Type', resContentType_p);
         if (chargeResult) {
           resHeaders.set('X-Points-Charged', String(chargeResult.charged));
           resHeaders.set('X-Points-Remaining', String(chargeResult.remaining));
           resHeaders.set('X-Unlimited', chargeResult.unlimited ? '1' : '0');
         }
-        return new Response(falRes.body, { status: falRes.status, headers: resHeaders });
+        return new Response(bodyText_p, { status: falRes.status, headers: resHeaders });
       }
 
       // ─────────────────────────────────────────
@@ -474,7 +552,9 @@ async function refundPoints(env, userId, amount, description) {
     await insertTransaction(env, userId, 'refund', 0, profile.points, description, null, null, null);
     return;
   }
-  const newBalance = profile.points + amount;
+  // 부동소수 오차 방지
+  const refundAmount = Math.round(amount * 100) / 100;
+  const newBalance = Math.round((profile.points + refundAmount) * 100) / 100;
   await fetch(
     env.SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId,
     {
@@ -488,5 +568,43 @@ async function refundPoints(env, userId, amount, description) {
       body: JSON.stringify({ points: newBalance }),
     }
   );
-  await insertTransaction(env, userId, 'refund', amount, newBalance, description, null, null, null);
+  await insertTransaction(env, userId, 'refund', refundAmount, newBalance, description, null, null, null);
+}
+
+// ============================================
+// request_id 기반 환불 — 해당 request의 차감 거래 찾아서 동일 금액 환불
+// 동일 request_id에 이미 환불 거래 있으면 중복 환불 방지
+// ============================================
+async function refundForRequest(env, userId, requestId, reason) {
+  if (!requestId) return;
+  try {
+    // 1) 해당 request_id의 거래 모두 조회
+    const r = await fetch(
+      env.SUPABASE_URL + '/rest/v1/point_transactions?user_id=eq.' + userId +
+      '&fal_request_id=eq.' + requestId + '&order=created_at.asc',
+      {
+        headers: {
+          'apikey': env.SUPABASE_SERVICE_KEY,
+          'Authorization': 'Bearer ' + env.SUPABASE_SERVICE_KEY,
+        },
+      }
+    );
+    if (!r.ok) return;
+    const txs = await r.json();
+    if (!Array.isArray(txs) || txs.length === 0) return;
+
+    // 2) 사용 거래(usage, amount<0) 중 환불 안 된 것 찾기
+    const usageTx = txs.find(t => t.type === 'usage' && Number(t.amount) < 0);
+    if (!usageTx) return;
+    const alreadyRefunded = txs.some(t => t.type === 'refund');
+    if (alreadyRefunded) return;  // 중복 환불 방지
+
+    // 3) 환불 (사용액의 절대값을 다시 더해줌)
+    const amount = Math.abs(Number(usageTx.amount));
+    if (amount > 0) {
+      await refundPoints(env, userId, amount, '자동 환불 (' + reason + '): ' + requestId);
+    }
+  } catch (e) {
+    // 환불 실패는 조용히 무시 (서비스 영향 없게)
+  }
 }
