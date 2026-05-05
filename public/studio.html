@@ -1793,7 +1793,6 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
     </div>
     <div class="korart-gnb-right">
       <a class="korart-points-pill" href="/subscription.html" id="gnbPointsPill" title="포인트 / 구독">
-        <i data-lucide="sparkles" style="width:14px;height:14px"></i>
         <span id="gnbPointsValue">—</span>
         <span style="opacity:.6;font-size:10px;font-weight:600">P</span>
       </a>
@@ -5123,16 +5122,12 @@ function setSceneHairFromSelect(libId, val) {
     const target = String(libId);
     return aLib === target || aId === target;
   });
-  if (!cast) {
-    console.warn('[setSceneHairFromSelect] cast 못 찾음 — libId:', libId, 'avatars:', S.avatars.map(a => ({id:a.id, _libId:a._libId})));
-    return;
-  }
+  if (!cast) return;
   if (val === '__custom__') {
     cast.sceneHair = ' ';
   } else {
     cast.sceneHair = val || '';
   }
-  console.log('[setSceneHairFromSelect] 적용 완료 — cast:', cast.name || cast.id, 'sceneHair:', cast.sceneHair);
   renderStep1Avatars();
   if (val === '__custom__') {
     setTimeout(() => {
@@ -5144,19 +5139,14 @@ function setSceneHairFromSelect(libId, val) {
 
 // 헤어 custom input 입력 시 (포커스 유지 — 재렌더 X)
 function updateAvatarSceneHairCustom(libId, value) {
-  console.log('[updateAvatarSceneHairCustom] 디테일 설정 커스텀 헤어 입력 — libId:', libId, 'value:', value);
   const cast = S.avatars.find(a => {
     const aLib = a._libId != null ? String(a._libId) : null;
     const aId  = a.id    != null ? String(a.id)    : null;
     const target = String(libId);
     return aLib === target || aId === target;
   });
-  if (!cast) {
-    console.warn('[updateAvatarSceneHairCustom] cast 못 찾음 — libId:', libId);
-    return;
-  }
+  if (!cast) return;
   cast.sceneHair = value || ' ';
-  console.log('[updateAvatarSceneHairCustom] 적용 완료 — cast:', cast.name || cast.id, 'sceneHair:', cast.sceneHair);
 }
 
 // === 시대 맞춤 헤어 옵션 (4단계 씬에서) ===
@@ -6442,7 +6432,6 @@ function refreshHairList() {
 }
 
 function pickHair(el, en) {
-  console.log('[pickHair] 아바타 라이브러리에서 헤어 선택 — en:', en);
   const wasActive = el.classList.contains('active');
   el.closest('.segs').querySelectorAll('.seg').forEach(s => s.classList.remove('active'));
   if (wasActive) {
@@ -6458,7 +6447,6 @@ function pickHair(el, en) {
 // 입력 즉시 자동 반영
 function useCustomHairAuto() {
   const v = document.getElementById('avHairCustom').value.trim();
-  console.log('[useCustomHairAuto] 아바타 라이브러리 커스텀 헤어 입력 — v:', v);
   document.getElementById('avHair').value = v;
   if (v) {
     document.querySelectorAll('#avHairSegs .seg').forEach(s => s.classList.remove('active'));
