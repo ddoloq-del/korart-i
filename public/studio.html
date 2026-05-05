@@ -9001,6 +9001,24 @@ function switchCutsMode(mode) {
   if (btn && !btn.disabled) {
     btn.innerHTML = '생성';
   }
+  // 1컷 모드면 4컷 그리드 전체 저장 버튼 숨김
+  const downloadBar = document.getElementById('quadDownloadBar');
+  if (downloadBar) {
+    if (mode === '1cut') {
+      downloadBar.dataset.hiddenByOneCut = '1';
+      downloadBar.style.display = 'none';
+    } else {
+      // 4컷 모드 복귀 시 — 원래 표시 상태 복원 (생성된 컷이 있으면 보임)
+      delete downloadBar.dataset.hiddenByOneCut;
+      const hasAnyCut = (S && S.cutDataUrls) ? S.cutDataUrls.some(u => !!u) : false;
+      downloadBar.style.display = hasAnyCut ? 'block' : 'none';
+    }
+  }
+  // quad 그리드 다시 그리기 (1컷 vs 4컷 레이아웃)
+  if (S && S.cutDataUrls && S.cutDataUrls.some(u => !!u)) {
+    if (typeof renderQuad === 'function') renderQuad();
+    if (typeof renderCutControls === 'function') renderCutControls();
+  }
 }
 
 function selectOneCutIdx(i, el) {
@@ -9009,6 +9027,11 @@ function selectOneCutIdx(i, el) {
   if (el && el.parentElement) {
     el.parentElement.querySelectorAll('.seg').forEach(s => s.classList.remove('active'));
     el.classList.add('active');
+  }
+  // 1컷 모드면 quad / 컨트롤 즉시 다시 그리기 (선택한 컷만 표시)
+  if (_cutsMode === '1cut' && S && S.cutDataUrls && S.cutDataUrls.some(u => !!u)) {
+    if (typeof renderQuad === 'function') renderQuad();
+    if (typeof renderCutControls === 'function') renderCutControls();
   }
   // 정보 텍스트 + 버튼 텍스트 갱신
   const info = document.getElementById('oneCutInfo');
@@ -9708,9 +9731,31 @@ function renderQuad() {
   const colors = ['#c8a04a','#3a70c0','#3e9660','#c03040'];
   const quad = document.getElementById('quad');
   if (!S.cutDataUrls[0]) return;
+
+  // 1컷 모드: 선택된 컷 하나만 꽉 채워서 표시
+  if (typeof _cutsMode !== 'undefined' && _cutsMode === '1cut') {
+    const i = (typeof _oneCutIdx === 'number') ? _oneCutIdx : 0;
+    const url = S.cutDataUrls[i];
+    quad.style.gridTemplateColumns = '1fr';
+    quad.style.aspectRatio = (S.aspectRatio === '9:16') ? '9/16' : (S.aspectRatio === '1:1' ? '1/1' : '16/9');
+    quad.innerHTML = `
+      <div class="qcell" style="${!S.cutApproval[i] ? 'opacity:.4' : ''}">
+        ${url ? `<img src="${url}">` : '<div style="background:transparent;width:100%;height:100%"></div>'}
+        ${_IS_IMG_MODE ? '' : `<div class="q-badge" style="background:rgba(0,0,0,.75);border:1px solid ${colors[i]}40;color:${colors[i]}">${S.angles[i] || '컷'+(i+1)}</div>`}
+        <div class="q-num" style="background:${colors[i]}cc">컷${i+1}</div>
+        ${url ? `<div onclick="downloadImage(S.cutDataUrls[${i}], 'korart_cut${i+1}_${Date.now()}.jpg')" style="position:absolute;bottom:6px;right:6px;font-size:11px;padding:4px 8px;border-radius:0;background:rgba(0,0,0,.7);color:#fff;cursor:pointer;border:1px solid rgba(255,255,255,.2)" title="이 컷 저장">💾</div>` : ''}
+        ${!S.cutApproval[i] ? '<div style="position:absolute;top:6px;right:6px;font-size:9px;padding:2px 6px;border-radius:0;background:rgba(192,48,64,.8);color:#fff">제외</div>' : ''}
+      </div>
+    `;
+    return;
+  }
+
+  // 4컷 모드 (기본): 4개 셀 그리드
+  quad.style.gridTemplateColumns = '1fr 1fr';
+  quad.style.aspectRatio = '16/9';
   quad.innerHTML = S.cutDataUrls.map((url, i) => `
     <div class="qcell" style="${!S.cutApproval[i] ? 'opacity:.4' : ''}">
-      ${url ? `<img src="${url}">` : '<div style="background:#111;width:100%;height:100%"></div>'}
+      ${url ? `<img src="${url}">` : '<div style="background:transparent;width:100%;height:100%"></div>'}
       ${_IS_IMG_MODE ? '' : `<div class="q-badge" style="background:rgba(0,0,0,.75);border:1px solid ${colors[i]}40;color:${colors[i]}">${S.angles[i] || '컷'+(i+1)}</div>`}
       <div class="q-num" style="background:${colors[i]}cc">컷${i+1}</div>
       ${url ? `<div onclick="downloadImage(S.cutDataUrls[${i}], 'korart_cut${i+1}_${Date.now()}.jpg')" style="position:absolute;bottom:6px;right:6px;font-size:11px;padding:4px 8px;border-radius: 0;background:rgba(0,0,0,.7);color:#fff;cursor:pointer;border:1px solid rgba(255,255,255,.2)" title="이 컷 저장">💾</div>` : ''}
@@ -9722,7 +9767,13 @@ function renderQuad() {
 function renderCutControls() {
   const grid = document.getElementById('cutCtrlGrid');
   const colors = ['#c8a04a','#3a70c0','#3e9660','#c03040'];
-  grid.innerHTML = S.cutDataUrls.map((url, i) => `
+  // 1컷 모드면 선택된 컷만 컨트롤 표시
+  let _ctrlList = S.cutDataUrls.map((url, i) => ({url, i}));
+  if (typeof _cutsMode !== 'undefined' && _cutsMode === '1cut') {
+    const sel = (typeof _oneCutIdx === 'number') ? _oneCutIdx : 0;
+    _ctrlList = [{url: S.cutDataUrls[sel], i: sel}];
+  }
+  grid.innerHTML = _ctrlList.map(({url, i}) => `
     <div style="background:var(--bg2);border:1px solid ${S.cutApproval[i] ? colors[i]+'60' : 'var(--line)'};border-radius: 0;padding:10px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
         ${url ? `<img src="${url}" style="width:48px;height:32px;object-fit:cover;border-radius: 0;border:1px solid var(--line)">` : ''}
