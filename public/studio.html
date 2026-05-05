@@ -240,7 +240,9 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 .cut-vid-card{background:var(--bg3);border:1px solid var(--line);border-radius: 0;overflow:hidden}
 .cut-vid-header{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
 .cut-vid-thumb{width:48px;height:32px;object-fit:cover;border-radius: 0;border:1px solid var(--line)}
-.cut-vid-title{font-size:12px;font-weight:700;color:var(--cream)}
+.cut-vid-title{font-size:12px;font-weight:700;color:#ffffff !important}
+.cut-vid-title:visited,.cut-vid-title:hover,.cut-vid-title:active,.cut-vid-title:focus{color:#ffffff !important}
+a .cut-vid-title,a:visited .cut-vid-title{color:#ffffff !important}
 .cut-vid-body{padding:12px}
 .cut-vid-video{width:100%;border-radius: 0;display:block;margin-top:8px}
 .cut-vid-status{font-size:10px;color:var(--ink3);padding:6px 0}
@@ -9900,7 +9902,8 @@ function updateScriptCounter(i) {
 
 function renderVidCards() {
   const approved = S.cutApproval.map((ok,i)=>ok?i:-1).filter(i=>i>=0);
-  const colors = ['#c8a04a','#3a70c0','#3e9660','#c03040'];
+  // 카드별 하단 제목(·앵글) 색상 — 흔색으로 통일 (클릭 후에도 안 변함)
+  const colors = ['#ffffff','#ffffff','#ffffff','#ffffff'];
   const grid = document.getElementById('cutVidGrid');
 
   // 4컷 이미지가 아예 없으면 승인 대신 4개 전체 슬롯 표시 — 불러오기만 가능
