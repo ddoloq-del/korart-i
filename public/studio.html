@@ -1997,6 +1997,12 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
     <!-- 씬 분위기 선택 화면 (Sub-step A) -->
     <div id="sceneStepA" style="display:block">
       <!-- 시대 배경 선택 (현대극/레트로/사극) — 이미지 프롬프트에만 반영 -->
+      <div class="field" id="vidStyleField" style="margin-bottom:14px">
+        <label style="margin:0 0 8px 0;font-size:14px;font-weight:700;display:block">영상 스타일 선택</label>
+        <div id="vidStyleChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"></div>
+        <div id="vidStyleSubChips" style="display:none;gap:6px;flex-wrap:wrap;padding:10px 12px;background:var(--bg2);border:1px solid var(--line);border-radius:0;margin-top:4px"></div>
+        <div style="font-size:10px;color:var(--ink3);margin-top:6px">실사가 기본 — 애니메이션이나 만화풍 원하면 카테고리 클릭 후 세부 스타일 선택</div>
+      </div>
       <div class="field" id="sceneStepAEraField" style="margin-bottom:14px">
         <label style="margin:0 0 8px 0;font-size:14px;font-weight:700;display:block">시대 배경 선택</label>
         <div id="eraChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
@@ -3573,6 +3579,35 @@ const ERA_KEYWORDS = {
   travel_uae:         'Korean tourists',
 };
 
+// ═══ 영상 스타일 카테고리 + 세부 옵션 ═══
+const VID_STYLES = {
+  live_action: { ko: '실사', sub: null },
+  anime_2d:    { ko: '2D 애니메이션', sub: {
+    ghibli:    { ko: '지브리 스타일',  kw: 'Studio Ghibli anime style, hand-drawn 2D animation, Miyazaki aesthetic, soft watercolor backgrounds' },
+    shinkai:   { ko: '신카이 마코토',   kw: 'Makoto Shinkai anime style, vivid sky and lighting, cinematic 2D animation, your name aesthetic' },
+    classic:   { ko: '클래식 애니',     kw: 'classic 90s Japanese anime style, cel-shaded 2D animation, retro hand-drawn look' },
+    modern:    { ko: '모던 애니',     kw: 'modern Japanese anime style, vibrant 2D animation, cel-shading, sharp clean lines' },
+    k_anime:   { ko: 'K-애니',         kw: 'Korean modern animation style, K-anime 2D, clean polished cel-shading' },
+    cel:       { ko: '셀 애니메이션',     kw: '2D cel animation, traditional cel-shaded look, flat colors with bold outlines' },
+  }},
+  anime_3d:    { ko: '3D 애니메이션', sub: {
+    pixar:     { ko: '픽사 스타일',     kw: 'Pixar 3D animation style, expressive characters, polished cinematic lighting' },
+    disney:    { ko: '디즈니 3D',      kw: 'Disney 3D animation style, modern Walt Disney CGI, colorful expressive cartoon' },
+    dreamworks:{ ko: '드림웍스',     kw: 'DreamWorks 3D animation style, expressive CGI cartoon look' },
+    jp_3d:     { ko: '일본 3D CG',     kw: 'Japanese 3D anime CG style, cel-shaded 3D, anime-inspired CGI' },
+    clay:      { ko: '클레이메이션',   kw: 'claymation stop-motion style, plasticine clay characters, handcrafted 3D' },
+    lowpoly:   { ko: '로우폴리',       kw: 'low-poly 3D animation, geometric stylized 3D characters, minimalist polygons' },
+  }},
+  comic:       { ko: '만화풍', sub: {
+    webtoon:   { ko: '한국 웹툰',     kw: 'Korean webtoon style, vertical scroll comic art, modern digital illustration, K-webtoon aesthetic' },
+    manga:     { ko: '일본 망가',     kw: 'Japanese manga style, black and white screentone, dynamic panels, ink illustration' },
+    american:  { ko: '아메리칸 코믹', kw: 'American comic book style, bold ink lines, halftone dots, superhero illustration' },
+    flat:      { ko: '단순 만화',     kw: 'simple flat cartoon style, minimalist 2D illustration, bold flat colors' },
+    storybook: { ko: '동화책',        kw: 'storybook illustration style, watercolor children book art, soft hand-painted look' },
+    lineart:   { ko: '라인아트',       kw: 'pen and ink line art style, monochrome cross-hatching illustration' },
+  }},
+};
+
 // === 시대별 장소 옵션 ===
 const LOCATIONS_BY_ERA = {
   modern: [
@@ -4134,6 +4169,8 @@ const S = {
   avatarCuts: {},  // libId → 출연 컷 인덱스 배열 [0,1,2,3] (기본: 모든 컷 출연)
   scene: 'romance',
   era: 'modern',  // 시대: modern(현대극) | retro(레트로) | historical(사극) — 이미지 프롬프트에만 주입
+  vidStyle: 'live_action',
+  vidStyleSub: '',
   season: '',
   timeofday: '',
   weather: '',
@@ -6852,6 +6889,54 @@ function editAvatarInLib(id) {
 // ════════════════════════════════════════════════════════════
 //  ERA (시대) 선택 — 그룹 칩 + 드롭다운
 // ════════════════════════════════════════════════════════════
+function renderVidStyleChips() {
+  const wrap = document.getElementById('vidStyleChips');
+  const subWrap = document.getElementById('vidStyleSubChips');
+  if (!wrap) return;
+  const current = S.vidStyle || 'live_action';
+  let html = '';
+  Object.keys(VID_STYLES).forEach(key => {
+    const style = VID_STYLES[key];
+    const isActive = current === key;
+    html += '<div class="seg' + (isActive ? ' active' : '') + '" onclick="selectVidStyle(\'' + key + '\')" style="padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;background:' + (isActive ? 'rgba(99,102,241,.15)' : 'var(--bg3)') + ';border:1px solid ' + (isActive ? 'var(--pink)' : 'var(--line)') + ';color:' + (isActive ? 'var(--pink)' : 'var(--ink)') + '">' + style.ko + '</div>';
+  });
+  wrap.innerHTML = html;
+  if (subWrap) {
+    const style = VID_STYLES[current];
+    if (style && style.sub) {
+      let subHtml = '<div style="font-size:10px;color:var(--ink3);font-weight:700;width:100%;margin-bottom:4px">세부 스타일</div>';
+      const currentSub = S.vidStyleSub || Object.keys(style.sub)[0];
+      Object.keys(style.sub).forEach(subKey => {
+        const sub = style.sub[subKey];
+        const isActiveSub = currentSub === subKey;
+        subHtml += '<div class="seg' + (isActiveSub ? ' active' : '') + '" onclick="selectVidStyleSub(\'' + subKey + '\')" style="padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;background:' + (isActiveSub ? 'rgba(94,234,212,.12)' : 'var(--bg3)') + ';border:1px solid ' + (isActiveSub ? 'var(--teal)' : 'var(--line)') + ';color:' + (isActiveSub ? 'var(--teal)' : 'var(--ink2)') + '">' + sub.ko + '</div>';
+      });
+      subWrap.innerHTML = subHtml;
+      subWrap.style.display = 'flex';
+    } else {
+      subWrap.innerHTML = '';
+      subWrap.style.display = 'none';
+    }
+  }
+}
+function selectVidStyle(key) {
+  if (!VID_STYLES[key]) return;
+  S.vidStyle = key;
+  const style = VID_STYLES[key];
+  if (style.sub) {
+    S.vidStyleSub = Object.keys(style.sub)[0];
+  } else {
+    S.vidStyleSub = '';
+  }
+  renderVidStyleChips();
+  if (typeof updatePromptPreview === 'function') updatePromptPreview();
+}
+function selectVidStyleSub(subKey) {
+  S.vidStyleSub = subKey;
+  renderVidStyleChips();
+  if (typeof updatePromptPreview === 'function') updatePromptPreview();
+}
+
 function renderEraChips() {
   const wrap = document.getElementById('eraChips');
   if (!wrap) return;
@@ -7334,6 +7419,7 @@ function renderScenes() {
     return;
   }
   renderEraChips();  // 시대 chip도 같이 렌더
+  if (typeof renderVidStyleChips === 'function') renderVidStyleChips();
   const grid = document.getElementById('sceneGrid');
   // 기본 8개 씬
   const defaults = [
@@ -9932,8 +10018,18 @@ function buildVidPrompt(i) {
   if (locShort) ctxParts.push(locShort);
   const ctx = ctxParts.join(', ');
 
+  // 영상 스타일 키워드
+  let styleKw = '';
+  if (S.vidStyle && S.vidStyle !== 'live_action' && typeof VID_STYLES !== 'undefined') {
+    const vs = VID_STYLES[S.vidStyle];
+    if (vs && vs.sub && S.vidStyleSub && vs.sub[S.vidStyleSub]) {
+      styleKw = vs.sub[S.vidStyleSub].kw || '';
+    }
+  }
+
   // 골격 조립
   let p = `Korean drama. ${eraKw}. ${sceneStyle}.`;
+  if (styleKw) p += ` ${styleKw}.`;
   if (ctx) p += ` ${ctx}.`;
   p += ` Camera: ${cam}. ${charLock}`;
 
