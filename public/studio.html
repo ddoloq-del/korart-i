@@ -240,9 +240,9 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
 .cut-vid-card{background:var(--bg3);border:1px solid var(--line);border-radius: 0;overflow:hidden}
 .cut-vid-header{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
 .cut-vid-thumb{width:48px;height:32px;object-fit:cover;border-radius: 0;border:none}
-.cut-vid-title{font-size:12px;font-weight:700;color:#ffffff !important}
-.cut-vid-title:visited,.cut-vid-title:hover,.cut-vid-title:active,.cut-vid-title:focus{color:#ffffff !important}
-a .cut-vid-title,a:visited .cut-vid-title{color:#ffffff !important}
+.cut-vid-title{font-size:12px;font-weight:700;color:#000 !important}
+.cut-vid-title:visited,.cut-vid-title:hover,.cut-vid-title:active,.cut-vid-title:focus{color:#000 !important}
+a .cut-vid-title,a:visited .cut-vid-title{color:#000 !important}
 .cut-vid-body{padding:12px}
 .cut-vid-video{width:100%;border-radius: 0;display:block;margin-top:8px}
 .cut-vid-status{font-size:10px;color:var(--ink3);padding:6px 0}
@@ -9962,8 +9962,8 @@ function updateScriptCounter(i) {
 
 function renderVidCards() {
   const approved = S.cutApproval.map((ok,i)=>ok?i:-1).filter(i=>i>=0);
-  // 카드별 하단 제목(·앵글) 색상 — 흔색으로 통일 (클릭 후에도 안 변함)
-  const colors = ['#ffffff','#ffffff','#ffffff','#ffffff'];
+  // 카드별 하단 제목(·앵글) 색상 — 검정으로 통일 (클릭 후에도 안 변함)
+  const colors = ['#000','#000','#000','#000'];
   const grid = document.getElementById('cutVidGrid');
 
   // 4컷 이미지가 아예 없으면 승인 대신 4개 전체 슬롯 표시 — 불러오기만 가능
@@ -9984,14 +9984,14 @@ function renderVidCards() {
       <div class="cut-vid-body">
         <!-- 추가 개인설정 (영상에 더할 디테일) -->
         <div style="margin-bottom:8px">
-          <label style="font-size:10px;color:var(--ink3);display:block;margin-bottom:3px">추가 개인설정 <span style="color:var(--ink3);font-weight:400">(선택)</span></label>
+          <label style="font-size:10px;color:#000;display:block;margin-bottom:3px;font-weight:700">추가 개인설정 <span style="color:var(--ink3);font-weight:400">(선택)</span></label>
           <input id="vidExtra${i}" placeholder="예: 비가 점점 거세진다 / 카메라가 천천히 줌인 / 표정이 점차 굳어진다" style="width:100%;background:var(--bg2);border:1px solid var(--line);border-radius: 0;padding:5px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
           <div style="font-size:9px;color:var(--ink3);margin-top:3px">기본 영상 프롬프트는 자동 생성되며, 입력한 내용은 추가 디테일로 합쳐집니다</div>
         </div>
         <!-- 대사 (화자 + 감정 + 대사) -->
         <div style="margin-bottom:8px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:6px">
-            <label style="font-size:10px;color:var(--ink3);margin:0">대사 (선택 · Kling 3.0만)</label>
+            <label style="font-size:10px;color:#000;margin:0;font-weight:700">대사</label>
             <span id="vidScriptCounter${i}" style="font-size:9px;color:var(--ink3);font-weight:600">0 / ${(S.cutDurations[i]||5)*4}자 (${S.cutDurations[i]||5}초)</span>
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
