@@ -10029,12 +10029,11 @@ function buildVidPrompt(i) {
   if (locShort) ctxParts.push(locShort);
   const ctx = ctxParts.join(', ');
 
-  // 영상 스타일 키워드
-  const styleKw = _getVidStyleKeyword();
+  // 영상 스타일 키워드 — 4컷 이미지(input)에 이미 스타일 적용되어 있으므로
+  // 영상 프롬프트에는 주입 안 함 (이중 강제로 인한 변형 방지)
 
   // 골격 조립
   let p = `Korean drama. ${eraKw}. ${sceneStyle}.`;
-  if (styleKw) p += ` ${styleKw}.`;
   if (ctx) p += ` ${ctx}.`;
   p += ` Camera: ${cam}. ${charLock}`;
 
