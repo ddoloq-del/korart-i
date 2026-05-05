@@ -4886,7 +4886,9 @@ function validateStep(step) {
       if (!S.season)    missing.push('계절');
       if (!S.timeofday) missing.push('시간대');
       if (!S.weather)   missing.push('날씨');
-      if (!S.location)  missing.push('장소');
+      // 장소 검증 — 선택되었거나 개인설정 입력값이 있으면 통과
+      const locCustomVal = (document.getElementById('locCustomInput')?.value || '').trim();
+      if (!S.location && !locCustomVal) missing.push('장소');
       if (S.angles.filter(Boolean).length < 4) missing.push('카메라 앵글 4개');
     }
   } else if (_vStep === 4) {
