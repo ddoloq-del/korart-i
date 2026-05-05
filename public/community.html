@@ -20,6 +20,8 @@ img{display:block}
 .logo{font-size:22px;font-weight:900;letter-spacing:-.03em;display:flex;align-items:center;gap:6px}
 .logo-text{color:var(--ink)}
 .logo-badge{font-size:11px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--gold));color:#fff;padding:3px 7px;border-radius:0;letter-spacing:.05em}
+.tagline{font-size:13px;font-weight:500;color:var(--ink-dim);letter-spacing:-.01em;margin-left:-20px;white-space:nowrap}
+@media (max-width:900px){.tagline{display:none}}
 .gnb-right{display:flex;align-items:center;gap:8px}
 .icon-btn{width:38px;height:38px;border-radius:0;display:flex;align-items:center;justify-content:center;color:var(--ink-dim);transition:background .15s}
 .icon-btn:hover{background:var(--bg-3);color:var(--ink)}
@@ -346,6 +348,7 @@ img.card-avatar{width:24px;height:24px;border-radius:50%;object-fit:cover;displa
   <div class="gnb-inner">
     <div class="gnb-left">
       <a class="logo" href="/community.html"><img src="/logo.png" alt="코라티" style="height:40px;width:auto;display:block"></a>
+      <span class="tagline">믿고 쓸 수 있는 국내 영상/이미지 선택형 생성 AI 플랫폼</span>
     </div>
     <div class="gnb-right">
       <button class="icon-btn"><i data-lucide="bell" class="icon-md"></i></button>
