@@ -9286,7 +9286,11 @@ async function generateSketchLow() {
     toast('스케치 완료 — 마음에 드시면 업그레이드하세요');
   } catch (e) {
     log('err', '스케치 실패: ' + e.message);
-    toast('스케치 실패: ' + e.message);
+    if (e.message && (e.message.includes('CONTENT_VIOLATION') || _isContentPolicyError(e.message))) {
+      _showContentPolicyAlert(e.message);
+    } else {
+      toast('❌ 스케치 실패: ' + e.message);
+    }
   } finally {
     btn.disabled = false;
     btn.innerHTML = 'Low로 스케치 시작';
@@ -9377,7 +9381,11 @@ async function upgradeSketch(targetQuality) {
     toast(`업그레이드 완료 — ${targetQuality === 'high' ? 'High' : 'Medium'}`);
   } catch (e) {
     log('err', '업그레이드 실패: ' + e.message);
-    toast('업그레이드 실패: ' + e.message);
+    if (e.message && (e.message.includes('CONTENT_VIOLATION') || _isContentPolicyError(e.message))) {
+      _showContentPolicyAlert(e.message);
+    } else {
+      toast('❌ 업그레이드 실패: ' + e.message);
+    }
   } finally {
     if (btnM) { btnM.disabled = false; btnM.innerHTML = 'Medium 업그레이드'; }
     if (btnH) { btnH.disabled = false; btnH.innerHTML = 'High 업그레이드'; }
@@ -9525,7 +9533,7 @@ async function generateOneCut() {
     toast(`✅ 컷 ${i+1} 생성 완료!`);
   } catch (e) {
     log('err', '1컷 생성 실패: ' + e.message);
-    if (_isContentPolicyError(e.message)) {
+    if (e.message && (e.message.includes('CONTENT_VIOLATION') || _isContentPolicyError(e.message))) {
       _showContentPolicyAlert(e.message);
     } else {
       toast('❌ ' + e.message);
@@ -9715,7 +9723,7 @@ async function generateImage() {
     toast('✅ 이미지 생성 완료!');
   } catch(e) {
     log('err', '이미지 생성 실패: ' + e.message);
-    if (_isContentPolicyError(e.message)) {
+    if (e.message && (e.message.includes('CONTENT_VIOLATION') || _isContentPolicyError(e.message))) {
       _showContentPolicyAlert(e.message);
     } else {
       toast('❌ ' + e.message);
@@ -10822,13 +10830,35 @@ async function _falImageQueue(model, body, statusEl) {
             throw new Error('결과 fetch 실패: ' + rr.status + ' — ' + errBody.slice(0, 300));
           }
           d = await rr.json();
+          // 최종 응답에도 violation/error 감지
+          if (d && (d.error || d.detail === 'violation' || (Array.isArray(d.detail) && d.detail.some(x => x.type === 'violation')))) {
+            const errMsg = String(d.error || JSON.stringify(d.detail) || 'content moderation');
+            log('err', '⛔ 콘텐츠 검열: ' + errMsg.slice(0, 200));
+            throw new Error('CONTENT_VIOLATION: ' + errMsg.slice(0, 200));
+          }
+          // 결과 URL 없으면 검열로 간주
+          const hasResult = !!((d.images && d.images.length > 0 && d.images[0].url) || (d.image && d.image.url) || (d.video && d.video.url) || d.url);
+          if (!hasResult) {
+            log('err', '⛔ 결과 없음 — 콘텐츠 검열 가능성');
+            throw new Error('CONTENT_VIOLATION: 결과물이 나오지 않았습니다 (콘텐츠 정책 위반 가능성)');
+          }
           break;
         }
         if (sd.status === 'FAILED' || sd.status === 'ERROR') {
-          throw new Error('fal 처리 실패: ' + JSON.stringify(sd).slice(0, 300));
+          // FAILED 응답에서 violation/error 내용 추출
+          const errDetail = sd.error || (sd.logs && sd.logs[0] && sd.logs[0].message) || JSON.stringify(sd).slice(0, 300);
+          log('err', '⛔ fal 처리 실패: ' + String(errDetail).slice(0, 200));
+          // violation 키워드 감지 시 특수 에러로 표시
+          if (typeof _isContentPolicyError === 'function' && _isContentPolicyError(errDetail)) {
+            throw new Error('CONTENT_VIOLATION: ' + String(errDetail).slice(0, 200));
+          }
+          throw new Error('fal 처리 실패: ' + String(errDetail).slice(0, 200));
         }
       } catch (e) {
-        if (e.message && e.message.includes('fal 처리 실패')) throw e;
+        // CONTENT_VIOLATION 또는 fal 처리 실패 → 즉시 중단 (폴링 더 안 시도)
+        if (e.message && (e.message.includes('CONTENT_VIOLATION') || e.message.includes('fal 처리 실패') || e.message.includes('결과 fetch 실패'))) {
+          throw e;
+        }
         log('warn', '폴링 ' + pollCount + ' 에러: ' + e.message);
       }
     }

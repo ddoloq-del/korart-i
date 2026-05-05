@@ -85,8 +85,8 @@ async function chargePoints(env, userId, amount, description, falEndpoint, reque
 
   if (profile.unlimited) {
     // 거래 기록만 (실제 차감은 0)
-    await insertTransaction(env, userId, 'usage', 0, profile.points, description, falEndpoint, requestId, metadata);
-    return { ok: true, charged: 0, remaining: profile.points, unlimited: true };
+    const tx = await insertTransaction(env, userId, 'usage', 0, profile.points, description, falEndpoint, requestId, metadata);
+    return { ok: true, charged: 0, remaining: profile.points, unlimited: true, transactionId: tx ? tx.id : null };
   }
 
   // 잔액 확인
@@ -113,19 +113,19 @@ async function chargePoints(env, userId, amount, description, falEndpoint, reque
 
   // 차감액도 소수점 둘째 자리까지 round (transactions 기록 일관성)
   const chargedAmount = Math.round(amount * 100) / 100;
-  await insertTransaction(env, userId, 'usage', -chargedAmount, newBalance, description, falEndpoint, requestId, metadata);
+  const tx = await insertTransaction(env, userId, 'usage', -chargedAmount, newBalance, description, falEndpoint, requestId, metadata);
 
-  return { ok: true, charged: chargedAmount, remaining: newBalance, unlimited: false };
+  return { ok: true, charged: chargedAmount, remaining: newBalance, unlimited: false, transactionId: tx ? tx.id : null };
 }
 
 async function insertTransaction(env, userId, type, amount, balanceAfter, description, falEndpoint, requestId, metadata) {
-  await fetch(env.SUPABASE_URL + '/rest/v1/point_transactions', {
+  const r = await fetch(env.SUPABASE_URL + '/rest/v1/point_transactions', {
     method: 'POST',
     headers: {
       'apikey': env.SUPABASE_SERVICE_KEY,
       'Authorization': 'Bearer ' + env.SUPABASE_SERVICE_KEY,
       'Content-Type': 'application/json',
-      'Prefer': 'return=minimal',
+      'Prefer': 'return=representation',  // 삽입된 row 반환 (id 추출에 필요)
     },
     body: JSON.stringify({
       user_id: userId,
@@ -138,6 +138,13 @@ async function insertTransaction(env, userId, type, amount, balanceAfter, descri
       metadata: metadata || null,
     }),
   });
+  if (!r.ok) return null;
+  try {
+    const arr = await r.json();
+    return Array.isArray(arr) && arr.length > 0 ? arr[0] : null;
+  } catch (e) {
+    return null;
+  }
 }
 
 // ============================================
@@ -296,9 +303,11 @@ export default {
               return m ? m[1] : null;
             })();
 
-            // ① FAILED / ERROR 상태
-            if (statusVal === 'FAILED' || statusVal === 'ERROR') {
-              await refundForRequest(env, user.id, reqId, 'fal status=' + statusVal);
+            console.log('[refund-check]', { statusVal, reqId, hasError: !!data.error, errorMsg: data.error });
+            // ① FAILED / ERROR 상태 또는 error 필드 있으면 환불 (violation, content moderation 등)
+            if (statusVal === 'FAILED' || statusVal === 'ERROR' || data.error || data.detail === 'violation') {
+              const reason = data.error || statusVal || 'error';
+              await refundForRequest(env, user.id, reqId, 'fal: ' + String(reason).substring(0, 100));
             }
             // ② COMPLETED인데 결과 URL이 없는 경우 (검열로 결과 비어있음)
             else if (statusVal === 'COMPLETED' || (!statusVal && (data.images || data.video || data.url || data.image))) {
@@ -457,18 +466,16 @@ export default {
         const resContentType_p = falRes.headers.get('Content-Type') || 'application/json';
         const bodyText_p = await falRes.text();
 
-        // POST 성공 + 차감했으면 fal request_id를 거래에 연결 (나중에 환불 시 매칭용)
-        if (request.method === 'POST' && falRes.ok && chargeResult && chargeResult.charged > 0) {
+        // POST 성공 + 차감했으면 fal request_id를 거래에 연결 (정확한 거래 ID로만 매칭)
+        if (request.method === 'POST' && falRes.ok && chargeResult && chargeResult.charged > 0 && chargeResult.transactionId) {
           try {
             if (resContentType_p.includes('json') && bodyText_p) {
               const data_p = JSON.parse(bodyText_p);
               const reqId_p = data_p && data_p.request_id;
               if (reqId_p) {
-                // 방금 삽입된 거래 (fal_request_id가 null인 가장 최근 usage)에 request_id update
+                // 정확한 거래 ID로만 PATCH — 다른 거래 덮어쓰기 방지
                 await fetch(
-                  env.SUPABASE_URL + '/rest/v1/point_transactions?user_id=eq.' + user.id +
-                  '&fal_endpoint=eq.' + encodeURIComponent(falPath) +
-                  '&fal_request_id=is.null&type=eq.usage&order=created_at.desc&limit=1',
+                  env.SUPABASE_URL + '/rest/v1/point_transactions?id=eq.' + chargeResult.transactionId,
                   {
                     method: 'PATCH',
                     headers: {
