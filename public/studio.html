@@ -10815,6 +10815,21 @@ async function _falImageQueue(model, body, statusEl) {
         const sr = await fetch('/fal-proxy-abs?url=' + encodeURIComponent(statusUrl), {
           headers: { 'Authorization': 'Bearer ' + jwt },
         });
+        // 422는 fal이 violation을 알린 특수 상태 — 즉시 중단
+        if (sr.status === 422) {
+          let errMsg = 'content_policy_violation';
+          try {
+            const errData = await sr.json();
+            if (Array.isArray(errData.detail)) {
+              const v = errData.detail.find(x => x && (x.type === 'content_policy_violation' || /content|moderation|policy|violation|flagged/i.test(x.msg || '')));
+              if (v) errMsg = v.msg || v.type || errMsg;
+            } else if (errData.detail) {
+              errMsg = String(errData.detail);
+            }
+          } catch (e) {}
+          log('err', '⛔ 콘텐츠 검열 (422): ' + errMsg.slice(0, 200));
+          throw new Error('CONTENT_VIOLATION: ' + errMsg.slice(0, 200));
+        }
         if (!sr.ok) { log('warn', '폴링 ' + pollCount + ' 실패 (' + sr.status + ')'); continue; }
         const sd = await sr.json();
         if (statusEl && pollCount % 5 === 0) {
@@ -10825,6 +10840,21 @@ async function _falImageQueue(model, body, statusEl) {
           const rr = await fetch('/fal-proxy-abs?url=' + encodeURIComponent(responseUrl), {
             headers: { 'Authorization': 'Bearer ' + jwt },
           });
+          // 결과 fetch도 422면 violation
+          if (rr.status === 422) {
+            let errMsg = 'content_policy_violation';
+            try {
+              const errData = await rr.json();
+              if (Array.isArray(errData.detail)) {
+                const v = errData.detail.find(x => x && (x.type === 'content_policy_violation' || /content|moderation|policy|violation|flagged/i.test(x.msg || '')));
+                if (v) errMsg = v.msg || v.type || errMsg;
+              } else if (errData.detail) {
+                errMsg = String(errData.detail);
+              }
+            } catch (e) {}
+            log('err', '⛔ 결과 검열 (422): ' + errMsg.slice(0, 200));
+            throw new Error('CONTENT_VIOLATION: ' + errMsg.slice(0, 200));
+          }
           if (!rr.ok) {
             const errBody = await rr.text();
             throw new Error('결과 fetch 실패: ' + rr.status + ' — ' + errBody.slice(0, 300));

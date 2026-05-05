@@ -291,43 +291,71 @@ export default {
         const resContentType = falRes.headers.get('Content-Type') || 'application/json';
         const bodyText = await falRes.text();
 
+        // request_id 추출 (URL에서 먼저 — 422 응답에도 항상 가능)
+        const _reqIdFromUrl = (() => {
+          const m = targetUrl.match(/\/requests\/([^/?]+)/);
+          return m ? m[1] : null;
+        })();
+
+        let _shouldRefund = false;
+        let _refundReason = '';
+
+        // ① HTTP 상태 자체가 성공 아닌지 (4xx/5xx) — 환불 의심
+        if (!falRes.ok) {
+          _shouldRefund = true;
+          _refundReason = 'http ' + falRes.status;
+        }
+
         try {
           // JSON일 때만 파싱 시도
           if (resContentType.includes('json') && bodyText) {
             const data = JSON.parse(bodyText);
             const statusVal = data && data.status;
-            // request_id 추출 (환불 메모용)
-            const reqId = (data && data.request_id) || (() => {
-              // status_url path에서 추출 (e.g. /openai/.../requests/<id>/status)
-              const m = targetUrl.match(/\/requests\/([^/?]+)/);
-              return m ? m[1] : null;
-            })();
+            const reqId = (data && data.request_id) || _reqIdFromUrl;
 
-            console.log('[refund-check]', { statusVal, reqId, hasError: !!data.error, errorMsg: data.error });
-            // ① FAILED / ERROR 상태 또는 error 필드 있으면 환불 (violation, content moderation 등)
-            if (statusVal === 'FAILED' || statusVal === 'ERROR' || data.error || data.detail === 'violation') {
-              const reason = data.error || statusVal || 'error';
-              await refundForRequest(env, user.id, reqId, 'fal: ' + String(reason).substring(0, 100));
+            // detail 배열에서 content_policy_violation 감지
+            let detailViolation = null;
+            if (Array.isArray(data.detail)) {
+              const v = data.detail.find(x => x && (x.type === 'content_policy_violation' || x.type === 'violation' || (x.msg && /content|moderation|policy|violation|flagged/i.test(x.msg))));
+              if (v) detailViolation = v.type || v.msg || 'violation';
+            } else if (typeof data.detail === 'string') {
+              if (/content|moderation|policy|violation|flagged/i.test(data.detail)) detailViolation = data.detail;
             }
-            // ② COMPLETED인데 결과 URL이 없는 경우 (검열로 결과 비어있음)
-            else if (statusVal === 'COMPLETED' || (!statusVal && (data.images || data.video || data.url || data.image))) {
-              // status_url이 아니라 response_url에서 받은 결과 응답
-              // status === 'COMPLETED' 면 폴링 응답, status 없으면 response 응답
+
+            console.log('[refund-check]', { httpStatus: falRes.status, statusVal, reqId, hasError: !!data.error, detailViolation });
+
+            // ② FAILED / ERROR 상태 또는 error 필드 또는 detail 안 violation
+            if (statusVal === 'FAILED' || statusVal === 'ERROR' || data.error || detailViolation) {
+              _shouldRefund = true;
+              _refundReason = data.error || detailViolation || statusVal || 'error';
+            }
+            // ③ COMPLETED인데 결과 URL이 없는 경우
+            else if (!statusVal && (data.images || data.video || data.url || data.image)) {
               const hasResult = !!(
                 (data.images && data.images.length > 0 && data.images[0].url) ||
                 (data.image && data.image.url) ||
                 (data.video && data.video.url) ||
                 data.url
               );
-              // status === 'COMPLETED'인 폴링 응답에는 결과가 없을 수 있으므로 (response_url 따로 fetch)
-              // 진짜 결과 응답인 경우에만 검사 — status 없이 images/video/url 키 있는 경우
-              if (!statusVal && !hasResult) {
-                await refundForRequest(env, user.id, reqId, 'fal completed but no result (likely content moderation)');
+              if (!hasResult) {
+                _shouldRefund = true;
+                _refundReason = 'completed but no result';
               }
             }
+
+            if (_shouldRefund && reqId) {
+              await refundForRequest(env, user.id, reqId, 'fal: ' + String(_refundReason).substring(0, 100));
+            }
+          } else if (_shouldRefund && _reqIdFromUrl) {
+            // JSON 아니지만 HTTP 에러 — reqId는 URL에서 추출
+            await refundForRequest(env, user.id, _reqIdFromUrl, 'fal: ' + _refundReason);
           }
         } catch (e) {
-          // 파싱 실패는 무시 (환불 안 함, 정상 응답일 가능성 있음)
+          // 파싱 실패지만 HTTP 에러이면 환불 도전
+          console.log('[refund-check parse fail]', e.message);
+          if (_shouldRefund && _reqIdFromUrl) {
+            await refundForRequest(env, user.id, _reqIdFromUrl, 'fal: ' + _refundReason + ' (parse failed)');
+          }
         }
 
         const resHeaders = new Headers(corsHeaders);
