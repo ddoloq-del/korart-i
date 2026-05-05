@@ -23,6 +23,9 @@ img{display:block}
 .tagline{font-size:13px;font-weight:500;color:var(--ink-dim);letter-spacing:-.01em;white-space:nowrap}
 .logo-wrap{display:flex;flex-direction:row;align-items:flex-end;gap:10px}
 @media (max-width:900px){.tagline{display:none}}
+@media (max-width:768px){.korart-points-pill{display:none !important}}
+.korart-points-pill{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(167,139,250,.08));border:1px solid rgba(99,102,241,.25);color:#4f46e5;font-family:'JetBrains Mono','Pretendard',monospace;font-size:13px;font-weight:800;cursor:pointer;transition:all .15s;text-decoration:none;letter-spacing:-.01em;white-space:nowrap}
+.korart-points-pill:hover{border-color:rgba(99,102,241,.5);background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(167,139,250,.15))}
 .gnb-right{display:flex;align-items:center;gap:8px}
 .icon-btn{width:38px;height:38px;border-radius:0;display:flex;align-items:center;justify-content:center;color:var(--ink-dim);transition:background .15s}
 .icon-btn:hover{background:var(--bg-3);color:var(--ink)}
@@ -344,6 +347,10 @@ img{display:block}
       </div>
     </div>
     <div class="gnb-right">
+      <a class="korart-points-pill" href="/subscription.html" id="gnbPointsPill" title="포인트 / 구독">
+        <span id="gnbPointsValue">—</span>
+        <span style="opacity:.6;font-size:10px;font-weight:600">P</span>
+      </a>
       <button class="icon-btn"><i data-lucide="bell" class="icon-md"></i></button>
       <button class="icon-btn"><i data-lucide="layout-grid" class="icon-md"></i></button>
       <button class="avatar-btn" id="avatarBtn"><i data-lucide="user-round" class="icon-sm"></i></button>
@@ -735,7 +742,30 @@ async function checkSession() {
     const { data: { session } } = await sb.auth.getSession();
     currentUser = session?.user || null;
     renderAuthState();
+    refreshGnbPoints();
   } catch (e) { console.warn('[auth] session check failed', e); }
+}
+
+async function refreshGnbPoints() {
+  const gnbEl = document.getElementById('gnbPointsValue');
+  if (!gnbEl) return;
+  if (!currentUser) {
+    gnbEl.textContent = '\u2014';
+    return;
+  }
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const jwt = session?.access_token;
+    if (!jwt) { gnbEl.textContent = '\u2014'; return; }
+    const r = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + jwt } });
+    if (!r.ok) { gnbEl.textContent = '\u2014'; return; }
+    const me = await r.json();
+    if (me.unlimited) {
+      gnbEl.textContent = '\u221E';
+    } else if (typeof me.points === 'number') {
+      gnbEl.textContent = me.points.toLocaleString();
+    }
+  } catch (e) { console.warn('[points] subscription gnb fetch failed', e); }
 }
 
 function renderAuthState() {

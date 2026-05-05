@@ -10726,28 +10726,55 @@ function getQuadCssAspect() {
 async function _falImageQueue(model, body, statusEl) {
   const jwt = await getSupabaseJWT();
 
-  // 영상 생성 포인트 — calcVidPoints는 카드 인덱스 인자를 받으므로
-  // body.duration + audio_enabled 기반으로 직접 계산 (calcVidPoints 공식 동일)
-  const _vidEstPoints = (function() {
+  // 이미지 모델인지 영상 모델인지 구분 — 모델 문자열에 이미지 키워드 포함 여부
+  const _isImageModel = /gpt-image|nano-banana|flux/i.test(model);
+
+  // 포인트 계산 — 이미지면 calcImgPoints, 영상이면 calcVidPoints 공식
+  const _estPoints = (function() {
     try {
+      if (_isImageModel) {
+        // 이미지: calcImgPoints(model, modelQuality, aspectRatio, imgQuality) 그대로 사용 (비치가 정한 공식 동일)
+        if (typeof calcImgPoints !== 'function') return 0;
+        const sel = document.getElementById('imgModel');
+        let modelQuality = 'medium';
+        if (sel) {
+          for (const o of sel.options) {
+            if (o.value === model && o.selected) {
+              modelQuality = o.dataset.quality || modelQuality;
+              break;
+            }
+          }
+          // selected가 모델과 안 맞을 경우 폴백 — model + quality 일치하는 첫 option
+          if (modelQuality === 'medium') {
+            for (const o of sel.options) {
+              if (o.value === model) {
+                modelQuality = o.dataset.quality || modelQuality;
+                break;
+              }
+            }
+          }
+        }
+        const ar = (typeof S !== 'undefined' && S.aspectRatio) ? S.aspectRatio : '16:9';
+        const imgQ = (typeof getSelectedImgQuality === 'function') ? getSelectedImgQuality() : 'fhd';
+        const pts = calcImgPoints(model, modelQuality, ar, imgQ);
+        return Math.round((pts || 0) * 10) / 10;
+      }
+      // 영상: data-points-on/off × duration
       const sel = document.getElementById('vidModel');
       if (!sel) return 0;
-      // model 일치하는 option 찾기
       let opt = null;
       for (const o of sel.options) {
         if (o.value === model) { opt = o; break; }
       }
       if (!opt) return 0;
-      // body에서 audio 필드 확인 (audio_enabled / generate_audio / with_audio)
       const audioOn = !!(body && (body.audio_enabled || body.generate_audio || body.with_audio));
       const ppsec = parseFloat(audioOn ? (opt.dataset.pointsOn || '0') : (opt.dataset.pointsOff || '0')) || 0;
       const dur = parseFloat(body && body.duration ? body.duration : 5) || 5;
-      // calcVidPoints와 동일: pts × dur (소수점 첫째까지)
       return Math.round(ppsec * dur * 10) / 10;
-    } catch (e) { console.warn('[points] _vidEstPoints 실패', e); return 0; }
+    } catch (e) { console.warn('[points] _falImageQueue 차감 계산 실패', e); return 0; }
   })();
-  log('info', `포인트 차감 예정 (영상): ${_vidEstPoints}P`);
-  console.log('[💰 영상 포인트 차감 헤더]', { model, _vidEstPoints, audio: !!(body && (body.audio_enabled || body.generate_audio || body.with_audio)), duration: body && body.duration });
+  log('info', `포인트 차감 예정 (${_isImageModel ? '이미지' : '영상'}): ${_estPoints}P`);
+  console.log('[💰 _falImageQueue 포인트 차감]', { model, isImage: _isImageModel, estPoints: _estPoints });
 
   // 1단계: queue 제출
   const submitRes = await fetch('/fal-proxy/' + model, {
@@ -10755,7 +10782,7 @@ async function _falImageQueue(model, body, statusEl) {
     headers: {
       'Authorization': 'Bearer ' + jwt,
       'Content-Type': 'application/json',
-      'X-Estimated-Points': String(_vidEstPoints)
+      'X-Estimated-Points': String(_estPoints)
     },
     body: JSON.stringify(body),
   });
