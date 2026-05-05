@@ -192,16 +192,16 @@ body{background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;font-
   #imageModeForm, #videoModeForm { grid-template-columns: 1fr !important; }
 }
 .scene-card{background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:18px 18px 16px 18px;cursor:pointer;text-align:left;transition:.18s;position:relative;overflow:hidden;aspect-ratio:16/9;display:flex;flex-direction:column;justify-content:space-between;gap:8px}
-.scene-card .sc-cat{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--pink);text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.scene-card .sc-cat{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.5px;color:#fff !important;text-transform:uppercase;display:flex;align-items:center;gap:6px;text-shadow:0 2px 8px rgba(0,0,0,.6)}
 .scene-card .sc-cat::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block}
 .scene-card .sc-title-block{display:flex;flex-direction:column;gap:4px;flex:1;justify-content:center;margin:4px 0}
 .scene-card .sc-name{font-family:'Pretendard',sans-serif;font-size:22px;font-weight:700;color:#fff;letter-spacing:-.02em;line-height:1.1;text-shadow:0 2px 8px rgba(0,0,0,.5)}
 .scene-card .sc-vidstyle{font-family:'Pretendard',sans-serif;font-size:11px;font-weight:400;color:#fff;font-style:italic;line-height:1.35;letter-spacing:.005em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 2px 8px rgba(0,0,0,.5)}clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .scene-card .sc-cam{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;color:#fff;letter-spacing:.05em;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;opacity:.85;text-shadow:0 2px 8px rgba(0,0,0,.5)}clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.scene-card.active .sc-cat{color:var(--pink)}
-.scene-card.active .sc-name{color:#fff}
-.scene-card.active .sc-vidstyle{color:var(--ink)}
-.scene-card.active .sc-cam{color:var(--ink2)}
+.scene-card.active .sc-cat{color:#fff !important}
+.scene-card.active .sc-name{color:#fff !important}
+.scene-card.active .sc-vidstyle{color:#fff !important}
+.scene-card.active .sc-cam{color:#fff !important}
 .scene-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(99,102,241,0) 0%,rgba(99,102,241,.08) 100%);opacity:0;transition:.2s;pointer-events:none}
 .scene-card:hover{border-color:var(--line2);transform:translateY(-2px)}
 .scene-card:hover::after{opacity:1}
@@ -3512,9 +3512,10 @@ const ERAS = {
   modern:      { ko: '현대극',        group: 'modern'     },
   historical:  { ko: '전통 사극',      group: 'historical' },
   gyeongseong: { ko: '1920년 경성',   group: 'historical' },
-  retro_80s:   { ko: '1980년 레트로', group: 'retro'      },
-  retro_90s:   { ko: '1990년 레트로', group: 'retro'      },
-  retro_2000s: { ko: '2000년 레트로', group: 'retro'      },
+  classic_80s:  { ko: '1980년대',  group: 'classic'    },
+  classic_90s:  { ko: '1990년대',  group: 'classic'    },
+  classic_2000s:{ ko: '2000년대',  group: 'classic'    },
+  cyberpunk_2100: { ko: '2100년 사이버폭크', group: 'future' },
   // 해외여행 — 한국인 여행자 컨셉
   travel_japan:       { ko: '일본',     group: 'travel' },
   travel_vietnam:     { ko: '베트남',   group: 'travel' },
@@ -3538,7 +3539,8 @@ const ERAS = {
 const ERA_GROUPS = {
   modern:     { ko: '현대극',     defaultKey: 'modern',         hasDropdown: false },
   historical: { ko: '사극',       defaultKey: 'historical',     hasDropdown: true  },
-  retro:      { ko: '레트로',     defaultKey: 'retro_90s',      hasDropdown: true  },
+  classic:    { ko: '클래식',     defaultKey: 'classic_90s',    hasDropdown: true  },
+  future:     { ko: '미래',       defaultKey: 'cyberpunk_2100', hasDropdown: false },
   travel:     { ko: '해외여행',   defaultKey: 'travel_japan',   hasDropdown: true  },
 };
 
@@ -3548,9 +3550,10 @@ const ERA_KEYWORDS = {
   modern:      '현대 한국',
   historical:  '조선시대, 한복, 사극',
   gyeongseong: '1920년대 경성, 일제강점기, 모던보이 모던걸',
-  retro_80s:   '1980년대 한국 레트로',
-  retro_90s:   '1990년대 한국 레트로',
-  retro_2000s: '2000년대 초 한국',
+  classic_80s:    '1980년대 한국 클래식 빈티지',
+  classic_90s:    '1990년대 한국 클래식 빈티지',
+  classic_2000s:  '2000년대 이천년대 한국',
+  cyberpunk_2100: '2100년 미래 사이버폭크, 네온 사인, 디스토피아 도시, 홀로그램, 고층 메가시티, 애당혁명 SF',
   // 해외여행 — 나라 정보는 장소 키워드에 이미 들어있어 'Korean tourists'로 통일
   travel_japan:       'Korean tourists',
   travel_vietnam:     'Korean tourists',
@@ -6428,8 +6431,8 @@ function refreshHairList() {
   const gender = document.getElementById('avGender').value;
   const list = HAIR_STYLES[gender] || HAIR_STYLES['Korean man'];
   const segs = document.getElementById('avHairSegs');
-  const ERA_LABELS = { modern: '현대', historical: '사극', gyeongseong: '경성', retro: '레트로' };
-  const ERA_COLORS = { modern: 'var(--ink3)', historical: 'var(--gold)', gyeongseong: 'var(--blue)', retro: 'var(--coral)' };
+  const ERA_LABELS = { modern: '현대', historical: '사극', gyeongseong: '경성', classic: '클래식', cyberpunk_2100: '사이버폭크' };
+  const ERA_COLORS = { modern: 'var(--ink3)', historical: 'var(--gold)', gyeongseong: 'var(--blue)', classic: 'var(--coral)', future: 'var(--pink)', cyberpunk_2100: 'var(--pink)' };
   segs.innerHTML = list.map(h => {
     const eraLabel = ERA_LABELS[h.era] || '';
     const eraColor = ERA_COLORS[h.era] || 'var(--ink3)';
@@ -7013,7 +7016,7 @@ function renderImageScenes() {
       const shortStyle = (sc.style || '').split(',').slice(0, 3).map(s => s.trim()).join(', ');
       // bgImage 있으면 사진 배경 적용 (가독성 위해 어두운 오버레이)
       const bgStyle = sc.bgImage
-        ? `background-image:linear-gradient(rgba(10,10,12,.35),rgba(10,10,12,.65)),url('${sc.bgImage}');background-size:cover;background-position:center;`
+        ? `background-image:linear-gradient(rgba(10,10,12,.15),rgba(10,10,12,.35)),url('${sc.bgImage}');background-size:cover;background-position:center;`
         : '';
       return `<div class="scene-card${isActive ? ' active' : ''}" onclick="selImgScene('${key}',this)" style="${bgStyle}">
         <div class="sc-cat">${sc.catLabel}</div>
@@ -7396,7 +7399,7 @@ function renderScenes() {
     const cat = SCENE_CAT[s.key] || s.key.toUpperCase();
     // bgImage 있으면 배경 이미지 + 어로운 오버레이 (가독성)
     const bgStyle = sc.bgImage
-      ? `background-image:linear-gradient(rgba(10,10,12,.35), rgba(10,10,12,.65)), url('${sc.bgImage}');background-size:cover;background-position:center`
+      ? `background-image:linear-gradient(rgba(10,10,12,.15), rgba(10,10,12,.35)), url('${sc.bgImage}');background-size:cover;background-position:center`
       : '';
     return `<div class="scene-card${S.scene===s.key?' active':''}" onclick="selScene('${s.key}',this)" style="${bgStyle}"><div class="sc-cat" style="color:${SCENE_COLOR[s.key] || '#818cf8'}">${cat}</div><div class="sc-title-block"><div class="sc-name">${s.name}</div>${vidStyle ? `<div class="sc-vidstyle">${vidStyle}</div>` : ''}</div>${cam ? `<div class="sc-cam">${cam}</div>` : ''}</div>`;
   }).join('');
