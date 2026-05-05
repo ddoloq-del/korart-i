@@ -3313,26 +3313,26 @@ function getAccessToken() {
 const SCENES = {
   // style: 이미지 프롬프트 (4컷 생성 시) — 풍부한 키워드로 분위기 명확히
   // vidStyle: 영상 프롬프트 (5초 영상 생성 시) — 510자 cap 안에서 동작하도록 핵심만
-  romance:    {name:'로맨스',     group:'drama',      bgImage:'/images/scenes/romance.jpg',     vidStyle:'warm golden hour, romantic, soft bokeh',          style:'warm golden hour lighting, romantic atmosphere, soft bokeh, shallow depth of field, Korean drama aesthetic', angles:['Two Shot','Medium Close-up (MCU)','Shallow Depth of Field close-up','Eye-Level Shot']},
-  tension:    {name:'긴장',       group:'thriller',   vidStyle:'high contrast shadows, cold tones',                style:'high contrast dramatic shadows, intense cold tones, sharp cinematic focus', angles:['Over-the-Shoulder (OTS)','Extreme Close-up (ECU)','Dutch Angle','Point of View (POV)'], bgImage:'/images/scenes/tension.png'},
-  breakup:    {name:'이별',       group:'drama',      bgImage:'/images/scenes/breakup.jpg',     vidStyle:'melancholic rain, blue-gray tones',                style:'melancholic rainy atmosphere, blue-gray tones, emotional soft lighting', angles:['Wide Shot','Medium Close-up (MCU)','Close-up (CU)','Rack Focus']},
-  climax:     {name:'감정 절정',  group:'drama',      vidStyle:'extreme emotion, dramatic light, tears',            style:'extreme emotional expression, dramatic lighting, high contrast tears', angles:['Extreme Close-up (ECU)','Close-up (CU)','Low Angle','Zoom-in'], bgImage:'/images/scenes/climax.jpg'},
-  suspense:   {name:'서스펜스',   group:'thriller',   vidStyle:'dark ominous, noir desaturated',                    style:'dark ominous atmosphere, heavy shadows, noir desaturated tones', angles:['Dutch Angle','Point of View (POV)','Extreme Close-up (ECU)','Low Angle'], bgImage:'/images/scenes/suspense.jpg'},
-  mellow:     {name:'막장',       group:'drama',      vidStyle:'melodramatic, theatrical, vivid',                  style:'melodramatic exaggerated emotion, theatrical lighting, vivid colors', angles:['Two Shot','Close-up (CU)','Low Angle','Zoom-in'], bgImage:'/images/scenes/mellow.jpg'},
-  action:     {name:'액션',       group:'thriller',   vidStyle:'dynamic motion blur, sharp action',                style:'dynamic motion blur, high contrast, sharp cinematic action, dramatic angles', angles:['Low Angle','Wide Shot','Extreme Close-up (ECU)','Dolly Zoom'], bgImage:'/images/scenes/action.jpg'},
-  slice:      {name:'일상',       group:'content',    vidStyle:'natural warm tones, candid',                       style:'natural warm tones, candid daily life, soft comfortable lighting', angles:['Full Shot (FS)','Medium Close-up (MCU)','Two Shot','Eye-Level Shot'], bgImage:'/images/scenes/daily.jpg'},
-  commercial: {name:'광고',       group:'commercial', vidStyle:'bright commercial, premium polished',              style:'clean bright commercial lighting, vibrant product focus, polished cinematic style, premium aesthetic', angles:['Macro Shot','Medium Close-up (MCU)','Establishing Shot','Rack Focus'], bgImage:'/images/scenes/commercial.png'},
-  vlog:       {name:'개인방송',   group:'content',    vidStyle:'casual selfie, warm intimate',                      style:'casual selfie-style lighting, warm friendly tone, intimate handheld feel, vlog aesthetic', angles:['Eye-Level Shot','Medium Close-up (MCU)','Point of View (POV)','Single Shot']},
-  flashback:  {name:'회상',       group:'drama',      vidStyle:'nostalgic dreamy haze, soft focus',                style:'nostalgic warm fading tones, soft dreamy haze, vintage film grain, soft focus', angles:['Shallow Depth of Field','Wide Shot','Medium Close-up (MCU)','Slow Motion'], bgImage:'/images/scenes/flashback.jpg'},
-  heaven:     {name:'천국',       group:'lifestyle',  vidStyle:'heavenly bright haze, ethereal glow',              style:'ethereal heavenly atmosphere, blinding bright white light, soft hazy glow, divine god rays, dreamy mist, overexposed highlights, cinematic celestial aesthetic, holy diffused lighting', angles:['Wide Shot','Low Angle','Medium Close-up (MCU)','Rack Focus'], bgImage:'/images/scenes/heaven.jpg'},
-  confession: {name:'고백',       group:'drama',      vidStyle:'intimate warm, trembling, golden glow',            style:'intimate soft lighting, intense emotional warmth, trembling intensity, golden glow', angles:['Extreme Close-up (ECU)','Close-up (CU)','Two Shot','Eye-Level Shot'], bgImage:'/images/scenes/confession.jpg'},
-  horror:     {name:'공포',       group:'thriller',   vidStyle:'dark unsettling, deep shadows, eerie',             style:'dark unsettling atmosphere, deep shadows, eerie cold tones, suspenseful framing', angles:['Dutch Angle','Extreme Close-up (ECU)','Point of View (POV)','Worm\'s Eye View'], bgImage:'/images/scenes/horror.png'},
-  foodie:     {name:'먹방',       group:'content',    vidStyle:'appetizing close-up, ASMR',                        style:'appetizing food close-up lighting, warm tasty colors, mouth-watering visual, ASMR-friendly framing', angles:['Bird\'s Eye View','Macro Shot','Medium Close-up (MCU)','Extreme Close-up (ECU)']},
-  travel:     {name:'풍경',       group:'lifestyle',  bgImage:'/images/scenes/travel.jpg',      vidStyle:'breathtaking landscape, golden hour',              style:'breathtaking scenic landscape, vast natural beauty, golden hour lighting, cinematic travel aesthetic', angles:['Wide Shot','Establishing Shot','Drone Shot','Bird\'s Eye View']},
-  fitness:    {name:'운동',       group:'lifestyle',  vidStyle:'energetic motion, athletic, sweat',                style:'energetic dynamic motion, sweat-drenched intensity, sharp athletic focus, gym aesthetic', angles:['Low Angle','Full Shot (FS)','Extreme Close-up (ECU)','Tracking Shot'], bgImage:'/images/scenes/fitness.png'},
-  dance:      {name:'댄스',       group:'lifestyle',  vidStyle:'rhythmic K-pop choreo, vibrant',                   style:'rhythmic K-pop choreography, vibrant studio lighting, dynamic synchronized movement', angles:['Wide Shot','Full Shot (FS)','Low Angle','Crane Shot']},
-  interview:  {name:'인터뷰',     group:'content',    vidStyle:'documentary, natural, focused',                    style:'professional documentary lighting, natural setting, focused conversation, talking-head style', angles:['Bust Shot','Medium Close-up (MCU)','Dirty Single','Over-the-Shoulder (OTS)'], bgImage:'/images/scenes/interview.png'},
-  mv:         {name:'뮤직비디오', group:'commercial', vidStyle:'stylized cinematic, rhythmic',                     style:'stylized music video aesthetic, dramatic lighting, rhythmic visual flow, cinematic look', angles:['Wide Shot','Crane Shot','Extreme Close-up (ECU)','Slow Motion']},
+  romance:    {name:'로맨스',     group:'drama',      bgImage:'/images/scenes/romance.jpg',     vidStyle:'warm bokeh romantic',          style:'warm golden hour lighting, romantic atmosphere, soft bokeh, shallow depth of field, Korean drama aesthetic', angles:['Two Shot','Medium Close-up (MCU)','Shallow Depth of Field close-up','Eye-Level Shot']},
+  tension:    {name:'긴장',       group:'thriller',   vidStyle:'cold high contrast',                style:'high contrast dramatic shadows, intense cold tones, sharp cinematic focus', angles:['Over-the-Shoulder (OTS)','Extreme Close-up (ECU)','Dutch Angle','Point of View (POV)'], bgImage:'/images/scenes/tension.png'},
+  breakup:    {name:'이별',       group:'drama',      bgImage:'/images/scenes/breakup.jpg',     vidStyle:'rainy blue-gray',                style:'melancholic rainy atmosphere, blue-gray tones, emotional soft lighting', angles:['Wide Shot','Medium Close-up (MCU)','Close-up (CU)','Rack Focus']},
+  climax:     {name:'감정 절정',  group:'drama',      vidStyle:'dramatic emotional',            style:'extreme emotional expression, dramatic lighting, high contrast tears', angles:['Extreme Close-up (ECU)','Close-up (CU)','Low Angle','Zoom-in'], bgImage:'/images/scenes/climax.jpg'},
+  suspense:   {name:'서스펜스',   group:'thriller',   vidStyle:'dark noir',                    style:'dark ominous atmosphere, heavy shadows, noir desaturated tones', angles:['Dutch Angle','Point of View (POV)','Extreme Close-up (ECU)','Low Angle'], bgImage:'/images/scenes/suspense.jpg'},
+  mellow:     {name:'막장',       group:'drama',      vidStyle:'vivid theatrical',                  style:'melodramatic exaggerated emotion, theatrical lighting, vivid colors', angles:['Two Shot','Close-up (CU)','Low Angle','Zoom-in'], bgImage:'/images/scenes/mellow.jpg'},
+  action:     {name:'액션',       group:'thriller',   vidStyle:'sharp motion blur',                style:'dynamic motion blur, high contrast, sharp cinematic action, dramatic angles', angles:['Low Angle','Wide Shot','Extreme Close-up (ECU)','Dolly Zoom'], bgImage:'/images/scenes/action.jpg'},
+  slice:      {name:'일상',       group:'content',    vidStyle:'natural candid',                       style:'natural candid daily life, soft comfortable lighting', angles:['Full Shot (FS)','Medium Close-up (MCU)','Two Shot','Eye-Level Shot'], bgImage:'/images/scenes/daily.jpg'},
+  commercial: {name:'광고',       group:'commercial', vidStyle:'bright premium',              style:'clean bright commercial lighting, vibrant product focus, polished cinematic style, premium aesthetic', angles:['Macro Shot','Medium Close-up (MCU)','Establishing Shot','Rack Focus'], bgImage:'/images/scenes/commercial.png'},
+  vlog:       {name:'개인방송',   group:'content',    vidStyle:'casual warm',                      style:'casual selfie-style lighting, warm friendly tone, intimate handheld feel, vlog aesthetic', angles:['Eye-Level Shot','Medium Close-up (MCU)','Point of View (POV)','Single Shot']},
+  flashback:  {name:'회상',       group:'drama',      vidStyle:'nostalgic dreamy',                style:'nostalgic warm fading tones, soft dreamy haze, vintage film grain, soft focus', angles:['Shallow Depth of Field','Wide Shot','Medium Close-up (MCU)','Slow Motion'], bgImage:'/images/scenes/flashback.jpg'},
+  heaven:     {name:'천국',       group:'lifestyle',  vidStyle:'ethereal glow',              style:'ethereal heavenly atmosphere, blinding bright white light, soft hazy glow, divine god rays, dreamy mist, overexposed highlights, cinematic celestial aesthetic, holy diffused lighting', angles:['Wide Shot','Low Angle','Medium Close-up (MCU)','Rack Focus'], bgImage:'/images/scenes/heaven.jpg'},
+  confession: {name:'고백',       group:'drama',      vidStyle:'intimate golden',            style:'intimate soft lighting, intense emotional warmth, trembling intensity, golden glow', angles:['Extreme Close-up (ECU)','Close-up (CU)','Two Shot','Eye-Level Shot'], bgImage:'/images/scenes/confession.jpg'},
+  horror:     {name:'공포',       group:'thriller',   vidStyle:'dark eerie',             style:'dark unsettling atmosphere, deep shadows, eerie cold tones, suspenseful framing', angles:['Dutch Angle','Extreme Close-up (ECU)','Point of View (POV)','Worm\'s Eye View'], bgImage:'/images/scenes/horror.png'},
+  foodie:     {name:'먹방',       group:'content',    vidStyle:'appetizing ASMR',                        style:'appetizing food close-up lighting, warm tasty colors, mouth-watering visual, ASMR-friendly framing', angles:['Bird\'s Eye View','Macro Shot','Medium Close-up (MCU)','Extreme Close-up (ECU)']},
+  travel:     {name:'풍경',       group:'lifestyle',  bgImage:'/images/scenes/travel.jpg',      vidStyle:'breathtaking golden',              style:'breathtaking scenic landscape, vast natural beauty, golden hour lighting, cinematic travel aesthetic', angles:['Wide Shot','Establishing Shot','Drone Shot','Bird\'s Eye View']},
+  fitness:    {name:'운동',       group:'lifestyle',  vidStyle:'energetic athletic',                style:'energetic dynamic motion, sweat-drenched intensity, sharp athletic focus, gym aesthetic', angles:['Low Angle','Full Shot (FS)','Extreme Close-up (ECU)','Tracking Shot'], bgImage:'/images/scenes/fitness.png'},
+  dance:      {name:'댄스',       group:'lifestyle',  vidStyle:'vibrant K-pop',                   style:'rhythmic K-pop choreography, vibrant studio lighting, dynamic synchronized movement', angles:['Wide Shot','Full Shot (FS)','Low Angle','Crane Shot']},
+  interview:  {name:'인터뷰',     group:'content',    vidStyle:'natural documentary',                    style:'professional documentary lighting, natural setting, focused conversation, talking-head style', angles:['Bust Shot','Medium Close-up (MCU)','Dirty Single','Over-the-Shoulder (OTS)'], bgImage:'/images/scenes/interview.png'},
+  mv:         {name:'뮤직비디오', group:'commercial', vidStyle:'stylized cinematic',                     style:'stylized music video aesthetic, dramatic lighting, rhythmic visual flow, cinematic look', angles:['Wide Shot','Crane Shot','Extreme Close-up (ECU)','Slow Motion']},
 };
 
 
@@ -3556,10 +3556,10 @@ const ERA_KEYWORDS = {
   modern:      '현대 한국',
   historical:  '조선시대, 한복, 사극',
   gyeongseong: '1920년대 경성, 일제강점기, 모던보이 모던걸',
-  classic_80s:    '1980년대 한국 클래식 빈티지',
-  classic_90s:    '1990년대 한국 클래식 빈티지',
-  classic_2000s:  '2000년대 이천년대 한국',
-  cyberpunk_2100: '2100년 미래 사이버폭크, 네온 사인, 디스토피아 도시, 홀로그램, 고층 메가시티, 애당혁명 SF',
+  classic_80s:    '1980년대 한국',
+  classic_90s:    '1990년대 한국',
+  classic_2000s:  '2000년대 한국',
+  cyberpunk_2100: '사이버폭크, 네온',
   // 해외여행 — 나라 정보는 장소 키워드에 이미 들어있어 'Korean tourists'로 통일
   travel_japan:       'Korean tourists',
   travel_vietnam:     'Korean tourists',
@@ -3583,28 +3583,28 @@ const ERA_KEYWORDS = {
 const VID_STYLES = {
   live_action: { ko: '실사', sub: null },
   anime_2d:    { ko: '2D 애니메이션', sub: {
-    ghibli:    { ko: '지브리 스타일',  kw: 'Studio Ghibli anime style, hand-drawn 2D animation, Miyazaki aesthetic, soft watercolor backgrounds' },
-    shinkai:   { ko: '신카이 마코토',   kw: 'Makoto Shinkai anime style, vivid sky and lighting, cinematic 2D animation, your name aesthetic' },
-    classic:   { ko: '클래식 애니',     kw: 'classic 90s Japanese anime style, cel-shaded 2D animation, retro hand-drawn look' },
-    modern:    { ko: '모던 애니',     kw: 'modern Japanese anime style, vibrant 2D animation, cel-shading, sharp clean lines' },
-    k_anime:   { ko: 'K-애니',         kw: 'Korean modern animation style, K-anime 2D, clean polished cel-shading' },
-    cel:       { ko: '셀 애니메이션',     kw: '2D cel animation, traditional cel-shaded look, flat colors with bold outlines' },
+    ghibli:    { ko: '지브리 스타일',  kw: 'Studio Ghibli style' },
+    shinkai:   { ko: '신카이 마코토',   kw: 'Makoto Shinkai style' },
+    classic:   { ko: '클래식 애니',     kw: 'classic 90s anime' },
+    modern:    { ko: '모던 애니',     kw: 'modern anime style' },
+    k_anime:   { ko: 'K-애니',         kw: 'K-anime style' },
+    cel:       { ko: '셀 애니메이션',     kw: '2D cel animation' },
   }},
   anime_3d:    { ko: '3D 애니메이션', sub: {
-    pixar:     { ko: '픽사 스타일',     kw: 'Pixar 3D animation style, expressive characters, polished cinematic lighting' },
-    disney:    { ko: '디즈니 3D',      kw: 'Disney 3D animation style, modern Walt Disney CGI, colorful expressive cartoon' },
-    dreamworks:{ ko: '드림웍스',     kw: 'DreamWorks 3D animation style, expressive CGI cartoon look' },
-    jp_3d:     { ko: '일본 3D CG',     kw: 'Japanese 3D anime CG style, cel-shaded 3D, anime-inspired CGI' },
-    clay:      { ko: '클레이메이션',   kw: 'claymation stop-motion style, plasticine clay characters, handcrafted 3D' },
-    lowpoly:   { ko: '로우폴리',       kw: 'low-poly 3D animation, geometric stylized 3D characters, minimalist polygons' },
+    pixar:     { ko: '픽사 스타일',     kw: 'Pixar 3D style' },
+    disney:    { ko: '디즈니 3D',      kw: 'Disney 3D style' },
+    dreamworks:{ ko: '드림웍스',     kw: 'DreamWorks 3D' },
+    jp_3d:     { ko: '일본 3D CG',     kw: 'Japanese 3D CG anime' },
+    clay:      { ko: '클레이메이션',   kw: 'claymation style' },
+    lowpoly:   { ko: '로우폴리',       kw: 'low-poly 3D' },
   }},
   comic:       { ko: '만화풍', sub: {
-    webtoon:   { ko: '한국 웹툰',     kw: 'Korean webtoon style, vertical scroll comic art, modern digital illustration, K-webtoon aesthetic' },
-    manga:     { ko: '일본 망가',     kw: 'Japanese manga style, black and white screentone, dynamic panels, ink illustration' },
-    american:  { ko: '아메리칸 코믹', kw: 'American comic book style, bold ink lines, halftone dots, superhero illustration' },
-    flat:      { ko: '단순 만화',     kw: 'simple flat cartoon style, minimalist 2D illustration, bold flat colors' },
-    storybook: { ko: '동화책',        kw: 'storybook illustration style, watercolor children book art, soft hand-painted look' },
-    lineart:   { ko: '라인아트',       kw: 'pen and ink line art style, monochrome cross-hatching illustration' },
+    webtoon:   { ko: '한국 웹툰',     kw: 'Korean webtoon style' },
+    manga:     { ko: '일본 망가',     kw: 'Japanese manga style' },
+    american:  { ko: '아메리칸 코믹', kw: 'American comic style' },
+    flat:      { ko: '단순 만화',     kw: 'flat cartoon style' },
+    storybook: { ko: '동화책',        kw: 'storybook watercolor' },
+    lineart:   { ko: '라인아트',       kw: 'ink line art style' },
   }},
 };
 
@@ -9967,7 +9967,7 @@ function buildVidPrompt(i) {
   //   "Korean drama. "(14)
   //   + era 한글(24)             ex) "1920년대 경성, 일제강점기, 모던보이 모던걸"
   //   + ". "(2)
-  //   + scene.vidStyle(40)       ex) "warm golden hour, romantic, soft bokeh"
+  //   + scene.vidStyle(40)       ex) "warm bokeh romantic"
   //   + ". "(2)
   //   + ctx 한글+장소영문(27)    ex) "봄, 황혼, 맑음, Han River park"
   //   + ". Camera: "(10)
