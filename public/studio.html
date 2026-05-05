@@ -10869,15 +10869,17 @@ async function _falImageQueue(model, body, statusEl) {
   return d;
 }
 
-// 폴리시 위반 에러 감지 (GPT/fal이 부절한 이유)
+// 폴리시 위반 에러 감지 (GPT/fal이 부적절한 이유)
 function _isContentPolicyError(errMsg) {
   if (!errMsg) return false;
   const lower = String(errMsg).toLowerCase();
-  return lower.includes('content_policy') || lower.includes('safety') || lower.includes('moderation') ||
+  return lower.includes('content_violation') || lower.includes('content_policy') ||
+         lower.includes('safety') || lower.includes('moderation') ||
          lower.includes('not safe') || lower.includes('policy violation') || lower.includes('refused') ||
          lower.includes('inappropriate') || lower.includes('explicit') || lower.includes('sensitive') ||
          lower.includes('your request was rejected') || lower.includes('cannot create') ||
-         lower.includes('declined to') || lower.includes('blocked');
+         lower.includes('declined to') || lower.includes('blocked') ||
+         lower.includes('violation') || lower.includes('결과물이 나오지 않');
 }
 
 // 친화적 팝업 표시 (콘텐츠 정책 위반)
