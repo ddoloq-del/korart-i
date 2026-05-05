@@ -1378,13 +1378,22 @@ if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
   async function updateDropdownPoints() {
     const el = document.getElementById('pdPoints');
     if (!el) return;
-    // localStorage 에서 포인트 가져오기 (최초 50만 P)
-    let points = parseFloat(localStorage.getItem('korart_points') || '0');
-    if (!points) {
-      localStorage.setItem('korart_points', '500000');
-      points = 500000;
+    // 서버 fetchMyPoints로 실시간 서버 잔액 가져오기 (DB 동기화)
+    try {
+      const me = await fetchMyPoints();
+      if (me && typeof me.points === 'number') {
+        if (me.unlimited) {
+          el.innerHTML = '∞<span class="pt-unit">P</span>';
+        } else {
+          el.innerHTML = me.points.toLocaleString() + '<span class="pt-unit">P</span>';
+        }
+      } else {
+        el.innerHTML = '—<span class="pt-unit">P</span>';
+      }
+    } catch (e) {
+      console.warn('[Points] updateDropdownPoints 실패', e);
+      el.innerHTML = '—<span class="pt-unit">P</span>';
     }
-    el.innerHTML = points.toLocaleString() + '<span class="pt-unit">P</span>';
   }
 
   async function openProfileModal() {
@@ -1398,13 +1407,17 @@ if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
     const provider = (currentUser.app_metadata && currentUser.app_metadata.provider) || 'email';
     const providerMap = { google: 'Google', kakao: '카카오', email: '이메일' };
     document.getElementById('pmProvider').textContent = providerMap[provider] || provider;
-    // 포인트
-    let points = parseFloat(localStorage.getItem('korart_points') || '0');
-    if (!points) {
-      localStorage.setItem('korart_points', '500000');
-      points = 500000;
+    // 포인트 — 서버 fetchMyPoints로 실시간 서버 잔액 가져오기
+    try {
+      const me = await fetchMyPoints();
+      if (me && typeof me.points === 'number') {
+        document.getElementById('pmPoints').textContent = me.unlimited ? '∞ P' : (me.points.toLocaleString() + 'P');
+      } else {
+        document.getElementById('pmPoints').textContent = '— P';
+      }
+    } catch (e) {
+      document.getElementById('pmPoints').textContent = '— P';
     }
-    document.getElementById('pmPoints').textContent = points.toLocaleString() + 'P';
     let postCount = 0;
     try { postCount = (JSON.parse(localStorage.getItem('korart_published') || '[]')).length; } catch (e) {}
     document.getElementById('pmPostCount').textContent = postCount + '건';

@@ -1232,6 +1232,7 @@ select option:hover {
 .korart-tagline { font-size: 13px; font-weight: 500; color: #888; letter-spacing: -.01em; white-space: nowrap; }
 .korart-logo-wrap { display: flex; flex-direction: row; align-items: flex-end; gap: 10px; }
 @media (max-width: 900px) { .korart-tagline { display: none; } }
+@media (max-width: 768px) { .korart-points-pill { display: none !important; } }
 .korart-gnb-right { display: flex; align-items: center; gap: 8px; }
 .korart-icon-btn { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #666; background: none; border: none; cursor: pointer; transition: background .15s; }
 .korart-icon-btn:hover { background: #f5f5f5; color: #1a1a1a; }
@@ -4427,9 +4428,12 @@ function updateCostDisplay() {
   // 1포인트 = 50원 (환율 1500원 + 마진 40%, 소수점 0.1까지)
   // 공식: P = USD × 1500 × 1.4 / 50 = USD × 42
   const usd2pt = (usd) => Math.round(usd * 42 * 10) / 10;
-  document.getElementById('costTotal').textContent = usd2pt(total) + ' P';
-  document.getElementById('costImg').textContent = usd2pt(S.sessionImgCost) + ' P';
-  document.getElementById('costVid').textContent = usd2pt(S.sessionVidCost) + ' P';
+  const el = document.getElementById('costTotal');
+  if (el) el.textContent = usd2pt(total) + ' P';
+  const elImg = document.getElementById('costImg');
+  if (elImg) elImg.textContent = usd2pt(S.sessionImgCost) + ' P';
+  const elVid = document.getElementById('costVid');
+  if (elVid) elVid.textContent = usd2pt(S.sessionVidCost) + ' P';
 }
 function resetCost() {
   S.sessionImgCost = 0; S.sessionVidCost = 0; updateCostDisplay();
@@ -5947,7 +5951,7 @@ Character: ${charDesc}.${randomNote}${_refGuidance}`;
   log('info', `아바타 다각도 시트 생성 — ${name} (3x2 grid, 1536x1024)`);
 
   try {
-    const url = await callFalImage(falKey, FIXED_MODEL, prompt, '1536x1024', _refImgUrl || undefined);
+    const url = await callFalImage(null, FIXED_MODEL, prompt, '1536x1024', _refImgUrl || undefined);
     setAvatarImagePreview(url);
     addImgCost(FIXED_CPM);
     log('ok', '다각도 시트 생성 완료 (6 angles)');
@@ -6618,7 +6622,7 @@ async function saveAvatarToLibFromModalWithCloud() {
         toast('☁️ 이미지 업로드 중...');
         const r = await fetch(imgUrl);
         const blob = await r.blob();
-        const cdnUrl = await uploadToFalStorage(falKey, blob, `avatar_${Date.now()}.png`, blob.type || 'image/png');
+        const cdnUrl = await uploadToFalStorage(null, blob, `avatar_${Date.now()}.png`, blob.type || 'image/png');
         imgUrl = cdnUrl;
         document.getElementById('avImgUrl').value = cdnUrl;
         log('ok', `[Avatar] dataURL → fal CDN URL로 변환: ${cdnUrl.slice(0, 60)}`);
@@ -9431,7 +9435,7 @@ async function generateOneCut() {
     try {
       if (!S.continueRefPubUrl) {
         const blob = dataURLtoBlob(S.continueRefDataUrl);
-        S.continueRefPubUrl = await uploadToFalStorage(falKey, blob, 'continue_ref.jpg');
+        S.continueRefPubUrl = await uploadToFalStorage(null, blob, 'continue_ref.jpg');
       }
       refImgs.push(S.continueRefPubUrl);
     } catch (e) { log('warn', '참고 이미지 업로드 실패: ' + e.message); }
@@ -9466,7 +9470,7 @@ async function generateOneCut() {
     if (!useRef && modelToUse !== model) {
       log('info', `레퍼런스 없음 → ${model} → ${modelToUse} (text-to-image 모드)`);
     }
-    const url = await callFalImage(falKey, modelToUse, prompt, sizeStr, refImgs.length ? refImgs : null);
+    const url = await callFalImage(null, modelToUse, prompt, sizeStr, refImgs.length ? refImgs : null);
 
     // 다운로드 -> dataURL
     const r = await fetch(url);
@@ -9608,7 +9612,7 @@ async function generateImage() {
       // 아직 업로드 안 된 경우에만 업로드
       if (!S.continueRefPubUrl) {
         const blob = dataURLtoBlob(S.continueRefDataUrl);
-        S.continueRefPubUrl = await uploadToFalStorage(falKey, blob, 'continue_ref.jpg');
+        S.continueRefPubUrl = await uploadToFalStorage(null, blob, 'continue_ref.jpg');
         log('info', '이전 컷 레퍼런스 업로드 완료');
       }
       refImgs.push(S.continueRefPubUrl);
@@ -9648,8 +9652,8 @@ async function generateImage() {
       log('info', `레퍼런스 없음 → ${model} → ${modelToUse} (text-to-image 모드)`);
     }
     const url = useRef
-      ? await callFalImageWithRef(falKey, model, prompt, getGridSize(), refImgs)
-        : await callFalImage(falKey, modelToUse, prompt, getGridSize());
+      ? await callFalImageWithRef(null, model, prompt, getGridSize(), refImgs)
+        : await callFalImage(null, modelToUse, prompt, getGridSize());
     S.gridPubUrl = url;
 
     // 이미지 로드 & 표시
@@ -9763,18 +9767,23 @@ async function goToStep3() {
   // CDN 업로드 (영상 생성에 필요)
 
   toast('⏳ 컷 이미지 업로드 중...');
+  let uploadFailed = false;
   for (const i of approved) {
     if (!S.cutPubUrls[i] && S.cutDataUrls[i]) {
       try {
         log('info', `컷${i+1} CDN 업로드 중...`);
         const blob = dataURLtoBlob(S.cutDataUrls[i]);
-        S.cutPubUrls[i] = await uploadToFalStorage(falKey, blob, `cut_${i}.jpg`);
-      if (typeof saveSession === 'function') saveSession();
+        S.cutPubUrls[i] = await uploadToFalStorage(null, blob, `cut_${i}.jpg`);
+        if (typeof saveSession === 'function') saveSession();
         log('ok', `컷${i+1} 업로드 완료: ${S.cutPubUrls[i].slice(0,50)}`);
       } catch(e) {
         log('warn', `컷${i+1} 업로드 실패: ${e.message}`);
+        uploadFailed = true;
       }
     }
+  }
+  if (uploadFailed) {
+    toast('⚠️ 일부 컷 업로드 실패 — 영상 생성 시 재시도됩니다');
   }
 
   goStep(5);
@@ -10431,7 +10440,7 @@ async function generateCutVideo(i) {
     try {
       status.textContent = '컷 이미지 CDN 업로드 중...';
       const blob = dataURLtoBlob(S.cutDataUrls[i]);
-      imgUrl = await uploadToFalStorage(falKey, blob, `cut_${i}.jpg`);
+      imgUrl = await uploadToFalStorage(null, blob, `cut_${i}.jpg`);
       S.cutPubUrls[i] = imgUrl;
       log('ok', `컷${i+1} CDN 업로드 완료: ${imgUrl.slice(0,60)}`);
     } catch(uploadErr) {
@@ -10990,27 +10999,42 @@ ${prompt}`;
 
 async function uploadToFalStorage(key, blob, filename, contentTypeOverride) {
   const ct = contentTypeOverride || blob.type || 'image/jpeg';
-  // 워커 프록시 사용 (rest.fal.ai 의 올바른 storage initiate 호출)
-  // base64 인코딩 → 워커 /fal-upload 에 POST → 워커가 initiate + PUT 공서
-  const arrayBuffer = await blob.arrayBuffer();
-  const bytes = new Uint8Array(arrayBuffer);
-  let binary = '';
-  const chunkSize = 8192;
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+
+  // 1차 시도: 워커 /fal-upload 프록시
+  try {
+    const arrayBuffer = await blob.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
+    let binary = '';
+    const chunkSize = 8192;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+    }
+    const base64 = btoa(binary);
+    const r = await fetch('/fal-upload', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + (await getSupabaseJWT()), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ base64, fileName: filename, contentType: ct }),
+    });
+    if (!r.ok) {
+      const errText = await r.text();
+      throw new Error('fal-upload ' + r.status + ': ' + errText.slice(0, 150));
+    }
+    const { url } = await r.json();
+    if (url) return url;
+    throw new Error('url 없음');
+  } catch (falErr) {
+    log('warn', `fal-upload 실패, Supabase Storage 대체: ${falErr.message}`);
   }
-  const base64 = btoa(binary);
-  const r = await fetch('/fal-upload', {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + (await getSupabaseJWT()), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ base64, fileName: filename, contentType: ct }),
-  });
-  if (!r.ok) {
-    const errText = await r.text();
-    throw new Error('fal-upload 실패 ' + r.status + ': ' + errText.slice(0, 200));
-  }
-  const { url } = await r.json();
-  return url;
+
+  // 2차 시도: Supabase Storage (korart-assets 버킷)
+  if (!sb || !currentUser) throw new Error('로그인 필요');
+  const path = `${currentUser.id}/temp_cuts/${Date.now()}_${filename}`;
+  const { error: upErr } = await sb.storage.from('korart-assets').upload(path, blob, { contentType: ct, upsert: true });
+  if (upErr) throw new Error('Supabase 업로드 실패 (' + upErr.statusCode + '): ' + upErr.message);
+  const { data } = sb.storage.from('korart-assets').getPublicUrl(path);
+  if (!data?.publicUrl) throw new Error('Supabase publicUrl 없음');
+  log('ok', `Supabase Storage 대체 업로드 완료: ${data.publicUrl.slice(0, 60)}`);
+  return data.publicUrl;
 }
 
 // ============================================================
