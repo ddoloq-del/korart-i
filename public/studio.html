@@ -6889,6 +6889,17 @@ function editAvatarInLib(id) {
 // ════════════════════════════════════════════════════════════
 //  ERA (시대) 선택 — 그룹 칩 + 드롭다운
 // ════════════════════════════════════════════════════════════
+// 영상 스타일 키워드 추출 (이미지/영상 빌더 공통)
+function _getVidStyleKeyword() {
+  if (!S || !S.vidStyle || S.vidStyle === 'live_action') return '';
+  if (typeof VID_STYLES === 'undefined') return '';
+  const vs = VID_STYLES[S.vidStyle];
+  if (vs && vs.sub && S.vidStyleSub && vs.sub[S.vidStyleSub]) {
+    return vs.sub[S.vidStyleSub].kw || '';
+  }
+  return '';
+}
+
 function renderVidStyleChips() {
   const wrap = document.getElementById('vidStyleChips');
   const subWrap = document.getElementById('vidStyleSubChips');
@@ -8578,7 +8589,7 @@ TIME PERIOD: ${eraKeyword}.
 ${variations ? '4-PANEL VARIATIONS: ' + variations + '.' : '4-PANEL VARIATIONS: natural variety of best shots, slight subtle variations.'}
 ${cutDescs ? 'CUT DETAILS: ' + cutDescs + '.' : ''}
 ${extra ? 'ADDITIONAL: ' + extra + '.' : ''}
-All 4 panels share consistent subjects and core concept. High-quality professional photography.`.trim();
+All 4 panels share consistent subjects and core concept. High-quality professional photography.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}`.trim();
 }
 
 // 이미지 모드 프롬프트 빌더 (async — API용, 한글 번역 포함)
@@ -8751,7 +8762,7 @@ TIME PERIOD: ${eraKeyword}.
 ${variations ? '4-PANEL VARIATIONS: ' + variations + '.' : '4-PANEL VARIATIONS: natural variety of best shots, slight subtle variations.'}
 ${cutDescs ? 'CUT DETAILS: ' + cutDescs + '.' : ''}
 ${extraEn ? 'ADDITIONAL: ' + extraEn + '.' : ''}
-All 4 panels share consistent subjects and core concept. High-quality professional photography.`.trim();
+All 4 panels share consistent subjects and core concept. High-quality professional photography.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}`.trim();
 }
 
 // 이미지 모드 1컷 프롬프트 빌더 — 단일 패널으로 생성
@@ -8813,7 +8824,7 @@ ${moodKeywords ? 'MOOD: ' + moodKeywords + '.' : ''}
 ${locEn ? 'LOCATION: ' + locEn + '.' : ''}
 TIME PERIOD: ${eraKeyword}.
 ${extraEn ? 'ADDITIONAL: ' + extraEn + '.' : ''}
-High-quality professional photography. Single frame only — do NOT split into multiple panels or grid.`.trim();
+High-quality professional photography. Single frame only — do NOT split into multiple panels or grid.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}`.trim();
 }
 
 // ────────────────────────────────────────────────────────────
@@ -8915,7 +8926,7 @@ TIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.
 ENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}
 CAMERA ANGLES: ${angleDesc}.${extra ? '\nADDITIONAL: ' + extra + '.' : ''}
 WARDROBE: All characters wear clothing appropriate for ${S.season} weather and ${loc}. Outfits should match the season, weather, and environment naturally.
-All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.`.trim();
+All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}`.trim();
 }
 
 // async 버전 — 실제 API 전송용 (한글 → 영어 번역)
@@ -9048,7 +9059,7 @@ TIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.
 ENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}
 CAMERA ANGLES: ${angleDesc}.${extraEn ? '\nADDITIONAL: ' + extraEn + '.' : ''}
 WARDROBE: All characters wear clothing appropriate for ${S.season} weather and ${locEn}. Outfits should match the season, weather, and environment naturally.
-All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.`.trim();
+All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}`.trim();
 }
 
 function updatePromptPreview() {
@@ -10019,13 +10030,7 @@ function buildVidPrompt(i) {
   const ctx = ctxParts.join(', ');
 
   // 영상 스타일 키워드
-  let styleKw = '';
-  if (S.vidStyle && S.vidStyle !== 'live_action' && typeof VID_STYLES !== 'undefined') {
-    const vs = VID_STYLES[S.vidStyle];
-    if (vs && vs.sub && S.vidStyleSub && vs.sub[S.vidStyleSub]) {
-      styleKw = vs.sub[S.vidStyleSub].kw || '';
-    }
-  }
+  const styleKw = _getVidStyleKeyword();
 
   // 골격 조립
   let p = `Korean drama. ${eraKw}. ${sceneStyle}.`;
