@@ -94,8 +94,8 @@ async function chargePoints(env, userId, amount, description, falEndpoint, reque
     return { ok: false, error: 'insufficient_points', balance: profile.points, required: amount };
   }
 
-  // 차감 (PostgREST PATCH)
-  const newBalance = profile.points - amount;
+  // 차감 (PostgREST PATCH) — 부동소수 오차 방지: 소수점 둘째 자리까지 round
+  const newBalance = Math.round((profile.points - amount) * 100) / 100;
   const upd = await fetch(
     env.SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId,
     {
@@ -111,9 +111,11 @@ async function chargePoints(env, userId, amount, description, falEndpoint, reque
   );
   if (!upd.ok) return { ok: false, error: 'update failed' };
 
-  await insertTransaction(env, userId, 'usage', -amount, newBalance, description, falEndpoint, requestId, metadata);
+  // 차감액도 소수점 둘째 자리까지 round (transactions 기록 일관성)
+  const chargedAmount = Math.round(amount * 100) / 100;
+  await insertTransaction(env, userId, 'usage', -chargedAmount, newBalance, description, falEndpoint, requestId, metadata);
 
-  return { ok: true, charged: amount, remaining: newBalance, unlimited: false };
+  return { ok: true, charged: chargedAmount, remaining: newBalance, unlimited: false };
 }
 
 async function insertTransaction(env, userId, type, amount, balanceAfter, description, falEndpoint, requestId, metadata) {

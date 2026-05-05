@@ -10598,6 +10598,7 @@ async function generateCutVideo(i) {
       } catch (e) { console.warn('[points] calcImgPoints 실패', e); return 0; }
     })();
     log('info', `포인트 차감 예정: ${_imgEstPoints}P`);
+    console.log('[💰 이미지 포인트 차감 헤더]', { model, _imgEstPoints, modelQuality: (typeof S !== 'undefined' && S.aspectRatio) ? S.aspectRatio : '?', imgQuality: typeof getSelectedImgQuality === 'function' ? getSelectedImgQuality() : '?' });
 
     const r = await fetch('/fal-proxy/' + model, {
       method: 'POST',
@@ -10746,6 +10747,7 @@ async function _falImageQueue(model, body, statusEl) {
     } catch (e) { console.warn('[points] _vidEstPoints 실패', e); return 0; }
   })();
   log('info', `포인트 차감 예정 (영상): ${_vidEstPoints}P`);
+  console.log('[💰 영상 포인트 차감 헤더]', { model, _vidEstPoints, audio: !!(body && (body.audio_enabled || body.generate_audio || body.with_audio)), duration: body && body.duration });
 
   // 1단계: queue 제출
   const submitRes = await fetch('/fal-proxy/' + model, {
