@@ -184,8 +184,8 @@ body {
 <article class="doc">
   <h1>개인정보처리방침</h1>
   <p class="doc-sub">
-    시행일자: 2026년 4월 25일<br>
-    버전: <strong>1.0</strong>
+    시행일자: 2026년 5월 6일<br>
+    버전: <strong>1.1</strong> (AI 위탁사 추가, 국외 이전 명시)
   </p>
 
   <div class="doc-intro">
@@ -208,14 +208,19 @@ body {
     </thead>
     <tbody>
       <tr>
-        <td><strong>필수</strong></td>
-        <td>이메일 주소, 비밀번호(암호화 저장), 이름/닉네임, 생년월일</td>
-        <td>회원가입 시 이용자 직접 입력</td>
-      </tr>
-      <tr>
         <td><strong>필수</strong><br>(소셜 로그인 시)</td>
         <td>이메일 주소, 이름, 프로필 사진 URL</td>
         <td>Google OAuth 제공</td>
+      </tr>
+      <tr>
+        <td><strong>필수</strong><br>(서비스 이용 시)</td>
+        <td>이용자가 업로드한 사진(아바타 reference 이미지), 입력한 프롬프트, AI 생성 결과물(이미지/영상), 닉네임, 게시글 내용</td>
+        <td>이용자 직접 입력 및 업로드</td>
+      </tr>
+      <tr>
+        <td><strong>필수</strong><br>(결제 시)</td>
+        <td>결제 수단 정보(결제대행사가 처리), 거래 내역, 포인트 충전·차감·환불 기록</td>
+        <td>결제대행사(PG) 및 회사 시스템</td>
       </tr>
       <tr>
         <td><strong>선택</strong></td>
@@ -290,35 +295,69 @@ body {
     <li>회사는 서비스 제공을 위해 필요한 경우 이용자의 동의를 얻은 후 제3자에게 개인정보를 제공할 수 있습니다.</li>
   </ol>
 
-  <h2>제5조 (개인정보 처리의 위탁)</h2>
-  <p>회사는 원활한 서비스 제공을 위하여 다음과 같이 개인정보 처리업무를 외부 전문업체에 위탁하고 있습니다.</p>
+  <h2>제5조 (개인정보 처리의 위탁 및 국외 이전)</h2>
+  <p>회사는 원활한 서비스 제공을 위하여 다음과 같이 개인정보 처리업무를 외부 전문업체에 위탁하고 있습니다. <strong>일부 수탁사는 해외에 위치하므로, 「개인정보 보호법」 제28조의8에 따라 국외 이전 사실을 안내드립니다.</strong></p>
 
   <table>
     <thead>
       <tr>
-        <th style="width:30%;">수탁사</th>
-        <th style="width:40%;">위탁업무 내용</th>
-        <th style="width:30%;">개인정보 보관 국가</th>
+        <th style="width:22%;">수탁사</th>
+        <th style="width:32%;">위탁업무 내용</th>
+        <th style="width:26%;">이전되는 정보</th>
+        <th style="width:20%;">보관 국가</th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <td>Supabase Inc.</td>
         <td>회원 인증 및 데이터베이스 관리</td>
+        <td>이메일, 닉네임, 프로필 사진 URL, 게시글, 포인트 거래 기록</td>
         <td>대한민국 (Seoul 리전)</td>
       </tr>
       <tr>
         <td>Cloudflare, Inc.</td>
         <td>웹사이트 호스팅 및 트래픽 처리</td>
-        <td>글로벌 (CDN)</td>
+        <td>접속 IP, 쿠키, 브라우저 정보</td>
+        <td>글로벌 CDN (미국 본사)</td>
       </tr>
       <tr>
         <td>Google LLC</td>
-        <td>소셜 로그인 인증 (OAuth, 이용자 선택 시)</td>
+        <td>소셜 로그인 인증 (OAuth)</td>
+        <td>이메일, 이름, 프로필 사진 URL</td>
         <td>미국</td>
+      </tr>
+      <tr>
+        <td><strong>fal.ai (Features and Labels Inc.)</strong></td>
+        <td>AI 영상/이미지 생성 처리 (Kling, Veo, WAN 등 모델 실행)</td>
+        <td>이용자가 업로드한 사진(아바타), 입력한 프롬프트, 생성 결과물</td>
+        <td>미국</td>
+      </tr>
+      <tr>
+        <td><strong>OpenAI, Inc.</strong></td>
+        <td>AI 이미지 생성 처리 (GPT Image 2 모델 실행)</td>
+        <td>이용자가 업로드한 사진(아바타), 입력한 프롬프트, 생성 결과물</td>
+        <td>미국</td>
+      </tr>
+      <tr>
+        <td><strong>fal.ai 모델 제공 파트너</strong><br>(Google DeepMind, Black Forest Labs 등)</td>
+        <td>AI 영상/이미지 생성에 사용되는 기반 모델 운영</td>
+        <td>fal.ai를 통해 전달된 프롬프트 및 이미지</td>
+        <td>미국, 유럽 등</td>
       </tr>
     </tbody>
   </table>
+
+  <div class="doc-intro" style="margin-top:20px;">
+    <strong>▶ 국외 이전에 관한 안내 (개인정보 보호법 제28조의8)</strong><br>
+    <ul style="margin-top:8px;padding-left:20px;">
+      <li><strong>이전되는 항목</strong>: 위 표 "이전되는 정보" 항목 참조</li>
+      <li><strong>이전되는 국가</strong>: 미국, 유럽 등 (수탁사 본사 소재지)</li>
+      <li><strong>이전 일시 및 방법</strong>: 이용자가 AI 생성 기능을 이용할 때마다 HTTPS 암호화 통신을 통해 실시간 이전</li>
+      <li><strong>이전받는 자의 개인정보 보호 조치</strong>: 각 수탁사는 자체 보안정책 및 GDPR/SOC 2 등 국제 보안 표준을 준수합니다.</li>
+      <li><strong>이전받는 자의 이용 목적 및 보유 기간</strong>: 서비스 처리 목적에 한해 사용되며, 처리 완료 후 단기간 내 파기됩니다 (각 수탁사 정책에 따름).</li>
+    </ul>
+    <small style="color:var(--ink-dim);display:block;margin-top:10px;">※ 이용자는 위와 같은 국외 이전을 거부할 권리가 있으며, 거부 시 AI 생성 기능을 이용할 수 없습니다. (회원가입 자체는 가능)</small>
+  </div>
 
   <h2>제6조 (정보주체의 권리·의무 및 행사방법)</h2>
   <ol>
