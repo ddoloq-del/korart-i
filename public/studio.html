@@ -4544,6 +4544,12 @@ function goStep(n) {
     if (typeof onImgModeChange === 'function') onImgModeChange();
     // AI hint 갱신
     if (typeof onImgAiChange === 'function') onImgAiChange();
+    // 스케치 결과가 있으면 (sketchPubUrl 존재) 업그레이드 버튼 복원
+    // (onImgModeChange가 더해 숨겼기 때문에 재진입 시 다시 보이게)
+    if (S.sketchPubUrl && S.imgMode === 'sketch') {
+      const upWrap = document.getElementById('sketchUpgradeWrap');
+      if (upWrap) upWrap.style.display = '';
+    }
   }
 
   // 영상 패널 진입 시 컷 카드 렌더링 (4컷 없이 도달해도 빈 슬롯 표시 + 불러오기 가능)
