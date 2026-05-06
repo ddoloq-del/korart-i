@@ -3330,9 +3330,7 @@ const SCENES = {
   foodie:     {name:'먹방',       group:'content',    vidStyle:'appetizing ASMR',                        style:'appetizing food close-up lighting, warm tasty colors, mouth-watering visual, ASMR-friendly framing', angles:['Bird\'s Eye View','Macro Shot','Medium Close-up (MCU)','Extreme Close-up (ECU)']},
   travel:     {name:'풍경',       group:'lifestyle',  bgImage:'/images/scenes/travel.jpg',      vidStyle:'breathtaking golden',              style:'breathtaking scenic landscape, vast natural beauty, golden hour lighting, cinematic travel aesthetic', angles:['Wide Shot','Establishing Shot','Drone Shot','Bird\'s Eye View']},
   fitness:    {name:'운동',       group:'lifestyle',  vidStyle:'energetic athletic',                style:'energetic dynamic motion, sweat-drenched intensity, sharp athletic focus, gym aesthetic', angles:['Low Angle','Full Shot (FS)','Extreme Close-up (ECU)','Tracking Shot'], bgImage:'/images/scenes/fitness.png'},
-  dance:      {name:'댄스',       group:'lifestyle',  vidStyle:'vibrant K-pop',                   style:'rhythmic K-pop choreography, vibrant studio lighting, dynamic synchronized movement', angles:['Wide Shot','Full Shot (FS)','Low Angle','Crane Shot']},
   interview:  {name:'인터뷰',     group:'content',    vidStyle:'natural documentary',                    style:'professional documentary lighting, natural setting, focused conversation, talking-head style', angles:['Bust Shot','Medium Close-up (MCU)','Dirty Single','Over-the-Shoulder (OTS)'], bgImage:'/images/scenes/interview.png'},
-  mv:         {name:'뮤직비디오', group:'commercial', vidStyle:'stylized cinematic',                     style:'stylized music video aesthetic, dramatic lighting, rhythmic visual flow, cinematic look', angles:['Wide Shot','Crane Shot','Extreme Close-up (ECU)','Slow Motion']},
 };
 
 
@@ -3347,7 +3345,7 @@ const SCENE_GROUPS = {
   thriller:   { ko: '스릴러',     en: 'THRILLER' },
   content:    { ko: '콘텐츠',     en: 'CONTENT' },
   lifestyle:  { ko: '라이프스타일', en: 'LIFESTYLE' },
-  commercial: { ko: '광고/MV',     en: 'COMMERCIAL' },
+  commercial: { ko: '광고',        en: 'COMMERCIAL' },
 };
 
 // 이미지 모드 카테고리 그룹 정의 (탭 UI용)
@@ -7459,7 +7457,7 @@ function renderScenes() {
     suspense:'SUSPENSE', mellow:'MELODRAMA', action:'ACTION', slice:'DAILY',
     commercial:'COMMERCIAL', vlog:'VLOG', flashback:'FLASHBACK', heaven:'HEAVEN', confession:'CONFESSION',
     horror:'HORROR', foodie:'FOODIE', travel:'TRAVEL', fitness:'FITNESS',
-    dance:'DANCE', interview:'INTERVIEW', mv:'MUSIC VIDEO',
+    interview:'INTERVIEW',
   };
 
   // 카테고리 색상 (씬 분위기에 맞춰)
@@ -7468,7 +7466,7 @@ function renderScenes() {
     suspense:'#a78bfa', mellow:'#e879f9', action:'#fb923c', slice:'#4ade80',
     commercial:'#fbbf24', vlog:'#22d3ee', flashback:'#a5b4fc', heaven:'#fef9c3', confession:'#fb7185',
     horror:'#dc2626', foodie:'#facc15', travel:'#5eead4', fitness:'#a3e635',
-    dance:'#ec4899', interview:'#7dd3fc', mv:'#a855f7',
+    interview:'#7dd3fc',
   };
   // 활성 카테고리 이불 초기화 (기본: drama)
   if (typeof S.activeVidCategory === 'undefined') S.activeVidCategory = 'drama';
