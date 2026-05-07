@@ -6459,6 +6459,8 @@ function openAvatarModal(editId) {
 
   document.getElementById('avModal').style.display = 'flex';
   document.getElementById('avModalBackdrop').style.display = 'block';
+  // 아바타 스타일 chip 렌더 (모달 열릴 때마다)
+  if (typeof renderAvStyleChips === 'function') renderAvStyleChips();
 }
 
 function closeAvatarModal() {
@@ -6710,6 +6712,9 @@ async function saveAvatarToLibFromModalWithCloud() {
   if (currentUser && av.imgUrl && !av.imgUrl.startsWith('data:')) {
     await saveAvatarToCloud(av);
   }
+  // 화면 즉시 갱신 (저장 후)
+  if (typeof renderSavedAvatars === 'function') renderSavedAvatars();
+  if (typeof renderStep1Avatars === 'function') renderStep1Avatars();
 }
 
 function saveAvatarToLib() {
@@ -12093,7 +12098,9 @@ function openAvatarPicker() {
       lib.push(av);
     }
     saveAvatarLib(lib);
-    renderSavedAvatars();
+    // 화면 즉시 갱신 — 라이브러리 그리드 + 1단계 총척
+    if (typeof renderSavedAvatars === 'function') renderSavedAvatars();
+    if (typeof renderStep1Avatars === 'function') renderStep1Avatars();
     toast(`✅ "${av.name}" 로컬로 불러옴`);
   }, null);  // 아바타는 로컬 추가 버튼 따로 있으므로 null
 }
