@@ -6019,8 +6019,15 @@ Character: ${charDesc}.${randomNote}${_refGuidance}`;
 
   log('info', `아바타 다각도 시트 생성 — ${name} (3x2 grid, 1536x1024)`);
 
-  // 아바타 스타일 자동 주입 (실사 외 스타일 선택 시)
-  if (_avStyleKw) prompt = prompt + `\n\nART STYLE: ${_avStyleKw}.`;
+  // 아바타 스타일 강력 주입 (실사 외 스타일 선택 시 — GPT Image 2 사실적 성향 제압)
+  if (_avStyleKw) {
+    // 1) 맨 앞에 강력 선언
+    prompt = `[CRITICAL ART STYLE: ${_avStyleKw}. This is a stylized illustration in ${_avStyleKw}, NOT a photograph. NOT photorealistic. The entire image must be drawn/illustrated in ${_avStyleKw}.]\n\n` + prompt;
+    // 2) 끝에도 한 번 더 강조
+    prompt = prompt + `\n\nFINAL REMINDER: Render this entirely in ${_avStyleKw}. The output must be a stylized illustration, not a photograph. Avoid photorealistic lighting and textures.`;
+    // 3) 사실적 키워드 제거
+    prompt = prompt.replace(/Studio portrait lighting, professional photography\.?/g, '').replace(/Sharp focus on face, high detail\.?/g, '');
+  }
 
   try {
     const url = await callFalImage(null, FIXED_MODEL, prompt, '1536x1024', _refImgUrl || undefined);
