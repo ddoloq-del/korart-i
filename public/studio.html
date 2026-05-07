@@ -6004,6 +6004,24 @@ Character: ${charDesc}.${randomNote}${_refGuidance}`;
   btn.innerHTML = '<div class="spin"></div> 다각도 시트 생성 중...';
   document.getElementById('avImgPreview').innerHTML = '<div class="spin"></div>';
 
+  // 경과 시간 타이머 (아바타)
+  const _avStartTime = Date.now();
+  let _avTimer = null;
+  const _updateAvTimer = () => {
+    const elapsed = Math.floor((Date.now() - _avStartTime) / 1000);
+    const preview = document.getElementById('avImgPreview');
+    if (!preview) return;
+    preview.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;height:100%;color:var(--cream)">
+        <div class="spin" style="width:22px;height:22px;border-width:2px"></div>
+        <div style="font-size:9px;font-weight:700">생성 중</div>
+        <div style="font-size:16px;color:var(--pink);font-weight:800;font-variant-numeric:tabular-nums">${elapsed}초</div>
+      </div>`;
+    btn.innerHTML = `<div class="spin"></div> 생성 중 ${elapsed}초`;
+  };
+  _updateAvTimer();
+  _avTimer = setInterval(_updateAvTimer, 1000);
+
   log('info', `아바타 다각도 시트 생성 — ${name} (3x2 grid, 1536x1024)`);
 
   try {
@@ -6019,6 +6037,7 @@ Character: ${charDesc}.${randomNote}${_refGuidance}`;
   } finally {
     btn.disabled = false;
     btn.innerHTML = '✨ AI 생성';
+    if (_avTimer) clearInterval(_avTimer);
   }
 }
 
@@ -9622,6 +9641,24 @@ async function generateOneCut() {
   btn.disabled = true;
   btn.innerHTML = '<div class="spin"></div> 생성 중...';
 
+  // 경과 시간 타이머 (1컷 모드 — 해당 cell만)
+  const _oneCutStartTime = Date.now();
+  let _oneCutTimer = null;
+  const _updateOneCutTimer = () => {
+    const elapsed = Math.floor((Date.now() - _oneCutStartTime) / 1000);
+    const quad = document.getElementById('quad');
+    if (!quad) return;
+    const cells = quad.querySelectorAll('.qcell');
+    if (cells[i]) {
+      cells[i].innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;height:100%;background:#0a0a0c">
+          <div class="spin" style="width:24px;height:24px;border-width:2px"></div>
+          <div style="font-size:10px;color:var(--cream);font-weight:700">컷 ${i+1} 생성 중</div>
+          <div style="font-size:18px;color:var(--pink);font-weight:800;font-variant-numeric:tabular-nums">${elapsed}초</div>
+        </div>`;
+    }
+  };
+
   // 레퍼런스 이미지 — 이 컷에 출연하는 아바타들만
   let refImgs = [];
   if (S.avatarCuts) {
@@ -9666,6 +9703,9 @@ async function generateOneCut() {
 
   // 생성 중 placeholder — quad의 해당 cell만 갱신
   renderQuadOneLoading(i);
+  // 경과 시간 타이머 시작
+  _updateOneCutTimer();
+  _oneCutTimer = setInterval(_updateOneCutTimer, 1000);
 
   try {
     // 비율에 맞는 사이즈
@@ -9716,6 +9756,7 @@ async function generateOneCut() {
   } finally {
     btn.disabled = false;
     btn.innerHTML = '생성';
+    if (_oneCutTimer) clearInterval(_oneCutTimer);
   }
 }
 
@@ -9809,6 +9850,22 @@ async function generateImage() {
   btn.disabled = true;
   btn.innerHTML = '<div class="spin"></div> 생성 중...';
 
+  // 경과 시간 타이머 시작
+  const _genStartTime = Date.now();
+  let _genTimer = null;
+  const _updateQuadTimer = (label) => {
+    const elapsed = Math.floor((Date.now() - _genStartTime) / 1000);
+    const quad = document.getElementById('quad');
+    if (!quad) return;
+    quad.innerHTML = `
+      <div style="grid-column:1/-1;grid-row:1/-1;display:flex;align-items:center;justify-content:center;background:#0a0a0c;flex-direction:column;gap:14px">
+        <div class="spin" style="width:36px;height:36px;border-width:3px"></div>
+        <div style="font-size:13px;color:var(--cream);font-weight:700">${label}</div>
+        <div style="font-size:24px;color:var(--pink);font-weight:800;font-variant-numeric:tabular-nums">${elapsed}초</div>
+        <div style="font-size:10px;color:var(--ink3)">AI가 이미지를 만들고 있어요</div>
+      </div>`;
+  };
+
   // 아바타 중 이미지 있는 것들만 레퍼런스로
   const refImgs = S.avatars.filter(av => av.imgUrl).map(av => av.imgUrl);
   // 이전 컷 이어서 만들기 체크 — 있으면 fal storage에 업로드 후 refImgs에 추가
@@ -9832,6 +9889,9 @@ async function generateImage() {
       <div class="spin" style="width:28px;height:28px;border-width:3px"></div>
       <div style="font-size:11px;color:var(--ink2)">한글 필드 번역 중...</div>
     </div>`;
+  // 경과 시간 타이머 시작
+  _updateQuadTimer('한글 필드 번역 중...');
+  _genTimer = setInterval(() => _updateQuadTimer('4컷 이미지 생성 중...'), 1000);
 
   let prompt;
   try {
@@ -9849,7 +9909,6 @@ async function generateImage() {
       <div class="spin" style="width:28px;height:28px;border-width:3px"></div>
       <div style="font-size:11px;color:var(--ink2)">4컷 이미지 생성 중...</div>
     </div>`;
-
   try {
     // 레퍼런스 없음 → /edit 제거 (GPT/나노바나나 둘 다 text-to-image 폴백)
     const modelToUse = useRef ? model : model.replace('/edit', '');
@@ -9906,6 +9965,7 @@ async function generateImage() {
   } finally {
     btn.disabled = false;
     btn.innerHTML = '생성';
+    if (_genTimer) clearInterval(_genTimer);
   }
 }
 
