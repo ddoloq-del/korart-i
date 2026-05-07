@@ -6019,14 +6019,42 @@ Character: ${charDesc}.${randomNote}${_refGuidance}`;
 
   log('info', `아바타 다각도 시트 생성 — ${name} (3x2 grid, 1536x1024)`);
 
-  // 아바타 스타일 강력 주입 (실사 외 스타일 선택 시 — GPT Image 2 사실적 성향 제압)
+  // 아바타 스타일 강력 주입 — 카테고리별 다른 템플릿 (GPT Image 2 사실적 성향 제압)
   if (_avStyleKw) {
-    // 1) 맨 앞에 강력 선언
-    prompt = `[CRITICAL ART STYLE: ${_avStyleKw}. This is a stylized illustration in ${_avStyleKw}, NOT a photograph. NOT photorealistic. The entire image must be drawn/illustrated in ${_avStyleKw}.]\n\n` + prompt;
-    // 2) 끝에도 한 번 더 강조
-    prompt = prompt + `\n\nFINAL REMINDER: Render this entirely in ${_avStyleKw}. The output must be a stylized illustration, not a photograph. Avoid photorealistic lighting and textures.`;
-    // 3) 사실적 키워드 제거
-    prompt = prompt.replace(/Studio portrait lighting, professional photography\.?/g, '').replace(/Sharp focus on face, high detail\.?/g, '');
+    const _avCat = S.avatarStyle;  // 'anime_2d' 또는 'anime_3d'
+    let _critical = '';
+    let _final = '';
+    if (_avCat === 'anime_2d') {
+      // 2D 애니 — 일러스트 강조
+      _critical = `[CRITICAL ART STYLE: ${_avStyleKw}. This is a hand-drawn 2D animation illustration in ${_avStyleKw}. NOT a photograph. NOT photorealistic. NOT 3D rendered. Flat 2D illustration with anime-style line art and cel shading.]`;
+      _final = `FINAL REMINDER: Render this entirely as a 2D anime illustration in ${_avStyleKw}. Hand-drawn style with flat colors, anime aesthetics, NO photorealism, NO 3D rendering.`;
+    } else if (_avCat === 'anime_3d') {
+      // 3D 애니 / 클레이메이션 — 3D 렌더링 강조
+      const _isClay = (S.avatarStyleSub === 'clay');
+      const _isLowpoly = (S.avatarStyleSub === 'lowpoly');
+      if (_isClay) {
+        _critical = `[CRITICAL ART STYLE: ${_avStyleKw}. This is a stop-motion clay model character. Visible clay texture, fingerprints, handcrafted look. NOT a photograph of a real person. NOT photorealistic 3D.]`;
+        _final = `FINAL REMINDER: Render this as a clay-model stop-motion character. Visible clay material texture, soft handmade aesthetic.`;
+      } else if (_isLowpoly) {
+        _critical = `[CRITICAL ART STYLE: ${_avStyleKw}. Geometric low-polygon 3D model with visible polygon facets. NOT photorealistic. NOT a real person. Stylized geometric look.]`;
+        _final = `FINAL REMINDER: Render this as a low-poly 3D character with visible polygon edges and flat shading.`;
+      } else {
+        // 픽사/디즈니/드림웍스/일본 3D CG
+        _critical = `[CRITICAL ART STYLE: ${_avStyleKw}. This is a stylized 3D animated movie character (CGI) in ${_avStyleKw}. NOT a photograph. NOT a real human. Animated movie character with exaggerated stylized 3D features, large expressive eyes, soft cartoon proportions.]`;
+        _final = `FINAL REMINDER: Render this entirely as a 3D animated character in ${_avStyleKw}. Stylized cartoon proportions, NOT photorealistic, NOT a real human.`;
+      }
+    } else {
+      // fallback
+      _critical = `[CRITICAL ART STYLE: ${_avStyleKw}. This is a stylized illustration in ${_avStyleKw}, NOT a photograph. NOT photorealistic.]`;
+      _final = `FINAL REMINDER: Render this entirely in ${_avStyleKw}. Stylized illustration, not photograph.`;
+    }
+    prompt = _critical + `\n\n` + prompt + `\n\n` + _final;
+    // 사실적 키워드 제거
+    prompt = prompt
+      .replace(/Studio portrait lighting, professional photography\.?/g, '')
+      .replace(/Sharp focus on face, high detail\.?/g, '')
+      .replace(/photorealistic/gi, 'stylized')
+      .replace(/professional photography/gi, 'stylized illustration');
   }
 
   try {
