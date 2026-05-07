@@ -5833,9 +5833,6 @@ async function generateAvatarImage() {
   const _avModelLabel = _refImgUrl ? 'GPT Image 2 Edit (Medium)' : 'GPT Image 2 (Medium)';
   const _avRefNote = _refImgUrl ? '<span style="color:var(--teal)">참고 사진 사용</span>' : '레퍼런스 없음 (설정에서 생성)';
   if (typeof showConfirm === 'function') {
-  // 아바타 스타일 자동 주입
-  if (_avStyleKw) prompt = prompt + `\n\nART STYLE: ${_avStyleKw}.`;
-
     const _avOk = await showConfirm(
       '아바타 AI 생성',
       `<div style="padding:8px 0">
@@ -6021,6 +6018,9 @@ Character: ${charDesc}.${randomNote}${_refGuidance}`;
   _avTimer = setInterval(_updateAvTimer, 1000);
 
   log('info', `아바타 다각도 시트 생성 — ${name} (3x2 grid, 1536x1024)`);
+
+  // 아바타 스타일 자동 주입 (실사 외 스타일 선택 시)
+  if (_avStyleKw) prompt = prompt + `\n\nART STYLE: ${_avStyleKw}.`;
 
   try {
     const url = await callFalImage(null, FIXED_MODEL, prompt, '1536x1024', _refImgUrl || undefined);
