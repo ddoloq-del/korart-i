@@ -2485,6 +2485,13 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
       <input id="avName" placeholder="예: 김민준">
     </div>
 
+    <!-- 아바타 스타일 선택 -->
+    <div class="field" style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:700;display:block;margin-bottom:6px">아바타 스타일</label>
+      <div id="avStyleChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px"></div>
+      <div id="avStyleSubChips" style="display:none;gap:5px;flex-wrap:wrap;padding:8px 10px;background:var(--bg2);border:1px solid var(--line);border-radius:0"></div>
+    </div>
+
     <!-- 참고용 이미지 (사람/반려동물/제품 공통) -->
     <div class="field">
       <label>참고용 이미지 <span style="font-size:9px;color:var(--ink3);font-weight:400;margin-left:4px">선택사항 · AI에게 닮은 이미지 참조</span></label>
@@ -2844,13 +2851,6 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
       </div>
     </div>
     <!-- ============= 제품 카테고리 입력 폼 끝 ============= -->
-
-﻿    <!-- 아바타 스타일 선택 -->
-    <div class="field" style="margin-bottom:12px">
-      <label style="font-size:11px;font-weight:700;display:block;margin-bottom:6px">아바타 스타일</label>
-      <div id="avStyleChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px"></div>
-      <div id="avStyleSubChips" style="display:none;gap:5px;flex-wrap:wrap;padding:8px 10px;background:var(--bg2);border:1px solid var(--line);border-radius:0"></div>
-    </div>
 
     <!-- 아바타 이미지 -->    <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;padding:12px;background:var(--bg);border:1px solid var(--line);border-radius:8px">
       <div id="avImgPreview" style="width:180px;height:120px;background:var(--bg4);border:1px dashed var(--line2);border-radius: 0;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:32px;flex-shrink:0;overflow:hidden">👤</div>
