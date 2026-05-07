@@ -4266,26 +4266,39 @@ function downloadGrid() {
   if (S.gridDataUrl) {
     downloadImage(S.gridDataUrl, `korart_grid_${Date.now()}.png`);
   } else if (S.cutDataUrls[0]) {
-    // gridDataUrl 없으면 컷 4개로 합쳐서 만들기
-    const W = 1792, H = 1024;
-    const c = document.createElement('canvas');
-    c.width = W; c.height = H;
-    const ctx = c.getContext('2d');
-    let loaded = 0;
-    S.cutDataUrls.forEach((url, i) => {
-      if (!url) { loaded++; return; }
-      const img = new Image();
-      img.onload = () => {
-        const x = (i % 2) * (W/2);
-        const y = Math.floor(i / 2) * (H/2);
-        ctx.drawImage(img, x, y, W/2, H/2);
-        loaded++;
-        if (loaded === 4) {
-          downloadImage(c.toDataURL('image/png'), `korart_grid_${Date.now()}.png`);
-        }
+    // gridDataUrl 없으면 컷 4개의 실제 비율을 파악해서 만들기 (강제 늘림 방지)
+    const firstImg = new Image();
+    firstImg.onload = () => {
+      const cellW = firstImg.naturalWidth;
+      const cellH = firstImg.naturalHeight;
+      const W = cellW * 2;
+      const H = cellH * 2;
+      const c = document.createElement('canvas');
+      c.width = W; c.height = H;
+      const ctx = c.getContext('2d');
+      // 검은 배경 채우기 (흰 선 잔재 방지)
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, W, H);
+
+      let loaded = 0;
+      const finalize = () => {
+        downloadImage(c.toDataURL('image/png'), `korart_grid_${Date.now()}.png`);
       };
-      img.src = url;
-    });
+      S.cutDataUrls.forEach((url, i) => {
+        if (!url) { loaded++; if (loaded === 4) finalize(); return; }
+        const img = new Image();
+        img.onload = () => {
+          const x = (i % 2) * cellW;
+          const y = Math.floor(i / 2) * cellH;
+          ctx.drawImage(img, x, y, cellW, cellH);
+          loaded++;
+          if (loaded === 4) finalize();
+        };
+        img.onerror = () => { loaded++; if (loaded === 4) finalize(); };
+        img.src = url;
+      });
+    };
+    firstImg.src = S.cutDataUrls[0];
   } else {
     toast('저장할 이미지가 없습니다');
   }
@@ -4311,12 +4324,15 @@ function loadQuadFromFile(event) {
       S.gridDataUrl = fullCanvas.toDataURL('image/jpeg', 0.92);
       S.gridPubUrl = null;  // CDN 업로드 필요 → goToStep3에서 자동 처리
 
-      // 4분할 → 각 컷 dataURL
+      // 4분할 → 각 컷 dataURL (분할선 잔재 제거 마진 포함)
       const positions = [[0,0],[hw,0],[0,hh],[hw,hh]];
+      const M = Math.max(2, Math.floor(Math.min(hw, hh) * 0.005));
       for (let i = 0; i < 4; i++) {
         const cc = document.createElement('canvas');
         cc.width = hw; cc.height = hh;
-        cc.getContext('2d').drawImage(img, positions[i][0], positions[i][1], hw, hh, 0, 0, hw, hh);
+        const sx = positions[i][0] + (positions[i][0] === 0 ? 0 : M);
+        const sy = positions[i][1] + (positions[i][1] === 0 ? 0 : M);
+        cc.getContext('2d').drawImage(img, sx, sy, hw - M, hh - M, 0, 0, hw, hh);
         S.cutDataUrls[i] = cc.toDataURL('image/jpeg', 0.92);
         S.cutPubUrls[i] = null;
       }
@@ -5910,7 +5926,7 @@ async function generateAvatarImage() {
     if (petExtra)   petParts.push(petExtra);
     charDesc = petParts.join(', ') || 'a cute pet';
 
-    prompt = `Create a single pet character reference sheet image showing the SAME pet in a strict 3x2 grid layout (3 columns, 2 rows) with thin black dividing lines between each panel. Plain neutral light gray studio background.
+    prompt = `Create a single pet character reference sheet image showing the SAME pet in a strict 3x2 grid layout (3 columns, 2 rows) with NO dividing lines, NO borders, NO gaps between panels — clean adjacent edges only. Plain neutral light gray studio background.
 
 Top row (left to right):
 1. Front view, sitting calmly, looking at camera
@@ -5954,7 +5970,7 @@ Pet description: ${charDesc}.${_refGuidance}`;
       ? `\n- The brand text or logo \"${productLogo}\" must be clearly visible and consistent across all panels`
       : '';
 
-    prompt = `Create a single product reference sheet image showing the SAME product in a strict 3x2 grid layout (3 columns, 2 rows) with thin black dividing lines between each panel. Plain neutral light gray studio background, professional product photography lighting.\n\nTop row (left to right):\n1. Front view, straight-on angle\n2. Three-quarter view from the LEFT\n3. Three-quarter view from the RIGHT\n\nBottom row (left to right):\n4. Back view\n5. Top-down view (from above)\n6. Detail close-up showing texture and material\n\nCRITICAL requirements:\n- Exact same product, same color, same material, same proportions in ALL 6 panels${logoLine}\n- Studio product photography, soft diffused lighting, clean shadows\n- Photorealistic, sharp focus, high detail\n- No humans, no hands holding the product\n- Centered composition with empty negative space around the product\n\nProduct description: ${charDesc}.${_refGuidance}`;
+    prompt = `Create a single product reference sheet image showing the SAME product in a strict 3x2 grid layout (3 columns, 2 rows) with NO dividing lines, NO borders, NO gaps between panels — clean adjacent edges only. Plain neutral light gray studio background, professional product photography lighting.\n\nTop row (left to right):\n1. Front view, straight-on angle\n2. Three-quarter view from the LEFT\n3. Three-quarter view from the RIGHT\n\nBottom row (left to right):\n4. Back view\n5. Top-down view (from above)\n6. Detail close-up showing texture and material\n\nCRITICAL requirements:\n- Exact same product, same color, same material, same proportions in ALL 6 panels${logoLine}\n- Studio product photography, soft diffused lighting, clean shadows\n- Photorealistic, sharp focus, high detail\n- No humans, no hands holding the product\n- Centered composition with empty negative space around the product\n\nProduct description: ${charDesc}.${_refGuidance}`;
   } else {
     // 사람 프롬프트 빌드 (기존)
     const charParts = [`a ${gender}`];
@@ -5972,7 +5988,7 @@ Pet description: ${charDesc}.${_refGuidance}`;
       ? '\n\nFor any unspecified features (face shape, eye shape if not stated, skin tone, etc.), choose natural and consistent Korean drama character features.'
       : '';
 
-    prompt = `Create a single character reference sheet image showing the SAME person in a strict 3x2 grid layout (3 columns, 2 rows) with thin black dividing lines between each panel. Plain neutral light gray studio background.
+    prompt = `Create a single character reference sheet image showing the SAME person in a strict 3x2 grid layout (3 columns, 2 rows) with NO dividing lines, NO borders, NO gaps between panels — clean adjacent edges only. Plain neutral light gray studio background.
 
 Top row (left to right):
 1. Front view, neutral relaxed expression, looking straight at camera
@@ -8701,7 +8717,7 @@ function buildImagePromptImageMode() {
   const extraEl = document.getElementById('imgExtraPrompt');
   const extra = (extraEl?.value || S.imgExtraPromptValue || '').trim();
 
-  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Panel positions are FIXED: Panel 1 = top-left, Panel 2 = top-right, Panel 3 = bottom-left, Panel 4 = bottom-right. Each panel shows variations of the same concept.
+  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with NO dividing lines, NO borders, NO gaps between panels — panels share clean adjacent edges. Panel positions are FIXED: Panel 1 = top-left, Panel 2 = top-right, Panel 3 = bottom-left, Panel 4 = bottom-right. Each panel shows variations of the same concept.
 SUBJECTS: ${subjectLock}
 ${charDesc ? 'CHARACTERS: ' + charDesc + '.' : ''}
 ${petDesc ? 'PETS: ' + petDesc + '.' : ''}
@@ -8873,7 +8889,7 @@ async function buildImagePromptImageModeForApi() {
   const extraRaw = (extraEl?.value || S.imgExtraPromptValue || '').trim();
   const extraEn = extraRaw ? await translateKoToEn(extraRaw) : '';
 
-  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Panel positions are FIXED: Panel 1 = top-left, Panel 2 = top-right, Panel 3 = bottom-left, Panel 4 = bottom-right. Each panel shows variations of the same concept.
+  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with NO dividing lines, NO borders, NO gaps between panels — panels share clean adjacent edges. Panel positions are FIXED: Panel 1 = top-left, Panel 2 = top-right, Panel 3 = bottom-left, Panel 4 = bottom-right. Each panel shows variations of the same concept.
 SUBJECTS: ${subjectLock}
 ${charDesc ? 'CHARACTERS: ' + charDesc + '.' : ''}
 ${panelCastDesc ? panelCastDesc + '. (Strictly follow this per-panel cast - do NOT include other characters in panels they are not assigned to.)' : ''}
@@ -9040,7 +9056,7 @@ function buildImagePrompt() {
       ' visible. NO additional people, NO extra characters, NO bystanders, NO romantic partners unless specified.'
     : 'NO people, NO characters visible.';
 
-  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Panel positions are FIXED: Panel 1 = top-left, Panel 2 = top-right, Panel 3 = bottom-left, Panel 4 = bottom-right. Each panel shows the SAME Korean drama scene from a DIFFERENT camera angle.
+  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with NO dividing lines, NO borders, NO gaps between panels — panels share clean adjacent edges. Panel positions are FIXED: Panel 1 = top-left, Panel 2 = top-right, Panel 3 = bottom-left, Panel 4 = bottom-right. Each panel shows the SAME Korean drama scene from a DIFFERENT camera angle.
 SUBJECTS: ${subjectLock}
 ${charDesc ? 'CHARACTERS: ' + charDesc + '.' : ''}
 ${petDesc ? 'PETS: ' + petDesc + '.' : ''}
@@ -9173,7 +9189,7 @@ async function buildImagePromptForApi() {
       ' visible. NO additional people, NO extra characters, NO bystanders, NO romantic partners unless specified.'
     : 'NO people, NO characters visible.';
 
-  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with thin black dividing lines. Panel positions are FIXED: Panel 1 = top-left, Panel 2 = top-right, Panel 3 = bottom-left, Panel 4 = bottom-right. Each panel shows the SAME Korean drama scene from a DIFFERENT camera angle.
+  return `Create a single image divided into exactly 4 equal panels in a strict 2x2 grid layout with NO dividing lines, NO borders, NO gaps between panels — panels share clean adjacent edges. Panel positions are FIXED: Panel 1 = top-left, Panel 2 = top-right, Panel 3 = bottom-left, Panel 4 = bottom-right. Each panel shows the SAME Korean drama scene from a DIFFERENT camera angle.
 SUBJECTS: ${subjectLock}
 ${charDesc ? 'CHARACTERS: ' + charDesc + '.' : ''}
 ${petDesc ? 'PETS: ' + petDesc + '.' : ''}
@@ -9634,12 +9650,19 @@ async function _displayQuadFromUrl(url) {
   const hw = Math.floor(img.naturalWidth/2);
   const hh = Math.floor(img.naturalHeight/2);
   const positions = [[0,0],[hw,0],[0,hh],[hw,hh]];
+  // 분할선 잔재 제거를 위한 안전 마진 (각 컷의 가장자리 일부 잘라내고 늘림)
+  const M = Math.max(2, Math.floor(Math.min(hw, hh) * 0.005));  // 0.5% 또는 최소 2px
   S.cutDataUrls = [];
   for (let i = 0; i < 4; i++) {
     const cc = document.createElement('canvas');
     cc.width = hw; cc.height = hh;
     const cx = cc.getContext('2d');
-    cx.drawImage(img, positions[i][0], positions[i][1], hw, hh, 0, 0, hw, hh);
+    // 가장자리 M픽셀씩 잘라내고 cell 전체를 채우도록 늘림 (분할선 잔재 제거)
+    const sx = positions[i][0] + (positions[i][0] === 0 ? 0 : M);
+    const sy = positions[i][1] + (positions[i][1] === 0 ? 0 : M);
+    const sw = hw - (positions[i][0] === 0 ? M : M);
+    const sh = hh - (positions[i][1] === 0 ? M : M);
+    cx.drawImage(img, sx, sy, sw, sh, 0, 0, hw, hh);
     S.cutDataUrls[i] = cc.toDataURL('image/jpeg', 0.92);
   }
 
@@ -9967,11 +9990,17 @@ async function generateImage() {
 
     const hw = Math.floor(img.naturalWidth/2), hh = Math.floor(img.naturalHeight/2);
     const positions = [[0,0],[hw,0],[0,hh],[hw,hh]];
+    // 분할선 잔재 제거를 위한 안전 마진
+    const M = Math.max(2, Math.floor(Math.min(hw, hh) * 0.005));
     for (let i=0; i<4; i++) {
       const cc = document.createElement('canvas');
       cc.width=hw; cc.height=hh;
       const cx = cc.getContext('2d');
-      cx.drawImage(img, positions[i][0], positions[i][1], hw, hh, 0, 0, hw, hh);
+      const sx = positions[i][0] + (positions[i][0] === 0 ? 0 : M);
+      const sy = positions[i][1] + (positions[i][1] === 0 ? 0 : M);
+      const sw = hw - M;
+      const sh = hh - M;
+      cx.drawImage(img, sx, sy, sw, sh, 0, 0, hw, hh);
       S.cutDataUrls[i] = cc.toDataURL('image/jpeg', 0.92);
     }
 
