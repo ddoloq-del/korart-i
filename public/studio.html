@@ -10240,9 +10240,6 @@ function buildVidPrompt(i) {
   const emotion = (S.cutEmotions && S.cutEmotions[i] || '').trim();
   if (emotion) p += ` Emotion: ${emotion}.`;
 
-  // 스타일 보존 명령 (영상 모델이 그림체 변형 시도 방지)
-  if (styleKw) p += ` PRESERVE input art style.`;
-
   // 510자 안전 캡 — Kling API 한계 절대 준수
   if (p.length > 510) p = p.slice(0, 507) + '...';
   return p;
