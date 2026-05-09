@@ -7789,12 +7789,39 @@ function updateImgSnsFields() {
   const editorialWrap = document.getElementById('imgEditorialFields');
   if (editorialWrap && isSns) editorialWrap.style.display = 'none';
   
+  // 2-1) 참고 이미지 필드(#imgContinueRefField)도 SNS에서만 숨김
+  const continueRefField = document.getElementById('imgContinueRefField');
+  if (continueRefField) {
+    if (isSns) {
+      // 원래 display 값 기억 (다른 씬으로 이동 시 복원용)
+      if (typeof continueRefField.dataset.snsOriginalDisplay === 'undefined') {
+        continueRefField.dataset.snsOriginalDisplay = continueRefField.style.display || '';
+      }
+      continueRefField.style.display = 'none';
+    } else {
+      // 다른 씬: 원래 표시 상태 복원 (한번이라도 SNS를 지난 적 있다면)
+      if (typeof continueRefField.dataset.snsOriginalDisplay !== 'undefined') {
+        continueRefField.style.display = continueRefField.dataset.snsOriginalDisplay;
+        delete continueRefField.dataset.snsOriginalDisplay;
+      }
+    }
+  }
+  
   // 3) 컷별 화보 앵글 영역 (#imgCutDescriptions의 부모 .field) 처리
   // SNS일 때는 앵글 카드 대신 테두리 슬롯으로 교체
   const cutDescWrap = document.getElementById('imgCutDescriptions');
   const cutDescField = cutDescWrap ? cutDescWrap.closest('.field') : null;
+  // 우측 컬럼 (컷별 화보 앵글 + 추가 프롬프트를 포함하는 div)
+  const rightCol = cutDescField ? cutDescField.parentElement : null;
   
   if (isSns) {
+    // 우측 컬럼을 grid-column: 1 / -1 로 확장 (좌측이 비어서 전체 폭 사용)
+    if (rightCol) {
+      if (typeof rightCol.dataset.snsOriginalGridColumn === 'undefined') {
+        rightCol.dataset.snsOriginalGridColumn = rightCol.style.gridColumn || '';
+      }
+      rightCol.style.gridColumn = '1 / -1';
+    }
     // 컷별 앵글 영역 부모(.field)는 유지 — label 변경 + 컨텐츠 교체
     if (cutDescField) {
       // label 변경
@@ -7809,7 +7836,7 @@ function updateImgSnsFields() {
     // SNS 전용 UI 렌더
     if (typeof renderSnsProfileUI === 'function') renderSnsProfileUI();
   } else {
-    // 다른 씬: SNS UI 숨김, 컷별 앵글 영역 복원
+    // 다른 씬: SNS UI 숨김, 컷별 앵글 영역 복원, 우측 컬럼 grid-column 복원
     const snsWrap = document.getElementById('imgSnsFields');
     if (snsWrap) snsWrap.style.display = 'none';
     if (cutDescField) {
@@ -7819,6 +7846,10 @@ function updateImgSnsFields() {
         delete lbl.dataset.snsOriginal;
       }
       if (cutDescWrap) cutDescWrap.style.display = '';
+    }
+    if (rightCol && typeof rightCol.dataset.snsOriginalGridColumn !== 'undefined') {
+      rightCol.style.gridColumn = rightCol.dataset.snsOriginalGridColumn;
+      delete rightCol.dataset.snsOriginalGridColumn;
     }
   }
 }
