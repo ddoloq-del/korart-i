@@ -2860,7 +2860,7 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
     <!-- ============= 제품 카테고리 입력 폼 끝 ============= -->
 
     <!-- 아바타 이미지 -->    <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;padding:12px;background:var(--bg);border:1px solid var(--line);border-radius:8px">
-      <div id="avImgPreview" style="width:180px;height:120px;background:var(--bg4);border:1px dashed var(--line2);border-radius: 0;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:32px;flex-shrink:0;overflow:hidden">👤</div>
+      <div id="avImgPreview" style="width:180px;height:120px;background:var(--bg4);border:1px dashed var(--line2);border-radius: 0;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:32px;flex-shrink:0;overflow:hidden">사진 없음</div>
       <div style="flex:1">
         <div style="font-size:11px;color:var(--ink2);margin-bottom:6px;font-weight:600">📸 아바타 얼굴</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
@@ -3970,18 +3970,18 @@ function renderVehicleOptions() {
 
 // === SNS 프로필 — 원형 테두리 스타일 (12개) ===
 const PROFILE_BORDERS = [
-  { key: 'cherry',    ko: '🌸 벚꽃',       en: 'pink cherry blossom flower wreath border around the circular profile, soft petals scattered, romantic spring vibe' },
-  { key: 'rose',      ko: '🌹 장미',       en: 'red and white rose flower border around the circular profile, lush blooms, classic romantic style' },
-  { key: 'daisy',     ko: '🌼 들꽃',       en: 'wildflower border with white daisies and lavender around the circular profile, natural meadow feel' },
-  { key: 'sunflower', ko: '🌻 해바라기',    en: 'cheerful yellow sunflower border around the circular profile, vibrant summer mood' },
-  { key: 'leaf',      ko: '🍃 보태니컬',    en: 'green botanical leaf border around the circular profile, lush eucalyptus and ferns, fresh natural style' },
-  { key: 'star',      ko: '⭐ 별/우주',     en: 'sparkling star and cosmic particles border around the circular profile, glowing magical galaxy effect' },
-  { key: 'snow',      ko: '❄️ 눈송이',     en: 'winter snowflake crystal border around the circular profile, delicate frost effect, cool blue tones' },
-  { key: 'neon',      ko: '💡 네온 링',     en: 'glowing neon ring border around the circular profile, cyberpunk pink and blue light effect' },
-  { key: 'gold',      ko: '👑 골드 프레임', en: 'vintage luxury gold ornate frame border around the circular profile, elegant baroque pattern' },
-  { key: 'gradient',  ko: '🌈 그라데이션',  en: 'colorful gradient ring border around the circular profile, Instagram story style purple to pink to orange' },
-  { key: 'emoji',     ko: '💕 이모지',      en: 'cute emoji border around the circular profile with hearts and stars and sparkles, kawaii style' },
-  { key: 'pearl',     ko: '💍 진주',       en: 'elegant pearl beads border around the circular profile, refined feminine luxury style' },
+  { key: 'cherry',    ko: '벚꽃',       en: 'pink cherry blossom flower wreath border around the circular profile, soft petals scattered, romantic spring vibe' },
+  { key: 'rose',      ko: '장미',       en: 'red and white rose flower border around the circular profile, lush blooms, classic romantic style' },
+  { key: 'daisy',     ko: '들꽃',       en: 'wildflower border with white daisies and lavender around the circular profile, natural meadow feel' },
+  { key: 'sunflower', ko: '해바라기',    en: 'cheerful yellow sunflower border around the circular profile, vibrant summer mood' },
+  { key: 'leaf',      ko: '보태니컬',    en: 'green botanical leaf border around the circular profile, lush eucalyptus and ferns, fresh natural style' },
+  { key: 'star',      ko: '별/우주',     en: 'sparkling star and cosmic particles border around the circular profile, glowing magical galaxy effect' },
+  { key: 'snow',      ko: '눈송이',     en: 'winter snowflake crystal border around the circular profile, delicate frost effect, cool blue tones' },
+  { key: 'neon',      ko: '네온 링',     en: 'glowing neon ring border around the circular profile, cyberpunk pink and blue light effect' },
+  { key: 'gold',      ko: '골드 프레임', en: 'vintage luxury gold ornate frame border around the circular profile, elegant baroque pattern' },
+  { key: 'gradient',  ko: '그라데이션',  en: 'colorful gradient ring border around the circular profile, Instagram story style purple to pink to orange' },
+  { key: 'emoji',     ko: '하트 패턴',      en: 'cute emoji border around the circular profile with hearts and stars and sparkles, kawaii style' },
+  { key: 'pearl',     ko: '진주',       en: 'elegant pearl beads border around the circular profile, refined feminine luxury style' },
 ];
 
 // SNS 프로필 default 4컷 테두리
@@ -3989,36 +3989,36 @@ const PROFILE_BORDERS_DEFAULT_4 = ['cherry', 'rose', 'daisy', 'sunflower'];
 
 // === 나의 애완동물 (life_pet) — 동물 종류 ===
 const PET_TYPES = [
-  { key: 'dog',      ko: '🐕 강아지',   en: 'a friendly happy dog (random breed: golden retriever, poodle, shiba inu, corgi, husky, etc)' },
-  { key: 'cat',      ko: '🐈 고양이',   en: 'a cute cat (random breed: persian, ragdoll, siamese, british shorthair, korean shorthair, etc)' },
-  { key: 'rabbit',   ko: '🐇 토끼',     en: 'a cute fluffy rabbit (random breed: holland lop, netherland dwarf, lionhead, etc)' },
-  { key: 'hamster',  ko: '🐹 햄스터',   en: 'a tiny adorable hamster (random breed: golden, dwarf, syrian, etc)' },
-  { key: 'parrot',   ko: '🦜 앵무새',   en: 'a colorful parrot (random species: macaw, cockatiel, budgie, lovebird, etc)' },
-  { key: 'turtle',   ko: '🐢 거북이',   en: 'a calm turtle (random species: red-eared slider, box turtle, etc)' },
-  { key: 'fish',     ko: '🐠 물고기',   en: 'a beautiful pet fish in an aquarium (random species: betta, goldfish, tropical fish, etc)' },
-  { key: 'iguana',   ko: '🦎 이구아나', en: 'an exotic iguana or lizard (random species)' },
-  { key: 'ferret',   ko: '🦡 페럿',     en: 'a playful ferret' },
-  { key: 'random',   ko: '🎲 랜덤',     en: '__RANDOM__' },
-  { key: 'custom',   ko: '✏️ 직접 입력', en: '__CUSTOM__' },
+  { key: 'dog',      ko: '강아지',   en: 'a friendly happy dog (random breed: golden retriever, poodle, shiba inu, corgi, husky, etc)' },
+  { key: 'cat',      ko: '고양이',   en: 'a cute cat (random breed: persian, ragdoll, siamese, british shorthair, korean shorthair, etc)' },
+  { key: 'rabbit',   ko: '토끼',     en: 'a cute fluffy rabbit (random breed: holland lop, netherland dwarf, lionhead, etc)' },
+  { key: 'hamster',  ko: '햄스터',   en: 'a tiny adorable hamster (random breed: golden, dwarf, syrian, etc)' },
+  { key: 'parrot',   ko: '앵무새',   en: 'a colorful parrot (random species: macaw, cockatiel, budgie, lovebird, etc)' },
+  { key: 'turtle',   ko: '거북이',   en: 'a calm turtle (random species: red-eared slider, box turtle, etc)' },
+  { key: 'fish',     ko: '물고기',   en: 'a beautiful pet fish in an aquarium (random species: betta, goldfish, tropical fish, etc)' },
+  { key: 'iguana',   ko: '이구아나', en: 'an exotic iguana or lizard (random species)' },
+  { key: 'ferret',   ko: '페럿',     en: 'a playful ferret' },
+  { key: 'random',   ko: '랜덤',     en: '__RANDOM__' },
+  { key: 'custom',   ko: '직접 입력', en: '__CUSTOM__' },
 ];
 
 // === 커플 (life_couple) — 인종 / 키 / 체형 ===
 const COUPLE_RACES = [
-  { key: 'korean',     ko: '🇰🇷 한국인',     en: 'Korean' },
-  { key: 'japanese',   ko: '🇯🇵 일본인',     en: 'Japanese' },
-  { key: 'chinese',    ko: '🇨🇳 중국인',     en: 'Chinese' },
-  { key: 'western',    ko: '🌎 서양인',     en: 'Caucasian Western (American/European)' },
-  { key: 'sea',        ko: '🌏 동남아인',   en: 'Southeast Asian (Vietnamese/Thai/Filipino/Indonesian)' },
-  { key: 'random',     ko: '🎲 랜덤',       en: '__RANDOM__' },
-  { key: 'custom',     ko: '✏️ 직접 입력',  en: '__CUSTOM__' },
+  { key: 'korean',     ko: '한국인',     en: 'Korean' },
+  { key: 'japanese',   ko: '일본인',     en: 'Japanese' },
+  { key: 'chinese',    ko: '중국인',     en: 'Chinese' },
+  { key: 'western',    ko: '서양인',     en: 'Caucasian Western (American/European)' },
+  { key: 'sea',        ko: '동남아인',   en: 'Southeast Asian (Vietnamese/Thai/Filipino/Indonesian)' },
+  { key: 'random',     ko: '랜덤',       en: '__RANDOM__' },
+  { key: 'custom',     ko: '직접 입력',  en: '__CUSTOM__' },
 ];
 
 const COUPLE_HEIGHTS = [
   { key: 'short',   ko: '작은 키',     en: 'short height' },
   { key: 'avg',     ko: '보통 키',     en: 'average height' },
   { key: 'tall',    ko: '큰 키',       en: 'tall height' },
-  { key: 'random',  ko: '🎲 랜덤',     en: '__RANDOM__' },
-  { key: 'custom',  ko: '✏️ 직접 입력', en: '__CUSTOM__' },
+  { key: 'random',  ko: '랜덤',     en: '__RANDOM__' },
+  { key: 'custom',  ko: '직접 입력', en: '__CUSTOM__' },
 ];
 
 const COUPLE_BODIES = [
@@ -4026,8 +4026,8 @@ const COUPLE_BODIES = [
   { key: 'avg',     ko: '보통 체형',   en: 'average body' },
   { key: 'chubby',  ko: '통통한 체형', en: 'chubby cute body' },
   { key: 'fit',     ko: '근육질 체형', en: 'fit athletic muscular body' },
-  { key: 'random',  ko: '🎲 랜덤',     en: '__RANDOM__' },
-  { key: 'custom',  ko: '✏️ 직접 입력', en: '__CUSTOM__' },
+  { key: 'random',  ko: '랜덤',     en: '__RANDOM__' },
+  { key: 'custom',  ko: '직접 입력', en: '__CUSTOM__' },
 ];
 
 // 랜덤 추첨 헬퍼
@@ -4052,15 +4052,15 @@ function buildSnsProfilePrompt(cutIdx) {
       }
     }
     
-    return `Four-panel grid of SNS profile pictures (2x2 layout). Each panel shows a circular profile photo of the SAME person, extreme close-up of the face only, identical face across all panels matching the reference photo exactly.
+    return `Four-panel grid of SNS profile pictures (2x2 layout). Each panel shows a LARGE circular profile photo of the SAME person, head and shoulders portrait centered inside the circle. CRITICAL: leave generous breathing room around the face — the entire head must fit comfortably inside the circle without cropping the top of the head, sides of the face, or hair. NOT extreme close-up. Identical person across all panels matching the reference photo exactly.
 ${panelLines.join('. ')}.
-Clean white or pastel background outside the circle, person centered inside the circle, friendly approachable expression, soft natural lighting. Each panel has a different decorative border around the circle. High-quality professional profile photography.`;
+Clean white or pastel background outside the circle. Top of head must NOT touch top of circle, chin must NOT touch bottom of circle — full face visible inside the circle with comfortable margin. Friendly approachable expression, soft natural lighting. Each panel has a different decorative border around the circle. High-quality professional profile photography.`;
   }
   
   // 1컷 모드: 선택된 컷의 테두리만
   const b = PROFILE_BORDERS.find(x => x.key === borders[cutIdx]);
   const borderEn = b ? b.en : 'simple clean border';
-  return `SNS profile picture, single image. Circular profile photo with ${borderEn}, extreme close-up of the face only, face matches the reference photo exactly. Clean white or pastel background outside the circle, person centered inside the circle, friendly approachable expression, soft natural lighting. High-quality professional profile photography.`;
+  return `SNS profile picture, single image. Large circular profile photo with ${borderEn}, head and shoulders portrait centered inside the circle. CRITICAL: leave generous breathing room around the face — the entire head must fit comfortably inside the circle without cropping the top of the head, sides of the face, or hair. NOT extreme close-up. Person face matches the reference photo exactly. Clean white or pastel background outside the circle. Top of head must NOT touch top of circle, chin must NOT touch bottom — full face visible with comfortable margin. Friendly approachable expression, soft natural lighting. High-quality professional profile photography.`;
 }
 
 // === 나의 애완동물 / 커플 prompt 헬퍼 ===
@@ -5410,7 +5410,7 @@ function renderStep1Avatars() {
         <div onclick="openAvatarCutPicker(${av.id})" style="cursor:pointer">
           ${av.imgUrl
             ? `<img src="${av.imgUrl}" style="width:100%;aspect-ratio:1;object-fit:cover;object-position:left top;display:block;background:#f0f0f0">`
-            : `<div style="width:100%;aspect-ratio:1;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--ink3)">👤</div>`}
+            : `<div style="width:100%;aspect-ratio:1;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--ink3)">사진 없음</div>`}
           <div style="padding:6px 8px">
             <div style="font-size:11px;font-weight:700;color:${isCast?'var(--gold)':'var(--cream)'};margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(av.name)}</div>
             <div style="font-size:9px;color:var(--ink3)">${av.gender === 'Korean man' ? '남' : av.gender === 'Korean woman' ? '여' : '?'}${ageShort ? ' · ' + ageShort : ''}</div>
@@ -7309,7 +7309,7 @@ function renderSavedAvatars() {
         <div onclick="event.stopPropagation();deleteAvatarFromLib(${av.id})" style="position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:var(--red);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2" title="삭제">✕</div>
         ${av.imgUrl
           ? `<img src="${av.imgUrl}" style="width:100%;aspect-ratio:1;object-fit:cover;object-position:left top;display:block;background:#f0f0f0">`
-          : `<div style="width:100%;aspect-ratio:1;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--ink3)">👤</div>`}
+          : `<div style="width:100%;aspect-ratio:1;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--ink3)">사진 없음</div>`}
         <div style="padding:8px 10px">
           <div style="font-size:12px;font-weight:700;color:var(--cream);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(av.name)}</div>
           <div style="display:flex;flex-wrap:wrap;gap:3px">
@@ -7801,7 +7801,7 @@ function updateImgSnsFields() {
       const lbl = cutDescField.querySelector('label');
       if (lbl && !lbl.dataset.snsOriginal) {
         lbl.dataset.snsOriginal = lbl.innerHTML;
-        lbl.innerHTML = '📸 참조 사진 + 테두리 스타일 <span style="font-size:10px;color:var(--ink3);font-weight:400">(사진 업로드 후 컷별 테두리 선택)</span>';
+        lbl.innerHTML = '참조 사진 + 테두리 스타일 <span style="font-size:10px;color:var(--ink3);font-weight:400">(사진 업로드 후 컷별 테두리 선택)</span>';
       }
       // imgCutDescriptions 영역 숨김
       if (cutDescWrap) cutDescWrap.style.display = 'none';
@@ -7841,7 +7841,7 @@ function renderSnsProfileUI() {
   
   const refImgPreview = S.snsRefImageDataUrl
     ? `<img src="${S.snsRefImageDataUrl}" style="width:100%;max-width:140px;aspect-ratio:1;object-fit:cover;border-radius:50%;border:2px solid var(--gold);display:block;margin:0 auto 8px">`
-    : `<div style="width:140px;height:140px;border-radius:50%;border:2px dashed var(--line);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;background:var(--bg3);font-size:32px;color:var(--ink3)">👤</div>`;
+    : `<div style="width:140px;height:140px;border-radius:50%;border:2px dashed var(--line);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;background:var(--bg3);font-size:32px;color:var(--ink3)">사진 없음</div>`;
   
   // 테두리 슬롯 (4개)
   const colors = ['var(--gold)','var(--blue)','var(--green)','var(--red)'];
@@ -7870,7 +7870,7 @@ function renderSnsProfileUI() {
       <div style="background:var(--bg3);border:1px solid var(--line);padding:14px;text-align:center">
         ${refImgPreview}
         <input type="file" id="snsRefImgInput" accept="image/*" onchange="handleSnsRefImageUpload(event)" style="display:none">
-        <button onclick="document.getElementById('snsRefImgInput').click()" style="background:var(--gold);color:#000;border:0;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;border-radius:0">${S.snsRefImageDataUrl ? '📷 사진 변경' : '📷 사진 선택'}</button>
+        <button onclick="document.getElementById('snsRefImgInput').click()" style="background:var(--gold);color:#000;border:0;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;border-radius:0">${S.snsRefImageDataUrl ? '사진 변경' : '사진 선택'}</button>
         ${S.snsRefImageDataUrl ? `<button onclick="clearSnsRefImage()" style="background:transparent;color:var(--red);border:1px solid var(--red);padding:8px 12px;font-size:11px;font-weight:700;cursor:pointer;border-radius:0;margin-left:6px">제거</button>` : ''}
       </div>
     </div>
@@ -7932,8 +7932,8 @@ function updateImgPetCoupleFields() {
       if (lbl && !lbl.dataset.petCoupleOriginal) {
         lbl.dataset.petCoupleOriginal = lbl.innerHTML;
         lbl.innerHTML = isPet
-          ? '🐾 동물 종류 + 컷별 추가 설명 <span style="font-size:10px;color:var(--ink3);font-weight:400">(4컷 모두 같은 종/다른 포즈)</span>'
-          : '💕 파트너 설정 + 컷별 추가 설명 <span style="font-size:10px;color:var(--ink3);font-weight:400">(4컷 모두 같은 파트너/다른 상황)</span>';
+          ? '동물 종류 + 컷별 추가 설명 <span style="font-size:10px;color:var(--ink3);font-weight:400">(4컷 모두 같은 종/다른 포즈)</span>'
+          : '파트너 설정 + 컷별 추가 설명 <span style="font-size:10px;color:var(--ink3);font-weight:400">(4컷 모두 같은 파트너/다른 상황)</span>';
       }
       // 컷별 앵글 카드는 보이게 두되 — 그 위에 pet/couple 설정 UI 추가
     }
@@ -9337,8 +9337,8 @@ function buildImagePromptImageMode() {
     const race = _resolveCoupleRaceEn();
     const height = _resolveCoupleHeightEn();
     const body = _resolveCoupleBodyEn();
-    const partnerDesc = `${race} ${partnerGender} with ${height} and ${body}, attractive ideal partner`;
-    return `Four-panel grid (2x2) of romantic couple photos. Same couple across all 4 panels: (1) ${charDesc || 'the person'} matching the reference photo exactly, AND (2) ${partnerDesc} (this partner remains identical across all 4 panels). Different romantic situations in each panel: holding hands, hugging, sharing a meal, walking together. Soft warm lighting, K-drama aesthetic, intimate genuine moments, dreamy bokeh. The partner appearance must be IDENTICAL in all 4 panels. ${sc.style}`;
+    const partnerDesc = `${race} ${partnerGender} with ${height} and ${body}, attractive ideal partner. CRITICAL: this partner must have a COMPLETELY DIFFERENT face from the reference person — distinct unique facial features, different face shape, different eyes, different nose, different lips, different jawline. NOT a sibling. NOT a doppelganger. Clearly a separate individual who looks NOTHING like the reference person`;
+    return `Four-panel grid (2x2) of romantic couple photos showing TWO COMPLETELY DIFFERENT PEOPLE who do NOT look alike. Same couple across all 4 panels: (1) ${charDesc || 'the person'} matching the reference photo exactly, AND (2) ${partnerDesc} (this partner stays identical across all 4 panels but has a face that is CLEARLY DIFFERENT from the reference person — they are two separate individuals, NOT lookalikes, NOT siblings, NOT similar features). Different romantic situations in each panel: holding hands, hugging, sharing a meal, walking together. The two people in every panel must look like clearly distinct individuals — DO NOT blend their features, DO NOT make them resemble each other. Soft warm lighting, K-drama aesthetic, intimate genuine moments, dreamy bokeh. ${sc.style}`;
   }
   const subjectLock = _imgBuildSubjectLock(nPerson, nPet, nProd);
 
@@ -9604,9 +9604,9 @@ async function buildImagePromptOneCutImageModeForApi(cutIdx) {
     const race = _resolveCoupleRaceEn();
     const height = _resolveCoupleHeightEn();
     const body = _resolveCoupleBodyEn();
-    const partnerDesc = `${race} ${partnerGender} with ${height} and ${body}, attractive ideal partner`;
+    const partnerDesc = `${race} ${partnerGender} with ${height} and ${body}, attractive ideal partner. CRITICAL: this partner must have a COMPLETELY DIFFERENT face from the reference person — distinct unique facial features, NOT a sibling, NOT a lookalike, clearly a separate individual`;
     const personDesc = (S.avatars || []).filter(av => (av.category || 'person') === 'person').map(av => av.gender || 'person').join(', ') || 'a person';
-    return `Single romantic couple photo. ${personDesc} matching reference photo, AND ${partnerDesc}. Soft warm lighting, K-drama aesthetic, intimate genuine moment, dreamy bokeh. ${sc.style || ''}`;
+    return `Single romantic couple photo of TWO COMPLETELY DIFFERENT PEOPLE who do NOT look alike. ${personDesc} matching reference photo, AND ${partnerDesc} (CLEARLY different face from the reference person, separate individual, NOT similar features). Soft warm lighting, K-drama aesthetic, intimate genuine moment, dreamy bokeh. ${sc.style || ''}`;
   }
   let charDesc = '';
   let petDesc = '';
@@ -13747,7 +13747,7 @@ function resetMerge() {
             <div class="auth-dropdown-email">${escapeHtml(email)}</div>
           </div>
           <button class="auth-dropdown-item" onclick="KorartiAuth.openAccountModal()">
-            <span>👤</span> 내 정보
+            <span>사진 없음</span> 내 정보
           </button>
           <button class="auth-dropdown-item danger" onclick="KorartiAuth.handleLogout()">
             <span>↗</span> 로그아웃
