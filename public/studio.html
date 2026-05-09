@@ -7757,6 +7757,7 @@ function renderScenes() {
     {key:'fitness',    name:'운동'},
     {key:'dance',      name:'댄스'},
     {key:'interview',  name:'인터뷰'},
+    {key:'livestream', name:'생방송'},
     {key:'mv',         name:'뮤직비디오'},
   ];
   // 카테고리 영문 라벨 (스크린샷 스타일)
@@ -7765,7 +7766,7 @@ function renderScenes() {
     suspense:'SUSPENSE', mellow:'MELODRAMA', action:'ACTION', slice:'DAILY',
     commercial:'COMMERCIAL', vlog:'VLOG', flashback:'FLASHBACK', heaven:'HEAVEN', confession:'CONFESSION',
     horror:'HORROR', foodie:'FOODIE', travel:'TRAVEL', fitness:'FITNESS',
-    interview:'INTERVIEW',
+    interview:'INTERVIEW', livestream:'LIVESTREAM',
   };
 
   // 카테고리 색상 (씬 분위기에 맞춰)
@@ -8801,13 +8802,16 @@ function _imgBuildAvatarDescriptions() {
 
   let charDesc = '';
   if (personAvs.length) {
+    // 웨딩 화보 같이 신 자체에 의상이 명시된 경우 아바타 outfit 무시 (scene style 우선)
+    const _curScene = (typeof SCENES_IMAGE !== 'undefined') ? SCENES_IMAGE[S.scene] : null;
+    const _ignoreOutfit = _curScene && _curScene.style && /tuxedo|wedding gown|wedding dress|bridal|veil|chef whites|doctor coat|business suit|flight attendant uniform/i.test(_curScene.style);
     charDesc = personAvs.map(av => {
       const parts = [av.gender, av.age, av.body, av.height, av.look];
       if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
       else if (av.hair) parts.push(av.hair);
       if (av.skin) parts.push(av.skin);
       if (av.extra) parts.push(av.extra);
-      if (av.outfit && av.outfit.trim()) parts.push(av.outfit.trim());
+      if (!_ignoreOutfit && av.outfit && av.outfit.trim()) parts.push(av.outfit.trim());
       return av.name + ': ' + parts.filter(Boolean).join(', ');
     }).join(' | ');
   }
@@ -8939,6 +8943,8 @@ async function buildImagePromptImageModeForApi() {
   // 사람 — 한글 필드 번역
   let charDesc = '';
   if (personAvs.length) {
+    // 웨딩/직업 체험 같이 신 자체에 의상이 명시된 경우 아바타 outfit 무시 (scene style 우선)
+    const _ignoreOutfit = sc && sc.style && /tuxedo|wedding gown|wedding dress|bridal|veil|chef whites|doctor coat|business suit|flight attendant uniform/i.test(sc.style);
     const translatedAvs = await Promise.all(personAvs.map(async av => ({
       name: await translateKoToEn(av.name),
       gender: av.gender, age: av.age, body: av.body,
@@ -8954,7 +8960,7 @@ async function buildImagePromptImageModeForApi() {
       else if (av.hair) parts.push(av.hair);
       if (av.skin) parts.push(av.skin);
       if (av.extra) parts.push(av.extra);
-      if (av.outfit && av.outfit.trim()) parts.push(av.outfit.trim());
+      if (!_ignoreOutfit && av.outfit && av.outfit.trim()) parts.push(av.outfit.trim());
       return av.name + ': ' + parts.filter(Boolean).join(', ');
     }).join(' | ');
   }
