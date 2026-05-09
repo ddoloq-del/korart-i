@@ -3965,6 +3965,12 @@ const OUTFITS_BY_ERA = {
     { ko: '캐쥬얼',   en: 'wearing casual clothes, t-shirt and jeans' },
     { ko: '츄리닝',   en: 'wearing a tracksuit, sportswear' },
     { ko: '교복',     en: 'wearing a Korean school uniform' },
+    { ko: '턱시도(남)', en: 'wearing a tailored black tuxedo with white dress shirt and bow tie, formal groom attire',
+      hasLux: true, luxEn: 'wearing a luxury bespoke black tuxedo, satin lapels, premium silk bow tie, high-end groom formal wear' },
+    { ko: '셔츠+슬랙스(남)', en: 'wearing a crisp white dress shirt and charcoal tailored slacks, polished casual wedding groom look' },
+    { ko: '웨딩드레스(여)', en: 'wearing a flowing white wedding gown with delicate lace details and soft veil, elegant bridal dress',
+      hasLux: true, luxEn: 'wearing a haute couture luxury wedding gown with intricate lace, beaded embellishments, long cathedral veil, designer bridal attire' },
+    { ko: '세미웨딩드레스(여)', en: 'wearing an elegant semi-formal mini wedding dress in ivory, knee-length sophisticated bridal look' },
   ],
   historical: [
     { ko: '평민 한복', en: 'wearing traditional Korean commoner hanbok, simple white and beige' },
@@ -8802,16 +8808,13 @@ function _imgBuildAvatarDescriptions() {
 
   let charDesc = '';
   if (personAvs.length) {
-    // 웨딩 화보 같이 신 자체에 의상이 명시된 경우 아바타 outfit 무시 (scene style 우선)
-    const _curScene = (typeof SCENES_IMAGE !== 'undefined') ? SCENES_IMAGE[S.scene] : null;
-    const _ignoreOutfit = _curScene && _curScene.style && /tuxedo|wedding gown|wedding dress|bridal|veil|chef whites|doctor coat|business suit|flight attendant uniform/i.test(_curScene.style);
     charDesc = personAvs.map(av => {
       const parts = [av.gender, av.age, av.body, av.height, av.look];
       if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
       else if (av.hair) parts.push(av.hair);
       if (av.skin) parts.push(av.skin);
       if (av.extra) parts.push(av.extra);
-      if (!_ignoreOutfit && av.outfit && av.outfit.trim()) parts.push(av.outfit.trim());
+      if (av.outfit && av.outfit.trim()) parts.push(av.outfit.trim());
       return av.name + ': ' + parts.filter(Boolean).join(', ');
     }).join(' | ');
   }
@@ -8943,8 +8946,6 @@ async function buildImagePromptImageModeForApi() {
   // 사람 — 한글 필드 번역
   let charDesc = '';
   if (personAvs.length) {
-    // 웨딩/직업 체험 같이 신 자체에 의상이 명시된 경우 아바타 outfit 무시 (scene style 우선)
-    const _ignoreOutfit = sc && sc.style && /tuxedo|wedding gown|wedding dress|bridal|veil|chef whites|doctor coat|business suit|flight attendant uniform/i.test(sc.style);
     const translatedAvs = await Promise.all(personAvs.map(async av => ({
       name: await translateKoToEn(av.name),
       gender: av.gender, age: av.age, body: av.body,
@@ -8960,7 +8961,7 @@ async function buildImagePromptImageModeForApi() {
       else if (av.hair) parts.push(av.hair);
       if (av.skin) parts.push(av.skin);
       if (av.extra) parts.push(av.extra);
-      if (!_ignoreOutfit && av.outfit && av.outfit.trim()) parts.push(av.outfit.trim());
+      if (av.outfit && av.outfit.trim()) parts.push(av.outfit.trim());
       return av.name + ': ' + parts.filter(Boolean).join(', ');
     }).join(' | ');
   }

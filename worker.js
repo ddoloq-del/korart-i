@@ -79,43 +79,33 @@ async function getProfile(env, userId) {
 // 포인트 차감 + 거래 기록 (트랜잭션)
 // ============================================
 async function chargePoints(env, userId, amount, description, falEndpoint, requestId, metadata) {
-  // unlimited이면 차감 안 함, 거래만 amount=0으로 기록
-  const profile = await getProfile(env, userId);
-  if (!profile) return { ok: false, error: 'profile not found' };
-
-  if (profile.unlimited) {
-    // 거래 기록만 (실제 차감은 0)
-    const tx = await insertTransaction(env, userId, 'usage', 0, profile.points, description, falEndpoint, requestId, metadata);
-    return { ok: true, charged: 0, remaining: profile.points, unlimited: true, transactionId: tx ? tx.id : null };
-  }
-
-  // 잔액 확인
-  if (profile.points < amount) {
-    return { ok: false, error: 'insufficient_points', balance: profile.points, required: amount };
-  }
-
-  // 차감 (PostgREST PATCH) — 부동소수 오차 방지: 소수점 둘째 자리까지 round
-  const newBalance = Math.round((profile.points - amount) * 100) / 100;
-  const upd = await fetch(
-    env.SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId,
-    {
-      method: 'PATCH',
-      headers: {
-        'apikey': env.SUPABASE_SERVICE_KEY,
-        'Authorization': 'Bearer ' + env.SUPABASE_SERVICE_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal',
-      },
-      body: JSON.stringify({ points: newBalance }),
+  // ★ v2.0 — 신 크레딧 시스템(consumeCredits)으로 리다이렉트
+  // amount는 P 단위(USD × 42)로 들어오니까 크레딧(USD × 21.7)으로 환산
+  // P × (21.7/42) ≈ P × 0.5167
+  const creditAmount = Math.round(amount * (21.7 / 42) * 10) / 10;
+  
+  // 신 크레딧 시스템 차감
+  const result = await consumeCredits(env, userId, creditAmount, description, requestId);
+  
+  if (!result.ok) {
+    // insufficient_credits → insufficient_points 라벨로 변환 (기존 클라이언트 호환)
+    if (result.error === 'insufficient_credits') {
+      return { ok: false, error: 'insufficient_points', balance: result.balance, required: result.required };
     }
-  );
-  if (!upd.ok) return { ok: false, error: 'update failed' };
-
-  // 차감액도 소수점 둘째 자리까지 round (transactions 기록 일관성)
-  const chargedAmount = Math.round(amount * 100) / 100;
-  const tx = await insertTransaction(env, userId, 'usage', -chargedAmount, newBalance, description, falEndpoint, requestId, metadata);
-
-  return { ok: true, charged: chargedAmount, remaining: newBalance, unlimited: false, transactionId: tx ? tx.id : null };
+    return result;
+  }
+  
+  // 성공 — 트랜잭션은 consumeCredits가 credit_transactions에 이미 기록함
+  // point_transactions에도 호환용으로 추가 기록 (마이페이지 거래내역 표시용)
+  try {
+    const balance = await getCreditBalance(env, userId);
+    const total = balance ? (Number(balance.subscription_credits || 0) + Number(balance.pack_credits || 0)) : 0;
+    await insertTransaction(env, userId, 'usage', -creditAmount, total, description, falEndpoint, requestId, metadata);
+  } catch (e) {
+    // 호환용 기록 실패는 무시
+  }
+  
+  return { ok: true, charged: creditAmount, remaining: result.balance ? (Number(result.balance.subscription_credits || 0) + Number(result.balance.pack_credits || 0)) : 0, unlimited: false };
 }
 
 async function insertTransaction(env, userId, type, amount, balanceAfter, description, falEndpoint, requestId, metadata) {
@@ -726,29 +716,48 @@ export default {
 // 환불 (fal 호출 실패 시)
 // ============================================
 async function refundPoints(env, userId, amount, description) {
-  const profile = await getProfile(env, userId);
-  if (!profile) return;
-  if (profile.unlimited) {
-    await insertTransaction(env, userId, 'refund', 0, profile.points, description, null, null, null);
-    return;
-  }
-  // 부동소수 오차 방지
-  const refundAmount = Math.round(amount * 100) / 100;
-  const newBalance = Math.round((profile.points + refundAmount) * 100) / 100;
+  // ★ v2.0 — 신 크레딧 시스템에 환불
+  // amount는 P 단위(USD × 42)로 들어오니까 크레딧(USD × 21.7)으로 환산
+  const creditAmount = Math.round(amount * (21.7 / 42) * 10) / 10;
+  if (creditAmount <= 0) return;
+  
+  // 1) credit_balances의 subscription_credits에 환불 추가
+  const balance = await getCreditBalance(env, userId);
+  if (!balance) return;
+  
+  const newSub = Math.round((Number(balance.subscription_credits || 0) + creditAmount) * 10) / 10;
   await fetch(
-    env.SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId,
+    env.SUPABASE_URL + '/rest/v1/credit_balances?user_id=eq.' + userId,
     {
       method: 'PATCH',
-      headers: {
-        'apikey': env.SUPABASE_SERVICE_KEY,
-        'Authorization': 'Bearer ' + env.SUPABASE_SERVICE_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal',
-      },
-      body: JSON.stringify({ points: newBalance }),
+      headers: sbHeaders(env, { 'Prefer': 'return=minimal' }),
+      body: JSON.stringify({
+        subscription_credits: newSub,
+        updated_at: new Date().toISOString(),
+      }),
     }
   );
-  await insertTransaction(env, userId, 'refund', refundAmount, newBalance, description, null, null, null);
+  
+  // 2) credit_transactions에 환불 기록
+  await fetch(env.SUPABASE_URL + '/rest/v1/credit_transactions', {
+    method: 'POST',
+    headers: sbHeaders(env, { 'Prefer': 'return=minimal' }),
+    body: JSON.stringify({
+      user_id: userId,
+      type: 'refund',
+      amount: creditAmount,
+      source: 'subscription',
+      description: description || '자동 환불',
+    }),
+  });
+  
+  // 3) 호환용 — point_transactions에도 환불 기록 (마이페이지 거래내역 표시용)
+  try {
+    const total = newSub + Number(balance.pack_credits || 0);
+    await insertTransaction(env, userId, 'refund', creditAmount, total, description, null, null, null);
+  } catch (e) {
+    // 호환 기록 실패는 무시
+  }
 }
 
 // ============================================
