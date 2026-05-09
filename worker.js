@@ -310,6 +310,121 @@ export default {
         const data = await r.json();
         return j({ transactions: data });
       }
+      // ─────────────────────────────────────────
+      // /api/credits — 신규: 크레딧 잔액 + 구독 + 패키지 통합 조회
+      // ─────────────────────────────────────────
+      if (url.pathname === '/api/credits') {
+        const user = await getUserFromJWT(request, env);
+        if (!user) return j({ error: 'unauthorized' }, 401);
+
+        // 만료된 패키지 자동 정리
+        await expireOldPacks(env, user.id);
+        // 죽은 작업 정리
+        await cleanupStaleJobs(env, user.id);
+
+        const balance = await getCreditBalance(env, user.id);
+        const sub = await getActiveSubscription(env, user.id);
+        const packs = await getActivePacks(env, user.id);
+
+        // 동시 작업 한도
+        const limit = sub ? (PLAN_LIMITS[sub.plan] || 1) : NO_SUB_LIMIT;
+        const nowIso = new Date().toISOString();
+        const jobsResp = await fetch(
+          env.SUPABASE_URL + '/rest/v1/active_jobs?user_id=eq.' + user.id +
+          '&expires_at=gt.' + encodeURIComponent(nowIso),
+          { headers: sbHeaders(env) }
+        );
+        const activeJobs = jobsResp.ok ? (await jobsResp.json()) : [];
+
+        return j({
+          user_id: user.id,
+          email: user.email,
+          balance: {
+            subscription: Number(balance.subscription_credits) || 0,
+            pack: Number(balance.pack_credits) || 0,
+            total: Math.round((Number(balance.subscription_credits) + Number(balance.pack_credits)) * 10) / 10,
+          },
+          subscription: sub ? {
+            plan: sub.plan,
+            status: sub.status,
+            next_billing: sub.next_billing,
+            started_at: sub.started_at,
+            amount: sub.amount,
+          } : null,
+          packs: packs.map(p => ({
+            id: p.id,
+            credits: Number(p.credits),
+            used: Number(p.used || 0),
+            remaining: Math.round((Number(p.credits) - Number(p.used || 0)) * 10) / 10,
+            expires_at: p.expires_at,
+            purchased_at: p.purchased_at,
+          })),
+          concurrent: {
+            active: Array.isArray(activeJobs) ? activeJobs.length : 0,
+            limit: limit,
+          },
+        });
+      }
+
+      // ─────────────────────────────────────────
+      // /api/job/start — 동시 작업 시작 (락 획득)
+      // POST { job_type, model }
+      // ─────────────────────────────────────────
+      if (url.pathname === '/api/job/start') {
+        const user = await getUserFromJWT(request, env);
+        if (!user) return j({ error: 'unauthorized' }, 401);
+        if (request.method !== 'POST') return j({ error: 'method' }, 405);
+
+        const body = await request.json().catch(() => ({}));
+        const jobType = body.job_type || 'image';
+        const model = body.model || null;
+
+        // 죽은 작업 먼저 정리
+        await cleanupStaleJobs(env, user.id);
+
+        const result = await startActiveJob(env, user.id, jobType, model);
+        if (!result.ok) {
+          return j(result, result.error === 'concurrent_limit_reached' ? 429 : 500);
+        }
+        return j(result);
+      }
+
+      // ─────────────────────────────────────────
+      // /api/job/end — 동시 작업 종료 (락 해제)
+      // POST { job_id }
+      // ─────────────────────────────────────────
+      if (url.pathname === '/api/job/end') {
+        const user = await getUserFromJWT(request, env);
+        if (!user) return j({ error: 'unauthorized' }, 401);
+        if (request.method !== 'POST') return j({ error: 'method' }, 405);
+
+        const body = await request.json().catch(() => ({}));
+        const jobId = body.job_id;
+
+        await endActiveJob(env, jobId);
+        return j({ ok: true });
+      }
+
+      // ─────────────────────────────────────────
+      // /api/credits/consume — 크레딧 차감 (개발/테스트용)
+      // POST { amount, description, ref_id }
+      // ─────────────────────────────────────────
+      if (url.pathname === '/api/credits/consume') {
+        const user = await getUserFromJWT(request, env);
+        if (!user) return j({ error: 'unauthorized' }, 401);
+        if (request.method !== 'POST') return j({ error: 'method' }, 405);
+
+        const body = await request.json().catch(() => ({}));
+        const amount = Number(body.amount);
+        if (!amount || amount <= 0) return j({ error: 'invalid_amount' }, 400);
+
+        const result = await consumeCredits(env, user.id, amount, body.description || '', body.ref_id || null);
+        if (!result.ok) {
+          return j(result, result.error === 'insufficient_credits' ? 402 : 500);
+        }
+        return j(result);
+      }
+
 
       // ─────────────────────────────────────────
       // /fal-upload — fal storage 업로드 (포인트 무료)
@@ -747,3 +862,254 @@ async function refundForRequest(env, userId, requestId, reason) {
     // 환불 실패는 조용히 무시 (서비스 영향 없게)
   }
 }
+
+// ============================================================
+// 신규 크레딧 시스템 (v2.0) — 구독 · 패키지 · 동시작업
+// 독립적으로 설계 (기존 chargePoints/profile 시스템과 병행)
+// ============================================================
+
+// PostgREST 공통 헤더
+function sbHeaders(env, extra) {
+  return Object.assign({
+    'apikey': env.SUPABASE_SERVICE_KEY,
+    'Authorization': 'Bearer ' + env.SUPABASE_SERVICE_KEY,
+    'Content-Type': 'application/json',
+  }, extra || {});
+}
+
+// 1) 활성 구독 조회 (active or null)
+async function getActiveSubscription(env, userId) {
+  const r = await fetch(
+    env.SUPABASE_URL + '/rest/v1/subscriptions?user_id=eq.' + userId +
+    '&status=eq.active&order=started_at.desc&limit=1',
+    { headers: sbHeaders(env) }
+  );
+  if (!r.ok) return null;
+  const arr = await r.json();
+  return Array.isArray(arr) && arr.length > 0 ? arr[0] : null;
+}
+
+// 2) 크레딧 잔액 조회 (구독 + 패키지 통합)
+async function getCreditBalance(env, userId) {
+  const r = await fetch(
+    env.SUPABASE_URL + '/rest/v1/credit_balances?user_id=eq.' + userId,
+    { headers: sbHeaders(env) }
+  );
+  if (!r.ok) return null;
+  const arr = await r.json();
+  if (!Array.isArray(arr) || arr.length === 0) {
+    // 잔액 row 없으면 생성
+    await fetch(env.SUPABASE_URL + '/rest/v1/credit_balances', {
+      method: 'POST',
+      headers: sbHeaders(env, { 'Prefer': 'return=minimal' }),
+      body: JSON.stringify({ user_id: userId, subscription_credits: 0, pack_credits: 0 }),
+    });
+    return { user_id: userId, subscription_credits: 0, pack_credits: 0, subscription_reset_at: null };
+  }
+  return arr[0];
+}
+
+// 3) 유효한 패키지 조회 (만료 안 됐고 잔액 있는 것)
+async function getActivePacks(env, userId) {
+  const nowIso = new Date().toISOString();
+  const r = await fetch(
+    env.SUPABASE_URL + '/rest/v1/credit_packs?user_id=eq.' + userId +
+    '&status=eq.active&expires_at=gt.' + encodeURIComponent(nowIso) +
+    '&order=expires_at.asc',
+    { headers: sbHeaders(env) }
+  );
+  if (!r.ok) return [];
+  const arr = await r.json();
+  return Array.isArray(arr) ? arr : [];
+}
+
+// 4) 크레딧 사용 (구독 우선, 부족하면 패키지에서, 패키지는 만료 임박 우선)
+async function consumeCredits(env, userId, amount, description, refId) {
+  const balance = await getCreditBalance(env, userId);
+  if (!balance) return { ok: false, error: 'balance_not_found' };
+
+  const subAvail = Number(balance.subscription_credits) || 0;
+  const packAvail = Number(balance.pack_credits) || 0;
+  const total = subAvail + packAvail;
+  const need = Math.round(amount * 10) / 10;
+
+  if (total < need) {
+    return { ok: false, error: 'insufficient_credits', balance: total, required: need };
+  }
+
+  let fromSub = Math.min(subAvail, need);
+  let fromPack = Math.round((need - fromSub) * 10) / 10;
+  let newSub = Math.round((subAvail - fromSub) * 10) / 10;
+  let newPack = Math.round((packAvail - fromPack) * 10) / 10;
+
+  // 1) credit_balances 갱신
+  const upd = await fetch(
+    env.SUPABASE_URL + '/rest/v1/credit_balances?user_id=eq.' + userId,
+    {
+      method: 'PATCH',
+      headers: sbHeaders(env, { 'Prefer': 'return=minimal' }),
+      body: JSON.stringify({
+        subscription_credits: newSub,
+        pack_credits: newPack,
+        updated_at: new Date().toISOString(),
+      }),
+    }
+  );
+  if (!upd.ok) return { ok: false, error: 'update_failed' };
+
+  // 2) 패키지에서 차감했으면 개별 패키지의 used 도 갱신 (오래된 게 먼저)
+  if (fromPack > 0) {
+    const packs = await getActivePacks(env, userId);
+    let remaining = fromPack;
+    for (const p of packs) {
+      if (remaining <= 0) break;
+      const avail = Math.round((Number(p.credits) - Number(p.used || 0)) * 10) / 10;
+      const take = Math.min(avail, remaining);
+      if (take > 0) {
+        const newUsed = Math.round((Number(p.used || 0) + take) * 10) / 10;
+        const isDepleted = (newUsed >= Number(p.credits));
+        await fetch(
+          env.SUPABASE_URL + '/rest/v1/credit_packs?id=eq.' + p.id,
+          {
+            method: 'PATCH',
+            headers: sbHeaders(env, { 'Prefer': 'return=minimal' }),
+            body: JSON.stringify({
+              used: newUsed,
+              status: isDepleted ? 'depleted' : 'active',
+            }),
+          }
+        );
+        remaining = Math.round((remaining - take) * 10) / 10;
+      }
+    }
+  }
+
+  // 3) 트랜잭션 기록
+  await fetch(env.SUPABASE_URL + '/rest/v1/credit_transactions', {
+    method: 'POST',
+    headers: sbHeaders(env, { 'Prefer': 'return=minimal' }),
+    body: JSON.stringify({
+      user_id: userId,
+      type: 'consume',
+      amount: -need,
+      source: fromPack > 0 ? (fromSub > 0 ? 'subscription' : 'pack') : 'subscription',
+      ref_id: refId || null,
+      description: description || null,
+    }),
+  });
+
+  return {
+    ok: true,
+    consumed: need,
+    fromSub,
+    fromPack,
+    remaining_sub: newSub,
+    remaining_pack: newPack,
+    remaining_total: Math.round((newSub + newPack) * 10) / 10,
+  };
+}
+
+// 5) 동시 작업 시작 (플랜별 한도 검사 포함)
+const PLAN_LIMITS = { lite: 1, standard: 3, pro: 6 };
+const NO_SUB_LIMIT = 1;
+
+async function startActiveJob(env, userId, jobType, model) {
+  const nowIso = new Date().toISOString();
+  // 1) 만료 안 된 활성 작업 조회
+  const r = await fetch(
+    env.SUPABASE_URL + '/rest/v1/active_jobs?user_id=eq.' + userId +
+    '&expires_at=gt.' + encodeURIComponent(nowIso),
+    { headers: sbHeaders(env) }
+  );
+  const jobs = r.ok ? (await r.json()) : [];
+  const activeCount = Array.isArray(jobs) ? jobs.length : 0;
+
+  // 2) 한도 계산 (구독 플랜 기반)
+  const sub = await getActiveSubscription(env, userId);
+  const limit = sub ? (PLAN_LIMITS[sub.plan] || 1) : NO_SUB_LIMIT;
+
+  if (activeCount >= limit) {
+    return { ok: false, error: 'concurrent_limit_reached', active: activeCount, limit };
+  }
+
+  // 3) 새 작업 등록 (5분 후 자동 만료)
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+  const ins = await fetch(env.SUPABASE_URL + '/rest/v1/active_jobs', {
+    method: 'POST',
+    headers: sbHeaders(env, { 'Prefer': 'return=representation' }),
+    body: JSON.stringify({
+      user_id: userId,
+      job_type: jobType,
+      model: model || null,
+      expires_at: expiresAt,
+    }),
+  });
+  if (!ins.ok) return { ok: false, error: 'job_insert_failed' };
+  const data = await ins.json();
+  const jobId = Array.isArray(data) && data.length > 0 ? data[0].id : null;
+
+  return { ok: true, job_id: jobId, active: activeCount + 1, limit };
+}
+
+// 6) 동시 작업 종료
+async function endActiveJob(env, jobId) {
+  if (!jobId) return { ok: true };
+  await fetch(
+    env.SUPABASE_URL + '/rest/v1/active_jobs?id=eq.' + jobId,
+    { method: 'DELETE', headers: sbHeaders(env) }
+  );
+  return { ok: true };
+}
+
+// 7) 죽은 active_jobs 정리 (5분 이상 된 것 삭제)
+async function cleanupStaleJobs(env, userId) {
+  const nowIso = new Date().toISOString();
+  await fetch(
+    env.SUPABASE_URL + '/rest/v1/active_jobs?user_id=eq.' + userId +
+    '&expires_at=lt.' + encodeURIComponent(nowIso),
+    { method: 'DELETE', headers: sbHeaders(env) }
+  );
+}
+
+// 8) 패키지 만료 정리 (사용자별 시도)
+async function expireOldPacks(env, userId) {
+  const nowIso = new Date().toISOString();
+  const r = await fetch(
+    env.SUPABASE_URL + '/rest/v1/credit_packs?user_id=eq.' + userId +
+    '&status=eq.active&expires_at=lt.' + encodeURIComponent(nowIso),
+    { headers: sbHeaders(env) }
+  );
+  if (!r.ok) return;
+  const expired = await r.json();
+  if (!Array.isArray(expired) || expired.length === 0) return;
+
+  let totalExpired = 0;
+  for (const p of expired) {
+    const remaining = Math.round((Number(p.credits) - Number(p.used || 0)) * 10) / 10;
+    if (remaining > 0) totalExpired += remaining;
+    await fetch(
+      env.SUPABASE_URL + '/rest/v1/credit_packs?id=eq.' + p.id,
+      {
+        method: 'PATCH',
+        headers: sbHeaders(env, { 'Prefer': 'return=minimal' }),
+        body: JSON.stringify({ status: 'expired' }),
+      }
+    );
+  }
+
+  if (totalExpired > 0) {
+    const balance = await getCreditBalance(env, userId);
+    if (balance) {
+      const newPack = Math.max(0, Math.round((Number(balance.pack_credits) - totalExpired) * 10) / 10);
+      await fetch(
+        env.SUPABASE_URL + '/rest/v1/credit_balances?user_id=eq.' + userId,
+        {
+          method: 'PATCH',
+          headers: sbHeaders(env, { 'Prefer': 'return=minimal' }),
+          body: JSON.stringify({ pack_credits: newPack, updated_at: new Date().toISOString() }),
+        }
+      );
+    }
+  }
+}
+

@@ -3049,6 +3049,90 @@ async function fetchMyPoints() {
   }
 }
 
+// ────────────────────────────────────────────────
+// 신규 크레딧 시스템 (v2.0) — /api/credits, /api/job/start, /api/job/end
+// ────────────────────────────────────────────────
+
+// 1) 사용자 크레딧 + 구독 + 동시작업 통합 조회
+async function fetchMyCredits() {
+  const jwt = await getSupabaseJWT();
+  if (!jwt) { console.warn('[Credits] JWT 없음'); return null; }
+  try {
+    const r = await fetch('/api/credits', { headers: { 'Authorization': 'Bearer ' + jwt }});
+    if (!r.ok) {
+      console.warn('[Credits] /api/credits 실패:', r.status);
+      return null;
+    }
+    return await r.json();
+  } catch (e) {
+    console.error('[Credits] fetchMyCredits 예외:', e);
+    return null;
+  }
+}
+
+// 2) 동시 작업 시작 (락 획득) — 한도 초과 시 null
+async function acquireJobLock(jobType, model) {
+  const jwt = await getSupabaseJWT();
+  if (!jwt) return null;
+  try {
+    const r = await fetch('/api/job/start', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + jwt, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ job_type: jobType || 'image', model: model || null }),
+    });
+    const data = await r.json();
+    if (!r.ok) {
+      if (data.error === 'concurrent_limit_reached') {
+        toast(`동시 작업 한도 도달 (${data.active}/${data.limit}) — 다른 작업이 끝나면 다시 시도해주세요`);
+      } else {
+        console.warn('[Credits] 락 실패:', data);
+      }
+      return null;
+    }
+    return data.job_id || null;
+  } catch (e) {
+    console.error('[Credits] acquireJobLock 예외:', e);
+    return null;
+  }
+}
+
+// 3) 동시 작업 종료 (락 해제)
+async function releaseJobLock(jobId) {
+  if (!jobId) return;
+  const jwt = await getSupabaseJWT();
+  if (!jwt) return;
+  try {
+    await fetch('/api/job/end', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + jwt, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ job_id: jobId }),
+    });
+  } catch (e) {
+    // 조용히 무시 (작업 끝나는 거니까)
+  }
+}
+
+// 4) USD → 크레딧 환산 (환율 1550 + 마진 40% = USD × 21.7)
+const _CREDITS_PER_USD = 21.7;
+
+// 5) 이미지 크레딧 계산 (4컷 = 1개 이미지 가격)
+function calcImgCredits(modelValue, modelQuality, aspectRatio, imgQuality) {
+  const pts = calcImgPoints(modelValue, modelQuality, aspectRatio, imgQuality);
+  if (pts === null) return null;
+  // calcImgPoints는 USD × 42 한 P 단위. 우린 USD × 21.7로 환산해야 함.
+  // → P × (21.7 / 42) = P × 0.5167
+  return Math.round(pts * (_CREDITS_PER_USD / 42) * 10) / 10;
+}
+
+// 6) 영상 크레딧 계산 (5초 기준, 다른 길이는 비율로)
+function calcVidCredits(i) {
+  const r = calcVidPoints(i);
+  if (!r || r.points <= 0) return { credits: 0, dur: r ? r.dur : 0, audio: r ? r.audio : false };
+  // calcVidPoints는 cps × dur × 42. 우리는 cps × dur × 21.7 필요
+  const credits = Math.round(r.points * (_CREDITS_PER_USD / 42) * 10) / 10;
+  return { credits, dur: r.dur, audio: r.audio, cps: r.cps, model: r.model, resolution: r.resolution };
+}
+
 // 포인트 잔액 UI 갱신
 async function updatePointsDisplay() {
   const me = await fetchMyPoints();
