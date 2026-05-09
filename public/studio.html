@@ -3971,56 +3971,79 @@ function renderVehicleOptions() {
 // === 시대별 의상 옵션 ===
 const OUTFITS_BY_ERA = {
   modern: [
-    { ko: '정장',     en: 'wearing a formal business suit',
+    // 일반 의상 (남녀 공통, 모든 씬)
+    { ko: '정장',     gender: 'any', en: 'wearing a formal business suit',
       hasLux: true, luxEn: 'wearing a luxury designer suit, premium tailored fabric' },
-    { ko: '캐쥬얼',   en: 'wearing casual clothes, t-shirt and jeans' },
-    { ko: '츄리닝',   en: 'wearing a tracksuit, sportswear' },
-    { ko: '교복',     en: 'wearing a Korean school uniform' },
-    { ko: '턱시도(남)', en: 'wearing a tailored black tuxedo with white dress shirt and bow tie, formal groom attire',
+    { ko: '캐쥬얼',   gender: 'any', en: 'wearing casual clothes, t-shirt and jeans' },
+    { ko: '츄리닝',   gender: 'any', en: 'wearing a tracksuit, sportswear' },
+    { ko: '교복',     gender: 'any', en: 'wearing a Korean school uniform' },
+    // 웨딩 의상 (성별 분리, 웨딩 화보 씬에서만)
+    { ko: '턱시도', gender: 'male', scenes: ['wedding'], en: 'wearing a tailored black tuxedo with white dress shirt and bow tie, formal groom attire',
       hasLux: true, luxEn: 'wearing a luxury bespoke black tuxedo, satin lapels, premium silk bow tie, high-end groom formal wear' },
-    { ko: '셔츠+슬랙스(남)', en: 'wearing a crisp white dress shirt and charcoal tailored slacks, polished casual wedding groom look' },
-    { ko: '웨딩드레스(여)', en: 'wearing a flowing white wedding gown with delicate lace details and soft veil, elegant bridal dress',
+    { ko: '셔츠+슬랙스', gender: 'male', scenes: ['wedding'], en: 'wearing a crisp white dress shirt and charcoal tailored slacks, polished casual wedding groom look' },
+    { ko: '웨딩드레스', gender: 'female', scenes: ['wedding'], en: 'wearing a flowing white wedding gown with delicate lace details and soft veil, elegant bridal dress',
       hasLux: true, luxEn: 'wearing a haute couture luxury wedding gown with intricate lace, beaded embellishments, long cathedral veil, designer bridal attire' },
-    { ko: '세미웨딩드레스(여)', en: 'wearing an elegant semi-formal mini wedding dress in ivory, knee-length sophisticated bridal look' },
+    { ko: '세미웨딩드레스', gender: 'female', scenes: ['wedding'], en: 'wearing an elegant semi-formal mini wedding dress in ivory, knee-length sophisticated bridal look' },
   ],
   historical: [
-    { ko: '평민 한복', en: 'wearing traditional Korean commoner hanbok, simple white and beige' },
-    { ko: '군복',     en: 'wearing Joseon era Korean military uniform with armor',
+    { ko: '평민 한복', gender: 'any',    en: 'wearing traditional Korean commoner hanbok, simple white and beige' },
+    { ko: '군복',     gender: 'male',   en: 'wearing Joseon era Korean military uniform with armor',
       hasLux: true, luxEn: 'wearing a Joseon era general\'s armor with golden helmet and sword, royal military attire' },
-    { ko: '왕족',     en: 'wearing Joseon royal family attire, dragon robe with crown' },
-    { ko: '궁녀',     en: 'wearing Joseon court lady gungnyeo hanbok, palace servant attire' },
-    { ko: '승려',     en: 'wearing Korean Buddhist monk robe, gray traditional monastic clothing' },
-    { ko: '무사',     en: 'wearing Joseon era warrior swordsman attire, martial arts clothing' },
+    { ko: '왕족',     gender: 'any',    en: 'wearing Joseon royal family attire, dragon robe with crown' },
+    { ko: '궁녀',     gender: 'female', en: 'wearing Joseon court lady gungnyeo hanbok, palace servant attire' },
+    { ko: '승려',     gender: 'male',   en: 'wearing Korean Buddhist monk robe, gray traditional monastic clothing' },
+    { ko: '무사',     gender: 'male',   en: 'wearing Joseon era warrior swordsman attire, martial arts clothing' },
   ],
   gyeongseong: [
-    { ko: '모던보이', en: 'wearing 1920s Korean modern boy outfit, vintage suit with hat, modernist style' },
-    { ko: '모던걸',   en: 'wearing 1920s Korean modern girl outfit, vintage Western dress with hat' },
-    { ko: '양복',     en: 'wearing 1920s Western style suit',
+    { ko: '모던보이', gender: 'male',   en: 'wearing 1920s Korean modern boy outfit, vintage suit with hat, modernist style' },
+    { ko: '모던걸',   gender: 'female', en: 'wearing 1920s Korean modern girl outfit, vintage Western dress with hat' },
+    { ko: '양복',     gender: 'male',   en: 'wearing 1920s Western style suit',
       hasLux: true, luxEn: 'wearing a 1920s luxury Western tailored suit with vintage accessories, upper class colonial era' },
-    { ko: '개량 한복', en: 'wearing 1920s modernized Korean hanbok, traditional with Western influences' },
-    { ko: '학생복',   en: 'wearing 1920s Korean student uniform during colonial era' },
-    { ko: '기생 한복', en: 'wearing 1920s gisaeng courtesan elaborate hanbok, traditional entertainer attire' },
+    { ko: '개량 한복', gender: 'any',    en: 'wearing 1920s modernized Korean hanbok, traditional with Western influences' },
+    { ko: '학생복',   gender: 'any',    en: 'wearing 1920s Korean student uniform during colonial era' },
+    { ko: '기생 한복', gender: 'female', en: 'wearing 1920s gisaeng courtesan elaborate hanbok, traditional entertainer attire' },
   ],
   retro: [
-    { ko: '캐쥬얼',   en: 'wearing retro Korean casual clothes, vintage 80s 90s 2000s style' },
-    { ko: '정장',     en: 'wearing a retro Korean business suit',
+    { ko: '캐쥬얼',   gender: 'any', en: 'wearing retro Korean casual clothes, vintage 80s 90s 2000s style' },
+    { ko: '정장',     gender: 'any', en: 'wearing a retro Korean business suit',
       hasLux: true, luxEn: 'wearing a retro luxury Korean tailored suit, high-end vintage fashion' },
-    { ko: '교복',     en: 'wearing a retro Korean school uniform, vintage style' },
-    { ko: '츄리닝',   en: 'wearing a retro tracksuit, vintage Korean sportswear' },
-    { ko: '청바지+티셔츠', en: 'wearing retro Korean blue jeans and t-shirt, vintage casual fashion' },
-    { ko: '작업복',   en: 'wearing retro Korean blue worker uniform, vintage labor attire' },
+    { ko: '교복',     gender: 'any', en: 'wearing a retro Korean school uniform, vintage style' },
+    { ko: '츄리닝',   gender: 'any', en: 'wearing a retro tracksuit, vintage Korean sportswear' },
+    { ko: '청바지+티셔츠', gender: 'any', en: 'wearing retro Korean blue jeans and t-shirt, vintage casual fashion' },
+    { ko: '작업복',   gender: 'any', en: 'wearing retro Korean blue worker uniform, vintage labor attire' },
   ],
 };
 
-function getOutfitsForCurrentEra() {
+function getOutfitsForCurrentEra(avGender) {
+  // avGender: 'Korean man' | 'Korean woman' | undefined
+  // S.scene: 현재 씬 키 (예: 'wedding', 'magazine', ...)
   const eraKey = S.era || 'modern';
-  if (OUTFITS_BY_ERA[eraKey]) return OUTFITS_BY_ERA[eraKey];
-  const group = (ERAS[eraKey] && ERAS[eraKey].group) || 'modern';
-  return OUTFITS_BY_ERA[group] || OUTFITS_BY_ERA.modern;
+  let outfits = OUTFITS_BY_ERA[eraKey];
+  if (!outfits) {
+    const group = (ERAS[eraKey] && ERAS[eraKey].group) || 'modern';
+    outfits = OUTFITS_BY_ERA[group] || OUTFITS_BY_ERA.modern;
+  }
+  // 씬 필터: scenes 태그가 있으면 현재 씬과 일치해야 보임 (없으면 모든 씬에서 보임)
+  const curScene = S.scene || '';
+  outfits = outfits.filter(o => !o.scenes || o.scenes.includes(curScene));
+  // 성별 필터: gender가 'any' 거나 아바타 성별과 일치
+  if (avGender) {
+    const targetG = (avGender === 'Korean man') ? 'male' : (avGender === 'Korean woman') ? 'female' : null;
+    if (targetG) {
+      outfits = outfits.filter(o => !o.gender || o.gender === 'any' || o.gender === targetG);
+    }
+  }
+  return outfits;
 }
 
 function getAllOutfitsForCurrentEra() {
-  const outs = getOutfitsForCurrentEra();
+  // custom 의상 검사용 — 모든 의상 (성별/씬 필터 무시) 반환
+  const eraKey = S.era || 'modern';
+  let outs = OUTFITS_BY_ERA[eraKey];
+  if (!outs) {
+    const group = (ERAS[eraKey] && ERAS[eraKey].group) || 'modern';
+    outs = OUTFITS_BY_ERA[group] || OUTFITS_BY_ERA.modern;
+  }
   const all = [];
   for (const o of outs) {
     all.push(o.en);
@@ -5203,7 +5226,7 @@ function renderStep1Avatars() {
     // 출연 중인 아바타의 outfit 가져오기
     const cast = S.avatars.find(a => (a._libId || a.id) === av.id);
     const outfit = cast?.outfit || '';
-    const outfitOptions = (typeof getOutfitsForCurrentEra === 'function') ? getOutfitsForCurrentEra() : [];
+    const outfitOptions = (typeof getOutfitsForCurrentEra === 'function') ? getOutfitsForCurrentEra(av.gender) : [];
     // 현재 cast.outfit이 active 옵션과 매치하는지 (en 또는 luxEn)
     const outfitMatch = outfitOptions.find(o => o.en === outfit || o.luxEn === outfit);
     const isCustomOutfit = (outfit === ' ' || (outfit && !outfitMatch));
