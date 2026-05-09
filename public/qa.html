@@ -393,11 +393,12 @@ img.card-avatar{width:24px;height:24px;border-radius:50%;object-fit:cover;displa
       </div>
     </div>
     <div class="pd-points">
-      <div class="pd-points-label">남은 포인트</div>
-      <div class="pd-points-value" id="pdPoints">0<span class="pt-unit">P</span></div>
+      <div class="pd-points-label">남은 크레딧</div>
+      <div class="pd-points-value" id="pdPoints">0<span class="pt-unit">C</span></div>
+      <div id="pdSubInfo" style="font-size:10px;color:var(--ink3);margin-top:6px;line-height:1.4;display:none"></div>
     </div>
     <div class="pd-menu">
-      <a class="pd-item" href="/subscription.html" style="text-decoration:none"><i data-lucide="sparkles" class="icon-sm"></i>포인트 충전/구독</a>
+      <a class="pd-item" href="/subscription.html" style="text-decoration:none"><i data-lucide="sparkles" class="icon-sm"></i>크레딧 / 구독</a>
       <button class="pd-item" id="pdProfileBtn"><i data-lucide="user" class="icon-sm"></i>회원정보</button>
       <button class="pd-item danger" id="pdLogoutBtn"><i data-lucide="log-out" class="icon-sm"></i>로그아웃</button>
     </div>
@@ -541,13 +542,16 @@ img.card-avatar{width:24px;height:24px;border-radius:50%;object-fit:cover;displa
         <div class="pm-row"><span class="pm-row-label">로그인 방식</span><span class="pm-row-value" id="pmProvider">—</span></div>
       </div>
       <div class="pm-section">
-        <div class="pm-section-title">포인트</div>
-        <div class="pm-row"><span class="pm-row-label">현재 보유 포인트</span><span class="pm-row-value" id="pmPoints">0P</span></div>
+        <div class="pm-section-title">크레딧 잔액</div>
+        <div class="pm-row"><span class="pm-row-label">현재 플랜</span><span class="pm-row-value" id="pmPlan">—</span></div>
+        <div class="pm-row"><span class="pm-row-label">구독 크레딧</span><span class="pm-row-value" id="pmSubCredits">0 C</span></div>
+        <div class="pm-row"><span class="pm-row-label">패키지 크레딧</span><span class="pm-row-value" id="pmPackCredits">0 C</span></div>
+        <div class="pm-row"><span class="pm-row-label">다음 결제일</span><span class="pm-row-value" id="pmNextBilling">—</span></div>
         <div class="pm-row"><span class="pm-row-label">누적 게시 수</span><span class="pm-row-value" id="pmPostCount">0건</span></div>
       </div>
       <div class="pm-danger-zone">
         <div class="pm-danger-title">⚠️ 회원 탈퇴</div>
-        <div class="pm-danger-desc">탈퇴 시 다음 정보가 영구 삭제됩니다: 계정, 보유 포인트, 게시한 작품, 클라우드 자료.<br>이 작업은 되돌릴 수 없습니다.</div>
+        <div class="pm-danger-desc">탈퇴 시 다음 정보가 영구 삭제됩니다: 계정, 보유 크레딧, 구독, 게시한 작품, 클라우드 자료.<br>이 작업은 되돌릴 수 없습니다.</div>
         <button class="pm-danger-btn" id="pmDeleteAccount">회원 탈퇴 신청</button>
       </div>
     </div>
@@ -760,7 +764,7 @@ function renderSidebarLoginCard() {
       <div class="lc-avatar">${avatar ? `<img src="${avatar}" alt="avatar" referrerpolicy="no-referrer">` : ''}</div>
       <div class="lc-name">${escapeText(name)}</div>
       <div class="lc-email">${escapeText(email)}</div>
-      <div class="lc-points" id="sbCardPoints"><span style="opacity:.5">— P</span></div>
+      <div class="lc-points" id="sbCardPoints"><span style="opacity:.5">— C</span></div>
       <div class="lc-actions">
         <button class="lc-btn" id="sidebarProfileBtn">회원정보</button>
         <button class="lc-btn danger" id="sidebarLogoutBtn">로그아웃</button>
@@ -770,12 +774,10 @@ function renderSidebarLoginCard() {
     fetchServerPoints().then(me => {
       const el = document.getElementById('sbCardPoints');
       if (!el) return;
-      if (me && me.unlimited) {
-        el.innerHTML = `<span style="color:var(--accent);font-weight:800">∞ P</span> <span style="font-weight:600;color:var(--ink-dimmer);font-size:11px">포인트 (무제한)</span>`;
-      } else if (me) {
-        el.innerHTML = `${me.points.toLocaleString()} P <span style="font-weight:600;color:var(--ink-dimmer);font-size:11px">포인트</span>`;
+      if (me && me.balance && typeof me.balance.total === 'number') {
+        el.innerHTML = `${me.balance.total.toLocaleString()} C <span style="font-weight:600;color:var(--ink-dimmer);font-size:11px">크레딧</span>`;
       } else {
-        el.innerHTML = `<span style="opacity:.5">— P</span>`;
+        el.innerHTML = `<span style="opacity:.5">— C</span>`;
       }
     });
     const lo = document.getElementById('sidebarLogoutBtn');
@@ -838,14 +840,14 @@ async function fetchServerPoints() {
   try {
     const { data: { session } } = await sb.auth.getSession();
     if (!session?.access_token) return null;
-    const r = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + session.access_token } });
+    const r = await fetch('/api/credits', { headers: { 'Authorization': 'Bearer ' + session.access_token } });
     if (!r.ok) return null;
     const me = await r.json();
-    _serverPointsCache = me.points;
-    _serverUnlimitedCache = !!me.unlimited;
+    _serverPointsCache = me.balance ? me.balance.total : 0;
+    _serverUnlimitedCache = false;
     return me;
   } catch (e) {
-    console.warn('[points] fetch 실패:', e);
+    console.warn('[credits] fetch 실패:', e);
     return null;
   }
 }
@@ -927,12 +929,10 @@ function updateProfileDropdown() {
   fetchServerPoints().then(me => {
     const el = document.getElementById('pdPoints');
     if (!el) return;
-    if (me && me.unlimited) {
-      el.innerHTML = `<span style="color:var(--gold);font-weight:800">∞</span> <span class="pt-unit">P</span>`;
-    } else if (me) {
-      el.innerHTML = `${me.points.toLocaleString()}<span class="pt-unit">P</span>`;
+    if (me && me.balance && typeof me.balance.total === 'number') {
+      el.innerHTML = `${me.balance.total.toLocaleString()}<span class="pt-unit">C</span>`;
     } else {
-      el.innerHTML = `<span style="opacity:.5">— P</span>`;
+      el.innerHTML = `<span style="opacity:.5">— C</span>`;
     }
   });
 }
@@ -1188,11 +1188,21 @@ function openProfileModal() {
   document.getElementById('pmProvider').textContent = providerMap[provider] || provider;
   // 포인트 — 서버에서 로드
   fetchServerPoints().then(me => {
-    const el = document.getElementById('pmPoints');
-    if (!el) return;
-    if (me && me.unlimited) el.textContent = '∞ P (무제한)';
-    else if (me) el.textContent = me.points.toLocaleString() + ' P';
-    else el.textContent = '— P';
+    if (!me || !me.balance) return;
+    const planLabels = { lite: 'Lite', standard: 'Standard', pro: 'Pro' };
+    const pmPlan = document.getElementById('pmPlan');
+    const pmSub = document.getElementById('pmSubCredits');
+    const pmPack = document.getElementById('pmPackCredits');
+    const pmNext = document.getElementById('pmNextBilling');
+    if (pmPlan) pmPlan.textContent = me.subscription ? (planLabels[me.subscription.plan] || me.subscription.plan) : '구독 없음';
+    if (pmSub) pmSub.textContent = (me.balance.subscription || 0).toLocaleString() + ' C';
+    if (pmPack) pmPack.textContent = (me.balance.pack || 0).toLocaleString() + ' C';
+    if (pmNext) {
+      if (me.subscription && me.subscription.next_billing) {
+        const dt = new Date(me.subscription.next_billing);
+        pmNext.textContent = dt.getFullYear() + '.' + String(dt.getMonth()+1).padStart(2,'0') + '.' + String(dt.getDate()).padStart(2,'0');
+      } else { pmNext.textContent = '—'; }
+    }
   });
   // 누적 게시 수 — 서버에서
   let postCount = 0;
@@ -1220,7 +1230,7 @@ function closeProfileModal() {
 
 document.getElementById('pmDeleteAccount').addEventListener('click', () => {
   if (!confirm('정말로 회원 탈퇴하시겠어요?\n\n모든 데이터가 영구 삭제되며 되돌릴 수 없습니다.')) return;
-  if (!confirm('마지막 확인입니다.\n\n귀하의 계정, 포인트, 게시물이 모두 삭제됩니다.')) return;
+  if (!confirm('마지막 확인입니다.\n\n귀하의 계정, 크레딧, 구독, 게시물이 모두 삭제됩니다.')) return;
   alert('탈퇴 신청이 접수되었습니다. 고객센터로 안내가 전달됩니다.');
   /* TODO: 실제 삭제는 서버 에드포인트 필요 */
 });

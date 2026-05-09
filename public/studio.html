@@ -1236,7 +1236,7 @@ select option:hover {
 .korart-gnb-right { display: flex; align-items: center; gap: 8px; }
 .korart-icon-btn { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #666; background: none; border: none; cursor: pointer; transition: background .15s; }
 .korart-icon-btn:hover { background: #f5f5f5; color: #1a1a1a; }
-/* GNB 포인트 배지 — 클릭 시 구독 페이지로 */
+/* GNB 크레딧 배지 — 클릭 시 구독 페이지로 */
 .korart-points-pill { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; background: linear-gradient(135deg, rgba(99,102,241,.08), rgba(167,139,250,.08)); border: 1px solid rgba(99,102,241,.25); color: #4f46e5; font-family: 'JetBrains Mono', 'Pretendard', monospace; font-size: 13px; font-weight: 800; cursor: pointer; transition: all .15s; text-decoration: none; letter-spacing: -.01em; white-space: nowrap; }
 .korart-points-pill:hover { background: linear-gradient(135deg, rgba(99,102,241,.18), rgba(167,139,250,.18)); border-color: #6366f1; transform: translateY(-1px); }
 .korart-points-pill svg { color: #6366f1; }
@@ -1801,9 +1801,9 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
       </div>
     </div>
     <div class="korart-gnb-right">
-      <a class="korart-points-pill" href="/subscription.html" id="gnbPointsPill" title="포인트 / 구독">
+      <a class="korart-points-pill" href="/subscription.html" id="gnbPointsPill" title="크레딧 / 구독">
         <span id="gnbPointsValue">—</span>
-        <span style="opacity:.6;font-size:10px;font-weight:600">P</span>
+        <span style="opacity:.6;font-size:10px;font-weight:600">C</span>
       </a>
       <button class="korart-avatar-btn" id="avatarBtn" title="프로필"><i data-lucide="user-round"></i></button>
     </div>
@@ -1817,8 +1817,9 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
       </div>
     </div>
     <div class="pd-points">
-      <div class="pd-points-label">남은 포인트</div>
-      <div class="pd-points-value" id="pdPoints">0<span class="pt-unit">P</span></div>
+      <div class="pd-points-label">남은 크레딧</div>
+      <div class="pd-points-value" id="pdPoints">0<span class="pt-unit">C</span></div>
+      <div id="pdSubInfo" style="font-size:10px;color:var(--ink3);margin-top:6px;line-height:1.4;display:none"></div>
     </div>
     <div class="pd-menu">
       <button class="pd-item" id="pdProfileBtn"><i data-lucide="user"></i>회원정보</button>
@@ -1860,12 +1861,15 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
         <div class="pm-row"><span class="pm-row-label">로그인 방식</span><span class="pm-row-value" id="pmProvider">—</span></div>
       </div>
       <div class="pm-section">
-        <div class="pm-section-title">포인트</div>
-        <div class="pm-row"><span class="pm-row-label">현재 보유 포인트</span><span class="pm-row-value" id="pmPoints">0P</span></div>
+        <div class="pm-section-title">크레딧 잔액</div>
+        <div class="pm-row"><span class="pm-row-label">현재 플랜</span><span class="pm-row-value" id="pmPlan">—</span></div>
+        <div class="pm-row"><span class="pm-row-label">구독 크레딧</span><span class="pm-row-value" id="pmSubCredits">0 C</span></div>
+        <div class="pm-row"><span class="pm-row-label">패키지 크레딧</span><span class="pm-row-value" id="pmPackCredits">0 C</span></div>
+        <div class="pm-row"><span class="pm-row-label">다음 결제일</span><span class="pm-row-value" id="pmNextBilling">—</span></div>
       </div>
       <div class="pm-danger-zone">
         <div class="pm-danger-title">⚠️ 회원 탈퇴</div>
-        <div class="pm-danger-desc">탈퇴 시 다음 정보가 영구 삭제됩니다: 계정, 보유 포인트, 게시한 작품, 클라우드 자료.<br>이 작업은 되돌릴 수 없습니다.</div>
+        <div class="pm-danger-desc">탈퇴 시 다음 정보가 영구 삭제됩니다: 계정, 보유 크레딧, 구독, 게시한 작품, 클라우드 자료.<br>이 작업은 되돌릴 수 없습니다.</div>
         <button class="pm-danger-btn" id="pmDeleteAccount">회원 탈퇴 신청</button>
       </div>
     </div>
@@ -2975,10 +2979,10 @@ async function callWorkerFal(endpointPath, opts = {}) {
   // 포인트 부족 처리 — 구독 페이지 안내 추가
   if (r.status === 402) {
     const data = await r.json();
-    if (confirm(`포인트가 부족해요!\n\n현재 잔액: ${data.balance.toLocaleString()} P\n필요: ${data.required.toLocaleString()} P\n\n구독 페이지로 이동할까요?`)) {
+    if (confirm(`크레딧이 부족해요!\n\n현재 잔액: ${data.balance.toLocaleString()} C\n필요: ${data.required.toLocaleString()} C\n\n구독 페이지로 이동할까요?`)) {
       window.location.href = '/subscription.html';
     }
-    throw new Error('포인트 부족 (' + data.balance + ' / 필요 ' + data.required + ')');
+    throw new Error('크레딧 부족 (' + data.balance + ' / 필요 ' + data.required + ')');
   }
   if (r.status === 401) {
     throw new Error('로그인이 필요합니다');
@@ -3001,7 +3005,7 @@ async function callWorkerFal(endpointPath, opts = {}) {
         } else {
           if (id === 'gnbPointsValue') el.textContent = pts.toLocaleString();
           else if (id === 'pdPoints') el.innerHTML = pts.toLocaleString() + '<span class="pt-unit">P</span>';
-          else if (id === 'pmPoints') el.textContent = pts.toLocaleString() + ' P';
+          else if (id === 'pmPoints') el.textContent = pts.toLocaleString() + ' C';
           else el.innerHTML = '<span style="color:var(--gold);font-weight:700">' + pts.toLocaleString() + ' P</span>';
         }
       });
@@ -3031,20 +3035,20 @@ async function callWorkerFalAbs(absUrl, opts = {}) {
   return r;
 }
 
-// 사용자 포인트 조회
+// 사용자 크레딧 조회 (신규 시스템)
 async function fetchMyPoints() {
   const jwt = await getSupabaseJWT();
-  if (!jwt) { console.warn('[Points] JWT 없음 - 로그인 안 됨'); return null; }
+  if (!jwt) { console.warn('[Credits] JWT 없음 - 로그인 안 됨'); return null; }
   try {
-    const r = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + jwt }});
+    const r = await fetch('/api/credits', { headers: { 'Authorization': 'Bearer ' + jwt }});
     if (!r.ok) {
       const errText = await r.text();
-      console.warn('[Points] /api/me 실패:', r.status, errText);
+      console.warn('[Credits] /api/credits 실패:', r.status, errText);
       return null;
     }
     return await r.json();
   } catch (e) {
-    console.error('[Points] fetchMyPoints 예외:', e);
+    console.error('[Credits] fetchMyPoints 예외:', e);
     return null;
   }
 }
@@ -3136,29 +3140,43 @@ function calcVidCredits(i) {
 // 포인트 잔액 UI 갱신
 async function updatePointsDisplay() {
   const me = await fetchMyPoints();
-  console.log('[Points] fetchMyPoints result:', me);
+  console.log('[Credits] fetchMyPoints result:', me);
 
-  // 구 GNB userPoints (이제 없음) + 새 GNB gnbPointsValue + 드롭다운 pdPoints + 회원정보 pmPoints 모두 갱신
-  const targets = ['userPoints', 'gnbPointsValue', 'pdPoints', 'pmPoints'];
+  // GNB pill + 드롭다운 + 회원정보 모달 갱신
+  const gnbEl = document.getElementById('gnbPointsValue');
+  const pdEl = document.getElementById('pdPoints');
+  const userPointsEl = document.getElementById('userPoints');
 
-  targets.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (!me) {
-      if (id === 'gnbPointsValue') el.textContent = '—';
-      else el.innerHTML = '<span style="color:var(--ink3);font-size:10px">— P</span>';
-      return;
-    }
-    if (me.unlimited) {
-      if (id === 'gnbPointsValue') el.textContent = '∞';
-      else el.innerHTML = '<span style="color:var(--gold);font-weight:700">∞ P</span> <span style="font-size:9px;color:var(--ink3)">(무제한)</span>';
-    } else {
-      if (id === 'gnbPointsValue') el.textContent = me.points.toLocaleString();
-      else if (id === 'pdPoints') el.innerHTML = me.points.toLocaleString() + '<span class="pt-unit">P</span>';
-      else if (id === 'pmPoints') el.textContent = me.points.toLocaleString() + ' P';
-      else el.innerHTML = '<span style="color:var(--gold);font-weight:700">' + me.points.toLocaleString() + ' P</span>';
-    }
-  });
+  if (!me || !me.balance) {
+    if (gnbEl) gnbEl.textContent = '—';
+    if (pdEl) pdEl.innerHTML = '<span style="color:var(--ink3);font-size:10px">— C</span>';
+    if (userPointsEl) userPointsEl.innerHTML = '<span style="color:var(--ink3);font-size:10px">— C</span>';
+    return;
+  }
+
+  const total = me.balance.total;
+  const sub = me.balance.subscription;
+  const pack = me.balance.pack;
+
+  if (gnbEl) gnbEl.textContent = total.toLocaleString();
+  if (pdEl) pdEl.innerHTML = total.toLocaleString() + '<span class="pt-unit">C</span>';
+  if (userPointsEl) userPointsEl.innerHTML = '<span style="color:var(--gold);font-weight:700">' + total.toLocaleString() + ' C</span>';
+
+  // 회원정보 모달
+  const pmPlan = document.getElementById('pmPlan');
+  const pmSub = document.getElementById('pmSubCredits');
+  const pmPack = document.getElementById('pmPackCredits');
+  const pmNext = document.getElementById('pmNextBilling');
+  const planLabels = { lite: 'Lite', standard: 'Standard', pro: 'Pro' };
+  if (pmPlan) pmPlan.textContent = me.subscription ? (planLabels[me.subscription.plan] || me.subscription.plan) : '구독 없음';
+  if (pmSub) pmSub.textContent = (sub || 0).toLocaleString() + ' C';
+  if (pmPack) pmPack.textContent = (pack || 0).toLocaleString() + ' C';
+  if (pmNext) {
+    if (me.subscription && me.subscription.next_billing) {
+      const dt = new Date(me.subscription.next_billing);
+      pmNext.textContent = dt.getFullYear() + '.' + String(dt.getMonth()+1).padStart(2,'0') + '.' + String(dt.getDate()).padStart(2,'0');
+    } else { pmNext.textContent = '—'; }
+  }
 }
 
 // DOMContentLoaded 또는 sb 준비되면 자동 호출
