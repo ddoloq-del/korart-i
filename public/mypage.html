@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>마이페이지 — Korart-i</title>
-  <meta name="description" content="포인트 잔액 확인 및 거래 내역 — Korart-i 한국 K-콘텐츠 AI 영상 생성 스튜디오">
+  <meta name="description" content="크레딧 잔액 확인 및 거래 내역 — Korart-i 한국 K-콘텐츠 AI 영상 생성 스튜디오">
   <meta property="og:type" content="website">
   <meta property="og:title" content="마이페이지 — Korart-i">
-  <meta property="og:description" content="포인트 잔액 및 거래 내역 확인">
+  <meta property="og:description" content="크레딧 잔액 및 거래 내역 확인">
   <meta property="og:site_name" content="Korart-i">
   <meta property="og:locale" content="ko_KR">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
@@ -820,7 +820,7 @@ async function onLoginReady() {
     avatarEl.style.display = 'inline-block';
   }
 
-  // 포인트 잔액 표시
+  // 크레딧 잔액 표시
   updatePointsDisplay();
 
   // 카운트 업데이트
@@ -1025,7 +1025,7 @@ async function loadTransactions() {
     localTxs = JSON.parse(localStorage.getItem('korart_transactions') || '[]');
   } catch (e) {}
 
-  // 포인트 50만 초기화 보장
+  // 크레딧 초기화 (옛 시스템 호환용)
   if (!parseFloat(localStorage.getItem('korart_points') || '0')) {
     localStorage.setItem('korart_points', '500000');
   }
@@ -1034,7 +1034,7 @@ async function loadTransactions() {
       id: 'tx_init',
       type: 'bonus',
       amount: 500000,
-      description: '테스트 포인트 적립',
+      description: '테스트 크레딧 적립',
       balance_after: 500000,
       created_at: new Date().toISOString()
     }];
@@ -1109,15 +1109,15 @@ function renderTransactions(transactions) {
   const summary = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:16px">' +
     '<div style="background:var(--bg3);border:1px solid var(--line);padding:12px">' +
       '<div style="font-size:9px;color:var(--ink3);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px">총 적립</div>' +
-      '<div style="font-size:16px;color:var(--teal);font-weight:800">+' + totalCharged.toLocaleString() + ' P</div>' +
+      '<div style="font-size:16px;color:var(--teal);font-weight:800">+' + totalCharged.toLocaleString() + ' C</div>' +
     '</div>' +
     '<div style="background:var(--bg3);border:1px solid var(--line);padding:12px">' +
       '<div style="font-size:9px;color:var(--ink3);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px">총 사용</div>' +
-      '<div style="font-size:16px;color:var(--ink);font-weight:800">-' + totalConsumed.toLocaleString() + ' P</div>' +
+      '<div style="font-size:16px;color:var(--ink);font-weight:800">-' + totalConsumed.toLocaleString() + ' C</div>' +
     '</div>' +
     '<div style="background:var(--bg3);border:1px solid var(--line);padding:12px">' +
       '<div style="font-size:9px;color:var(--ink3);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px">총 환불</div>' +
-      '<div style="font-size:16px;color:var(--gold);font-weight:800">+' + totalRefunded.toLocaleString() + ' P</div>' +
+      '<div style="font-size:16px;color:var(--gold);font-weight:800">+' + totalRefunded.toLocaleString() + ' C</div>' +
     '</div>' +
   '</div>';
 
@@ -1130,12 +1130,12 @@ function renderTransactions(transactions) {
     const dt = tx.created_at ? new Date(tx.created_at) : null;
     const dtStr = dt ? (dt.toLocaleDateString('ko-KR') + ' ' + dt.toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'})) : '—';
     const desc = tx.description || tx.note || tx.reason || tx.model || '—';
-    const balance = (tx.balance_after !== null && tx.balance_after !== undefined) ? Number(tx.balance_after).toLocaleString() + ' P' : '';
+    const balance = (tx.balance_after !== null && tx.balance_after !== undefined) ? Number(tx.balance_after).toLocaleString() + ' C' : '';
     return '<tr style="border-bottom:1px solid var(--line)">' +
       '<td style="padding:10px 8px;font-size:10px;color:var(--ink3);white-space:nowrap">' + dtStr + '</td>' +
       '<td style="padding:10px 8px"><span style="display:inline-block;padding:2px 8px;background:rgba(0,0,0,.2);border:1px solid ' + meta.color + ';color:' + meta.color + ';font-size:10px;font-weight:700">' + meta.label + '</span></td>' +
       '<td style="padding:10px 8px;font-size:11px;color:var(--ink2)">' + escapeHtml(String(desc)) + '</td>' +
-      '<td style="padding:10px 8px;font-size:12px;font-weight:800;color:' + amtColor + ';text-align:right;white-space:nowrap">' + sign + amt.toLocaleString() + ' P</td>' +
+      '<td style="padding:10px 8px;font-size:12px;font-weight:800;color:' + amtColor + ';text-align:right;white-space:nowrap">' + sign + amt.toLocaleString() + ' C</td>' +
       '<td style="padding:10px 8px;font-size:10px;color:var(--ink3);text-align:right;white-space:nowrap">' + balance + '</td>' +
     '</tr>';
   }).join('');

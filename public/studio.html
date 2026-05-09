@@ -4067,6 +4067,11 @@ const ANGLE_DESCRIPTIONS = {
   'Crane Shot':             { ko: '크레인으로 부드럽게 상승/하강 이동', use: '댄스·뮤직비디오·웅장한 전환에 시각적 임팩트를 줄 때' },
   'Medium Shot':            { ko: '허리 위 화면, 표정과 의상 동시에', use: '화보의 기본 샷, 표정과 상의 의상을 함께 보여줄 때' },
   'Over-the-Shoulder (OTS)':{ ko: '어깨 너머 시점으로 보는 구도', use: '인물과 배경의 관계감, 손짓/액세서리 강조' },
+  'Selfie Shot':            { ko: '셀카 각도, 아래에서 위로 찍은 느낌', use: 'V로그·셀카·개인방송 잡담에 자연스러운 느낌' },
+  'Webcam Frame':           { ko: '웹캠 정면, 근거리 아이컨택', use: '스트리머 화면, 실시간 방송 큐와 채팅 느낌' },
+  'Vlog Handheld':          { ko: '핸드헬드 V로그 샷, 약간의 흔들림이 있는 자연 구도', use: 'V로그·일상 공유 영상의 자연스러운 현장감' },
+  'Top-down Desk Shot':     { ko: '책상 위에서 수직 다운 샷', use: '게임 스트리머·팟캐스트·DIY 콘텐츠의 워크스테이션 그대로' },
+  'Reaction Cam':           { ko: '화면 모서리 작은 리액션캠 컴포지션', use: '게임·요리/쇼츠 컨텐츠에 출연자의 리액션을 동시에 표현할 때' },
 };
 
 const ANGLE_IMG_KEYS = {
@@ -4096,6 +4101,11 @@ const ANGLE_IMG_KEYS = {
   "Bird's Eye View": '',
   'Dolly Zoom': '',
   'Point of Interest': '',
+  'Selfie Shot': '',
+  'Webcam Frame': '',
+  'Vlog Handheld': '',
+  'Top-down Desk Shot': '',
+  'Reaction Cam': '',
 };
 
 const ANGLE_IMAGES = {
@@ -4159,6 +4169,13 @@ const ANGLE_CATS = [
   {cat:'공간 & 카메라 무빙', items:[
     {label:'Dolly Zoom',            tip:'다가가며 줌 아웃, 환각·충격 연출'},
     {label:'Point of Interest',     tip:'특정 사물에 시선 머무름'},
+  ]},
+  {cat:'개인방송 & 1인 미디어', items:[
+    {label:'Selfie Shot',           tip:'셀카 각도, 브이로그·셀카·잡담 방송'},
+    {label:'Webcam Frame',          tip:'웹캠 정면, 스트리머 라이브 방송 화면'},
+    {label:'Vlog Handheld',         tip:'핸드헬드 V로그 샷, 자연스러운 현장감'},
+    {label:'Top-down Desk Shot',    tip:'책상 위 수직 다운 샷, 게임·팟캐스트·DIY'},
+    {label:'Reaction Cam',          tip:'화면 모서리 리액션캠, 게임·쇼츠·요리'},
   ]},
 ];
 
