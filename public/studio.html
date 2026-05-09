@@ -3476,6 +3476,7 @@ const IMAGE_SCENE_GROUPS = {
   editorial: { ko: '화보' },
   job:       { ko: '직업 체험' },
   lifestyle: { ko: '라이프스타일' },
+  makeup:    { ko: '화장' },
 };
 
 // 이미지 모드 16씬 — 영상 모드 SCENES와 별개 (앵글 없음, 카테고리 그룹 포함)
@@ -3483,10 +3484,11 @@ const IMAGE_SCENE_GROUPS = {
 // group: 카테고리 그룹 키 (IMAGE_SCENE_GROUPS 참조)
 // catLabel: 포토카드에 표시될 영문 부제 (예: "EDITORIAL", "PASSPORT")
 const SCENES_IMAGE = {
-  // ── 화보 (3) ──
+  // ── 화보 (4) ──
   magazine:     { name:'잡지 화보',   group:'editorial', catLabel:'EDITORIAL',     bgImage:'/images/scenes/magazine.png',     style:'high fashion editorial photography, professional studio lighting, Vogue magazine aesthetic, sharp clean composition, premium glossy finish' },
   cinematic:    { name:'시네마틱',    group:'editorial', catLabel:'CINEMATIC',     bgImage:'/images/scenes/cinematic.jpg',     style:'cinematic film still, anamorphic lens flare, moody atmospheric lighting, movie poster aesthetic, dramatic color grading' },
   vintage_film: { name:'빈티지 필름', group:'editorial', catLabel:'VINTAGE FILM',  bgImage:'/images/scenes/vintage_film.png', style:'analog film photography, Kodak Portra warmth, faded retro tones, soft film grain, 70s 80s aesthetic, nostalgic mood' },
+  wedding:      { name:'웨딩 화보',   group:'editorial', catLabel:'WEDDING',       bgImage:'/images/scenes/wedding.png',      style:'pre-wedding photoshoot, dreamy romantic atmosphere, soft golden sunlight, fine-art bridal photography. Outfits: groom wears tailored black tuxedo with white dress shirt and bow tie, OR crisp white dress shirt with charcoal slacks for casual look. Bride wears flowing white wedding gown with lace details and soft veil, OR elegant semi-formal mini wedding dress in ivory. Locations: vast green meadow with rolling hills, golden English countryside, cobblestone streets of London or Edinburgh, Parisian Eiffel-style boulevards, blooming cherry blossom paths, sun-drenched vineyard. Backlit golden hour, soft bokeh, ethereal romantic mood, hand-in-hand poses, tender intimate moments' },
 
   // ── 직업 체험 (4) ──
   job_doctor:   { name:'의사',       group:'job',       catLabel:'DOCTOR',        bgImage:'/images/scenes/job_doctor.png',        style:'white doctor coat, hospital setting, stethoscope around neck, professional medical photography, confident clinical atmosphere, clean bright lighting' },
@@ -3498,6 +3500,16 @@ const SCENES_IMAGE = {
   life_sns:     { name:'SNS 프로필', group:'lifestyle', catLabel:'INSTAGRAM',     style:'trendy Instagram aesthetic, soft natural window light, Korean cafe vibe, casual chic outfit, candid lifestyle moment, warm pastel tones' },
   life_family:  { name:'가족 사진', group:'lifestyle', catLabel:'FAMILY',        style:'warm family portrait, natural happy expressions, soft pastel tones, cozy home atmosphere or sunny park, genuine loving moments, K-drama family aesthetic' },
   life_couple:  { name:'미래의 내 여친/남친',  group:'lifestyle', catLabel:'FUTURE LOVE',  style:'romantic couple portrait, soft warm lighting, K-drama aesthetic, intimate genuine moment, beautiful natural backdrop, dreamy bokeh, ideal partner imagery' },
+
+  // ── 화장 (6) ──
+  // 씬 구조는 화보(editorial)와 동일 — 의상/장소/계절/시간대/날씨 입력 적용
+  // style 필드에 화장 키워드를 주입하여 일관된 화보 퀄리티 + 화장 스타일 동시 반영
+  makeup_idol_kpop:    { name:'한국 아이돌 화장', group:'makeup', catLabel:'K-IDOL', bgImage:'/images/scenes/makeup_idol_kpop.png',  style:'high fashion editorial portrait with K-pop idol makeup style, glass skin foundation, dewy radiant complexion, gradient lip in coral or peach pink, straight defined eyebrows, subtle peach blush on cheeks, sparkling glitter eyeshadow, glossy plump lip tint, professional studio lighting, sharp clean composition, premium glossy finish, idol photoshoot aesthetic' },
+  makeup_idol_doll:    { name:'서구형 인형 메이크', group:'makeup', catLabel:'DOLL IDOL', bgImage:'/images/scenes/makeup_idol_doll.png', style:'high fashion editorial portrait with western doll-like idol makeup, porcelain matte foundation, sharp contoured cheekbones, smoky eye with dramatic black eyeliner, defined cut crease eyeshadow, bold matte red lip, arched bold brows, photogenic doll-like features, professional studio lighting, sharp clean composition, premium glossy finish' },
+  makeup_idol_fairy:   { name:'요정 무대 메이크', group:'makeup', catLabel:'FAIRY IDOL', bgImage:'/images/scenes/makeup_idol_fairy.png', style:'high fashion editorial portrait with fairy stage idol makeup, ethereal pearl shimmer skin, iridescent highlight on cheekbones and nose tip, holographic glitter eyeshadow, jelly tinted lip in rose, soft straight brows, dreamy fantasy concept makeup, professional studio lighting, premium glossy finish' },
+  makeup_jp_kawaii:    { name:'일본 카와이 메이크', group:'makeup', catLabel:'KAWAII JP', bgImage:'/images/scenes/makeup_jp_kawaii.png', style:'high fashion editorial portrait with Japanese kawaii gyaru-inspired makeup, baby doll round eyes with bottom lashes, soft pink circle blush placed under eyes (igari blush), heart-shaped pink gradient lips, fluffy straight brows, pure milky skin, oversized double eyelid, cute aegyo-sal under eyes, professional studio lighting, premium glossy finish, Japanese magazine aesthetic' },
+  makeup_jp_natural:   { name:'일본 자연 메이크', group:'makeup', catLabel:'NATURAL JP', bgImage:'/images/scenes/makeup_jp_natural.png', style:'high fashion editorial portrait with Japanese natural ulzzang makeup, no-makeup makeup look, sheer luminous skin, soft brown eyeshadow, thin natural eyeliner, sheer berry tinted lip, faded soft brows, minimalist daily aesthetic, Tokyo street style, professional studio lighting, sharp clean composition' },
+  makeup_jp_classic:   { name:'일본 전통 게이샤 메이크', group:'makeup', catLabel:'GEISHA JP', bgImage:'/images/scenes/makeup_jp_classic.png', style:'high fashion editorial portrait with traditional Japanese geisha-inspired makeup, pure white oshiroi base on face and neck, vivid red lip in small heart shape, fine red eye accents at outer corners, dark stark contrast brows, refined elegant features, kabuki theatrical aesthetic refined for modern editorial, professional studio lighting, premium glossy finish' },
 };
 
 // 이미지 모드 화보용 앵글 12개 — 영상 모드의 ANGLE_DESCRIPTIONS 리소스 재사용
@@ -7526,8 +7538,9 @@ function updateImgEditorialFields() {
   const wrap = document.getElementById('imgEditorialFields');
   if (!wrap) return;
   const sc = (typeof SCENES_IMAGE !== 'undefined') ? SCENES_IMAGE[S.scene] : null;
-  const isEditorial = sc && sc.group === 'editorial';
-  wrap.style.display = isEditorial ? '' : 'none';
+  // 화보 + 화장 카테고리에서 계절/시간대/날씨 필드 표시
+  const showFields = sc && (sc.group === 'editorial' || sc.group === 'makeup');
+  wrap.style.display = showFields ? '' : 'none';
 }
 
 // 직업 체험 카테고리 필드 토글 (무드/장소/변주 숨기기)
