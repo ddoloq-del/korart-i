@@ -3499,7 +3499,7 @@ const SCENES_IMAGE = {
   job_flight:   { name:'승무원',     group:'job',       catLabel:'FLIGHT CREW',   bgImage:'/images/scenes/job_flight.png',   style:'airline flight attendant uniform, airport terminal or airplane interior, polished friendly aesthetic, neat hair and makeup, professional service smile' },
 
   // ── 라이프스타일 (3) ──
-  life_sns:     { name:'SNS 프로필', group:'lifestyle', catLabel:'INSTAGRAM',     style:'trendy Instagram aesthetic, soft natural window light, Korean cafe vibe, casual chic outfit, candid lifestyle moment, warm pastel tones' },
+  life_sns:     { name:'SNS 프로필', group:'lifestyle', catLabel:'PROFILE',      isProfileMode:true, style:'circular profile picture, extreme close-up, friendly approachable expression, soft natural lighting, clean background' },
   life_family:  { name:'가족 사진', group:'lifestyle', catLabel:'FAMILY',        style:'warm family portrait, natural happy expressions, soft pastel tones, cozy home atmosphere or sunny park, genuine loving moments, K-drama family aesthetic' },
   life_couple:  { name:'미래의 내 여친/남친',  group:'lifestyle', catLabel:'FUTURE LOVE',  style:'romantic couple portrait, soft warm lighting, K-drama aesthetic, intimate genuine moment, beautiful natural backdrop, dreamy bokeh, ideal partner imagery' },
 
@@ -3966,6 +3966,52 @@ function renderVehicleOptions() {
     }
   }
   wrap.innerHTML = html;
+}
+
+// === SNS 프로필 — 원형 테두리 스타일 (12개) ===
+const PROFILE_BORDERS = [
+  { key: 'cherry',    ko: '🌸 벚꽃',       en: 'pink cherry blossom flower wreath border around the circular profile, soft petals scattered, romantic spring vibe' },
+  { key: 'rose',      ko: '🌹 장미',       en: 'red and white rose flower border around the circular profile, lush blooms, classic romantic style' },
+  { key: 'daisy',     ko: '🌼 들꽃',       en: 'wildflower border with white daisies and lavender around the circular profile, natural meadow feel' },
+  { key: 'sunflower', ko: '🌻 해바라기',    en: 'cheerful yellow sunflower border around the circular profile, vibrant summer mood' },
+  { key: 'leaf',      ko: '🍃 보태니컬',    en: 'green botanical leaf border around the circular profile, lush eucalyptus and ferns, fresh natural style' },
+  { key: 'star',      ko: '⭐ 별/우주',     en: 'sparkling star and cosmic particles border around the circular profile, glowing magical galaxy effect' },
+  { key: 'snow',      ko: '❄️ 눈송이',     en: 'winter snowflake crystal border around the circular profile, delicate frost effect, cool blue tones' },
+  { key: 'neon',      ko: '💡 네온 링',     en: 'glowing neon ring border around the circular profile, cyberpunk pink and blue light effect' },
+  { key: 'gold',      ko: '👑 골드 프레임', en: 'vintage luxury gold ornate frame border around the circular profile, elegant baroque pattern' },
+  { key: 'gradient',  ko: '🌈 그라데이션',  en: 'colorful gradient ring border around the circular profile, Instagram story style purple to pink to orange' },
+  { key: 'emoji',     ko: '💕 이모지',      en: 'cute emoji border around the circular profile with hearts and stars and sparkles, kawaii style' },
+  { key: 'pearl',     ko: '💍 진주',       en: 'elegant pearl beads border around the circular profile, refined feminine luxury style' },
+];
+
+// SNS 프로필 default 4컷 테두리
+const PROFILE_BORDERS_DEFAULT_4 = ['cherry', 'rose', 'daisy', 'sunflower'];
+
+// SNS 프로필 전용 prompt 빌드 (씬 상세 무시, 테두리 + 참조 이미지 강조)
+// cutIdx: 0~3 (4컷) 또는 단일 (cutIdx 무시 시 4컷 모두)
+function buildSnsProfilePrompt(cutIdx) {
+  const borders = (S.snsCutBorders && S.snsCutBorders.length === 4) ? S.snsCutBorders : PROFILE_BORDERS_DEFAULT_4.slice();
+  
+  // 4컷 모드: 4개 테두리 패널별 명시
+  if (typeof cutIdx === 'undefined' || cutIdx === null) {
+    const panelLines = [];
+    const PANEL_POSITIONS = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+    for (let i = 0; i < 4; i++) {
+      const b = PROFILE_BORDERS.find(x => x.key === borders[i]);
+      if (b) {
+        panelLines.push(`Panel ${i+1} (${PANEL_POSITIONS[i]}): circular profile picture with ${b.en}`);
+      }
+    }
+    
+    return `Four-panel grid of SNS profile pictures (2x2 layout). Each panel shows a circular profile photo of the SAME person, extreme close-up of the face only, identical face across all panels matching the reference photo exactly.
+${panelLines.join('. ')}.
+Clean white or pastel background outside the circle, person centered inside the circle, friendly approachable expression, soft natural lighting. Each panel has a different decorative border around the circle. High-quality professional profile photography.`;
+  }
+  
+  // 1컷 모드: 선택된 컷의 테두리만
+  const b = PROFILE_BORDERS.find(x => x.key === borders[cutIdx]);
+  const borderEn = b ? b.en : 'simple clean border';
+  return `SNS profile picture, single image. Circular profile photo with ${borderEn}, extreme close-up of the face only, face matches the reference photo exactly. Clean white or pastel background outside the circle, person centered inside the circle, friendly approachable expression, soft natural lighting. High-quality professional profile photography.`;
 }
 
 // === 시대별 의상 옵션 ===
@@ -7413,6 +7459,10 @@ function ensureImageModeState() {
   if (typeof S.imgVariationCustom === 'undefined')S.imgVariationCustom = '';
   if (!Array.isArray(S.imgCutDescriptions))       S.imgCutDescriptions = ['','','',''];
   if (!Array.isArray(S.imgCutAngles))             S.imgCutAngles       = ['','','',''];
+  // SNS 프로필 — 4컷 테두리 + 참조 이미지 (life_sns 씬 전용)
+  if (!Array.isArray(S.snsCutBorders))             S.snsCutBorders     = PROFILE_BORDERS_DEFAULT_4.slice();
+  if (typeof S.snsRefImageUrl === 'undefined')     S.snsRefImageUrl    = '';
+  if (typeof S.snsRefImageDataUrl === 'undefined') S.snsRefImageDataUrl = '';
   // 시대 배경은 이미지 모드에서 현대극 고정
   S.era = 'modern';
 }
@@ -7612,6 +7662,130 @@ function updateImgJobFields() {
   if (varEl) { const f = varEl.closest('.field'); if (f) f.style.display = isJob ? 'none' : ''; }
 }
 
+// SNS 프로필 (life_sns) 씬 전용 — 모든 씬 상세 숨김 + 테두리 슬롯 표시
+function updateImgSnsFields() {
+  const isSns = (S.scene === 'life_sns');
+  // 1) 모든 씬 상세 필드 숨김 (SNS일 때)
+  const idsToHide = ['imgMoodChips', 'imgLocChips', 'imgVariationChips'];
+  for (const id of idsToHide) {
+    const el = document.querySelector('#imageModeForm #' + id);
+    if (el) { const f = el.closest('.field'); if (f && isSns) f.style.display = 'none'; }
+  }
+  // 2) 화보 전용 필드(계절/시간/날씨)도 숨김
+  const editorialWrap = document.getElementById('imgEditorialFields');
+  if (editorialWrap && isSns) editorialWrap.style.display = 'none';
+  
+  // 3) SNS 전용 UI 표시/숨김
+  let snsWrap = document.getElementById('imgSnsFields');
+  if (isSns) {
+    // 앵글 슬롯 영역 자체를 SNS 전용으로 교체 (테두리 슬롯)
+    const angleSlotsEl = document.getElementById('angleSlots');
+    if (angleSlotsEl) {
+      angleSlotsEl.style.display = 'none';
+    }
+    // SNS 테두리 슬롯 + 참조 이미지 UI 렌더
+    if (typeof renderSnsProfileUI === 'function') renderSnsProfileUI();
+  } else {
+    // 다른 씬: SNS UI 숨김, 앵글 슬롯 복원
+    const angleSlotsEl = document.getElementById('angleSlots');
+    if (angleSlotsEl) angleSlotsEl.style.display = '';
+    if (snsWrap) snsWrap.style.display = 'none';
+  }
+}
+
+// SNS 프로필 UI 렌더 (참조 이미지 업로드 + 4컷 테두리 슬롯)
+function renderSnsProfileUI() {
+  // angleSlots 부모 영역에 SNS 전용 UI 삽입
+  const angleSlotsEl = document.getElementById('angleSlots');
+  if (!angleSlotsEl) return;
+  const parent = angleSlotsEl.parentElement;
+  if (!parent) return;
+  
+  let snsWrap = document.getElementById('imgSnsFields');
+  if (!snsWrap) {
+    snsWrap = document.createElement('div');
+    snsWrap.id = 'imgSnsFields';
+    parent.insertBefore(snsWrap, angleSlotsEl);
+  }
+  snsWrap.style.display = '';
+  
+  const refImgPreview = S.snsRefImageDataUrl
+    ? `<img src="${S.snsRefImageDataUrl}" style="width:100%;max-width:140px;aspect-ratio:1;object-fit:cover;border-radius:50%;border:2px solid var(--gold);display:block;margin:0 auto 8px">`
+    : `<div style="width:140px;height:140px;border-radius:50%;border:2px dashed var(--line);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;background:var(--bg3);font-size:32px;color:var(--ink3)">👤</div>`;
+  
+  // 테두리 슬롯 (4개)
+  const colors = ['var(--gold)','var(--blue)','var(--green)','var(--red)'];
+  const slotsHtml = [0,1,2,3].map(i => {
+    const borderKey = (S.snsCutBorders && S.snsCutBorders[i]) || '';
+    const border = PROFILE_BORDERS.find(b => b.key === borderKey);
+    const label = border ? border.ko : '— 선택 —';
+    const color = colors[i];
+    return `
+      <div style="display:flex;gap:8px;align-items:stretch;margin-bottom:8px">
+        <div style="flex:0 0 140px;padding:10px 8px;border-radius:0;border:1.5px solid ${color};background:rgba(255,255,255,.04);text-align:center;display:flex;flex-direction:column;justify-content:center">
+          <div style="font-size:11px;font-weight:800;color:${color};letter-spacing:1px;margin-bottom:4px">CUT ${i+1}</div>
+          <select onchange="setSnsBorder(${i}, this.value)" style="width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:5px;color:var(--ink);font-size:11px">
+            ${PROFILE_BORDERS.map(b => `<option value="${b.key}" ${borderKey === b.key ? 'selected' : ''}>${b.ko}</option>`).join('')}
+          </select>
+        </div>
+        <div style="flex:1;background:var(--bg3);border:1px solid var(--line);padding:8px 10px;font-size:11px;color:var(--ink3);display:flex;align-items:center">
+          ${label}
+        </div>
+      </div>`;
+  }).join('');
+  
+  snsWrap.innerHTML = `
+    <div style="margin-bottom:12px">
+      <label style="font-size:13px;font-weight:700;color:var(--cream);display:block;margin-bottom:8px">📸 참조 사진 업로드 <span style="color:var(--ink3);font-size:11px;font-weight:400">— 이 사진의 인물로 프로필 생성</span></label>
+      <div style="background:var(--bg3);border:1px solid var(--line);padding:14px;text-align:center">
+        ${refImgPreview}
+        <input type="file" id="snsRefImgInput" accept="image/*" onchange="handleSnsRefImageUpload(event)" style="display:none">
+        <button onclick="document.getElementById('snsRefImgInput').click()" style="background:var(--gold);color:#000;border:0;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;border-radius:0">${S.snsRefImageDataUrl ? '📷 사진 변경' : '📷 사진 선택'}</button>
+        ${S.snsRefImageDataUrl ? `<button onclick="clearSnsRefImage()" style="background:transparent;color:var(--red);border:1px solid var(--red);padding:8px 12px;font-size:11px;font-weight:700;cursor:pointer;border-radius:0;margin-left:6px">제거</button>` : ''}
+      </div>
+    </div>
+    <div>
+      <label style="font-size:13px;font-weight:700;color:var(--cream);display:block;margin-bottom:8px">🎨 4컷 테두리 스타일 선택</label>
+      ${slotsHtml}
+    </div>
+  `;
+}
+
+// SNS 테두리 선택
+function setSnsBorder(cutIdx, borderKey) {
+  if (!Array.isArray(S.snsCutBorders)) S.snsCutBorders = PROFILE_BORDERS_DEFAULT_4.slice();
+  S.snsCutBorders[cutIdx] = borderKey;
+  if (typeof saveSession === 'function') saveSession();
+}
+
+// SNS 참조 이미지 업로드 처리
+async function handleSnsRefImageUpload(ev) {
+  const file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    if (typeof toast === 'function') toast('❌ 이미지 파일만 업로드 가능');
+    return;
+  }
+  // dataURL로 즉시 미리보기
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    S.snsRefImageDataUrl = e.target.result;
+    // CDN 업로드 (선택사항 — generate 시 처리해도 됨)
+    if (typeof saveSession === 'function') saveSession();
+    if (typeof renderSnsProfileUI === 'function') renderSnsProfileUI();
+    if (typeof toast === 'function') toast('✓ 사진 업로드 완료');
+  };
+  reader.readAsDataURL(file);
+}
+
+// SNS 참조 이미지 제거
+function clearSnsRefImage() {
+  S.snsRefImageDataUrl = '';
+  S.snsRefImageUrl = '';
+  if (typeof saveSession === 'function') saveSession();
+  if (typeof renderSnsProfileUI === 'function') renderSnsProfileUI();
+}
+
 // 컷별 앵글 + 설명 렌더 (4개)
 function renderImgCutDescriptions() {
   ensureImageModeState();
@@ -7737,6 +7911,7 @@ function renderImageModeForm() {
   renderImgCutDescriptions();
   updateImgEditorialFields();
   updateImgJobFields();
+  updateImgSnsFields();
 
   // 자유 입력칸 동기화 + 이벤트 바인딩 (1회만)
   const bindCustom = (id, key) => {
@@ -8902,6 +9077,11 @@ function buildImagePromptImageMode() {
   const sc = SCENES_IMAGE[S.scene];
   if (!sc) return ''; // 안전장치 (이미지 모드 씬이 아니면 빈 문자열)
 
+  // SNS 프로필 씬: 씬 상세 무시, 테두리 + 참조 이미지 전용 prompt
+  if (S.scene === 'life_sns') {
+    return buildSnsProfilePrompt();
+  }
+
   const { charDesc, petDesc, productDesc, nPerson, nPet, nProd } = _imgBuildAvatarDescriptions();
   const subjectLock = _imgBuildSubjectLock(nPerson, nPet, nProd);
 
@@ -8964,6 +9144,11 @@ All 4 panels share consistent subjects and core concept. High-quality profession
 async function buildImagePromptImageModeForApi() {
   const sc = SCENES_IMAGE[S.scene];
   if (!sc) return '';
+
+  // SNS 프로필 씬: 씬 상세 무시, 테두리 + 참조 이미지 전용 prompt
+  if (S.scene === 'life_sns') {
+    return buildSnsProfilePrompt();
+  }
 
   const fullLib = (typeof loadAvatarLib === 'function') ? loadAvatarLib() : [];
   const getCat = (av) => {
@@ -9138,6 +9323,11 @@ async function buildImagePromptOneCutImageModeForApi(cutIdx) {
   ensureImageModeState();
   const sc = SCENES_IMAGE[S.scene] || {};
   if (!sc) return '';
+
+  // SNS 프로필 씬: 씬 상세 무시, 1컷 테두리 + 참조 이미지 전용 prompt
+  if (S.scene === 'life_sns') {
+    return buildSnsProfilePrompt(cutIdx);
+  }
   let charDesc = '';
   let petDesc = '';
   let productDesc = '';
@@ -9944,8 +10134,12 @@ async function generateOneCut() {
   };
 
   // 레퍼런스 이미지 — 이 컷에 출연하는 아바타들만
+  // SNS 프로필 씬: 사용자가 업로드한 사진 사용 (아바타 무시)
   let refImgs = [];
-  if (S.avatarCuts) {
+  if (S.scene === 'life_sns' && S.snsRefImageDataUrl) {
+    refImgs = [S.snsRefImageDataUrl];
+    log('info', 'SNS 프로필 1컷: 업로드된 참조 사진 사용');
+  } else if (S.avatarCuts) {
     // 각 아바타 검사: 이 컷에 출연하는지
     for (const av of (S.avatars || [])) {
       const libId = av._libId || av.id;
@@ -10151,7 +10345,14 @@ async function generateImage() {
   };
 
   // 아바타 중 이미지 있는 것들만 레퍼런스로
-  const refImgs = S.avatars.filter(av => av.imgUrl).map(av => av.imgUrl);
+  // SNS 프로필 씬: 사용자가 업로드한 사진 사용 (아바타 무시)
+  let refImgs;
+  if (S.scene === 'life_sns' && S.snsRefImageDataUrl) {
+    refImgs = [S.snsRefImageDataUrl];
+    log('info', 'SNS 프로필: 업로드된 참조 사진 사용');
+  } else {
+    refImgs = S.avatars.filter(av => av.imgUrl).map(av => av.imgUrl);
+  }
   // 이전 컷 이어서 만들기 체크 — 있으면 fal storage에 업로드 후 refImgs에 추가
   if (S.continueRefDataUrl) {
     try {
