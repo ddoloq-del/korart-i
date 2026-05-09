@@ -3001,17 +3001,17 @@ async function callWorkerFal(endpointPath, opts = {}) {
         if (!el) return;
         if (unlimited) {
           if (id === 'gnbPointsValue') el.textContent = '∞';
-          else el.innerHTML = '<span style="color:var(--gold);font-weight:700">∞ P</span>';
+          else el.innerHTML = '<span style="color:var(--gold);font-weight:700">∞ C</span>';
         } else {
           if (id === 'gnbPointsValue') el.textContent = pts.toLocaleString();
-          else if (id === 'pdPoints') el.innerHTML = pts.toLocaleString() + '<span class="pt-unit">P</span>';
+          else if (id === 'pdPoints') el.innerHTML = pts.toLocaleString() + '<span class="pt-unit">C</span>';
           else if (id === 'pmPoints') el.textContent = pts.toLocaleString() + ' C';
           else el.innerHTML = '<span style="color:var(--gold);font-weight:700">' + pts.toLocaleString() + ' P</span>';
         }
       });
       // 차감되었을 때만 toast 알림
       if (charged && parseFloat(charged) > 0 && typeof showToast === 'function') {
-        showToast(`-${charged}P 차감 · 잔액 ${pts.toLocaleString()}P`);
+        showToast(`-${_pToC(charged)}C 차감 · 잔액 ${pts.toLocaleString()}C`);
       }
     }
   }
@@ -3117,6 +3117,8 @@ async function releaseJobLock(jobId) {
 }
 
 // 4) USD → 크레딧 환산 (환율 1550 + 마진 40% = USD × 21.7)
+// P → C 환산 헬퍼 (P = USD × 42, C = USD × 21.7, 비율 = 21.7/42 ≈ 0.5167)
+function _pToC(p) { return Math.round(Number(p || 0) * (21.7 / 42) * 10) / 10; }
 const _CREDITS_PER_USD = 21.7;
 
 // 5) 이미지 크레딧 계산 (4컷 = 1개 이미지 가격)
@@ -6034,7 +6036,7 @@ async function generateAvatarImage() {
            <span style="color:var(--ink3)">모델</span><span style="color:var(--cream);font-weight:700">${_avModelLabel}</span>
            <span style="color:var(--ink3)">해상도</span><span>1536x1024 (3x2 다각도 시트)</span>
            <span style="color:var(--ink3)">참고</span><span>${_avRefNote}</span>
-           <span style="color:var(--ink3)">예상 비용</span><span style="color:var(--gold);font-weight:700">${_avPts} P</span>
+           <span style="color:var(--ink3)">예상 비용</span><span style="color:var(--gold);font-weight:700">${_pToC(_avPts)} C</span>
          </div>
          <div style="font-size:11px;color:var(--ink3);margin-top:10px">생성 후 6개 각도 중 하나를 골라 아바타로 사용합니다.</div>
        </div>`
@@ -8465,13 +8467,13 @@ function pickModel(kind) {
               priceTag = '⚠️ ' + ar + '+UHD 미지원';
               disabled = true;
             } else if (pts > 0) {
-              priceTag = pts + ' P/장';
+              priceTag = _pToC(pts) + ' C/장';
             }
           } else if (kind === 'vid' && m.resolutions && m.resolutions[0]) {
             const r = m.resolutions[0];
             priceTag = (r.cpsOff !== r.cpsOn)
-              ? r.pointsOff + '~' + r.pointsOn + ' P/초'
-              : r.pointsOff + ' P/초';
+              ? _pToC(r.pointsOff) + '~' + _pToC(r.pointsOn) + ' C/초'
+              : _pToC(r.pointsOff) + ' C/초';
           }
           const cardStyle = disabled
             ? 'cursor:not-allowed;padding:12px 14px;border-radius: 0;border:1px solid var(--line);background:var(--bg2);opacity:0.45;display:flex;align-items:center;gap:10px'
@@ -9509,7 +9511,7 @@ async function generateByMode() {
            <span style="color:var(--ink3)">모드</span><span style="color:var(--pink);font-weight:700">스케치 → 업그레이드</span>
            <span style="color:var(--ink3)">화질</span><span>${IMG_QUALITY_LABELS[q] || q}</span>
            <span style="color:var(--ink3)">AI</span><span>GPT Image 2 Edit Low (자동 고정)</span>
-           <span style="color:var(--ink3)">예상 비용</span><span style="color:var(--gold);font-weight:700">${pts} P</span>
+           <span style="color:var(--ink3)">예상 비용</span><span style="color:var(--gold);font-weight:700">${_pToC(pts)} C</span>
          </div>
          <div style="font-size:11px;color:var(--ink3);margin-top:10px">스케치 후 업그레이드 버튼이 표시됩니다.</div>
        </div>`
@@ -9539,7 +9541,7 @@ async function generateByMode() {
          <span style="color:var(--ink3)">모드</span><span>일반 생성</span>
          <span style="color:var(--ink3)">화질</span><span>${IMG_QUALITY_LABELS[q] || q}</span>
          <span style="color:var(--ink3)">AI</span><span style="color:var(--cream);font-weight:700">${m.label}${m.recommended ? ' [추천]' : ''}</span>
-         <span style="color:var(--ink3)">예상 비용</span><span style="color:var(--gold);font-weight:700">${pts} P</span>
+         <span style="color:var(--ink3)">예상 비용</span><span style="color:var(--gold);font-weight:700">${_pToC(pts)} C</span>
        </div>
      </div>`
   );
@@ -9590,7 +9592,7 @@ function onImgAiChange() {
         hint.textContent = '⚠️ 이 비율+화질에서는 미지원';
         hint.style.color = 'var(--gold)';
       } else {
-        hint.textContent = pts + ' P/장';
+        hint.textContent = _pToC(pts) + ' C/장';
         hint.style.color = 'var(--gold)';
       }
     } else {
@@ -9727,7 +9729,7 @@ async function generateSketchLow() {
     const pts = calcImgPoints('openai/gpt-image-2/edit', 'low', ar, q);
     if (pts) addImgCost(pts);
 
-    log('ok', `스케치 완료 (${pts || 0} P 차감) — 업그레이드 버튼 활성`);
+    log('ok', `스케치 완료 (${_pToC(pts || 0)} C 차감) — 업그레이드 버튼 활성`);
     toast('스케치 완료 — 마음에 드시면 업그레이드하세요');
   } catch (e) {
     log('err', '스케치 실패: ' + e.message);
@@ -9760,7 +9762,7 @@ async function upgradeSketch(targetQuality) {
     `${targetQuality === 'high' ? 'High' : 'Medium'}로 업그레이드`,
     `<div style="padding:8px 0">
        <div style="font-size:13px;color:var(--ink2);margin-bottom:8px">스케치 결과를 input으로 넣고 ${targetQuality === 'high' ? 'High' : 'Medium'} 품질로 재생성합니다.</div>
-       <div style="font-size:13px;color:var(--gold);font-weight:700">예상 비용: ${pts} P</div>
+       <div style="font-size:13px;color:var(--gold);font-weight:700">예상 비용: ${_pToC(pts)} C</div>
        <div style="font-size:11px;color:var(--ink3);margin-top:6px">구도와 포즈는 거의 동일하게 유지됩니다.</div>
      </div>`
   );
@@ -9822,7 +9824,7 @@ async function upgradeSketch(targetQuality) {
     await _displayQuadFromUrl(url);
 
     if (pts) addImgCost(pts);
-    log('ok', `업그레이드 완료 (${targetQuality}, ${pts || 0} P 차감)`);
+    log('ok', `업그레이드 완료 (${targetQuality}, ${_pToC(pts || 0)} C 차감)`);
     toast(`업그레이드 완료 — ${targetQuality === 'high' ? 'High' : 'Medium'}`);
   } catch (e) {
     log('err', '업그레이드 실패: ' + e.message);
@@ -10848,8 +10850,8 @@ function getVidModelOptions(i) {
     // 가격 범위 (off ~ on, 첫 해상도 기준)
     const r = m.resolutions && m.resolutions[0];
     const priceTag = r ? ((r.cpsOff !== r.cpsOn)
-      ? r.pointsOff + '~' + r.pointsOn + 'P/초'
-      : r.pointsOff + 'P/초') : (m.pointsOff + 'P/초');
+      ? _pToC(r.pointsOff) + '~' + _pToC(r.pointsOn) + 'C/초'
+      : _pToC(r.pointsOff) + 'C/초') : (_pToC(m.pointsOff) + 'C/초');
     return '<option value="' + key + '" ' + sel + '>' + m.label + ' · ' + priceTag + (m.recommended ? ' [추천]' : '') + '</option>';
   }).join('');
 }
@@ -10887,8 +10889,8 @@ function getVidResolutionOptions(i) {
   return m.resolutions.map(r => {
     const sel = (cur === r.key) ? 'selected' : '';
     const priceTag = (r.cpsOff !== r.cpsOn)
-      ? r.pointsOff + '~' + r.pointsOn + 'P/초'
-      : r.pointsOff + 'P/초';
+      ? _pToC(r.pointsOff) + '~' + _pToC(r.pointsOn) + 'C/초'
+      : _pToC(r.pointsOff) + 'C/초';
     return '<option value="' + r.key + '" ' + sel + '>' + r.label + ' · ' + priceTag + '</option>';
   }).join('');
 }
@@ -11071,7 +11073,7 @@ function updateVidCostEst(i) {
   if (!el) return;
   const r = calcVidPoints(i);
   if (r.points <= 0) { el.textContent = ''; return; }
-  el.textContent = (Math.round(r.points * 10) / 10).toFixed(1) + ' P 예상';
+  el.textContent = (_pToC(r.points)).toFixed(1) + ' C 예상';
 }
 
 // 모든 카드 cost 갱신
@@ -11128,7 +11130,7 @@ async function generateCutVideo(i) {
   // 확인 모달 — 모든 옵션 표시
   const audioLabel = pickedV.audioFixed
     ? (pickedV.audioIncluded ? '포함 (모델 고정)' : '없음 (모델 고정)')
-    : (audio ? 'ON (+' + (Math.round((pickedV.pointsOn - pickedV.pointsOff) * 10) / 10).toFixed(1) + ' P/초)' : 'OFF');
+    : (audio ? 'ON (+' + (_pToC(pickedV.pointsOn - pickedV.pointsOff)).toFixed(1) + ' C/초)' : 'OFF');
 
   const scriptLine = _hasCharMode && _charSummary
     ? '<div style="font-size:11px;color:var(--ink2);margin-top:4px">\u00b7 캐릭터: <b>' + escHtml(_charSummary) + '</b></div>'
@@ -11157,7 +11159,7 @@ async function generateCutVideo(i) {
       '</div>' +
       '<div style="border-top:1px solid var(--line);padding-top:10px;background:rgba(200,160,74,.08);padding:10px;margin:0 -8px">' +
         '<div style="font-size:12px;color:var(--ink3)">예상 비용</div>' +
-        '<div style="font-size:20px;font-weight:800;color:var(--gold);margin-top:2px">' + (Math.round(totalPts * 10) / 10).toFixed(1) + ' P</div>' +
+        '<div style="font-size:20px;font-weight:800;color:var(--gold);margin-top:2px">' + (_pToC(totalPts)).toFixed(1) + ' C</div>' +
       '</div>' +
     '</div>'
   );
