@@ -11256,21 +11256,30 @@ async function generateCutVideo(i) {
     }
 
     if (_isSingleMode && script) {
-      // 화자별로 영어 지시문 + 한국어 대사 따올표로 분리 (압축)
-      let speakerLabel = '';
-      if (speaker === 'woman') {
-        speakerLabel = 'Woman speaks Korean line, lips visible';
-      } else if (speaker === 'man') {
-        speakerLabel = 'Man speaks Korean line, lips visible';
-      } else if (speaker === 'narrator-woman') {
-        speakerLabel = 'Female narrator voice-over (no visible speaker)';
-      } else if (speaker === 'narrator-man') {
-        speakerLabel = 'Male narrator voice-over (no visible speaker)';
+      // 화자 미선택 → 대사 출력 안함 (skip)
+      if (!speaker || speaker === '') {
+        log('info', `대사 입력되었으나 화자 미선택 — prompt에서 제외`);
       } else {
-        speakerLabel = 'Character speaks Korean line';
+        // 화자별로 영어 지시문 + 한국어 대사 따올표로 분리
+        // 대사 끝에 "closes mouth and holds expression" 명시해서 대사가 중간에 자연스럽게 위치하도록 유도
+        let speakerLabel = '';
+        let endingTag = '';
+        if (speaker === 'woman') {
+          speakerLabel = 'Woman speaks Korean line, lips visible';
+          endingTag = ' then closes mouth and holds expression';
+        } else if (speaker === 'man') {
+          speakerLabel = 'Man speaks Korean line, lips visible';
+          endingTag = ' then closes mouth and holds expression';
+        } else if (speaker === 'narrator-woman') {
+          speakerLabel = 'Female narrator voice-over (no visible speaker)';
+          endingTag = ' then a brief silent pause';
+        } else if (speaker === 'narrator-man') {
+          speakerLabel = 'Male narrator voice-over (no visible speaker)';
+          endingTag = ' then a brief silent pause';
+        }
+        finalPrompt += ` ${speakerLabel}: "${script}"${endingTag}`;
+        log('info', `대사: [${speaker}] "${script}"`);
       }
-      finalPrompt += ` ${speakerLabel}: "${script}"`;
-      log('info', `대사: [${speaker || 'character'}] "${script}"`);
     }
 
     // 캐릭터별 모드: @Element1, @Element2… 행동/대사 프롬프트 추가
@@ -11282,13 +11291,20 @@ async function generateCutVideo(i) {
         if (inp.action && inp.action.trim()) parts.push(inp.action.trim());
         if (inp.line && inp.line.trim()) {
           const spk = document.getElementById(`vidSpeaker_${i}_${j}`)?.value || inp.speaker || '';
-          const isNar = (spk === 'narrator-woman' || spk === 'narrator-man');
-          if (!isNar) {
+          // 화자 미선택 → 대사 출력 안함 (skip)
+          if (!spk || spk === '') {
+            log('info', `${elTag} 대사 입력되었으나 화자 미선택 — prompt에서 제외`);
+          } else {
+            const isNar = (spk === 'narrator-woman' || spk === 'narrator-man');
             // 화자 명시 — 성별 태그 삽입으로 대사 매핑 도움
             let voiceTag = '';
             if (spk === 'woman') voiceTag = ' (female voice)';
             else if (spk === 'man') voiceTag = ' (male voice)';
-            parts.push(`"${inp.line.trim()}"라고 말한다${voiceTag}`);
+            // 대사 끝에 "입을 다물고 표정을 유지" 명시 — 대사가 중간에 위치하도록 유도
+            const endingPhrase = isNar
+              ? ', 이후 잠시 침묵이 이어진다'
+              : ', 이후 입을 다물고 표정을 유지한다';
+            parts.push(`"${inp.line.trim()}"라고 말한 뒤${endingPhrase}${voiceTag}`);
           }
         }
         if (inp.emotion && emotionMap[inp.emotion]) {
