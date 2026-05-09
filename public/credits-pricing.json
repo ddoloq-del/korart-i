@@ -48,16 +48,12 @@
   },
   "image_pricing": {
     "_note": "4컷 기준. 1컷 = 4컷의 30%",
-    "flux-schnell": {
-      "ko": "Flux Schnell",
-      "credits_4cut": 0.4
-    },
-    "nano-banana-fhd": {
-      "ko": "Nano Banana FHD",
+    "nano-banana-2-fhd": {
+      "ko": "Nano Banana 2 FHD",
       "credits_4cut": 0.5
     },
-    "nano-banana-uhd": {
-      "ko": "Nano Banana 4K",
+    "nano-banana-2-uhd": {
+      "ko": "Nano Banana 2 4K",
       "credits_4cut": 1.0
     },
     "gpt-image-medium-16x9": {
@@ -75,10 +71,6 @@
   },
   "video_pricing": {
     "_note": "5초 기준. 다른 길이는 비율로 계산",
-    "wan-2-1": {
-      "ko": "WAN 2.1 표준",
-      "credits_5sec": 1.5
-    },
     "kling-1-6-std": {
       "ko": "Kling 1.6 표준",
       "credits_5sec": 3.0
@@ -94,10 +86,6 @@
     "pika-2-0": {
       "ko": "Pika 2.0",
       "credits_5sec": 5.0
-    },
-    "veo-2": {
-      "ko": "Veo 2",
-      "credits_5sec": 12.0
     },
     "veo-3-audio": {
       "ko": "Veo 3 (오디오 ON)",
