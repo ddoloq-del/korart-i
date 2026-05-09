@@ -11256,18 +11256,18 @@ async function generateCutVideo(i) {
     }
 
     if (_isSingleMode && script) {
-      // 화자별로 영어 지시문 + 한국어 대사 영상 시작부터 입을 움직여 대사를 시작
+      // 화자별로 영어 지시문 + 한국어 대사 따올표로 분리 (압축)
       let speakerLabel = '';
       if (speaker === 'woman') {
-        speakerLabel = 'Woman speaks from the start with lip sync';
+        speakerLabel = 'Woman speaks Korean line, lips visible';
       } else if (speaker === 'man') {
-        speakerLabel = 'Man speaks from the start with lip sync';
+        speakerLabel = 'Man speaks Korean line, lips visible';
       } else if (speaker === 'narrator-woman') {
-        speakerLabel = 'Female narrator voice-over from the start (no visible speaker)';
+        speakerLabel = 'Female narrator voice-over (no visible speaker)';
       } else if (speaker === 'narrator-man') {
-        speakerLabel = 'Male narrator voice-over from the start (no visible speaker)';
+        speakerLabel = 'Male narrator voice-over (no visible speaker)';
       } else {
-        speakerLabel = 'Character speaks from the start';
+        speakerLabel = 'Character speaks Korean line';
       }
       finalPrompt += ` ${speakerLabel}: "${script}"`;
       log('info', `대사: [${speaker || 'character'}] "${script}"`);
@@ -11279,23 +11279,22 @@ async function generateCutVideo(i) {
         const inp = _ci[av.id] || {};
         const elTag = `@Element${j+1}`;
         const parts = [];
-        // 영상 시작하자마자 입을 움직여 대사 동시에 시작—행동과 함께 자연스럽게 나오도록
+        if (inp.action && inp.action.trim()) parts.push(inp.action.trim());
         if (inp.line && inp.line.trim()) {
           const spk = document.getElementById(`vidSpeaker_${i}_${j}`)?.value || inp.speaker || '';
           const isNar = (spk === 'narrator-woman' || spk === 'narrator-man');
           if (!isNar) {
+            // 화자 명시 — 성별 태그 삽입으로 대사 매핑 도움
             let voiceTag = '';
             if (spk === 'woman') voiceTag = ' (female voice)';
             else if (spk === 'man') voiceTag = ' (male voice)';
-            // "speaks from the start" — 영상 초반에 입을 움직여 대사를 시작, 이후 행동 수행
-            parts.push(`speaks "${inp.line.trim()}" from the start with lip sync${voiceTag}`);
+            parts.push(`"${inp.line.trim()}"라고 말한다${voiceTag}`);
           }
         }
-        if (inp.action && inp.action.trim()) parts.push(`while ${inp.action.trim()}`);
         if (inp.emotion && emotionMap[inp.emotion]) {
           parts.push(emotionMap[inp.emotion]);
         }
-        return parts.length ? `${elTag} ${parts.join(', ')}` : null;
+        return parts.length ? `${elTag}이 ${parts.join(', ')}` : null;
       }).filter(Boolean);
       if (charLines.length) {
         finalPrompt += ' ' + charLines.join('. ');
