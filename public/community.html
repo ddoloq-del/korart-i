@@ -1619,28 +1619,21 @@ document.getElementById('modalPublish').addEventListener('click', async () => {
       return;
     }
 
-    // 포인트 보상 (비동기 — 실패해도 게시는 완료)
+    // 게시 완료 — 누적 글 수 조회 후 마일스톤 축하 (포인트 보상 폐지)
     try {
-      const { data: { session } } = await sb.auth.getSession();
-      const jwt = session?.access_token;
-      if (jwt) {
-        const r = await fetch('/api/community-post-reward', {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + jwt, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ postId: data.id }),
-        });
-        const result = await r.json().catch(() => ({}));
-        if (result.ok) {
-          if (typeof toast === 'function') {
-            toast('🎉 +' + result.rewarded + 'P 적립! (오늘 ' + result.todayCount + '/' + result.dailyLimit + ')');
-          } else {
-            alert('+' + result.rewarded + 'P 적립! (오늘 ' + result.todayCount + '/' + result.dailyLimit + ')');
-          }
-        } else if (result.error === 'daily_limit_reached') {
-          if (typeof toast === 'function') toast('오늘 보상 한도 ' + result.limit + '건 다 소진 — 내일 다시!');
-        }
-      }
-    } catch (e) { console.warn('[reward] failed:', e); }
+      const { count } = await sb
+        .from('community_posts')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', currentUser.id);
+      const total = count || 0;
+      const milestones = { 1: '🎉 첫 번째 글이에요! 환영합니다', 5: '✨ 5번째 글이에요!', 10: '🏆 10번째 글 — 단골 작가!', 30: '👑 30번째 글 — 마스터 작가!', 50: '💎 50번째 글 — 전설의 작가!', 100: '🌟 100번째 글 — 아카데미상!' };
+      const msg = milestones[total] || `📝 ${total}번째 글이 등록됐어요`;
+      if (typeof toast === 'function') toast(msg);
+      else alert(msg);
+    } catch (e) {
+      console.warn('[milestone] failed:', e);
+      if (typeof toast === 'function') toast('📝 글이 등록됐어요');
+    }
 
     // 화면에 즉시 추가
     const newPost = {

@@ -171,110 +171,16 @@ export default {
       }
 
       // ─────────────────────────────────────────
-      // /api/community-post-reward
-      // 커뮤니티 글 작성 보상 (1일 최대 5건, 건당 1.0P)
       // ─────────────────────────────────────────
-      if (url.pathname === '/api/community-post-reward' && request.method === 'POST') {
-        const user = await getUserFromJWT(request, env);
-        if (!user) return j({ error: 'unauthorized' }, 401);
-
-        let body = {};
-        try { body = await request.json(); } catch (e) {}
-        const postId = body.postId;
-        if (!postId) return j({ error: 'postId required' }, 400);
-
-        const REWARD_AMOUNT = 1.0;
-        const DAILY_LIMIT = 5;
-
-        try {
-          // KST 자정 기준 (UTC+9)
-          const now = new Date();
-          const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-          const todayStart = new Date(Date.UTC(kstNow.getUTCFullYear(), kstNow.getUTCMonth(), kstNow.getUTCDate(), -9));
-
-          // 1) 중복 보상 검사 — 같은 postId로 이미 보상 받았으면 거부
-          const dupCheck = await fetch(
-            env.SUPABASE_URL + '/rest/v1/point_transactions?user_id=eq.' + user.id +
-            '&type=eq.reward&description=ilike.community_post:' + postId + '*&limit=1',
-            {
-              headers: {
-                'apikey': env.SUPABASE_SERVICE_KEY,
-                'Authorization': 'Bearer ' + env.SUPABASE_SERVICE_KEY,
-              },
-            }
-          );
-          if (dupCheck.ok) {
-            const existing = await dupCheck.json();
-            if (Array.isArray(existing) && existing.length > 0) {
-              return j({ ok: false, error: 'already_rewarded' }, 200);
-            }
-          }
-
-          // 2) 일일 한도 검사
-          const todayCheck = await fetch(
-            env.SUPABASE_URL + '/rest/v1/point_transactions?user_id=eq.' + user.id +
-            '&type=eq.reward&description=ilike.community_post:*&created_at=gte.' + todayStart.toISOString(),
-            {
-              headers: {
-                'apikey': env.SUPABASE_SERVICE_KEY,
-                'Authorization': 'Bearer ' + env.SUPABASE_SERVICE_KEY,
-              },
-            }
-          );
-          let todayCount = 0;
-          if (todayCheck.ok) {
-            const todayList = await todayCheck.json();
-            todayCount = Array.isArray(todayList) ? todayList.length : 0;
-          }
-          if (todayCount >= DAILY_LIMIT) {
-            return j({ ok: false, error: 'daily_limit_reached', limit: DAILY_LIMIT }, 200);
-          }
-
-          // 3) 보상 지급
-          const profile = await getProfile(env, user.id);
-          if (!profile) return j({ error: 'profile not found' }, 500);
-
-          const newBalance = profile.unlimited
-            ? profile.points
-            : Math.round((profile.points + REWARD_AMOUNT) * 100) / 100;
-
-          if (!profile.unlimited) {
-            await fetch(
-              env.SUPABASE_URL + '/rest/v1/profiles?id=eq.' + user.id,
-              {
-                method: 'PATCH',
-                headers: {
-                  'apikey': env.SUPABASE_SERVICE_KEY,
-                  'Authorization': 'Bearer ' + env.SUPABASE_SERVICE_KEY,
-                  'Content-Type': 'application/json',
-                  'Prefer': 'return=minimal',
-                },
-                body: JSON.stringify({ points: newBalance }),
-              }
-            );
-          }
-
-          await insertTransaction(
-            env, user.id, 'reward',
-            profile.unlimited ? 0 : REWARD_AMOUNT,
-            newBalance,
-            'community_post:' + postId,
-            null, null, null
-          );
-
-          return j({
-            ok: true,
-            rewarded: REWARD_AMOUNT,
-            newBalance,
-            todayCount: todayCount + 1,
-            dailyLimit: DAILY_LIMIT,
-          });
-        } catch (e) {
-          return j({ error: 'reward failed', detail: String(e).substring(0, 200) }, 500);
-        }
+      // /api/community-post-reward — 폐지됨 (v2.0 크레딧 시스템)
+      // 자체 화폐 발행 위험 회피를 위해 보상 시스템 제거
+      // 옛 클라이언트가 호출해도 안전하게 응답 (글 작성은 정상 처리됨)
+      // ─────────────────────────────────────────
+      if (url.pathname === '/api/community-post-reward') {
+        return j({ ok: false, error: 'reward_system_deprecated', message: '글 작성 보상은 폐지되었습니다.' }, 200);
       }
 
-      // ─────────────────────────────────────────
+            // ─────────────────────────────────────────
       // /api/me — 현재 사용자 포인트 잔액 조회
       // ─────────────────────────────────────────
       if (url.pathname === '/api/me') {
