@@ -7,7 +7,7 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Estimated-Points, X-Fal-Endpoint',
-  'Access-Control-Expose-Headers': 'X-Points-Charged, X-Points-Remaining, X-Unlimited',
+  'Access-Control-Expose-Headers': 'X-Points-Charged, X-Points-Remaining, X-Unlimited, X-Priority-Queue',
 };
 
 // secret 값 정화 — BOM(U+FEFF), 양쪽 공백, 따옴표, 줄바꿈, 제어문자 제거
@@ -590,6 +590,24 @@ export default {
           }
         }
 
+        // ★ 우선 큐 — POST(생성 시작)에만 적용, GET(폴링)은 즉시 처리
+        let priorityTier = 'normal';
+        if (request.method === 'POST') {
+          try {
+            const sub = await getActiveSubscription(env, user.id);
+            if (sub && sub.plan === 'pro') {
+              priorityTier = 'pro';
+              // Pro: 즉시 실행 (지연 없음)
+            } else {
+              // Lite/Standard/구독없음: 인위 지연 (약 1.5초)
+              await new Promise(r => setTimeout(r, NON_PRO_DELAY_MS));
+            }
+          } catch (e) {
+            // 구독 조회 실패 시 안전하게 일반 처리 (지연 없이 진행)
+            console.warn('[priority] sub check failed:', e.message);
+          }
+        }
+
         const proxyHeaders = new Headers();
         proxyHeaders.set('Authorization', falAuthHeader(env));
         const ct = request.headers.get('Content-Type');
@@ -649,6 +667,8 @@ export default {
 
         const resHeaders = new Headers(corsHeaders);
         resHeaders.set('Content-Type', resContentType_p);
+        // priorityTier가 정의되지 않은 경우 (GET 폴링) 기본값 normal
+        resHeaders.set('X-Priority-Queue', typeof priorityTier !== 'undefined' ? priorityTier : 'normal');
         if (chargeResult) {
           resHeaders.set('X-Points-Charged', String(chargeResult.charged));
           resHeaders.set('X-Points-Remaining', String(chargeResult.remaining));
@@ -918,6 +938,9 @@ async function consumeCredits(env, userId, amount, description, refId) {
 // 5) 동시 작업 시작 (플랜별 한도 검사 포함)
 const PLAN_LIMITS = { lite: 1, standard: 3, pro: 6 };
 const NO_SUB_LIMIT = 1;
+
+// 우선 큐 (Priority Queue) 설정 — Pro만 즉시, 일반은 인위 지연
+const NON_PRO_DELAY_MS = 1500;  // Lite/Standard/구독없음 = 1.5초 지연
 
 async function startActiveJob(env, userId, jobType, model) {
   const nowIso = new Date().toISOString();
