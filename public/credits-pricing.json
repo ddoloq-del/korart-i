@@ -1,0 +1,113 @@
+{
+  "_meta": {
+    "version": "2.0",
+    "currency": "KRW",
+    "credit_value_won": 100,
+    "note": "1 크레딧 = 100원 가치 (구독 기준). 모델별 크레딧은 fal.ai 비용 + 마진 30%"
+  },
+  "plans": {
+    "lite": {
+      "ko": "Lite",
+      "price_won": 9900,
+      "credits": 100,
+      "concurrent": 1,
+      "priority": "normal"
+    },
+    "standard": {
+      "ko": "Standard",
+      "price_won": 29000,
+      "credits": 350,
+      "concurrent": 3,
+      "priority": "normal",
+      "popular": true
+    },
+    "pro": {
+      "ko": "Pro",
+      "price_won": 79000,
+      "credits": 1000,
+      "concurrent": 6,
+      "priority": "fast"
+    }
+  },
+  "packs": {
+    "p30": {
+      "ko": "30 크레딧",
+      "price_won": 4500,
+      "credits": 30,
+      "expires_days": 30,
+      "concurrent": 1
+    },
+    "p100": {
+      "ko": "100 크레딧",
+      "price_won": 12000,
+      "credits": 100,
+      "expires_days": 30,
+      "concurrent": 1,
+      "discount_label": "10% 할인"
+    }
+  },
+  "image_pricing": {
+    "_note": "4컷 기준. 1컷 = 4컷의 30%",
+    "flux-schnell": {
+      "ko": "Flux Schnell",
+      "credits_4cut": 0.4
+    },
+    "nano-banana-fhd": {
+      "ko": "Nano Banana FHD",
+      "credits_4cut": 0.5
+    },
+    "nano-banana-uhd": {
+      "ko": "Nano Banana 4K",
+      "credits_4cut": 1.0
+    },
+    "gpt-image-medium-16x9": {
+      "ko": "GPT Image 2 Medium 16:9",
+      "credits_4cut": 1.5
+    },
+    "gpt-image-high-16x9": {
+      "ko": "GPT Image 2 High 16:9",
+      "credits_4cut": 4.0
+    },
+    "flux-pro": {
+      "ko": "Flux Pro",
+      "credits_4cut": 2.0
+    }
+  },
+  "video_pricing": {
+    "_note": "5초 기준. 다른 길이는 비율로 계산",
+    "wan-2-1": {
+      "ko": "WAN 2.1 표준",
+      "credits_5sec": 1.5
+    },
+    "kling-1-6-std": {
+      "ko": "Kling 1.6 표준",
+      "credits_5sec": 3.0
+    },
+    "hailuo-02": {
+      "ko": "Hailuo 02",
+      "credits_5sec": 4.0
+    },
+    "kling-1-6-pro": {
+      "ko": "Kling 1.6 Pro",
+      "credits_5sec": 6.0
+    },
+    "pika-2-0": {
+      "ko": "Pika 2.0",
+      "credits_5sec": 5.0
+    },
+    "veo-2": {
+      "ko": "Veo 2",
+      "credits_5sec": 12.0
+    },
+    "veo-3-audio": {
+      "ko": "Veo 3 (오디오 ON)",
+      "credits_5sec": 25.0
+    }
+  },
+  "avatar_pricing": {
+    "gpt-image-medium-3x2": {
+      "ko": "GPT Image 2 Medium 다각도 시트",
+      "credits_per_sheet": 1.5
+    }
+  }
+}
