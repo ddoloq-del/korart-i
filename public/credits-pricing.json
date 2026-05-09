@@ -1,9 +1,10 @@
 {
   "_meta": {
-    "version": "2.0",
+    "version": "2.1",
     "currency": "KRW",
     "credit_value_won": 100,
-    "note": "1 크레딧 = 100원 가치 (구독 기준). 모델별 크레딧은 fal.ai 비용 + 마진 30%"
+    "note": "1 크레딧 = 100원 가치 (구독 기준). studio.html의 IMG_MODELS · VID_MODELS 그대로 반영",
+    "source": "public/studio.html IMG_MODELS · VID_MODELS · GPT_IMG_PRICING · NANO_BANANA_PRICING"
   },
   "plans": {
     "lite": {
@@ -47,55 +48,126 @@
     }
   },
   "image_pricing": {
-    "_note": "4컷 기준. 1컷 = 4컷의 30%",
-    "nano-banana-2-fhd": {
-      "ko": "Nano Banana 2 FHD",
-      "credits_4cut": 0.5
+    "_note": "4컷 기준 (16:9 FHD 1920x1080). 1컷 = 4컷의 30%. cpm = USD/이미지",
+    "gpt-image-2-low": {
+      "ko": "GPT Image 2 Edit Low",
+      "sub": "저렴 · 빠름",
+      "value": "openai/gpt-image-2/edit",
+      "quality": "low",
+      "cpm_usd": 0.017,
+      "credits_4cut": 0.7
     },
-    "nano-banana-2-uhd": {
-      "ko": "Nano Banana 2 4K",
-      "credits_4cut": 1.0
+    "gpt-image-2-medium": {
+      "ko": "GPT Image 2 Edit Medium",
+      "sub": "균형",
+      "value": "openai/gpt-image-2/edit",
+      "quality": "medium",
+      "cpm_usd": 0.053,
+      "credits_4cut": 2.3
     },
-    "gpt-image-medium-16x9": {
-      "ko": "GPT Image 2 Medium 16:9",
-      "credits_4cut": 1.5
+    "gpt-image-2-high": {
+      "ko": "GPT Image 2 Edit High",
+      "sub": "최고 화질 · 디테일 풍부",
+      "value": "openai/gpt-image-2/edit",
+      "quality": "high",
+      "cpm_usd": 0.158,
+      "credits_4cut": 6.7,
+      "recommended": true
     },
-    "gpt-image-high-16x9": {
-      "ko": "GPT Image 2 High 16:9",
-      "credits_4cut": 4.0
+    "nano-banana-pro": {
+      "ko": "나노바나나 프로",
+      "sub": "Gemini 3 Pro · 고품질",
+      "value": "fal-ai/nano-banana-pro/edit",
+      "cpm_usd": 0.15,
+      "credits_4cut": 6.3
     },
-    "flux-pro": {
-      "ko": "Flux Pro",
-      "credits_4cut": 2.0
+    "nano-banana-2": {
+      "ko": "나노바나나 2",
+      "sub": "가성비 · 빠름",
+      "value": "fal-ai/nano-banana-2/edit",
+      "cpm_usd": 0.08,
+      "credits_4cut": 3.4
     }
   },
   "video_pricing": {
-    "_note": "5초 기준. 다른 길이는 비율로 계산",
-    "kling-1-6-std": {
-      "ko": "Kling 1.6 표준",
-      "credits_5sec": 3.0
+    "_note": "5초 기준 (해상도·오디오에 따라 다름). cps = USD/초",
+    "kling-3-std-720p": {
+      "ko": "Kling 3.0 Standard 720p",
+      "sub": "권장 가성비",
+      "value": "fal-ai/kling-video/v3/standard/image-to-video",
+      "cps_off_usd": 0.084,
+      "cps_on_usd": 0.126,
+      "credits_5sec_audio_off": 3.6,
+      "credits_5sec_audio_on": 5.3,
+      "recommended": true
     },
-    "hailuo-02": {
-      "ko": "Hailuo 02",
-      "credits_5sec": 4.0
+    "kling-3-pro-1080p": {
+      "ko": "Kling 3.0 Pro 1080p",
+      "value": "fal-ai/kling-video/v3/pro/image-to-video",
+      "cps_off_usd": 0.112,
+      "cps_on_usd": 0.168,
+      "credits_5sec_audio_off": 4.7,
+      "credits_5sec_audio_on": 7.1
     },
-    "kling-1-6-pro": {
-      "ko": "Kling 1.6 Pro",
-      "credits_5sec": 6.0
+    "veo-3-1-fast-720p": {
+      "ko": "Veo 3.1 Fast 720p",
+      "value": "fal-ai/veo3.1/fast/image-to-video",
+      "cps_off_usd": 0.03,
+      "cps_on_usd": 0.05,
+      "credits_5sec_audio_off": 1.3,
+      "credits_5sec_audio_on": 2.1
     },
-    "pika-2-0": {
-      "ko": "Pika 2.0",
-      "credits_5sec": 5.0
+    "veo-3-1-fast-1080p": {
+      "ko": "Veo 3.1 Fast 1080p",
+      "value": "fal-ai/veo3.1/fast/image-to-video",
+      "cps_off_usd": 0.05,
+      "cps_on_usd": 0.08,
+      "credits_5sec_audio_off": 2.1,
+      "credits_5sec_audio_on": 3.4
     },
-    "veo-3-audio": {
-      "ko": "Veo 3 (오디오 ON)",
-      "credits_5sec": 25.0
+    "veo-3-1-1080p": {
+      "ko": "Veo 3.1 1080p",
+      "sub": "구글 최고급",
+      "value": "fal-ai/veo3.1/image-to-video",
+      "cps_off_usd": 0.2,
+      "cps_on_usd": 0.4,
+      "credits_5sec_audio_off": 8.4,
+      "credits_5sec_audio_on": 16.8
+    },
+    "happyhorse-720p": {
+      "ko": "HappyHorse 720p",
+      "value": "alibaba/happy-horse/image-to-video",
+      "resolution": "720p",
+      "cps_usd": 0.14,
+      "credits_5sec": 5.9
+    },
+    "happyhorse-1080p": {
+      "ko": "HappyHorse 1080p",
+      "value": "alibaba/happy-horse/image-to-video",
+      "resolution": "1080p",
+      "cps_usd": 0.28,
+      "credits_5sec": 11.8
+    },
+    "seedance-2-fast-720p": {
+      "ko": "Seedance 2.0 Fast 720p",
+      "value": "bytedance/seedance-2.0/fast/image-to-video",
+      "cps_usd": 0.2419,
+      "credits_5sec": 10.2
+    },
+    "seedance-2-std-1080p": {
+      "ko": "Seedance 2.0 Standard 1080p",
+      "value": "bytedance/seedance-2.0/image-to-video",
+      "cps_usd": 0.3024,
+      "credits_5sec": 12.7
     }
   },
   "avatar_pricing": {
-    "gpt-image-medium-3x2": {
+    "_note": "아바타 다각도 시트 (3x2 grid, 1536x1024)",
+    "gpt-image-2-medium-3x2": {
       "ko": "GPT Image 2 Medium 다각도 시트",
-      "credits_per_sheet": 1.5
+      "value": "openai/gpt-image-2",
+      "cpm_usd": 0.053,
+      "credits_per_sheet": 2.3
     }
   }
 }
