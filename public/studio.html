@@ -4297,7 +4297,7 @@ const S = {
   cutPubUrls:  [null,null,null,null],  // 각 컷 CDN URL
   cutApproval: [true,true,true,true],
   cutDurations:[5,5,5,5],
-  cutAudio:    [true,true,true,true],
+  cutAudio:    [false,false,false,false],
 
   // 각 컷별 사용자 설명 (쯤트/명장/감정 등 자유 입력)
   cutDescriptions: ['','','',''],
@@ -11234,7 +11234,13 @@ async function generateCutVideo(i) {
         if (inp.line && inp.line.trim()) {
           const spk = document.getElementById(`vidSpeaker_${i}_${j}`)?.value || inp.speaker || '';
           const isNar = (spk === 'narrator-woman' || spk === 'narrator-man');
-          if (!isNar) parts.push(`"${inp.line.trim()}"라고 말한다`);
+          if (!isNar) {
+            // 화자 명시 — 성별 태그 삽입으로 대사 매핑 도움
+            let voiceTag = '';
+            if (spk === 'woman') voiceTag = ' (female voice)';
+            else if (spk === 'man') voiceTag = ' (male voice)';
+            parts.push(`"${inp.line.trim()}"라고 말한다${voiceTag}`);
+          }
         }
         if (inp.emotion && emotionMap[inp.emotion]) {
           parts.push(emotionMap[inp.emotion]);
@@ -11271,9 +11277,17 @@ async function generateCutVideo(i) {
     // Kling API negative_prompt 최대 512자 — 반드시 캡핑
     const isNarrator = _isSingleMode && (speaker === 'narrator-woman' || speaker === 'narrator-man');
     const baseNeg = (S.vidStyle === 'live_action' || !S.vidStyle) ? KLING_NEG_LIVE : KLING_NEG_ANIME;
+    // 오디오 ON일 때 대사만 나오도록 BGM·음악 차단 키워드 추가
+    const _audioOn = !!(S.cutAudio && S.cutAudio[i]) || !!document.getElementById('vidAudio'+i)?.checked;
+    const noMusicNeg = _audioOn ? ', background music, BGM, soundtrack, instrumental, song' : '';
     const negPrompt = (isNarrator
-      ? baseNeg + ', talking, speaking, lip sync, mouth movement, mouth opening, lips moving, person speaking, character talking'
-      : baseNeg).slice(0, 512);
+      ? baseNeg + ', talking, speaking, lip sync, mouth movement, mouth opening, lips moving, person speaking, character talking' + noMusicNeg
+      : baseNeg + noMusicNeg).slice(0, 512);
+
+    // 오디오 ON일 때 finalPrompt에도 "대사만" 명시 (Kling이 generate_audio: true 시 BGM 동시 합성 방지)
+    if (_audioOn && !isNarrator && finalPrompt.length < 480) {
+      finalPrompt += ' Dialogue only, no music.';
+    }
 
     // ── Kling elements 배열 구성 (cutAvatars[i] 기반) ──
     // 아바타 1~3명 모두 elements 사용 (_cutAvs.length > 0)
