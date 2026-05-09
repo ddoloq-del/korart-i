@@ -335,6 +335,70 @@ img{display:block}
 
 .price-note{text-align:center;font-size:12px;color:var(--ink-dimmer);padding:16px 0;line-height:1.7}
 
+/* ============= 새 크레딧 시스템 CSS ============= */
+.current-plan{background:linear-gradient(135deg,rgba(99,102,241,.05),rgba(167,139,250,.05));border:1px solid var(--accent);padding:20px 28px;margin-bottom:32px;border-radius:0}
+.current-plan .cp-row{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+@media(max-width:780px){.current-plan .cp-row{grid-template-columns:repeat(2,1fr);gap:16px}}
+.current-plan .cp-label{font-size:11px;font-weight:700;color:var(--ink-dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.current-plan .cp-val{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+
+.price-credits{display:flex;align-items:baseline;gap:4px;font-family:'JetBrains Mono',monospace;font-weight:900;color:var(--accent);font-size:34px;letter-spacing:-.02em}
+.price-credits-unit{font-size:14px;color:var(--ink-dim);font-weight:700;letter-spacing:0;font-family:'Pretendard',sans-serif}
+.price-concurrent{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-dim);padding:12px 14px;background:rgba(99,102,241,.05);border:1px solid var(--line);border-radius:0}
+.price-concurrent strong{color:var(--accent);font-weight:800;font-size:15px}
+.price-priority-badge{display:inline-block;padding:3px 8px;background:linear-gradient(135deg,var(--gold),#d4a256);color:#fff;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-left:8px}
+
+.packs-section{margin-top:48px;padding:36px 32px;background:#f8f8f3;border:1px solid var(--line)}
+.packs-header{text-align:center;margin-bottom:24px}
+.packs-eyebrow{font-size:11px;font-weight:800;color:var(--gold);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+.packs-title{font-size:24px;font-weight:900;color:var(--ink);letter-spacing:-.02em;margin-bottom:8px}
+.packs-sub{font-size:13px;color:var(--ink-dim);line-height:1.6}
+.packs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:680px;margin:0 auto}
+@media(max-width:600px){.packs-grid{grid-template-columns:1fr}}
+.pack-card{background:#fff;border:1px solid var(--line);padding:20px 22px;display:flex;flex-direction:column;gap:8px;transition:all .2s}
+.pack-card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.pack-card-name{font-size:14px;font-weight:800;color:var(--ink)}
+.pack-card-credits{font-size:28px;font-weight:900;color:var(--accent);font-family:'JetBrains Mono',monospace;letter-spacing:-.02em}
+.pack-card-credits-unit{font-size:13px;color:var(--ink-dim);font-weight:700;font-family:'Pretendard',sans-serif;margin-left:4px}
+.pack-card-price{font-size:18px;font-weight:800;color:var(--ink)}
+.pack-card-meta{font-size:11px;color:var(--ink-dim);margin-bottom:8px}
+.pack-card-discount{display:inline-block;padding:2px 8px;background:var(--gold);color:#fff;font-size:10px;font-weight:800;letter-spacing:.06em;border-radius:0;align-self:flex-start;margin-bottom:4px}
+.pack-card-cta{margin-top:8px;padding:11px;background:var(--ink);color:#fff;border:none;font-size:13px;font-weight:800;letter-spacing:.04em;cursor:pointer;transition:all .2s}
+.pack-card-cta:hover{background:var(--gold)}
+
+.pricing-table{margin-top:48px}
+.pt-header{text-align:center;margin-bottom:24px}
+.pt-eyebrow{font-size:11px;font-weight:800;color:var(--accent);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+.pt-title{font-size:24px;font-weight:900;color:var(--ink);letter-spacing:-.02em;margin-bottom:8px}
+.pt-sub{font-size:13px;color:var(--ink-dim);line-height:1.6;max-width:560px;margin:0 auto}
+.pt-tabs{display:flex;gap:0;justify-content:center;margin-bottom:20px;border-bottom:2px solid var(--line)}
+.pt-tab{padding:12px 24px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;font-size:14px;font-weight:700;color:var(--ink-dim);cursor:pointer;transition:all .2s;letter-spacing:-.01em}
+.pt-tab:hover{color:var(--ink)}
+.pt-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.pt-content{background:#fff;border:1px solid var(--line);padding:0;overflow:hidden}
+.pt-row{display:grid;grid-template-columns:1fr auto;align-items:center;padding:14px 24px;border-bottom:1px solid var(--line)}
+.pt-row:last-child{border-bottom:none}
+.pt-row:hover{background:#fafaf7}
+.pt-name{font-size:14px;font-weight:700;color:var(--ink)}
+.pt-name-sub{font-size:11px;color:var(--ink-dim);font-weight:500;margin-top:2px}
+.pt-credits-row{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.pt-credits-line{display:flex;align-items:baseline;gap:6px;font-size:12px;color:var(--ink-dim)}
+.pt-credits-line strong{font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:15px;font-weight:800}
+.pt-rec-badge{display:inline-block;padding:1px 6px;background:var(--accent);color:#fff;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-left:6px;vertical-align:middle}
+
+.faq-section{margin-top:48px;max-width:760px;margin-left:auto;margin-right:auto}
+.faq-header{text-align:center;margin-bottom:24px}
+.faq-eyebrow{font-size:11px;font-weight:800;color:var(--gold);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+.faq-title{font-size:24px;font-weight:900;color:var(--ink);letter-spacing:-.02em}
+.faq-item{background:#fff;border:1px solid var(--line);margin-bottom:8px}
+.faq-item summary{padding:16px 24px;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;list-style:none;position:relative;padding-right:48px}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:'+';position:absolute;right:24px;top:50%;transform:translateY(-50%);font-size:20px;font-weight:300;color:var(--ink-dim);transition:transform .2s}
+.faq-item[open] summary::after{content:'−'}
+.faq-item summary:hover{background:#fafaf7}
+.faq-body{padding:0 24px 18px 24px;font-size:13px;color:var(--ink-dim);line-height:1.7}
+.faq-body strong{color:var(--ink);font-weight:700}
+
 </style>
 </head>
 <body>
@@ -536,96 +600,105 @@ img{display:block}
 
 <main class="main subscription-page">
   <section class="sub-hero">
-    <div class="sub-hero-eyebrow">SUBSCRIPTION</div>
-    <h1 class="sub-hero-title">구독으로 매달, <em>포인트로 자유롭게.</em></h1>
+    <div class="sub-hero-eyebrow">SUBSCRIPTION &amp; CREDITS</div>
+    <h1 class="sub-hero-title">내가 쓰는 만큼, <em>모든 AI 모델.</em></h1>
     <p class="sub-hero-sub">
-      매달 일정 포인트가 충전되는 구독을 선택하세요.<br>
-      부족하면 언제든 추가 포인트를 따로 구매할 수 있습니다. <strong>1포인트 = 50원</strong> 단위.
+      모든 구독 플랜에서 동일한 기능을 제공합니다 — 크레딧 양과 동시 작업 수만 다릅니다.
     </p>
   </section>
 
-  <section class="pricing-grid">
-    <!-- Starter -->
-    <div class="price-card">
-      <div class="price-icon">i</div>
-      <div class="price-name">Starter</div>
-      <div class="price-tag">개인 크리에이터·실험용</div>
-      <div class="price-amount">29,000<span class="unit">원</span></div>
-      <div class="price-per">/ 월</div>
-      <div class="price-points">
-        <div class="price-points-label">매월 충전 포인트</div>
-        <div class="price-points-value">580<span class="pt-unit">P</span></div>
+  <!-- 현재 프랜 및 잔액 (로그인 시에만 표시) -->
+  <section id="currentPlanBox" class="current-plan" style="display:none;">
+    <div class="cp-row">
+      <div class="cp-col">
+        <div class="cp-label">현재 플랜</div>
+        <div class="cp-val" id="cpPlanName">-</div>
       </div>
-      <ul class="price-features">
-        <li>모든 씬 사용 가능</li>
-        <li>아바타 라이브러리 무제한</li>
-        <li>영상 1편당 약 50~150P 차감</li>
-        <li>720p · 9:16 쇼츠 변환</li>
-        <li>광고 등 상업 이용 가능</li>
-      </ul>
-      <button class="price-cta" data-plan="starter">구독 시작</button>
-    </div>
-
-    <!-- Creator (추천) -->
-    <div class="price-card featured">
-      <div class="price-badge">추천</div>
-      <div class="price-icon">ii</div>
-      <div class="price-name">Creator</div>
-      <div class="price-tag">유튜버·인플루언서</div>
-      <div class="price-amount">59,000<span class="unit">원</span></div>
-      <div class="price-per">/ 월</div>
-      <div class="price-points">
-        <div class="price-points-label">매월 충전 포인트</div>
-        <div class="price-points-value">1,250<span class="pt-unit">P</span></div>
+      <div class="cp-col">
+        <div class="cp-label">구독 크레딧</div>
+        <div class="cp-val" id="cpSubCredits">- / -</div>
       </div>
-      <ul class="price-features">
-        <li>Starter의 모든 기능</li>
-        <li>1080p 고화질 + 오디오</li>
-        <li>씬별 최적 모델 자동 선택</li>
-        <li>16:9 · 1:1 · 9:16 모두 지원</li>
-        <li>새 씬 우선 액세스</li>
-        <li>4컷 무료 재생성 무제한</li>
-      </ul>
-      <button class="price-cta" data-plan="creator">구독 시작</button>
-    </div>
-
-    <!-- Studio -->
-    <div class="price-card">
-      <div class="price-icon">iii</div>
-      <div class="price-name">Studio</div>
-      <div class="price-tag">에이전시·브랜드</div>
-      <div class="price-amount">99,000<span class="unit">원</span></div>
-      <div class="price-per">/ 월</div>
-      <div class="price-points">
-        <div class="price-points-label">매월 충전 포인트</div>
-        <div class="price-points-value">2,200<span class="pt-unit">P</span></div>
+      <div class="cp-col">
+        <div class="cp-label">패키지 크레딧</div>
+        <div class="cp-val" id="cpPackCredits">-</div>
       </div>
-      <ul class="price-features">
-        <li>Creator의 모든 기능</li>
-        <li>최고 품질 모델 고정</li>
-        <li>4K 업스케일 옵션</li>
-        <li>팀 협업 (최대 3명)</li>
-        <li>커스텀 씬 제작 신청 가능</li>
-        <li>우선 기술 지원</li>
-      </ul>
-      <button class="price-cta" data-plan="studio">구독 시작</button>
+      <div class="cp-col">
+        <div class="cp-label" id="cpResetLabel">다음 충전</div>
+        <div class="cp-val" id="cpReset">-</div>
+      </div>
     </div>
   </section>
 
-  <section class="extra-points">
-    <div class="extra-points-info">
-      <div class="extra-points-label">Need More?</div>
-      <div class="extra-points-title">추가 포인트, 따로 구매</div>
-      <div class="extra-points-sub">
-        구독 포인트가 부족할 때 언제든 추가 충전.<br>
-        남은 포인트는 다음 달로 이월됩니다.
+  <!-- 구독 플랜 -->
+  <section class="pricing-grid" id="plansGrid">
+    <!-- JS로 동적 렌더링 -->
+  </section>
+
+  <!-- 1회 패키지 -->
+  <section class="packs-section">
+    <div class="packs-header">
+      <div class="packs-eyebrow">ONE-TIME PACKS</div>
+      <h2 class="packs-title">1회 패키지</h2>
+      <p class="packs-sub">구독 없이도 단건 구매 가능 · 구매일로부터 30일간 사용</p>
+    </div>
+    <div class="packs-grid" id="packsGrid">
+      <!-- JS로 동적 렌더링 -->
+    </div>
+  </section>
+
+  <!-- 모델별 크레딧 단가 -->
+  <section class="pricing-table">
+    <div class="pt-header">
+      <div class="pt-eyebrow">PRICING</div>
+      <h2 class="pt-title">모델별 크레딧 단가</h2>
+      <p class="pt-sub">AI 모델·옵션에 따라 크레딧 소모량이 다릅니다. 결제 전 생성 화면에서 정확한 소모량을 확인하세요.</p>
+    </div>
+    <div class="pt-tabs">
+      <button class="pt-tab active" data-tab="image">이미지</button>
+      <button class="pt-tab" data-tab="video">영상 (5초 기준)</button>
+      <button class="pt-tab" data-tab="avatar">아바타</button>
+    </div>
+    <div class="pt-content" id="ptContent">
+      <!-- JS로 동적 렌더링 -->
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-section">
+    <div class="faq-header">
+      <div class="faq-eyebrow">FAQ</div>
+      <h2 class="faq-title">자주 묻는 질문</h2>
+    </div>
+    <details class="faq-item">
+      <summary>크레딧은 현금으로 환불되나요?</summary>
+      <div class="faq-body">
+        결제일로부터 7일 이내 크레딧을 <strong>일체 사용하지 않은 경우</strong>에 한해 전액 환불 가능합니다. 1크레딧이라도 사용한 경우에는 환불이 제한됩니다 (디지털 콘텐츠 즉시 소비 특성).
       </div>
-    </div>
-    <div class="extra-points-rate">
-      <span class="rate-num">1</span><span class="rate-unit">P</span>
-      <span class="rate-equals">=</span>
-      <span class="rate-num">50</span><span class="rate-unit">원</span>
-    </div>
+    </details>
+    <details class="faq-item">
+      <summary>구독 해지하면 바로 못 쓰나요?</summary>
+      <div class="faq-body">
+        구독 해지 후에도 <strong>현재 결제 주기가 끝날 때까지</strong> 잔여 크레딧을 모두 사용할 수 있습니다. 다음 달부터 자동 결제가 중지됩니다.
+      </div>
+    </details>
+    <details class="faq-item">
+      <summary>1회 패키지는 자동 갱신되나요?</summary>
+      <div class="faq-body">
+        아닙니다. 1회 패키지는 <strong>단건 결제</strong>이며 구매일로부터 30일 후 자동 소멸됩니다. 자동 결제·갱신 없습니다.
+      </div>
+    </details>
+    <details class="faq-item">
+      <summary>동시 작업 수가 뜻하는 게 뭐예요?</summary>
+      <div class="faq-body">
+        한 번에 동시에 실행할 수 있는 AI 생성 작업 개수입니다. Lite는 1개, Standard는 3개, Pro는 6개까지 같은 시간에 돌릴 수 있으며, Pro는 추가로 <strong>우선 큐</strong>가 적용됩니다.
+      </div>
+    </details>
+    <details class="faq-item">
+      <summary>크레딧이 부족하면 어떻게 해요?</summary>
+      <div class="faq-body">
+        구독이 있더라도 1회 패키지를 추가 구매해서 쓸 수 있습니다. 또는 더 큰 플랜으로 업그레이드하세요 (함께스 운영 중).
+      </div>
+    </details>
   </section>
 
   <section class="price-note">
@@ -1704,21 +1777,216 @@ loadCommunityPosts();
 </script>
 
 <script>
-// 구독 버튼 핸들러 (결제 시스템 연동 전 임시)
-document.querySelectorAll('.price-cta[data-plan]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const plan = btn.dataset.plan;
-    const planNames = { starter: 'Starter (29,000원)', creator: 'Creator (59,000원)', studio: 'Studio (99,000원)' };
-    if (typeof currentUser === 'undefined' || !currentUser) {
-      alert('구독은 로그인 후 이용 가능합니다.');
-      // 로그인 모달 열기 시도
-      const am = document.getElementById('authModal');
-      if (am) am.classList.add('active');
-      return;
-    }
-    alert(planNames[plan] + ' 플랜 구독 기능은 곧 출시됩니다!\n결제 시스템(토스페이먼츠) 연동 후 활성화됩니다.');
+// ============= 새 크레딧 시스템 JS =============
+let PRICING = null;
+
+// 1) 가격표 로드
+async function loadPricing() {
+  try {
+    const r = await fetch('/credits-pricing.json?t=' + Date.now());
+    if (!r.ok) throw new Error('pricing fetch failed');
+    PRICING = await r.json();
+    renderPlans();
+    renderPacks();
+    renderPricingTable('image');
+  } catch (e) {
+    console.error('[subscription] PRICING 로드 실패:', e);
+    document.getElementById('plansGrid').innerHTML = '<div style="text-align:center;padding:40px;color:var(--ink-dim)">가격표 로딩 실패. 잠시 후 새로고침해주세요.</div>';
+  }
+}
+
+// 2) 구독 플랜 렌더
+function renderPlans() {
+  if (!PRICING) return;
+  const grid = document.getElementById('plansGrid');
+  const planKeys = ['lite', 'standard', 'pro'];
+  const taglines = {
+    lite:     '가벼운 시작',
+    standard: '가장 인기',
+    pro:     '프로·팀 용'
+  };
+  const features = {
+    lite: [
+      '모든 AI 모델 사용 가능',
+      '4컷 · 1컷 · 영상 · 아바타 모든 지원',
+      '모든 씬 사용 가능',
+      '클라우드 아바타 라이브러리',
+      '커뮤니티 이용'
+    ],
+    standard: [
+      'Lite의 모든 기능',
+      '<strong>3.5배 더 많은</strong> 크레딧',
+      '<strong>3개</strong>까지 동시 작업',
+      '그리드 자동 분할',
+      '커뮤니티 포인트 적립'
+    ],
+    pro: [
+      'Standard의 모든 기능',
+      '<strong>10배 더 많은</strong> 크레딧',
+      '<strong>6개</strong>까지 동시 작업',
+      '<strong>우선 큐</strong> — 더 빠른 시작',
+      '우선 기술 지원'
+    ]
+  };
+
+  grid.innerHTML = planKeys.map(k => {
+    const p = PRICING.plans[k];
+    const isPopular = !!p.popular;
+    const isPro = (k === 'pro');
+    return `
+      <div class="price-card ${isPopular ? 'featured' : ''}">
+        ${isPopular ? '<div class="price-badge">가장 인기</div>' : ''}
+        <div class="price-name">${p.ko}${isPro ? '<span class="price-priority-badge">⚡ 우선 큐</span>' : ''}</div>
+        <div class="price-tag">${taglines[k]}</div>
+        <div class="price-amount">${p.price_won.toLocaleString()}<span class="unit">원</span></div>
+        <div class="price-per">/ 월</div>
+        <div class="price-credits">
+          ${p.credits.toLocaleString()}<span class="price-credits-unit">크레딧/월</span>
+        </div>
+        <div class="price-concurrent">
+          동시 작업: <strong>${p.concurrent}개</strong>
+        </div>
+        <ul class="price-features">
+          ${features[k].map(f => `<li>${f}</li>`).join('')}
+        </ul>
+        <button class="price-cta" data-plan="${k}">구독 시작</button>
+      </div>
+    `;
+  }).join('');
+
+  // 버튼 핸들러 바인딩
+  grid.querySelectorAll('.price-cta[data-plan]').forEach(btn => {
+    btn.addEventListener('click', () => handleSubscribe(btn.dataset.plan));
+  });
+}
+
+// 3) 1회 패키지 렌더
+function renderPacks() {
+  if (!PRICING) return;
+  const grid = document.getElementById('packsGrid');
+  const keys = ['p30', 'p100'];
+  grid.innerHTML = keys.map(k => {
+    const p = PRICING.packs[k];
+    return `
+      <div class="pack-card">
+        ${p.discount_label ? `<span class="pack-card-discount">${p.discount_label}</span>` : ''}
+        <div class="pack-card-name">${p.ko}</div>
+        <div>
+          <span class="pack-card-credits">${p.credits}</span><span class="pack-card-credits-unit">크레딧</span>
+        </div>
+        <div class="pack-card-price">${p.price_won.toLocaleString()}원</div>
+        <div class="pack-card-meta">${p.expires_days}일 이내 사용 · 동시 작업 ${p.concurrent}개</div>
+        <button class="pack-card-cta" data-pack="${k}">구매하기</button>
+      </div>
+    `;
+  }).join('');
+
+  grid.querySelectorAll('.pack-card-cta[data-pack]').forEach(btn => {
+    btn.addEventListener('click', () => handleBuyPack(btn.dataset.pack));
+  });
+}
+
+// 4) 모델별 단가 표 렌더 (탭: image / video / avatar)
+function renderPricingTable(tab) {
+  if (!PRICING) return;
+  const content = document.getElementById('ptContent');
+  let rows = [];
+
+  if (tab === 'image') {
+    Object.entries(PRICING.image_pricing).forEach(([k, v]) => {
+      if (k.startsWith('_')) return;
+      rows.push(`
+        <div class="pt-row">
+          <div>
+            <div class="pt-name">${v.ko}${v.recommended ? '<span class="pt-rec-badge">추천</span>' : ''}</div>
+            ${v.sub ? `<div class="pt-name-sub">${v.sub}</div>` : ''}
+          </div>
+          <div class="pt-credits-row">
+            <div class="pt-credits-line"><strong>${v.credits}</strong>크레딧 / 4컷</div>
+          </div>
+        </div>
+      `);
+    });
+  } else if (tab === 'video') {
+    Object.entries(PRICING.video_pricing).forEach(([k, v]) => {
+      if (k.startsWith('_')) return;
+      const hasOnOff = (v.credits_5sec_audio_off !== undefined);
+      rows.push(`
+        <div class="pt-row">
+          <div>
+            <div class="pt-name">${v.ko}${v.recommended ? '<span class="pt-rec-badge">추천</span>' : ''}</div>
+            ${v.sub ? `<div class="pt-name-sub">${v.sub}</div>` : ''}
+          </div>
+          <div class="pt-credits-row">
+            ${hasOnOff
+              ? `<div class="pt-credits-line"><strong>${v.credits_5sec_audio_off}</strong> / 5초 · 오디오 OFF</div>
+                 <div class="pt-credits-line"><strong>${v.credits_5sec_audio_on}</strong> / 5초 · 오디오 ON</div>`
+              : `<div class="pt-credits-line"><strong>${v.credits_5sec}</strong> / 5초</div>`
+            }
+          </div>
+        </div>
+      `);
+    });
+  } else if (tab === 'avatar') {
+    Object.entries(PRICING.avatar_pricing).forEach(([k, v]) => {
+      if (k.startsWith('_')) return;
+      rows.push(`
+        <div class="pt-row">
+          <div>
+            <div class="pt-name">${v.ko}</div>
+            <div class="pt-name-sub">3x2 그리드 멀티앤글 촬영</div>
+          </div>
+          <div class="pt-credits-row">
+            <div class="pt-credits-line"><strong>${v.credits}</strong>크레딧 / 세트</div>
+          </div>
+        </div>
+      `);
+    });
+  }
+
+  content.innerHTML = rows.join('');
+}
+
+// 5) 탭 전환
+document.querySelectorAll('.pt-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.pt-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    renderPricingTable(tab.dataset.tab);
   });
 });
+
+// 6) 구독 버튼 핸들러
+function handleSubscribe(planKey) {
+  if (!PRICING) return;
+  const p = PRICING.plans[planKey];
+  if (typeof currentUser === 'undefined' || !currentUser) {
+    alert('구독은 로그인 후 이용 가능합니다.');
+    const am = document.getElementById('authModal');
+    if (am) am.classList.add('active');
+    return;
+  }
+  alert(`${p.ko} 플랜 (${p.price_won.toLocaleString()}원 / 월)\n\n⚡ 결제 시스템은 준비 중입니다.\n토스페이먼츠 정기결제 연동 완료 후 활성화됩니다.`);
+}
+
+// 7) 패키지 구매 버튼 핸들러
+function handleBuyPack(packKey) {
+  if (!PRICING) return;
+  const p = PRICING.packs[packKey];
+  if (typeof currentUser === 'undefined' || !currentUser) {
+    alert('패키지 구매는 로그인 후 이용 가능합니다.');
+    const am = document.getElementById('authModal');
+    if (am) am.classList.add('active');
+    return;
+  }
+  alert(`${p.ko} 패키지 (${p.price_won.toLocaleString()}원)\n\n⚡ 결제 시스템은 준비 중입니다.`);
+}
+
+// 8) 재재 잔액 표시 (로그인 시에만 — 추후 worker.js 연동 시 활성화)
+// async function loadCurrentBalance() { ... }
+
+// 초기화
+loadPricing();
 </script>
 </body>
 </html>

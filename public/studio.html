@@ -2439,6 +2439,9 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
       💡 영상은 4컷 이미지를 기준으로 만들어지지만, 표정·동작은 AI가 자유롭게 해석해요. 결과가 다소 달라질 수 있습니다.
     </div>
 
+    <!-- AI 모델 탭 바 -->
+    <div id="vidModelTabBar" style="margin-bottom:16px"></div>
+
     <div class="cut-vid-grid" id="cutVidGrid"></div>
 
     <!-- 영상 통합 박스 -->
@@ -3143,11 +3146,14 @@ function _serializeSession() {
     // cutDataUrls는 저장 안 함 (5MB 제한)
     cutApproval: S.cutApproval,
     cutDurations: S.cutDurations,
-    vidModelSel: ['', '', '', ''],
+    vidModelTab: S.vidModelTab || 'kling_720',
     cutAudio: S.cutAudio,
     cutDescriptions: S.cutDescriptions,
     cutEmotions: S.cutEmotions,
+    cutSingleAction: S.cutSingleAction,
     cutPrompts: S.cutPrompts,
+    cutAvatars: S.cutAvatars,
+    cutCharInputs: S.cutCharInputs,
     vidUrls: S.vidUrls,                // fal.ai CDN URL (잘 저장됨)
     extraPrompt: document.getElementById('extraPrompt')?.value || '',
     sessionImgCost: S.sessionImgCost,
@@ -3207,7 +3213,7 @@ function loadSession() {
 // S 객체에 데이터 부어넣기 + UI 동기화
 function restoreSession(data) {
   if (!data || !S) return;
-  const fields = ['aspectRatio','avatars','avatarCuts','scene','era','season','timeofday','weather','location','locCustom','vehicle','personCount','passerby','passerbyDensity','angles','customAngleMode','cutPubUrls','cutApproval','cutDurations','cutAudio','cutDescriptions','cutEmotions','cutPrompts','vidUrls','sessionImgCost','sessionVidCost'];
+  const fields = ['aspectRatio','avatars','avatarCuts','scene','era','season','timeofday','weather','location','locCustom','vehicle','personCount','passerby','passerbyDensity','angles','customAngleMode','cutPubUrls','cutApproval','cutDurations','cutAudio','cutDescriptions','cutEmotions','cutSingleAction','cutPrompts','cutAvatars','cutCharInputs','vidUrls','sessionImgCost','sessionVidCost'];
   for (const f of fields) {
     if (data[f] !== undefined) S[f] = data[f];
   }
@@ -4196,7 +4202,14 @@ const S = {
 
   // 각 컷별 감정 (드롭다운 선택: angry/shouting/calm/sad/funny/excited/...)
   cutEmotions: ['','','',''],
+  cutSingleAction: ['','','',''],  // 단일 모드(아바타 0~1명) 행동 입력
 
+  // 컷별 출연 아바타 (영상 생성용 elements 매핑)
+  cutAvatars: [[],[],[],[]],  // [[{id, name, imgUrl}, ...], ...]
+  // 컷별 캐릭터별 입력 {avatarId: {line, emotion, speaker, action}}
+  cutCharInputs: [{},{},{},{}],
+
+  vidModelTab: 'kling_720',        // 전역 AI 모델 탭 (kling_720/kling_1080/veo_fast/veo_std/happy_720/happy_1080/seedance_fast/seedance_std)
   vidUrls: [null,null,null,null],  // 생성된 영상 URLs
 
   // 이전 컷 이어서 만들기 — 사용자 업로드 레퍼런스
@@ -4225,6 +4238,24 @@ function toast(msg, dur=3000) {
   setTimeout(() => t.classList.remove('show'), dur);
 }
 function escHtml(s) { return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// 범용 확인 모달 (버튼 하나, 자동 닫힘 없음)
+function showAlertModal(msg) {
+  const existing = document.getElementById('_alertModal');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = '_alertModal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:9999';
+  overlay.innerHTML = `
+    <div style="background:var(--bg,#18181b);border:1px solid var(--line,#333);border-radius:0;padding:28px 32px;min-width:300px;max-width:420px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.5)">
+      <div style="font-size:13px;color:var(--ink,#eee);line-height:1.7;white-space:pre-line;margin-bottom:22px">${escHtml(msg)}</div>
+      <button id="_alertModalOk" style="padding:8px 32px;background:var(--pink,#ff6b9d);color:#fff;border:none;border-radius:0;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.03em">확인</button>
+    </div>`;
+  document.body.appendChild(overlay);
+  const close = () => overlay.remove();
+  document.getElementById('_alertModalOk').addEventListener('click', close);
+  overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+}
 
 // 이미지 다운로드 헬퍼 - URL 또는 dataURL → 파일 저장
 async function downloadImage(url, filename) {
@@ -8237,6 +8268,29 @@ VID_MODELS.forEach(m => {
   m.maxDur = m.durations[m.durations.length - 1];
 });
 
+// ── 전역 영상 모델 탭 맵 ──
+// 각 탭키 → {value, label, sub, key(해상도), durations, audioFixed, audioIncluded, cpsOff, cpsOn, pointsOff, pointsOn, minDur}
+const VID_MODEL_TAB_MAP = {};
+(function() {
+  const p = cps => Math.round(cps * 42 * 10) / 10;
+  [
+    // [tabKey, falEndpoint, label, sub, resKey, durations, audioFixed, audioIncluded, cpsOff, cpsOn]
+    ['kling_720',     'fal-ai/kling-video/v3/standard/image-to-video', 'Kling 3.0 Standard', '720p · 1초 단위 · 사운드 옵션',       '720p',  [3,4,5,6,7,8,9,10,11,12,13,14,15], false, true,  0.084,  0.126 ],
+    ['kling_1080',    'fal-ai/kling-video/v3/pro/image-to-video',      'Kling 3.0 Pro',      '1080p · 1초 단위 · 사운드 옵션',      '1080p', [3,4,5,6,7,8,9,10,11,12,13,14,15], false, true,  0.112,  0.168 ],
+    ['veo_fast',      'fal-ai/veo3.1/fast/image-to-video',             'Veo 3.1 Fast',        '1080p Fast · 4/6/8초 · 사운드 옵션',  '1080p', [4,6,8],                            false, true,  0.05,   0.08  ],
+    ['veo_std',       'fal-ai/veo3.1/image-to-video',                  'Veo 3.1',             '1080p · 4/6/8초 · 구글 최고급',       '1080p', [4,6,8],                            false, true,  0.20,   0.40  ],
+    ['happy_720',     'alibaba/happy-horse/image-to-video',             'HappyHorse 720p',     '720p · 1초 단위',                     '720p',  [3,4,5,6,7,8,9,10,11,12,13,14,15], true,  true,  0.14,   0.14  ],
+    ['happy_1080',    'alibaba/happy-horse/image-to-video',             'HappyHorse 1080p',    '1080p · 1초 단위',                    '1080p', [3,4,5,6,7,8,9,10,11,12,13,14,15], true,  true,  0.28,   0.28  ],
+    ['seedance_fast', 'bytedance/seedance-2.0/fast/image-to-video',    'Seedance 2.0 Fast',   '720p Fast · 1초 단위',                '720p',  [4,5,6,7,8,9,10,11,12,13,14,15],   true,  true,  0.2419, 0.2419],
+    ['seedance_std',  'bytedance/seedance-2.0/image-to-video',         'Seedance 2.0',        '1080p · 1초 단위',                    '1080p', [4,5,6,7,8,9,10,11,12,13,14,15],   true,  true,  0.3024, 0.3024],
+  ].forEach(([tab, value, label, sub, key, durations, audioFixed, audioIncluded, cpsOff, cpsOn]) => {
+    VID_MODEL_TAB_MAP[tab] = {
+      value, label, sub, key, durations, audioFixed, audioIncluded,
+      cpsOff, cpsOn, pointsOff: p(cpsOff), pointsOn: p(cpsOn), minDur: durations[0],
+    };
+  });
+})();
+
 // 모델 선택 모달 — 사용자가 선택한 모델 정보 반환 (취소 시 null)
 function pickModel(kind) {
   return new Promise((resolve) => {
@@ -10149,21 +10203,10 @@ async function goToStep3() {
 //  STEP 3: 컷별 영상 생성
 // ════════════════════════════════════════════════════════════
 // Kling 영상 생성 시 차단할 요소 (negative_prompt)
-const KLING_NEGATIVE_PROMPT = [
-  // 유명인/실존 인물 차단
-  'celebrity', 'famous person', 'real actor', 'movie star', 'public figure',
-  'recognizable person', 'real-world person', 'identifiable celebrity',
-  // 추가 인물/행인 차단
-  'extra people', 'background extras', 'crowd', 'bystanders', 'passersby',
-  'additional characters', 'random people appearing', 'people walking by',
-  'unexpected character entering frame', 'new person appearing',
-  // 얼굴 변형/왜곡 차단
-  'face morphing', 'changing face', 'distorted face', 'face swap',
-  'different person', 'face replacement', 'multiple faces blending',
-  // 일반적인 품질 문제
-  'blurry', 'low quality', 'distorted', 'deformed', 'extra limbs',
-  'duplicated person', 'cloned faces', 'mismatched features',
-].join(', ');
+// 실사 모드용 네거티브 프롬프트 (유명인·행인·얼굴변형 차단)
+const KLING_NEG_LIVE = `celebrity, famous person, real actor, public figure, recognizable person, extra people, background extras, crowd, bystanders, passersby, additional characters, random people appearing, people walking by, back-facing figure, second figure in background, person seen from behind, face morphing, distorted face, face swap, different person, multiple faces blending, blurry, low quality, distorted, deformed, extra limbs, duplicated person, cloned faces, mismatched features, location change, stranger`;
+// 애니 모드용 네거티브 프롬프트 (추가 캐릭터 등장 차단 위주)
+const KLING_NEG_ANIME = `additional character, extra character, new character entering, uninvited character, background character interacting, third character, unexpected animated figure, extra animated character, unintended character appearance, same character twice, cloned character, back-facing figure, second figure in background, character seen from behind, background silhouette, blurry, low quality, distorted, deformed, extra limbs, cloned faces, mismatched features, location change, changing background`;
 
 function buildVidPrompt(i) {
   // 영상 프롬프트 — 510자 cap (Kling API 한계 절대 준수)
@@ -10229,6 +10272,7 @@ function buildVidPrompt(i) {
   // 골격 조립
   let p = `Korean drama. ${eraKw}. ${sceneStyle}.`;
   if (styleKw) p += ` Keep input ${styleKw}.`;
+  if (S.vidStyle && S.vidStyle !== 'live_action') p += ` 배경, 장소 유지.`;
   if (ctx) p += ` ${ctx}.`;
   p += ` Camera: ${cam}. ${charLock}`;
 
@@ -10244,27 +10288,220 @@ function buildVidPrompt(i) {
   if (p.length > 510) p = p.slice(0, 507) + '...';
   return p;
 }
+// ────────────────────────────────────────────────
+//  컷별 출연 아바타 선택 + 캐릭터별 대사/행동 입력 헬퍼
+// ────────────────────────────────────────────────
+
+// 감정 <option> HTML (vidEmotion select 재사용)
+function _emotionOptions(cur) {
+  const opts = [
+    ['','감정 선택'],['angry','화남 😠'],['shouting','소리침 📢'],
+    ['sad','슬픔 😢'],['crying','울음 😭'],['calm','평온 😌'],
+    ['happy','행복 😊'],['excited','신남 🤩'],['funny','웃김 😆'],
+    ['surprised','놀람 😲'],['scared','두려움 😨'],['shy','수줌음 😊'],
+    ['longing','그리움 🥺'],['serious','진지 😐'],['romantic','로맨틱 😍'],
+  ];
+  return opts.map(([v,l]) => `<option value="${v}" ${cur===v?'selected':''}>${l}</option>`).join('');
+}
+
+// 화자 <option> HTML
+function _speakerOptions(cur) {
+  const opts = [
+    ['','화자 선택'],['woman','여자'],['man','남자'],
+    ['narrator-woman','나레이션 (여자)'],['narrator-man','나레이션 (남자)'],
+  ];
+  return opts.map(([v,l]) => `<option value="${v}" ${cur===v?'selected':''}>${l}</option>`).join('');
+}
+
+// 출연 아바타 체크박스 섹션 HTML 반환
+// 아바타 번호 뱃지 선택 + 캐릭터별 입력 통합 섹션 — 내부 HTML 반환 (wrapper div는 renderVidCards에서 고정)
+// 비Kling 탭용 — 단일 대사 입력 HTML만 반환 (아바타 chip 없음)
+function renderSingleScriptHtml(i, hasCut) {
+  const dis = !hasCut ? 'disabled' : '';
+  const dur = S.cutDurations[i] || 5;
+  const curEmotion = S.cutEmotions[i] || '';
+  const curAction = ((S.cutSingleAction && S.cutSingleAction[i]) || '').replace(/"/g, '&quot;');
+  return `<div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:6px">
+      <label style="font-size:10px;color:#000;margin:0;font-weight:700">대사 <span style="color:var(--ink3);font-weight:400">(선택)</span></label>
+      <span id="vidScriptCounter${i}" style="font-size:9px;color:var(--ink3);font-weight:600">0 / ${dur*4}자 (${dur}초)</span>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <select id="vidSpeaker${i}" style="background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:5px 8px;color:var(--ink);font-size:11px;width:120px" ${dis}>${_speakerOptions('')}</select>
+      <select id="vidEmotion${i}" onchange="S.cutEmotions[${i}]=this.value" style="background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:5px 8px;color:var(--ink);font-size:11px;width:120px" ${dis}>${_emotionOptions(curEmotion)}</select>
+      <input id="vidScript${i}" oninput="updateScriptCounter(${i})" placeholder='대사만 입력 (예: 나는 널 잊을 수 없어)' style="flex:1;min-width:160px;background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:5px 8px;color:var(--ink);font-size:11px" ${dis}>
+    </div>
+    <div style="font-size:9px;color:var(--ink3);margin-top:3px">최대 <strong style="color:var(--cream)">초당 4글자</strong>까지 음성 생성</div>
+    <div style="margin-top:6px">
+      <label style="font-size:10px;color:#000;display:block;margin-bottom:3px;font-weight:700">행동 <span style="color:var(--ink3);font-weight:400">(선택)</span></label>
+      <input id="vidSingleAction${i}" oninput="if(!S.cutSingleAction)S.cutSingleAction=['','','',''];S.cutSingleAction[${i}]=this.value" value="${curAction}" placeholder="행동을 입력하세요 (예: 카메라를 천천히 바라보며 미소 짓는다)" style="width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:5px 8px;color:var(--ink);font-size:11px" ${dis}>
+    </div>
+  </div>`;
+}
+
+function renderCutCharSection(i, hasCut) {
+  if (!Array.isArray(S.cutAvatars)) S.cutAvatars = [[],[],[],[]];
+  if (!Array.isArray(S.cutCharInputs)) S.cutCharInputs = [{},{},{},{}];
+
+  const cutAvs = S.cutAvatars[i] || [];
+  const selIds = cutAvs.map(a => String(a.id));
+  const sceneAvs = (S.avatars || []).slice(0, 6);
+  const dis = !hasCut ? 'disabled' : '';
+  const dur = S.cutDurations[i] || 5;
+
+  // ── 출연 아바타 번호 뱃지 ──
+  let chipsHtml;
+  if (sceneAvs.length === 0) {
+    chipsHtml = '<span style="font-size:10px;color:var(--ink3)">씬에 등록된 아바타가 없습니다</span>';
+  } else {
+    chipsHtml = sceneAvs.map(av => {
+      const avId = String(av._libId || av.id);
+      const selIdx = selIds.indexOf(avId); // 선택 순서 인덱스 (-1이면 미선택)
+      const sel = selIdx >= 0;
+      const num = sel ? selIdx + 1 : 0;
+      const maxed = !sel && selIds.length >= 3;
+      const safeName = (av.name||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      // 선택: 핑크 원형 숫자 뱃지 / 미선택: 빈 원
+      const badge = sel
+        ? `<span style="display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--pink);color:#fff;font-size:9px;font-weight:700;flex-shrink:0">${num}</span>`
+        : `<span style="display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;border:1.5px solid ${maxed?'var(--line)':'var(--ink3)'};flex-shrink:0"></span>`;
+      return `<div onclick="${maxed?'void 0':`toggleCutAvatar(${i},'${avId}')`}" style="display:flex;align-items:center;gap:5px;font-size:10px;cursor:${maxed?'default':'pointer'};padding:4px 8px;background:${sel?'rgba(255,107,157,.15)':'var(--bg3)'};border:1px solid ${sel?'var(--pink)':'var(--line)'};border-radius:0;opacity:${maxed?'0.4':'1'};transition:.15s;user-select:none">
+        ${badge}<span>${safeName}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // ── 캐릭터별 입력 or 기존 단일 대사 ──
+  // 0명 또는 1명: 단일 대사 입력 / 2~3명: 캐릭터별 섹션
+  let inputHtml;
+  if (cutAvs.length <= 1) {
+    // 아바타 0~1명: renderSingleScriptHtml 재사용 (행동 입력칸 포함)
+    inputHtml = `<div style="margin-top:8px">${renderSingleScriptHtml(i, hasCut)}</div>`;
+  } else {
+    // 아바타 선택됨: 캐릭터별 섹션 (번호 뱃지 + 이름 헤더)
+    const ci = S.cutCharInputs[i] || {};
+    inputHtml = cutAvs.map((av, j) => {
+      const avId = String(av.id);
+      const inp = ci[avId] || {};
+      const safeName = (av.name||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      const numBadge = `<span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--pink);color:#fff;font-size:9px;font-weight:700;flex-shrink:0">${j+1}</span>`;
+      return `<div style="margin-top:8px;padding:8px;background:var(--bg3);border:1px solid var(--line);border-radius:0">
+        <div style="display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:var(--pink);margin-bottom:6px;border-bottom:1px solid var(--line2);padding-bottom:4px">${numBadge}<span>${safeName}</span></div>
+        <div style="margin-bottom:5px">
+          <label style="font-size:9px;color:var(--ink3);display:block;margin-bottom:3px;font-weight:600">대사</label>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">
+            <select id="vidSpeaker_${i}_${j}" style="background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:4px 7px;color:var(--ink);font-size:10px;width:110px" ${dis}>${_speakerOptions(inp.speaker||'')}</select>
+            <select id="vidEmotion_${i}_${j}" onchange="setCutCharInput(${i},'${avId}','emotion',this.value)" style="background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:4px 7px;color:var(--ink);font-size:10px;width:110px" ${dis}>${_emotionOptions(inp.emotion||'')}</select>
+            <input id="vidScript_${i}_${j}" oninput="setCutCharInput(${i},'${avId}','line',this.value)" value="${(inp.line||'').replace(/"/g,'&quot;')}" placeholder='대사 (예: 나는 널 잊을 수 없어)' style="flex:1;min-width:140px;background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:4px 7px;color:var(--ink);font-size:10px" ${dis}>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:9px;color:var(--ink3);display:block;margin-bottom:3px;font-weight:600">행동 <span style="font-weight:400">(선택)</span></label>
+          <input id="vidAction_${i}_${j}" oninput="setCutCharInput(${i},'${avId}','action',this.value)" value="${(inp.action||'').replace(/"/g,'&quot;')}" placeholder='예: 카메라를 바라보며 미소 짓는다' style="width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:4px 7px;color:var(--ink);font-size:10px" ${dis}>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // 캐릭터 모드일 때 합산 대사 카운터 추가
+  const charCounterHtml = cutAvs.length > 0
+    ? `<div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
+        <span style="font-size:9px;color:var(--ink3)">초당 4글자 기준</span>
+        <span id="vidScriptCounter${i}" style="font-size:9px;color:var(--ink3);font-weight:600">합산 0 / ${dur*4}자 (${dur}초)</span>
+      </div>`
+    : '';
+
+  // wrapper div 없이 내부 HTML만 반환 — wrapper는 renderVidCards에서 고정
+  return `<label style="font-size:10px;color:#000;display:block;margin-bottom:4px;font-weight:700">출연 아바타 <span style="color:var(--ink3);font-weight:400">(선택 · 최대 3명 · 선택 순서대로 대사·행동 진행)</span></label>
+    <div style="display:flex;flex-wrap:wrap;gap:5px">${chipsHtml}</div>
+    ${inputHtml}${charCounterHtml}`;
+}
+
+// cutCharInputs 개별 필드 업데이트
+function setCutCharInput(cutIdx, avId, field, value) {
+  if (!Array.isArray(S.cutCharInputs)) S.cutCharInputs = [{},{},{},{}];
+  if (!S.cutCharInputs[cutIdx]) S.cutCharInputs[cutIdx] = {};
+  if (!S.cutCharInputs[cutIdx][avId]) S.cutCharInputs[cutIdx][avId] = {};
+  S.cutCharInputs[cutIdx][avId][field] = value;
+  // 대사 입력 시 합산 카운터 갱신
+  if (field === 'line') updateScriptCounter(cutIdx);
+}
+
+// 출연 아바타 번호 뱃지 토글 — cutCharSection 전체 재렌더
+function toggleCutAvatar(cutIdx, avId) {
+  avId = String(avId);
+  if (!Array.isArray(S.cutAvatars)) S.cutAvatars = [[],[],[],[]];
+  if (!S.cutAvatars[cutIdx]) S.cutAvatars[cutIdx] = [];
+
+  // name/imgUrl은 S.avatars에서 직접 lookup
+  const srcAv = (S.avatars || []).find(a => String(a._libId || a.id) === avId);
+  const name = srcAv ? (srcAv.name || '') : avId;
+  const imgUrl = srcAv ? (srcAv.imgUrl || '') : '';
+
+  const existing = S.cutAvatars[cutIdx].findIndex(a => String(a.id) === avId);
+
+  if (existing >= 0) {
+    // 선택 해제 → splice 후 번호 자동 재정렬됨 (배열 순서 기반)
+    S.cutAvatars[cutIdx].splice(existing, 1);
+    if (S.cutCharInputs && S.cutCharInputs[cutIdx]) {
+      delete S.cutCharInputs[cutIdx][avId];
+    }
+  } else {
+    // 선택 추가
+    if (S.cutAvatars[cutIdx].length >= 3) {
+      if (typeof toast === 'function') toast('최대 3명까지 선택할 수 있습니다');
+      return;
+    }
+    S.cutAvatars[cutIdx].push({ id: avId, name, imgUrl });
+  }
+
+  // 통합 섹션 전체 재렌더 (wrapper div는 고정, innerHTML만 교체)
+  const section = document.getElementById('cutCharSection' + cutIdx);
+  if (section) {
+    const hasCut = !!S.cutDataUrls[cutIdx];
+    section.innerHTML = renderCutCharSection(cutIdx, hasCut);
+  }
+}
+
 // 대사 글자 수 카운터 업데이트 (초당 4글자 기준)
+// 캐릭터 모드: S.cutAvatars[i] 선택된 캐릭터의 대사 합산 / 단일 모드: 기존 방식
 function updateScriptCounter(i) {
-  const scriptEl = document.getElementById(`vidScript${i}`);
   const counterEl = document.getElementById(`vidScriptCounter${i}`);
   if (!counterEl) return;
   const dur = parseInt(document.getElementById(`vidDur${i}`)?.value) || S.cutDurations[i] || 5;
   const max = dur * 4;
-  const current = scriptEl ? scriptEl.value.length : 0;
-  counterEl.textContent = `${current} / ${max}자 (${dur}초)`;
+
+  const cutAvs = (Array.isArray(S.cutAvatars) && S.cutAvatars[i]) ? S.cutAvatars[i] : [];
+  let current, label;
+
+  if (cutAvs.length > 0) {
+    // 캐릭터 모드: 선택된 모든 캐릭터의 대사 글자 수 합산
+    const ci = (Array.isArray(S.cutCharInputs) && S.cutCharInputs[i]) ? S.cutCharInputs[i] : {};
+    current = cutAvs.reduce((sum, av) => {
+      const inp = ci[String(av.id)] || {};
+      return sum + (inp.line ? inp.line.length : 0);
+    }, 0);
+    label = `합산 ${current} / ${max}자 (${dur}초)`;
+  } else {
+    // 단일 모드: 기존 방식
+    const scriptEl = document.getElementById(`vidScript${i}`);
+    current = scriptEl ? scriptEl.value.length : 0;
+    label = `${current} / ${max}자 (${dur}초)`;
+    if (scriptEl) {
+      scriptEl.style.borderColor = current > max ? 'var(--red)' : current > max * 0.85 ? 'var(--gold)' : 'var(--line)';
+    }
+  }
+
+  counterEl.textContent = label;
   if (current > max) {
     counterEl.style.color = 'var(--red)';
     counterEl.style.fontWeight = '800';
-    if (scriptEl) scriptEl.style.borderColor = 'var(--red)';
   } else if (current > max * 0.85) {
     counterEl.style.color = 'var(--gold)';
     counterEl.style.fontWeight = '700';
-    if (scriptEl) scriptEl.style.borderColor = 'var(--gold)';
   } else {
     counterEl.style.color = 'var(--ink3)';
     counterEl.style.fontWeight = '600';
-    if (scriptEl) scriptEl.style.borderColor = 'var(--line)';
   }
 }
 
@@ -10295,61 +10532,10 @@ function renderVidCards() {
           <input id="vidExtra${i}" placeholder="예: 비가 점점 거세진다 / 카메라가 천천히 줌인 / 표정이 점차 굳어진다" style="width:100%;background:var(--bg2);border:1px solid var(--line);border-radius: 0;padding:5px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
           <div style="font-size:9px;color:var(--ink3);margin-top:3px">기본 영상 프롬프트는 자동 생성되며, 입력한 내용은 추가 디테일로 합쳐집니다</div>
         </div>
-        <!-- 대사 (화자 + 감정 + 대사) -->
-        <div style="margin-bottom:8px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:6px">
-            <label style="font-size:10px;color:#000;margin:0;font-weight:700">대사</label>
-            <span id="vidScriptCounter${i}" style="font-size:9px;color:var(--ink3);font-weight:600">0 / ${(S.cutDurations[i]||5)*4}자 (${S.cutDurations[i]||5}초)</span>
-          </div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <select id="vidSpeaker${i}" style="background:var(--bg2);border:1px solid var(--line);border-radius: 0;padding:5px 8px;color:var(--ink);font-size:11px;width:120px" ${!hasCut ? 'disabled' : ''}>
-              <option value="">화자 선택</option>
-              <option value="woman">여자</option>
-              <option value="man">남자</option>
-              <option value="narrator-woman">나레이션 (여자)</option>
-              <option value="narrator-man">나레이션 (남자)</option>
-            </select>
-            <select id="vidEmotion${i}" onchange="S.cutEmotions[${i}]=this.value" style="background:var(--bg2);border:1px solid var(--line);border-radius: 0;padding:5px 8px;color:var(--ink);font-size:11px;width:120px" ${!hasCut ? 'disabled' : ''}>
-              <option value="">감정 선택</option>
-              <option value="angry" ${S.cutEmotions[i]==='angry'?'selected':''}>화남 😠</option>
-              <option value="shouting" ${S.cutEmotions[i]==='shouting'?'selected':''}>소리침 📢</option>
-              <option value="sad" ${S.cutEmotions[i]==='sad'?'selected':''}>슬픔 😢</option>
-              <option value="crying" ${S.cutEmotions[i]==='crying'?'selected':''}>울음 😭</option>
-              <option value="calm" ${S.cutEmotions[i]==='calm'?'selected':''}>평온 😌</option>
-              <option value="happy" ${S.cutEmotions[i]==='happy'?'selected':''}>행복 😊</option>
-              <option value="excited" ${S.cutEmotions[i]==='excited'?'selected':''}>신남 🤩</option>
-              <option value="funny" ${S.cutEmotions[i]==='funny'?'selected':''}>웃김 😆</option>
-              <option value="surprised" ${S.cutEmotions[i]==='surprised'?'selected':''}>놀람 😲</option>
-              <option value="scared" ${S.cutEmotions[i]==='scared'?'selected':''}>두려움 😨</option>
-              <option value="shy" ${S.cutEmotions[i]==='shy'?'selected':''}>수줌음 😊</option>
-              <option value="longing" ${S.cutEmotions[i]==='longing'?'selected':''}>그리움 🥺</option>
-              <option value="serious" ${S.cutEmotions[i]==='serious'?'selected':''}>진지 😐</option>
-              <option value="romantic" ${S.cutEmotions[i]==='romantic'?'selected':''}>로맨틱 😍</option>
-            </select>
-            <input id="vidScript${i}" oninput="updateScriptCounter(${i})" placeholder='대사만 입력 (예: 나는 널 잊을 수 없어)' style="flex:1;min-width:160px;background:var(--bg2);border:1px solid var(--line);border-radius: 0;padding:5px 8px;color:var(--ink);font-size:11px" ${!hasCut ? 'disabled' : ''}>
-          </div>
-          <div style="font-size:9px;color:var(--ink3);margin-top:3px">최대 <strong style="color:var(--cream)">초당 4글자</strong>까지 음성 생성 (영상 길이 × 4자 = 최대 글자 수)</div>
-        </div>
-        <!-- 설정 (모델 → 시간 → 오디오 → 비용) -->
-        <!-- 1) AI 모델 선택 -->
-        <div style="margin-bottom:10px;padding:8px 10px;background:rgba(200,160,74,.08);border:1px solid var(--gold);border-radius:0">
-          <label style="font-size:9px;color:var(--gold);font-weight:700;letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px">AI 모델 선택</label>
-          <select id="vidModelSel${i}" onchange="onVidModelChange(${i})" ${!hasCut ? 'disabled' : ''} style="width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:6px 8px;color:var(--ink);font-size:11px;font-family:inherit;cursor:pointer">
-            <option value="">— 모델을 선택해주세요 —</option>
-            ${getVidModelOptions(i)}
-          </select>
-          <div id="vidModelSub${i}" style="font-size:9px;color:var(--ink3);margin-top:4px"></div>
-        </div>
-
-        <!-- 1.5) 해상도 (모델 선택 후 표시) -->
-        <div id="vidResWrap${i}" style="display:none;margin-bottom:8px;padding:6px 8px;background:var(--bg3);border:1px solid var(--line);border-radius:0">
-          <label style="font-size:9px;color:var(--ink3);font-weight:700;letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:3px">해상도</label>
-          <select id="vidRes${i}" onchange="onVidResolutionChange(${i})" disabled style="width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:0;padding:4px 6px;color:var(--ink);font-size:11px;font-family:inherit;cursor:pointer">
-            <option value="">-</option>
-          </select>
-        </div>
-
-        <!-- 2) 시간 + 오디오 (모델에 따라 옵션 변화) -->
+        <!-- 출연 아바타 + 대사/행동 (통합) -->
+        <div id="cutCharSection${i}" style="margin-bottom:8px">${renderCutCharSection(i, hasCut)}</div>
+        <!-- 설정 (시간 → 오디오 → 비용) — 모델은 상단 탭에서 전역 선택 -->
+        <!-- 2) 시간 + 오디오 (탭 모델에 따라 옵션 변화) -->
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
           <div style="display:inline-flex;align-items:center;gap:6px;padding:5px 8px;background:var(--bg3);border:1px solid var(--gold);border-radius:0">
             <span style="font-size:9px;color:var(--gold);font-weight:700;letter-spacing:.05em;text-transform:uppercase">시간</span>
@@ -10403,13 +10589,94 @@ function renderVidCards() {
     if (typeof updateScriptCounter === 'function') updateScriptCounter(idx);
   }
 
-  // 각 카드 모델 선택 복원 + 비용 갱신
-  for (let idx = 0; idx < 4; idx++) {
-    if (S.vidModelSel && S.vidModelSel[idx]) {
-      const sel = document.getElementById('vidModelSel' + idx);
-      if (sel) sel.value = S.vidModelSel[idx];
-      onVidModelChange(idx);
+  // 탭 UI 렌더 + 탭 기반 duration/audio/cost 초기화
+  renderVidModelTabs();
+  applyVidModelTab();
+}
+
+// === Step 6 (영상 생성) — 탭 UI ===
+
+// 탭 바 렌더 (panel3 상단 #vidModelTabBar에 주입)
+function renderVidModelTabs() {
+  const wrap = document.getElementById('vidModelTabBar');
+  if (!wrap) return;
+  const current = S.vidModelTab || 'kling_720';
+  const parentOf = k => k.startsWith('kling') ? 'kling' : k.startsWith('veo') ? 'veo' : k.startsWith('happy') ? 'happy' : 'seedance';
+  const parentTab = parentOf(current);
+  const TABS = [
+    { key: 'kling',    label: 'Kling 3.0',      badge: '추천', subs: [{ key: 'kling_720', label: '720p Standard' }, { key: 'kling_1080', label: '1080p Pro' }] },
+    { key: 'veo',      label: 'Veo 3.1',         badge: null,   subs: [{ key: 'veo_fast',  label: '1080p Fast' }, { key: 'veo_std', label: '1080p' }] },
+    { key: 'happy',    label: 'HappyHorse 1.0',  badge: null,   subs: [{ key: 'happy_720', label: '720p' }, { key: 'happy_1080', label: '1080p' }] },
+    { key: 'seedance', label: 'Seedance 2.0',    badge: null,   subs: [{ key: 'seedance_fast', label: '720p Fast' }, { key: 'seedance_std', label: '1080p' }] },
+  ];
+  const activeSubs = (TABS.find(t => t.key === parentTab) || TABS[0]).subs;
+  wrap.innerHTML =
+    `<div style="border-bottom:1px solid var(--line);margin-bottom:10px">` +
+      `<div style="display:flex;gap:0">` +
+        TABS.map(t => {
+          const active = t.key === parentTab;
+          const badgeHtml = t.badge ? `<span style="margin-left:5px;font-size:9px;font-weight:700;color:#fff;background:var(--pink);padding:1px 5px;border-radius:99px;vertical-align:middle">${t.badge}</span>` : '';
+          return `<button onclick="setVidParentTab('${t.key}')" style="padding:8px 16px;font-size:12px;font-weight:${active?700:400};color:${active?'var(--pink)':'var(--ink3)'};background:${active?'var(--bg2)':'transparent'};border:none;border-bottom:${active?'2px solid var(--pink)':'2px solid transparent'};cursor:pointer;font-family:inherit;margin-bottom:-1px">${t.label}${badgeHtml}</button>`;
+        }).join('') +
+      `</div>` +
+    `</div>` +
+    `<div style="display:flex;gap:6px;margin-bottom:4px">` +
+      activeSubs.map(s => {
+        const active = s.key === current;
+        return `<button onclick="selectVidModelTab('${s.key}')" style="padding:5px 16px;font-size:11px;font-weight:${active?700:400};color:${active?'var(--bg)':'var(--ink2)'};background:${active?'var(--pink)':'var(--bg3)'};border:1px solid ${active?'var(--pink)':'var(--line)'};border-radius:99px;cursor:pointer;font-family:inherit">${s.label}</button>`;
+      }).join('') +
+    `</div>`;
+}
+
+// 상위 탭 클릭 → 해당 첫 번째 하위 탭으로
+function setVidParentTab(parentKey) {
+  const first = { kling: 'kling_720', veo: 'veo_fast', happy: 'happy_720', seedance: 'seedance_fast' }[parentKey];
+  if (first) selectVidModelTab(first);
+}
+
+// 탭 선택 — state 갱신 + 탭 UI 재렌더 + 카드 전체 갱신
+function selectVidModelTab(key) {
+  if (!VID_MODEL_TAB_MAP[key]) return;
+  S.vidModelTab = key;
+  renderVidModelTabs();
+  applyVidModelTab();
+}
+
+// 탭 모델 기반으로 전체 카드 duration/audio/cost 갱신 + 대사 섹션 전환
+function applyVidModelTab() {
+  const tab = S.vidModelTab || 'kling_720';
+  const m = VID_MODEL_TAB_MAP[tab];
+  if (!m) return;
+  const isKling = tab.startsWith('kling');
+  for (let i = 0; i < 4; i++) {
+    // 대사/아바타 섹션 전환
+    const charSection = document.getElementById('cutCharSection' + i);
+    if (charSection) {
+      charSection.style.display = '';
+      if (isKling) {
+        // Kling: 아바타 chip + 캐릭터별 대사 (전체 섹션)
+        const hasCut = !!S.cutDataUrls[i];
+        charSection.innerHTML = renderCutCharSection(i, hasCut);
+      } else {
+        // 비Kling: 단일 대사 입력만 표시 (아바타 chip 없음)
+        charSection.innerHTML = renderSingleScriptHtml(i, !!S.cutDataUrls[i]);
+      }
     }
+    // duration 옵션 채우기
+    const durSel = document.getElementById('vidDur' + i);
+    if (durSel) {
+      durSel.disabled = false;
+      const curDur = S.cutDurations[i];
+      const validDur = m.durations.includes(curDur) ? curDur : m.durations[0];
+      durSel.innerHTML = m.durations.map(d => `<option value="${d}"${d===validDur?' selected':''}>${d}초</option>`).join('');
+      S.cutDurations[i] = validDur;
+    }
+    // audio 상태 적용
+    applyAudioStateForResolution(i, m);
+    if (typeof updateVidAudioLabel === 'function') updateVidAudioLabel(i);
+    // 비용 갱신
+    updateVidCostEst(i);
+    if (typeof updateScriptCounter === 'function') updateScriptCounter(i);
   }
 }
 
@@ -10455,10 +10722,9 @@ function getSelectedVidModelOption(i) {
 }
 
 function getSelectedVidModel(i) {
-  const key = (S.vidModelSel && S.vidModelSel[i]) || '';
-  if (!key) return null;
-  const list = getAllVidModels();
-  return list.find(m => (m.value + '|' + m.label) === key) || null;
+  // 전역 탭에서 읽음 (i 는 호환성 인자 — 무시)
+  const tab = S.vidModelTab || 'kling_720';
+  return VID_MODEL_TAB_MAP[tab] || null;
 }
 
 // 모델 변경 — duration 옵션 동적 채우기, 오디오 활성화/비활성, 첫값=최소duration
@@ -10478,12 +10744,9 @@ function getVidResolutionOptions(i) {
   }).join('');
 }
 
-// 카드별 선택된 해상도 객체 반환
+// 카드별 선택된 해상도 객체 반환 (탭 맵 자체가 해상도 포함)
 function getSelectedVidResolution(i) {
-  const m = getSelectedVidModel(i);
-  if (!m) return null;
-  const key = (S.vidResolutions && S.vidResolutions[i]) || m.resolutions[0].key;
-  return m.resolutions.find(r => r.key === key) || m.resolutions[0];
+  return getSelectedVidModel(i);  // 탭 맵 엔트리에 cpsOff/cpsOn/audioFixed 등 모두 포함
 }
 
 // 해상도 변경 핸들러
@@ -10662,28 +10925,17 @@ function updateVidCostEst(i) {
   el.textContent = (Math.round(r.points * 10) / 10).toFixed(1) + ' P 예상';
 }
 
-// 모든 카드 cost 갱신 (renderVidCards 끝에서 호출)
+// 모든 카드 cost 갱신
 function refreshAllVidCosts() {
-  for (let i = 0; i < 4; i++) {
-    if (S.vidModelSel && S.vidModelSel[i]) {
-      onVidModelChange(i);
-    } else {
-      updateVidCostEst(i);
-    }
-  }
+  for (let i = 0; i < 4; i++) updateVidCostEst(i);
 }
 
 
 async function generateCutVideo(i) {
 
-  // 카드 자체에서 모델 선택값 가져오기
+  // 전역 탭에서 모델 가져오기
   const pickedV = getSelectedVidModel(i);
-  if (!pickedV) {
-    toast('먼저 AI 모델을 선택해주세요');
-    const sel = document.getElementById('vidModelSel' + i);
-    if (sel) sel.focus();
-    return;
-  }
+  if (!pickedV) { toast('모델을 선택해주세요'); return; }
 
   // 설정값 파싱
   const dur = parseInt(document.getElementById('vidDur' + i)?.value || S.cutDurations[i] || pickedV.minDur);
@@ -10695,20 +10947,47 @@ async function generateCutVideo(i) {
 
   // 추가 옵션 정보 (대사, 추가 디테일)
   const extra = document.getElementById('vidExtra' + i)?.value.trim() || '';
-  const speakerEl = document.getElementById('vidSpeaker' + i);
-  const emotionEl = document.getElementById('vidEmotion' + i);
-  const scriptEl = document.getElementById('vidScript' + i);
-  const speaker = speakerEl ? speakerEl.value : '';
-  const emotion = emotionEl ? emotionEl.value : '';
-  const script = scriptEl ? scriptEl.value.trim() : '';
+
+  // 컷별 출연 아바타 (Kling elements 매핑용)
+  const _cutAvs = (Array.isArray(S.cutAvatars) && S.cutAvatars[i]) ? S.cutAvatars[i] : [];
+  const _hasCharMode = _cutAvs.length >= 2;  // 2~3명: 캐릭터별 모드
+  const _isSingleMode = _cutAvs.length <= 1; // 0~1명: 단일 모드
+
+  // 대사/감정/화자/행동 — 단일 모드에서 읽기
+  let speaker = '', emotion = '', script = '', singleAction = '';
+  if (_isSingleMode) {
+    const speakerEl = document.getElementById('vidSpeaker' + i);
+    const emotionEl = document.getElementById('vidEmotion' + i);
+    const scriptEl  = document.getElementById('vidScript' + i);
+    speaker = speakerEl ? speakerEl.value : '';
+    emotion = emotionEl ? emotionEl.value : '';
+    script  = scriptEl  ? scriptEl.value.trim() : '';
+    singleAction = (S.cutSingleAction && S.cutSingleAction[i]) || '';
+  }
+  // 캐릭터별 모드: charInputs에서 읽기 (확인 모달용 요약)
+  const _ci = (Array.isArray(S.cutCharInputs) && S.cutCharInputs[i]) ? S.cutCharInputs[i] : {};
+  const _charSummary = _hasCharMode
+    ? _cutAvs.map((av,j) => {
+        const inp = _ci[av.id] || {};
+        const parts = [];
+        if (inp.line) parts.push(`"${inp.line}"`);
+        if (inp.action) parts.push(inp.action);
+        return parts.length ? `@El${j+1}(${av.name}): ${parts.join(' / ')}` : null;
+      }).filter(Boolean).join(' | ')
+    : '';
 
   // 확인 모달 — 모든 옵션 표시
   const audioLabel = pickedV.audioFixed
     ? (pickedV.audioIncluded ? '포함 (모델 고정)' : '없음 (모델 고정)')
     : (audio ? 'ON (+' + (Math.round((pickedV.pointsOn - pickedV.pointsOff) * 10) / 10).toFixed(1) + ' P/초)' : 'OFF');
 
-  const scriptLine = script
-    ? '<div style="font-size:11px;color:var(--ink2);margin-top:4px">\u00b7 대사: <b>' + escHtml(script) + '</b>' + (speaker ? ' (' + speaker + ')' : '') + (emotion ? ' [' + emotion + ']' : '') + '</div>'
+  const scriptLine = _hasCharMode && _charSummary
+    ? '<div style="font-size:11px;color:var(--ink2);margin-top:4px">\u00b7 캐릭터: <b>' + escHtml(_charSummary) + '</b></div>'
+    : (script
+      ? '<div style="font-size:11px;color:var(--ink2);margin-top:4px">\u00b7 대사: <b>' + escHtml(script) + '</b>' + (speaker ? ' (' + speaker + ')' : '') + (emotion ? ' [' + emotion + ']' : '') + '</div>'
+      : '');
+  const singleActionLine = (_isSingleMode && singleAction)
+    ? '<div style="font-size:11px;color:var(--ink2);margin-top:4px">\u00b7 행동: <b>' + escHtml(singleAction) + '</b></div>'
     : '';
   const extraLine = extra
     ? '<div style="font-size:11px;color:var(--ink2);margin-top:4px">\u00b7 추가: <b>' + escHtml(extra) + '</b></div>'
@@ -10725,7 +11004,7 @@ async function generateCutVideo(i) {
       '<div style="border-top:1px solid var(--line);padding-top:10px;margin-bottom:10px">' +
         '<div style="font-size:12px;color:var(--ink2)">\u00b7 영상 시간: <b style="color:var(--cream)">' + dur + '초</b></div>' +
         '<div style="font-size:12px;color:var(--ink2);margin-top:4px">\u00b7 오디오: <b style="color:var(--cream)">' + audioLabel + '</b></div>' +
-        angleLine + extraLine + scriptLine +
+        angleLine + extraLine + scriptLine + singleActionLine +
       '</div>' +
       '<div style="border-top:1px solid var(--line);padding-top:10px;background:rgba(200,160,74,.08);padding:10px;margin:0 -8px">' +
         '<div style="font-size:12px;color:var(--ink3)">예상 비용</div>' +
@@ -10813,13 +11092,19 @@ async function generateCutVideo(i) {
   try {
     let finalPrompt = prompt;
 
-    // 감정 지시문 추가 (대사보다 먼저 추가 — 일반 자세/표정을 명시)
-    if (emotion && emotionMap[emotion]) {
+    // 감정 지시문 추가 — 단일 모드에서만 (캐릭터별 모드는 아래에서 별도 처리)
+    if (_isSingleMode && emotion && emotionMap[emotion]) {
       finalPrompt += ` ${emotionMap[emotion]}.`;
       log('info', `감정: ${emotion}`);
     }
 
-    if (script) {
+    // 단일 행동 추가 (아바타 0~1명)
+    if (_isSingleMode && singleAction) {
+      finalPrompt += ` ${singleAction}`;
+      log('info', `단일 행동: "${singleAction}"`);
+    }
+
+    if (_isSingleMode && script) {
       // 화자별로 영어 지시문 + 한국어 대사 따올표로 분리 (압축)
       let speakerLabel = '';
       if (speaker === 'woman') {
@@ -10837,31 +11122,82 @@ async function generateCutVideo(i) {
       log('info', `대사: [${speaker || 'character'}] "${script}"`);
     }
 
-    // 최종 안전장치: 512자 커팅
-    if (finalPrompt.length > 510) {
-      log('warn', `프롬프트 ${finalPrompt.length}자 → 510자로 잘라냄`);
-      finalPrompt = finalPrompt.slice(0, 507) + '...';
+    // 캐릭터별 모드: @Element1, @Element2… 행동/대사 프롬프트 추가
+    if (_hasCharMode) {
+      const charLines = _cutAvs.map((av, j) => {
+        const inp = _ci[av.id] || {};
+        const elTag = `@Element${j+1}`;
+        const parts = [];
+        if (inp.action && inp.action.trim()) parts.push(inp.action.trim());
+        if (inp.line && inp.line.trim()) {
+          const spk = document.getElementById(`vidSpeaker_${i}_${j}`)?.value || inp.speaker || '';
+          const isNar = (spk === 'narrator-woman' || spk === 'narrator-man');
+          if (!isNar) parts.push(`"${inp.line.trim()}"라고 말한다`);
+        }
+        if (inp.emotion && emotionMap[inp.emotion]) {
+          parts.push(emotionMap[inp.emotion]);
+        }
+        return parts.length ? `${elTag}이 ${parts.join(', ')}` : null;
+      }).filter(Boolean);
+      if (charLines.length) {
+        finalPrompt += ' ' + charLines.join('. ');
+        log('info', `캐릭터 지시: ${charLines.join(' | ')}`);
+      }
     }
 
-    // 나레이션이면 인물이 말하지 않도록 네거티브 키워드 주가
-    const isNarrator = (speaker === 'narrator-woman' || speaker === 'narrator-man');
-    const negPrompt = isNarrator
-      ? KLING_NEGATIVE_PROMPT + ', talking, speaking, lip sync, mouth movement, mouth opening, lips moving, person speaking, character talking'
-      : KLING_NEGATIVE_PROMPT;
+    // 1인 출연 시 제3자 차단 강화
+    if (_cutAvs.length === 1) {
+      finalPrompt += ` only @Element1, no other humans.`;
+    }
+
+    // @Element identity — 실제 elements 배열(_cutAvs) 기준으로 태그 삽입
+    if (_cutAvs.length > 0) {
+      const elTags = _cutAvs.map((_, j) => `@Element${j+1}`).join(' ');
+      finalPrompt += ` ${elTags} in scene.`;
+    }
+
+    // 510자 초과 시 생성 중단 + 팝업 안내
+    if (finalPrompt.length > 510) {
+      const _len = finalPrompt.length;
+      log('warn', `프롬프트 ${_len}자 초과 — 생성 중단`);
+      const _msg = `현재 영상 프롬프트에 총 ${_len}/510자\n글자 수 제한으로 줄여야 됩니다`;
+      showAlertModal(_msg);
+      return;
+    }
+
+    // 나레이션이면 인물이 말하지 않도록 네거티브 키워드 추가 (레거시 단일 모드)
+    // Kling API negative_prompt 최대 512자 — 반드시 캡핑
+    const isNarrator = _isSingleMode && (speaker === 'narrator-woman' || speaker === 'narrator-man');
+    const baseNeg = (S.vidStyle === 'live_action' || !S.vidStyle) ? KLING_NEG_LIVE : KLING_NEG_ANIME;
+    const negPrompt = (isNarrator
+      ? baseNeg + ', talking, speaking, lip sync, mouth movement, mouth opening, lips moving, person speaking, character talking'
+      : baseNeg).slice(0, 512);
+
+    // ── Kling elements 배열 구성 (cutAvatars[i] 기반) ──
+    // 아바타 1~3명 모두 elements 사용 (_cutAvs.length > 0)
+    // frontal_image_url + reference_image_urls 모두 필수 (API 422 방지)
+    const _elements = (_cutAvs.length > 0)
+      ? _cutAvs.slice(0, 3).map(av => {
+          const pUrl = av.imgUrl || '';
+          return pUrl ? { frontal_image_url: pUrl, reference_image_urls: [pUrl] } : null;
+        }).filter(Boolean)
+      : [];
+
     let body;
-    if (model.includes('v3') || model.includes('o3')) {
-      // Kling v3/o3: multi_prompt 사용 (prompt 단수 X)
+    if (model.includes('kling')) {
+      // elements 유무와 관계없이 단일 prompt 방식 — multi_prompt는 멀티샷 전용이라 느림
       body = {
-        multi_prompt: [{
-          prompt: finalPrompt,
-          duration: String(dur),
-          negative_prompt: negPrompt,
-        }],
+        prompt: finalPrompt,
+        duration: String(dur),
         start_image_url: imgUrl,
         aspect_ratio: getVideoAspectRatio(),
         generate_audio: audio,
         negative_prompt: negPrompt,
       };
+      if (_elements.length > 0) {
+        body.elements = _elements;
+        log('info', `elements ${_elements.length}개: ${_elements.map(e=>e.frontal_image_url?.slice(0,40)).join(', ')}`);
+      }
     } else {
       // 기타: prompt 단수 + image_url + duration
       // Veo는 'Ns' 형식 ('4s'/'6s'/'8s') 필수, Kling/Seedance/HappyHorse는 'N' 형식
@@ -10932,9 +11268,11 @@ async function generateCutVideo(i) {
       if (!statusUrl || !responseUrl) throw new Error('queue URL 없음: ' + JSON.stringify(d).slice(0, 200));
 
       const jwt = await getSupabaseJWT();
-      const maxWait = 8 * 60 * 1000;
+      const maxWait = 20 * 60 * 1000; // 20분 (Kling v3는 5~10분 소요)
       const startTime = Date.now();
       let pollCount = 0;
+      let failCount = 0;
+      const MAX_FAIL = 20;
       while (Date.now() - startTime < maxWait) {
         await new Promise(rs => setTimeout(rs, 3000));
         pollCount++;
@@ -10942,7 +11280,13 @@ async function generateCutVideo(i) {
           const sr = await fetch('/fal-proxy-abs?url=' + encodeURIComponent(statusUrl), {
             headers: { 'Authorization': 'Bearer ' + jwt },
           });
-          if (!sr.ok) { log('warn', '폴링 ' + pollCount + ' 실패 (' + sr.status + ')'); continue; }
+          if (!sr.ok) {
+            failCount++;
+            log('warn', '폴링 ' + pollCount + ' 실패 (' + sr.status + ') (실패 ' + failCount + '/' + MAX_FAIL + ')');
+            if (failCount >= MAX_FAIL) throw new Error('폴링 ' + MAX_FAIL + '회 연속 실패로 중단됐습니다 (HTTP ' + sr.status + ')');
+            continue;
+          }
+          failCount = 0; // 성공 시 리셋
           const sd = await sr.json();
           if (pollCount % 5 === 0) status.textContent = 'fal 처리 중... (' + Math.floor((Date.now() - startTime) / 1000) + '초 경과)';
           if (sd.status === 'COMPLETED') {
@@ -10951,9 +11295,9 @@ async function generateCutVideo(i) {
               headers: { 'Authorization': 'Bearer ' + jwt },
             });
             if (!rr.ok) {
-            const errBody = await rr.text();
-            throw new Error('결과 fetch 실패: ' + rr.status + ' — ' + errBody.slice(0, 300));
-          }
+              const errBody = await rr.text();
+              throw new Error('결과 fetch 실패: ' + rr.status + ' — ' + errBody.slice(0, 300));
+            }
             d = await rr.json();
             break;
           }
@@ -10961,12 +11305,14 @@ async function generateCutVideo(i) {
             throw new Error('fal 처리 실패: ' + JSON.stringify(sd).slice(0, 200));
           }
         } catch (e) {
-          if (e.message && e.message.includes('fal 처리 실패')) throw e;
-          log('warn', '폴링 ' + pollCount + ' 에러: ' + e.message);
+          if (e.message && (e.message.includes('fal 처리 실패') || e.message.includes('연속 실패') || e.message.includes('결과 fetch 실패'))) throw e;
+          failCount++;
+          log('warn', '폴링 ' + pollCount + ' 에러: ' + e.message + ' (실패 ' + failCount + '/' + MAX_FAIL + ')');
+          if (failCount >= MAX_FAIL) throw new Error('폴링 ' + MAX_FAIL + '회 연속 실패로 중단됐습니다 (' + e.message + ')');
         }
       }
       if (d && (d.status === 'IN_QUEUE' || d.status === 'IN_PROGRESS')) {
-        throw new Error('폴링 타임아웃 (8분 초과)');
+        throw new Error('폴링 타임아웃 (20분 초과)');
       }
     }
 
@@ -13633,539 +13979,4 @@ function resetMerge() {
     if (profile) {
       if (profile.display_name) document.getElementById("acctName").textContent = profile.display_name;
       document.getElementById("acctNickDisplay").textContent = profile.nickname || "-";
-      if (profile.birthdate) document.getElementById("acctBirthdate").textContent = profile.birthdate;
-    }
-  }
-
-  function closeAccountModal() {
-    document.getElementById("authAccountModal").classList.remove("active");
-    cancelNicknameEdit();
-  }
-
-  function formatDate(d) {
-    if (!d) return "-";
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return y + "년 " + m + "월 " + day + "일";
-  }
-
-  function toggleNicknameEdit() {
-    const editEl = document.getElementById("acctNickEdit");
-    const displayEl = document.getElementById("acctNickDisplay");
-    const btn = document.getElementById("acctNickEditBtn");
-    const input = document.getElementById("acctNickInput");
-    const status = document.getElementById("acctNickStatus");
-    if (editEl.style.display === "none" || !editEl.style.display) {
-      editEl.style.display = "";
-      displayEl.style.display = "none";
-      btn.textContent = "닫기";
-      input.value = (cachedProfile && cachedProfile.nickname) || "";
-      input.focus();
-      if (status) { status.textContent = ""; status.className = "auth-nick-status"; }
-      if (!input.dataset.checkBound) {
-        input.dataset.checkBound = "1";
-        input.addEventListener("input", (e) => {
-          const v = e.target.value.trim();
-          if (cachedProfile && v === cachedProfile.nickname) {
-            status.textContent = "";
-            status.className = "auth-nick-status";
-            return;
-          }
-          debouncedNickCheck(v, status);
-        });
-      }
-    } else {
-      cancelNicknameEdit();
-    }
-  }
-
-  function cancelNicknameEdit() {
-    const editEl = document.getElementById("acctNickEdit");
-    const displayEl = document.getElementById("acctNickDisplay");
-    const btn = document.getElementById("acctNickEditBtn");
-    if (editEl) editEl.style.display = "none";
-    if (displayEl) displayEl.style.display = "";
-    if (btn) btn.textContent = "수정";
-  }
-﻿  async function saveNickname() {
-    const input = document.getElementById("acctNickInput");
-    const status = document.getElementById("acctNickStatus");
-    const saveBtn = document.getElementById("acctNickSaveBtn");
-    const newNick = input.value.trim();
-    const v = validateNickname(newNick);
-    if (!v.ok) {
-      if (status) { status.textContent = v.msg; status.className = "auth-nick-status invalid"; }
-      return;
-    }
-    if (cachedProfile && newNick === cachedProfile.nickname) {
-      cancelNicknameEdit();
-      return;
-    }
-    saveBtn.disabled = true;
-    saveBtn.textContent = "저장 중...";
-    try {
-      const { data: avail } = await sb.rpc("check_nickname_available", { p_nickname: newNick });
-      if (avail !== true) {
-        if (status) { status.textContent = "이미 사용 중이에요"; status.className = "auth-nick-status taken"; }
-        saveBtn.disabled = false; saveBtn.textContent = "저장";
-        return;
-      }
-      const { error } = await sb.from("profiles").update({ nickname: newNick }).eq("id", currentUser.id);
-      if (error) {
-        if (status) { status.textContent = "저장 실패"; status.className = "auth-nick-status invalid"; }
-      } else {
-        await sb.auth.updateUser({ data: { nickname: newNick } });
-        if (cachedProfile) cachedProfile.nickname = newNick;
-        document.getElementById("acctNickDisplay").textContent = newNick;
-        cancelNicknameEdit();
-        renderNav();
-      }
-    } catch (e) {
-      console.error(e);
-      if (status) { status.textContent = "오류가 발생했어요"; status.className = "auth-nick-status invalid"; }
-    } finally {
-      saveBtn.disabled = false;
-      saveBtn.textContent = "저장";
-    }
-  }
-
-  function openChangePassword() {
-    closeAccountModal();
-    document.getElementById("authChangePw1").value = "";
-    document.getElementById("authChangePw2").value = "";
-    hideError();
-    document.getElementById("authChangePasswordModal").classList.add("active");
-  }
-
-  function closeChangePassword() {
-    document.getElementById("authChangePasswordModal").classList.remove("active");
-  }
-
-  async function handleChangePassword() {
-    const p1 = document.getElementById("authChangePw1").value;
-    const p2 = document.getElementById("authChangePw2").value;
-    const btn = document.getElementById("authChangePwBtn");
-    hideError();
-    if (!p1 || p1.length < 8) { showError("changePw", "비밀번호는 8자 이상이어야 해요."); return; }
-    if (p1 !== p2) { showError("changePw", "비밀번호가 일치하지 않아요."); return; }
-    btn.disabled = true;
-    btn.textContent = "변경 중...";
-    try {
-      const { error } = await sb.auth.updateUser({ password: p1 });
-      if (error) {
-        showError("changePw", translateAuthError(error));
-      } else {
-        showSuccess("changePw", "비밀번호가 변경됐어요.");
-        document.getElementById("authChangePw1").value = "";
-        document.getElementById("authChangePw2").value = "";
-        setTimeout(() => { closeChangePassword(); }, 1500);
-      }
-    } catch (e) {
-      console.error(e);
-      showError("changePw", "오류가 발생했어요.");
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "변경하기";
-    }
-  }
-
-  function openDeleteAccount() {
-    closeAccountModal();
-    document.getElementById("authDeleteConfirm").value = "";
-    hideError();
-    document.getElementById("authDeleteAccountModal").classList.add("active");
-  }
-
-  function closeDeleteAccount() {
-    document.getElementById("authDeleteAccountModal").classList.remove("active");
-  }
-
-  async function handleDeleteAccount() {
-    const confirmText = document.getElementById("authDeleteConfirm").value.trim();
-    const btn = document.getElementById("authDeleteBtn");
-    hideError();
-    if (confirmText !== "탈퇴합니다") {
-      showError("delete", "확인 문구를 정확히 입력해주세요: 탈퇴합니다");
-      return;
-    }
-    btn.disabled = true;
-    btn.textContent = "처리 중...";
-    try {
-      const { error } = await sb.rpc("delete_my_account");
-      if (error) {
-        showError("delete", "탈퇴 처리 중 오류: " + (error.message || ""));
-      } else {
-        try { await sb.auth.signOut(); } catch (_) {}
-        try { localStorage.removeItem("korarti_pending_profile"); } catch (_) {}
-        alert("탈퇴가 완료됐어요. 그동안 Korart-i를 이용해주셔서 감사해요.");
-        closeDeleteAccount();
-        try { window.location.href = "/"; } catch (_) { window.location.reload(); }
-      }
-    } catch (e) {
-      console.error(e);
-      showError("delete", "오류가 발생했어요.");
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "탈퇴하기";
-    }
-  }
-
-  // 세션 변경 감지
-  sb.auth.onAuthStateChange((event, session) => {
-    currentSession = session;
-    currentUser = session?.user || null;
-    renderNav();
-    if (event === 'SIGNED_IN' && currentUser) {
-      upsertProfileFromPending();
-      checkOnboardingNeeded();
-      // 로그인 성공 — 인증 모달 닫기
-      closeRequiredModal();
-      closeModal();
-      // OAuth 콜백일 때만 mypage로 redirect (페이지에 직접 들어온 경우는 그대로)
-      const isOAuthCallback = window.location.hash.includes('access_token') ||
-                              window.location.search.includes('code=');
-      if (isOAuthCallback) {
-        window.location.href = 'mypage.html';
-      }
-    } else if (event === 'SIGNED_OUT' || !session) {
-      // 로그아웃 — 인증 필수 모달 다시 표시
-      setTimeout(() => showAuthRequiredModal(), 100);
-    }
-  });
-
-  // ============================================================
-  //                      전역 API 노출
-  // ============================================================
-  window.KorartiAuth = {
-    isLoggedIn: () => !!currentUser,
-    handleKakaoLogin,
-    getUser: () => currentUser,
-    getSession: () => currentSession,
-    openModal,
-    closeModal,
-    switchView,
-    showAuthRequiredModal,
-    closeRequiredModal,
-    toggleDropdown,
-    handleLogin,
-    handleSignup,
-    handleGoogleLogin,
-    handleOnboardingSubmit,
-    cancelOnboarding,
-    toggleAllOnboardingConsents,
-    syncOnboardingConsent,
-    handleLogout,
-    handleForgotPassword,
-    handleNewPassword,
-    toggleAllConsents,
-    syncAllConsent,
-    openAccountModal,
-    closeAccountModal,
-    toggleNicknameEdit,
-    cancelNicknameEdit,
-    saveNickname,
-    openChangePassword,
-    closeChangePassword,
-    handleChangePassword,
-    openDeleteAccount,
-    closeDeleteAccount,
-    handleDeleteAccount,
-    // 내부용 (Supabase 클라이언트 재사용 가능)
-    _sb: sb
-  };
-
-  // 비밀번호 재설정 링크로 진입한 경우 자동으로 재설정 모달 열기
-  // Supabase는 해당 링크 진입 시 onAuthStateChange의 PASSWORD_RECOVERY 이벤트로 알림
-  sb.auth.onAuthStateChange((event) => {
-    if (event === 'PASSWORD_RECOVERY') {
-      setTimeout(() => openModal('newPassword'), 300);
-    }
-  });
-  // URL에 reset=1 파라미터가 있으면 즉시 모달 열기
-  checkPasswordResetMode();
-
-  // Enter 키로 폼 제출
-  document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Enter') return;
-    const modal = document.getElementById('authModal');
-    if (!modal || !modal.classList.contains('active')) return;
-
-    const loginVisible = document.getElementById('authViewLogin').style.display !== 'none';
-    const signupVisible = document.getElementById('authViewSignup').style.display !== 'none';
-
-    if (loginVisible && document.activeElement && modal.contains(document.activeElement)) {
-      e.preventDefault();
-      handleLogin();
-    } else if (signupVisible && document.activeElement && modal.contains(document.activeElement)) {
-      e.preventDefault();
-      handleSignup();
-    }
-  });
-
-  // ESC로 모달 닫기
-  document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
-    if (document.getElementById('authRequiredModal').classList.contains('active')) {
-      closeRequiredModal();
-    } else if (document.getElementById('authModal').classList.contains('active')) {
-      closeModal();
-    }
-  });
-
-})();
-</script>
-
-<script>
-// panel1이 1단계(panel-num='01')일 때 뒤로 버튼 숨김
-(function(){
-  function syncBackBtn() {
-    var num = document.getElementById('panel1Num');
-    var btn = document.getElementById('panel1BackBtn');
-    if (!num || !btn) return;
-    var n = (num.textContent || '').trim();
-    btn.style.visibility = (n === '01') ? 'hidden' : '';
-  }
-  // 로드 완료 후
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', syncBackBtn);
-  } else {
-    syncBackBtn();
-  }
-  // panel1Num 변경 감지
-  var target = document.getElementById('panel1Num');
-  if (target) {
-    var obs = new MutationObserver(syncBackBtn);
-    obs.observe(target, { childList: true, characterData: true, subtree: true });
-  }
-  // 패널 전환 시도 가끰
-  document.addEventListener('click', function(){ setTimeout(syncBackBtn, 50); });
-})();
-</script>
-<script>if(typeof lucide!=="undefined"&&lucide.createIcons)lucide.createIcons();</script>
-
-<!-- ====== 공유 GNB 아바타 드롭다운 + 로그인 + 회원정보 (studio) ====== -->
-<script>
-(function() {
-  // KorartiAuth 또는 sb 객체 재사용
-  function getSb() { return window.sb || (window.KorartiAuth && window.KorartiAuth.client) || null; }
-  function getCurrentUser() {
-    // 전역 currentUser 변수 장소 — authBootstrap에서는 currentUser/window.__currentUser에 저장
-    if (typeof currentUser !== 'undefined' && currentUser) return currentUser;
-    if (window.__currentUser) return window.__currentUser;
-    if (window.currentUser) return window.currentUser;
-    if (window.KorartiAuth && typeof window.KorartiAuth.getUser === 'function') {
-      const u = window.KorartiAuth.getUser();
-      if (u) return u;
-    }
-    if (window.KorartiAuth && window.KorartiAuth.user) return window.KorartiAuth.user;
-    return null;
-  }
-  async function getJWT() {
-    const _sb = getSb();
-    if (!_sb) return null;
-    try {
-      const { data } = await _sb.auth.getSession();
-      return data && data.session ? data.session.access_token : null;
-    } catch (e) { return null; }
-  }
-  async function fetchPoints() {
-    const jwt = await getJWT();
-    if (!jwt) return null;
-    try {
-      const r = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + jwt }});
-      if (!r.ok) return null;
-      return await r.json();
-    } catch (e) { return null; }
-  }
-
-  function renderAvatar() {
-    const u = getCurrentUser();
-    const btn = document.getElementById('avatarBtn');
-    if (!btn) return;
-    if (u) {
-      const meta = u.user_metadata || {};
-      const url = meta.avatar_url || meta.picture || '';
-      if (url) {
-        btn.classList.add('logged-in');
-        btn.innerHTML = '<img src="' + url + '" alt="avatar" referrerpolicy="no-referrer">';
-      } else {
-        btn.classList.remove('logged-in');
-        btn.innerHTML = '<i data-lucide="user-round"></i>';
-        if (window.lucide) lucide.createIcons();
-      }
-      const name = meta.name || meta.full_name || (u.email ? u.email.split('@')[0] : '사용자');
-      const ne = document.getElementById('pdName'); if (ne) ne.textContent = name;
-      const ee = document.getElementById('pdEmail'); if (ee) ee.textContent = u.email || '';
-      const av = document.getElementById('pdAvatar');
-      if (av) av.innerHTML = url ? '<img src="' + url + '" alt="avatar" referrerpolicy="no-referrer">' : '';
-    } else {
-      btn.classList.remove('logged-in');
-      btn.innerHTML = '<i data-lucide="user-round"></i>';
-      if (window.lucide) lucide.createIcons();
-    }
-  }
-
-  async function updatePoints() {
-    const el = document.getElementById('pdPoints');
-    if (!el) return;
-    let points = parseFloat(localStorage.getItem('korart_points') || '0');
-    if (!points) {
-      localStorage.setItem('korart_points', '500000');
-      points = 500000;
-    }
-    el.innerHTML = points.toLocaleString() + '<span class="pt-unit">P</span>';
-  }
-
-  function showAuthModal() {
-    document.getElementById('authModal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeAuthModal() {
-    document.getElementById('authModal').classList.remove('active');
-    document.body.style.overflow = '';
-  }
-
-  async function openProfileModal() {
-    const u = getCurrentUser();
-    if (!u) return;
-    const meta = u.user_metadata || {};
-    const name = meta.name || meta.full_name || (u.email ? u.email.split('@')[0] : '—');
-    document.getElementById('pmName').textContent = name;
-    document.getElementById('pmEmail').textContent = u.email || '—';
-    document.getElementById('pmJoinDate').textContent = u.created_at ? new Date(u.created_at).toLocaleDateString('ko-KR') : '—';
-    const provider = (u.app_metadata && u.app_metadata.provider) || 'email';
-    const map = { google: 'Google', kakao: '카카오', email: '이메일' };
-    document.getElementById('pmProvider').textContent = map[provider] || provider;
-    let points = parseFloat(localStorage.getItem('korart_points') || '0');
-    if (!points) {
-      localStorage.setItem('korart_points', '500000');
-      points = 500000;
-    }
-    document.getElementById('pmPoints').textContent = points.toLocaleString() + 'P';
-    document.getElementById('profileModal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeProfileModal() {
-    document.getElementById('profileModal').classList.remove('active');
-    document.body.style.overflow = '';
-  }
-
-  // 이벤트 바인딩
-  function bind() {
-    const btn = document.getElementById('avatarBtn');
-    if (btn) {
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const u = getCurrentUser();
-        if (u) {
-          document.getElementById('profileDropdown').classList.toggle('active');
-          updatePoints();
-        } else {
-          showAuthModal();
-        }
-      });
-    }
-    document.addEventListener('click', function(e) {
-      const dd = document.getElementById('profileDropdown');
-      if (dd && !dd.contains(e.target) && !e.target.closest('#avatarBtn')) {
-        dd.classList.remove('active');
-      }
-    });
-    const ac = document.getElementById('authClose');
-    if (ac) ac.addEventListener('click', closeAuthModal);
-    const am = document.getElementById('authModal');
-    if (am) am.addEventListener('click', function(e) { if (e.target.id === 'authModal') closeAuthModal(); });
-
-    const gb = document.getElementById('googleLoginBtn');
-    if (gb) gb.addEventListener('click', async function() {
-      const _sb = getSb();
-      if (!_sb) { alert('인증 시스템 로딩 중...'); return; }
-      try {
-        await _sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href }});
-      } catch (e) { alert('Google 로그인 실패: ' + e.message); }
-    });
-    const kb = document.getElementById('kakaoLoginBtn');
-    if (kb) kb.addEventListener('click', async function() {
-      const _sb = getSb();
-      if (!_sb) { alert('인증 시스템 로딩 중...'); return; }
-      try {
-        await _sb.auth.signInWithOAuth({ provider: 'kakao', options: { redirectTo: window.location.href }});
-      } catch (e) { alert('카카오 로그인 실패: ' + e.message); }
-    });
-
-    const lo = document.getElementById('pdLogoutBtn');
-    if (lo) lo.addEventListener('click', async function() {
-      const _sb = getSb();
-      if (!_sb) return;
-      if (!confirm('로그아웃 하시겠어요?')) return;
-      await _sb.auth.signOut();
-      window.currentUser = null;
-      document.getElementById('profileDropdown').classList.remove('active');
-      window.location.reload();
-    });
-    const pb = document.getElementById('pdProfileBtn');
-    if (pb) pb.addEventListener('click', function() {
-      document.getElementById('profileDropdown').classList.remove('active');
-      openProfileModal();
-    });
-    const pmc = document.getElementById('pmClose');
-    if (pmc) pmc.addEventListener('click', closeProfileModal);
-    const pmm = document.getElementById('profileModal');
-    if (pmm) pmm.addEventListener('click', function(e) { if (e.target.id === 'profileModal') closeProfileModal(); });
-    const da = document.getElementById('pmDeleteAccount');
-    if (da) da.addEventListener('click', function() {
-      if (!confirm('정말로 회원 탈퇴하시겠어요?\n\n모든 데이터가 영구 삭제됩니다.')) return;
-      if (!confirm('마지막 확인입니다.\n\n되돌릴 수 없습니다.')) return;
-      alert('탈퇴 신청이 접수되었습니다. 고객센터로 안내가 전달됩니다.');
-    });
-
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        const dd = document.getElementById('profileDropdown');
-        if (dd) dd.classList.remove('active');
-        const am = document.getElementById('authModal');
-        if (am && am.classList.contains('active')) closeAuthModal();
-        const pm = document.getElementById('profileModal');
-        if (pm && pm.classList.contains('active')) closeProfileModal();
-      }
-    });
-  }
-
-  // 세션 체크 후 아바타 렌더링 (KorartiAuth 준비 대기)
-  function pollUser(retries) {
-    const u = getCurrentUser();
-    if (u || retries <= 0) {
-      renderAvatar();
-      return;
-    }
-    setTimeout(() => pollUser(retries - 1), 200);
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-      bind();
-      pollUser(20);  // 최대 4초 대기
-    });
-  } else {
-    bind();
-    pollUser(20);
-  }
-})();
-</script>
-
-<footer style="background:#0a0908;border-top:1px solid #2a2825;padding:30px 32px;margin-top:40px;">
-  <div style="max-width:1200px;margin:0 auto;color:#8a857d;font-size:13px;line-height:1.7;">
-    <div style="display:flex;flex-wrap:wrap;gap:18px;margin-bottom:14px;">
-      <a href="/terms.html" style="color:#f5f1e8;text-decoration:none;font-weight:600;">이용약관</a>
-      <a href="/privacy.html" style="color:#f5f1e8;text-decoration:none;font-weight:600;">개인정보처리방침</a>
-      <a href="/policy.html" style="color:#8a857d;text-decoration:none;">운영정책</a>
-      <a href="mailto:dddol91@naver.com" style="color:#8a857d;text-decoration:none;">고객센터</a>
-    </div>
-    <p style="margin:0;">주식회사 코라티 · 사업자등록번호: 645-05-03770 · 대표자: 이진욱</p>
-    <p style="margin:0;">인천광역시 서구 봉오대로318번길 23, 201동 601호(가정동, 하나아파트) · 고객센터: dddol91@naver.com</p>
-    <p style="margin-top:10px;">Copyright © 주식회사 코라티 All Rights Reserved.</p>
-  </div>
-</footer>
-</body>
-</html>
+      if (profile.birthdate) 
