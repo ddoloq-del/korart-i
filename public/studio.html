@@ -7870,10 +7870,6 @@ function renderSnsProfileUI() {
   }
   snsWrap.style.display = '';
   
-  const refImgPreview = S.snsRefImageDataUrl
-    ? `<img src="${S.snsRefImageDataUrl}" style="width:100%;max-width:140px;aspect-ratio:1;object-fit:cover;border-radius:50%;border:2px solid var(--gold);display:block;margin:0 auto 8px">`
-    : `<div style="width:140px;height:140px;border-radius:50%;border:2px dashed var(--line);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;background:var(--bg3);font-size:32px;color:var(--ink3)">사진 없음</div>`;
-  
   // 테두리 슬롯 (4개)
   const colors = ['var(--gold)','var(--blue)','var(--green)','var(--red)'];
   const slotsHtml = [0,1,2,3].map(i => {
@@ -7896,17 +7892,8 @@ function renderSnsProfileUI() {
   }).join('');
   
   snsWrap.innerHTML = `
-    <div style="margin-bottom:12px">
-      <label style="font-size:13px;font-weight:700;color:var(--cream);display:block;margin-bottom:8px">참조 사진 업로드 <span style="color:var(--ink3);font-size:11px;font-weight:400">— 이 사진의 인물로 프로필 생성</span></label>
-      <div style="background:var(--bg3);border:1px solid var(--line);padding:14px;text-align:center">
-        ${refImgPreview}
-        <input type="file" id="snsRefImgInput" accept="image/*" onchange="handleSnsRefImageUpload(event)" style="display:none">
-        <button onclick="document.getElementById('snsRefImgInput').click()" style="background:var(--gold);color:#000;border:0;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;border-radius:0">${S.snsRefImageDataUrl ? '사진 변경' : '사진 선택'}</button>
-        ${S.snsRefImageDataUrl ? `<button onclick="clearSnsRefImage()" style="background:transparent;color:var(--red);border:1px solid var(--red);padding:8px 12px;font-size:11px;font-weight:700;cursor:pointer;border-radius:0;margin-left:6px">제거</button>` : ''}
-      </div>
-    </div>
     <div>
-      <label style="font-size:13px;font-weight:700;color:var(--cream);display:block;margin-bottom:8px">4컷 테두리 스타일 선택</label>
+      <label style="font-size:13px;font-weight:700;color:var(--cream);display:block;margin-bottom:8px">4컷 테두리 스타일 선택 <span style="color:var(--ink3);font-size:11px;font-weight:400">— 등록된 아바타로 프로필 생성</span></label>
       ${slotsHtml}
     </div>
   `;
@@ -10444,13 +10431,9 @@ async function generateOneCut() {
     }
   };
 
-  // 레퍼런스 이미지 — 이 컷에 출연하는 아바타들만
-  // SNS 프로필 씬: 사용자가 업로드한 사진 사용 (아바타 무시)
+  // 레퍼런스 이미지 — 이 컷에 출연하는 아바타들만 (SNS 프로필 포함 — 아바타 사진 그대로 사용)
   let refImgs = [];
-  if (S.scene === 'life_sns' && S.snsRefImageDataUrl) {
-    refImgs = [S.snsRefImageDataUrl];
-    log('info', 'SNS 프로필 1컷: 업로드된 참조 사진 사용');
-  } else if (S.avatarCuts) {
+  if (S.avatarCuts) {
     // 각 아바타 검사: 이 컷에 출연하는지
     for (const av of (S.avatars || [])) {
       const libId = av._libId || av.id;
@@ -10655,15 +10638,8 @@ async function generateImage() {
       </div>`;
   };
 
-  // 아바타 중 이미지 있는 것들만 레퍼런스로
-  // SNS 프로필 씬: 사용자가 업로드한 사진 사용 (아바타 무시)
-  let refImgs;
-  if (S.scene === 'life_sns' && S.snsRefImageDataUrl) {
-    refImgs = [S.snsRefImageDataUrl];
-    log('info', 'SNS 프로필: 업로드된 참조 사진 사용');
-  } else {
-    refImgs = S.avatars.filter(av => av.imgUrl).map(av => av.imgUrl);
-  }
+  // 아바타 중 이미지 있는 것들만 레퍼런스로 (SNS 프로필 포함 — 아바타 사진 그대로 사용)
+  const refImgs = S.avatars.filter(av => av.imgUrl).map(av => av.imgUrl);
   // 이전 컷 이어서 만들기 체크 — 있으면 fal storage에 업로드 후 refImgs에 추가
   if (S.continueRefDataUrl) {
     try {
