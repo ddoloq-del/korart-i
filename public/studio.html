@@ -7675,37 +7675,53 @@ function updateImgSnsFields() {
   const editorialWrap = document.getElementById('imgEditorialFields');
   if (editorialWrap && isSns) editorialWrap.style.display = 'none';
   
-  // 3) SNS 전용 UI 표시/숨김
-  let snsWrap = document.getElementById('imgSnsFields');
+  // 3) 컷별 화보 앵글 영역 (#imgCutDescriptions의 부모 .field) 처리
+  // SNS일 때는 앵글 카드 대신 테두리 슬롯으로 교체
+  const cutDescWrap = document.getElementById('imgCutDescriptions');
+  const cutDescField = cutDescWrap ? cutDescWrap.closest('.field') : null;
+  
   if (isSns) {
-    // 앵글 슬롯 영역 자체를 SNS 전용으로 교체 (테두리 슬롯)
-    const angleSlotsEl = document.getElementById('angleSlots');
-    if (angleSlotsEl) {
-      angleSlotsEl.style.display = 'none';
+    // 컷별 앵글 영역 부모(.field)는 유지 — label 변경 + 컨텐츠 교체
+    if (cutDescField) {
+      // label 변경
+      const lbl = cutDescField.querySelector('label');
+      if (lbl && !lbl.dataset.snsOriginal) {
+        lbl.dataset.snsOriginal = lbl.innerHTML;
+        lbl.innerHTML = '📸 참조 사진 + 테두리 스타일 <span style="font-size:10px;color:var(--ink3);font-weight:400">(사진 업로드 후 컷별 테두리 선택)</span>';
+      }
+      // imgCutDescriptions 영역 숨김
+      if (cutDescWrap) cutDescWrap.style.display = 'none';
     }
-    // SNS 테두리 슬롯 + 참조 이미지 UI 렌더
+    // SNS 전용 UI 렌더
     if (typeof renderSnsProfileUI === 'function') renderSnsProfileUI();
   } else {
-    // 다른 씬: SNS UI 숨김, 앵글 슬롯 복원
-    const angleSlotsEl = document.getElementById('angleSlots');
-    if (angleSlotsEl) angleSlotsEl.style.display = '';
+    // 다른 씬: SNS UI 숨김, 컷별 앵글 영역 복원
+    const snsWrap = document.getElementById('imgSnsFields');
     if (snsWrap) snsWrap.style.display = 'none';
+    if (cutDescField) {
+      const lbl = cutDescField.querySelector('label');
+      if (lbl && lbl.dataset.snsOriginal) {
+        lbl.innerHTML = lbl.dataset.snsOriginal;
+        delete lbl.dataset.snsOriginal;
+      }
+      if (cutDescWrap) cutDescWrap.style.display = '';
+    }
   }
 }
 
 // SNS 프로필 UI 렌더 (참조 이미지 업로드 + 4컷 테두리 슬롯)
 function renderSnsProfileUI() {
-  // angleSlots 부모 영역에 SNS 전용 UI 삽입
-  const angleSlotsEl = document.getElementById('angleSlots');
-  if (!angleSlotsEl) return;
-  const parent = angleSlotsEl.parentElement;
+  // imgCutDescriptions 영역(SNS UI 자리)에 SNS 전용 UI 삽입
+  const cutDescWrap = document.getElementById('imgCutDescriptions');
+  if (!cutDescWrap) return;
+  const parent = cutDescWrap.parentElement;
   if (!parent) return;
   
   let snsWrap = document.getElementById('imgSnsFields');
   if (!snsWrap) {
     snsWrap = document.createElement('div');
     snsWrap.id = 'imgSnsFields';
-    parent.insertBefore(snsWrap, angleSlotsEl);
+    parent.insertBefore(snsWrap, cutDescWrap);
   }
   snsWrap.style.display = '';
   
