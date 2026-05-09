@@ -8753,7 +8753,7 @@ function _imgBuildAvatarDescriptions() {
   let charDesc = '';
   if (personAvs.length) {
     charDesc = personAvs.map(av => {
-      const parts = [av.gender, av.age, av.body];
+      const parts = [av.gender, av.age, av.body, av.height, av.look];
       if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
       else if (av.hair) parts.push(av.hair);
       if (av.skin) parts.push(av.skin);
