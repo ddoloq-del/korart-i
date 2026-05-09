@@ -3500,8 +3500,8 @@ const SCENES_IMAGE = {
 
   // ── 라이프스타일 (3) ──
   life_sns:     { name:'SNS 프로필', group:'lifestyle', catLabel:'PROFILE',      isProfileMode:true, style:'circular profile picture, extreme close-up, friendly approachable expression, soft natural lighting, clean background' },
-  life_family:  { name:'가족 사진', group:'lifestyle', catLabel:'FAMILY',        style:'warm family portrait, natural happy expressions, soft pastel tones, cozy home atmosphere or sunny park, genuine loving moments, K-drama family aesthetic' },
-  life_couple:  { name:'미래의 내 여친/남친',  group:'lifestyle', catLabel:'FUTURE LOVE',  style:'romantic couple portrait, soft warm lighting, K-drama aesthetic, intimate genuine moment, beautiful natural backdrop, dreamy bokeh, ideal partner imagery' },
+  life_pet:     { name:'나의 애완동물', group:'lifestyle', catLabel:'MY PET',       isPetMode:true,    style:'warm portrait of a person with their pet, natural happy expressions, soft pastel tones, cozy home atmosphere or sunny park, genuine bond between owner and animal, lifestyle pet photography' },
+  life_couple:  { name:'미래의 내 여친/남친',  group:'lifestyle', catLabel:'FUTURE LOVE',  isCoupleMode:true, style:'romantic couple portrait, soft warm lighting, K-drama aesthetic, intimate genuine moment, beautiful natural backdrop, dreamy bokeh, lovely couple chemistry' },
 
   // ── 화장 (6) ──
   // 씬 구조는 화보(editorial)와 동일 — 의상/장소/계절/시간대/날씨 입력 적용
@@ -3592,7 +3592,7 @@ const SCENE_DEFAULTS = {
   job_chef:      { location: 'kitchen',        mood: 'mood_chic',     variation: 'pose' },
   job_flight:    { location: 'airport',        mood: 'mood_chic',     variation: 'pose' },
   life_sns:      { location: 'cafe',           mood: 'mood_bright',   variation: 'pose' },
-  life_family:   { location: 'park',           mood: 'mood_bright',   variation: 'pose' },
+  life_pet:      { location: 'park',           mood: 'mood_bright',   variation: 'pose' },
   life_couple:   { location: 'park',           mood: 'mood_dreamy',   variation: 'pose' },
 };
 
@@ -3987,6 +3987,55 @@ const PROFILE_BORDERS = [
 // SNS 프로필 default 4컷 테두리
 const PROFILE_BORDERS_DEFAULT_4 = ['cherry', 'rose', 'daisy', 'sunflower'];
 
+// === 나의 애완동물 (life_pet) — 동물 종류 ===
+const PET_TYPES = [
+  { key: 'dog',      ko: '🐕 강아지',   en: 'a friendly happy dog (random breed: golden retriever, poodle, shiba inu, corgi, husky, etc)' },
+  { key: 'cat',      ko: '🐈 고양이',   en: 'a cute cat (random breed: persian, ragdoll, siamese, british shorthair, korean shorthair, etc)' },
+  { key: 'rabbit',   ko: '🐇 토끼',     en: 'a cute fluffy rabbit (random breed: holland lop, netherland dwarf, lionhead, etc)' },
+  { key: 'hamster',  ko: '🐹 햄스터',   en: 'a tiny adorable hamster (random breed: golden, dwarf, syrian, etc)' },
+  { key: 'parrot',   ko: '🦜 앵무새',   en: 'a colorful parrot (random species: macaw, cockatiel, budgie, lovebird, etc)' },
+  { key: 'turtle',   ko: '🐢 거북이',   en: 'a calm turtle (random species: red-eared slider, box turtle, etc)' },
+  { key: 'fish',     ko: '🐠 물고기',   en: 'a beautiful pet fish in an aquarium (random species: betta, goldfish, tropical fish, etc)' },
+  { key: 'iguana',   ko: '🦎 이구아나', en: 'an exotic iguana or lizard (random species)' },
+  { key: 'ferret',   ko: '🦡 페럿',     en: 'a playful ferret' },
+  { key: 'random',   ko: '🎲 랜덤',     en: '__RANDOM__' },
+  { key: 'custom',   ko: '✏️ 직접 입력', en: '__CUSTOM__' },
+];
+
+// === 커플 (life_couple) — 인종 / 키 / 체형 ===
+const COUPLE_RACES = [
+  { key: 'korean',     ko: '🇰🇷 한국인',     en: 'Korean' },
+  { key: 'japanese',   ko: '🇯🇵 일본인',     en: 'Japanese' },
+  { key: 'chinese',    ko: '🇨🇳 중국인',     en: 'Chinese' },
+  { key: 'western',    ko: '🌎 서양인',     en: 'Caucasian Western (American/European)' },
+  { key: 'sea',        ko: '🌏 동남아인',   en: 'Southeast Asian (Vietnamese/Thai/Filipino/Indonesian)' },
+  { key: 'random',     ko: '🎲 랜덤',       en: '__RANDOM__' },
+  { key: 'custom',     ko: '✏️ 직접 입력',  en: '__CUSTOM__' },
+];
+
+const COUPLE_HEIGHTS = [
+  { key: 'short',   ko: '작은 키',     en: 'short height' },
+  { key: 'avg',     ko: '보통 키',     en: 'average height' },
+  { key: 'tall',    ko: '큰 키',       en: 'tall height' },
+  { key: 'random',  ko: '🎲 랜덤',     en: '__RANDOM__' },
+  { key: 'custom',  ko: '✏️ 직접 입력', en: '__CUSTOM__' },
+];
+
+const COUPLE_BODIES = [
+  { key: 'slim',    ko: '마른 체형',   en: 'slim slender body' },
+  { key: 'avg',     ko: '보통 체형',   en: 'average body' },
+  { key: 'chubby',  ko: '통통한 체형', en: 'chubby cute body' },
+  { key: 'fit',     ko: '근육질 체형', en: 'fit athletic muscular body' },
+  { key: 'random',  ko: '🎲 랜덤',     en: '__RANDOM__' },
+  { key: 'custom',  ko: '✏️ 직접 입력', en: '__CUSTOM__' },
+];
+
+// 랜덤 추첨 헬퍼
+function _pickRandom(arr) {
+  const filtered = arr.filter(o => o.en && !o.en.startsWith('__'));
+  return filtered[Math.floor(Math.random() * filtered.length)];
+}
+
 // SNS 프로필 전용 prompt 빌드 (씬 상세 무시, 테두리 + 참조 이미지 강조)
 // cutIdx: 0~3 (4컷) 또는 단일 (cutIdx 무시 시 4컷 모두)
 function buildSnsProfilePrompt(cutIdx) {
@@ -4012,6 +4061,61 @@ Clean white or pastel background outside the circle, person centered inside the 
   const b = PROFILE_BORDERS.find(x => x.key === borders[cutIdx]);
   const borderEn = b ? b.en : 'simple clean border';
   return `SNS profile picture, single image. Circular profile photo with ${borderEn}, extreme close-up of the face only, face matches the reference photo exactly. Clean white or pastel background outside the circle, person centered inside the circle, friendly approachable expression, soft natural lighting. High-quality professional profile photography.`;
+}
+
+// === 나의 애완동물 / 커플 prompt 헬퍼 ===
+function _resolvePetTypeEn() {
+  const key = S.petTypeKey || 'random';
+  if (key === 'custom' && (S.petTypeCustom || '').trim()) return (S.petTypeCustom || '').trim();
+  if (key === 'random') {
+    const picked = _pickRandom(PET_TYPES);
+    return picked ? picked.en : 'a friendly happy pet';
+  }
+  const found = PET_TYPES.find(p => p.key === key);
+  return found && found.en && !found.en.startsWith('__') ? found.en : 'a friendly happy pet';
+}
+
+function _resolveCoupleRaceEn() {
+  const key = S.coupleRaceKey || 'random';
+  if (key === 'custom' && (S.coupleRaceCustom || '').trim()) return (S.coupleRaceCustom || '').trim();
+  if (key === 'random') {
+    const picked = _pickRandom(COUPLE_RACES);
+    return picked ? picked.en : 'Korean';
+  }
+  const found = COUPLE_RACES.find(o => o.key === key);
+  return found && found.en && !found.en.startsWith('__') ? found.en : 'Korean';
+}
+
+function _resolveCoupleHeightEn() {
+  const key = S.coupleHeightKey || 'random';
+  if (key === 'custom' && (S.coupleHeightCustom || '').trim()) return (S.coupleHeightCustom || '').trim();
+  if (key === 'random') {
+    const picked = _pickRandom(COUPLE_HEIGHTS);
+    return picked ? picked.en : 'average height';
+  }
+  const found = COUPLE_HEIGHTS.find(o => o.key === key);
+  return found && found.en && !found.en.startsWith('__') ? found.en : 'average height';
+}
+
+function _resolveCoupleBodyEn() {
+  const key = S.coupleBodyKey || 'random';
+  if (key === 'custom' && (S.coupleBodyCustom || '').trim()) return (S.coupleBodyCustom || '').trim();
+  if (key === 'random') {
+    const picked = _pickRandom(COUPLE_BODIES);
+    return picked ? picked.en : 'average body';
+  }
+  const found = COUPLE_BODIES.find(o => o.key === key);
+  return found && found.en && !found.en.startsWith('__') ? found.en : 'average body';
+}
+
+// 커플 파트너 성별 — 첫 번째 사람 아바타의 반대 성별
+function _resolveCouplePartnerGender() {
+  const personAv = (S.avatars || []).find(av => (av.category || 'person') === 'person');
+  if (!personAv) return 'woman'; // 기본 (아바타 없으면 여자)
+  const g = (personAv.gender || '').toLowerCase();
+  if (g.includes('man') || g.includes('male')) return 'woman';
+  if (g.includes('woman') || g.includes('female')) return 'man';
+  return 'woman';
 }
 
 // === 시대별 의상 옵션 ===
@@ -7463,6 +7567,16 @@ function ensureImageModeState() {
   if (!Array.isArray(S.snsCutBorders))             S.snsCutBorders     = PROFILE_BORDERS_DEFAULT_4.slice();
   if (typeof S.snsRefImageUrl === 'undefined')     S.snsRefImageUrl    = '';
   if (typeof S.snsRefImageDataUrl === 'undefined') S.snsRefImageDataUrl = '';
+  // 나의 애완동물 — 4컷에 적용할 동물 종류 + 직접 입력
+  if (typeof S.petTypeKey === 'undefined')     S.petTypeKey = 'random';
+  if (typeof S.petTypeCustom === 'undefined')  S.petTypeCustom = '';
+  // 커플 — 파트너 인종/키/체형 + 직접 입력
+  if (typeof S.coupleRaceKey === 'undefined')      S.coupleRaceKey = 'random';
+  if (typeof S.coupleRaceCustom === 'undefined')   S.coupleRaceCustom = '';
+  if (typeof S.coupleHeightKey === 'undefined')    S.coupleHeightKey = 'random';
+  if (typeof S.coupleHeightCustom === 'undefined') S.coupleHeightCustom = '';
+  if (typeof S.coupleBodyKey === 'undefined')      S.coupleBodyKey = 'random';
+  if (typeof S.coupleBodyCustom === 'undefined')   S.coupleBodyCustom = '';
   // 시대 배경은 이미지 모드에서 현대극 고정
   S.era = 'modern';
 }
@@ -7802,6 +7916,116 @@ function clearSnsRefImage() {
   if (typeof renderSnsProfileUI === 'function') renderSnsProfileUI();
 }
 
+// === 나의 애완동물 / 커플 씬 전용 UI 토글 ===
+function updateImgPetCoupleFields() {
+  const sc = SCENES_IMAGE[S.scene];
+  const isPet = sc && sc.isPetMode;
+  const isCouple = sc && sc.isCoupleMode;
+  
+  // imgCutDescriptions 영역(.field) — pet/couple일 때 label/내용 교체
+  const cutDescWrap = document.getElementById('imgCutDescriptions');
+  const cutDescField = cutDescWrap ? cutDescWrap.closest('.field') : null;
+  
+  if (isPet || isCouple) {
+    if (cutDescField) {
+      const lbl = cutDescField.querySelector('label');
+      if (lbl && !lbl.dataset.petCoupleOriginal) {
+        lbl.dataset.petCoupleOriginal = lbl.innerHTML;
+        lbl.innerHTML = isPet
+          ? '🐾 동물 종류 + 컷별 추가 설명 <span style="font-size:10px;color:var(--ink3);font-weight:400">(4컷 모두 같은 종/다른 포즈)</span>'
+          : '💕 파트너 설정 + 컷별 추가 설명 <span style="font-size:10px;color:var(--ink3);font-weight:400">(4컷 모두 같은 파트너/다른 상황)</span>';
+      }
+      // 컷별 앵글 카드는 보이게 두되 — 그 위에 pet/couple 설정 UI 추가
+    }
+    // pet/couple 설정 UI 렌더
+    if (typeof renderPetCoupleUI === 'function') renderPetCoupleUI();
+  } else {
+    // 다른 씬: pet/couple UI 숨김, label 복원
+    const wrap = document.getElementById('imgPetCoupleFields');
+    if (wrap) wrap.style.display = 'none';
+    if (cutDescField) {
+      const lbl = cutDescField.querySelector('label');
+      if (lbl && lbl.dataset.petCoupleOriginal) {
+        lbl.innerHTML = lbl.dataset.petCoupleOriginal;
+        delete lbl.dataset.petCoupleOriginal;
+      }
+    }
+  }
+}
+
+// pet / couple 설정 UI 렌더 (셀렉트 + 직접 입력)
+function renderPetCoupleUI() {
+  const sc = SCENES_IMAGE[S.scene];
+  const isPet = sc && sc.isPetMode;
+  const isCouple = sc && sc.isCoupleMode;
+  if (!isPet && !isCouple) return;
+  
+  const cutDescWrap = document.getElementById('imgCutDescriptions');
+  if (!cutDescWrap) return;
+  const parent = cutDescWrap.parentElement;
+  if (!parent) return;
+  
+  let wrap = document.getElementById('imgPetCoupleFields');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.id = 'imgPetCoupleFields';
+    wrap.style.cssText = 'background:var(--bg3);border:1px solid var(--line);padding:12px;margin-bottom:12px';
+    parent.insertBefore(wrap, cutDescWrap);
+  }
+  wrap.style.display = '';
+  
+  if (isPet) {
+    // 동물 종류 셀렉트 + 직접 입력
+    const opts = PET_TYPES.map(p => 
+      `<option value="${p.key}" ${S.petTypeKey === p.key ? 'selected' : ''}>${p.ko}</option>`
+    ).join('');
+    const customField = (S.petTypeKey === 'custom')
+      ? `<input type="text" value="${(S.petTypeCustom || '').replace(/"/g,'&quot;')}" oninput="setPetTypeCustom(this.value)" placeholder="예: 검은 푸들, 노랑 카나리아 등 (영어 또는 한국어)" style="width:100%;background:var(--bg4);border:1px solid var(--line);padding:8px 10px;color:var(--ink);font-size:12px;margin-top:8px;border-radius:0">`
+      : '';
+    wrap.innerHTML = `
+      <label style="font-size:12px;font-weight:700;color:var(--cream);display:block;margin-bottom:6px">🐾 동물 종류 선택</label>
+      <select onchange="setPetTypeKey(this.value)" style="width:100%;background:var(--bg4);border:1px solid var(--line);padding:8px 10px;color:var(--ink);font-size:12px;border-radius:0">
+        ${opts}
+      </select>
+      ${customField}
+      <div style="font-size:10px;color:var(--ink3);margin-top:6px">선택한 종류로 4컷 모두 같은 동물(다른 포즈/상황)이 생성됩니다</div>
+    `;
+  } else if (isCouple) {
+    // 인종 / 키 / 체형 3개 셀렉트
+    const buildSelect = (id, options, currentKey, customVal, fnSet, fnCustom, label) => {
+      const opts = options.map(o =>
+        `<option value="${o.key}" ${currentKey === o.key ? 'selected' : ''}>${o.ko}</option>`
+      ).join('');
+      const customField = (currentKey === 'custom')
+        ? `<input type="text" value="${(customVal || '').replace(/"/g,'&quot;')}" oninput="${fnCustom}(this.value)" placeholder="직접 입력" style="width:100%;background:var(--bg4);border:1px solid var(--line);padding:6px 10px;color:var(--ink);font-size:11px;margin-top:6px;border-radius:0">`
+        : '';
+      return `
+        <div style="margin-bottom:10px">
+          <label style="font-size:11px;font-weight:700;color:var(--cream);display:block;margin-bottom:4px">${label}</label>
+          <select onchange="${fnSet}(this.value)" style="width:100%;background:var(--bg4);border:1px solid var(--line);padding:6px 10px;color:var(--ink);font-size:11px;border-radius:0">${opts}</select>
+          ${customField}
+        </div>`;
+    };
+    wrap.innerHTML = `
+      <label style="font-size:12px;font-weight:700;color:var(--cream);display:block;margin-bottom:8px">💕 파트너 설정 (성별은 아바타와 반대로 자동)</label>
+      ${buildSelect('coupleRace', COUPLE_RACES, S.coupleRaceKey, S.coupleRaceCustom, 'setCoupleRaceKey', 'setCoupleRaceCustom', '인종')}
+      ${buildSelect('coupleHeight', COUPLE_HEIGHTS, S.coupleHeightKey, S.coupleHeightCustom, 'setCoupleHeightKey', 'setCoupleHeightCustom', '키')}
+      ${buildSelect('coupleBody', COUPLE_BODIES, S.coupleBodyKey, S.coupleBodyCustom, 'setCoupleBodyKey', 'setCoupleBodyCustom', '체형')}
+      <div style="font-size:10px;color:var(--ink3);margin-top:6px">선택한 파트너로 4컷 모두 같은 사람(다른 커플 상황)이 생성됩니다</div>
+    `;
+  }
+}
+
+// pet/couple state setter
+function setPetTypeKey(v) { S.petTypeKey = v; if (typeof saveSession === 'function') saveSession(); renderPetCoupleUI(); }
+function setPetTypeCustom(v) { S.petTypeCustom = v; if (typeof saveSession === 'function') saveSession(); }
+function setCoupleRaceKey(v) { S.coupleRaceKey = v; if (typeof saveSession === 'function') saveSession(); renderPetCoupleUI(); }
+function setCoupleRaceCustom(v) { S.coupleRaceCustom = v; if (typeof saveSession === 'function') saveSession(); }
+function setCoupleHeightKey(v) { S.coupleHeightKey = v; if (typeof saveSession === 'function') saveSession(); renderPetCoupleUI(); }
+function setCoupleHeightCustom(v) { S.coupleHeightCustom = v; if (typeof saveSession === 'function') saveSession(); }
+function setCoupleBodyKey(v) { S.coupleBodyKey = v; if (typeof saveSession === 'function') saveSession(); renderPetCoupleUI(); }
+function setCoupleBodyCustom(v) { S.coupleBodyCustom = v; if (typeof saveSession === 'function') saveSession(); }
+
 // 컷별 앵글 + 설명 렌더 (4개)
 function renderImgCutDescriptions() {
   ensureImageModeState();
@@ -7928,6 +8152,7 @@ function renderImageModeForm() {
   updateImgEditorialFields();
   updateImgJobFields();
   updateImgSnsFields();
+  updateImgPetCoupleFields();
 
   // 자유 입력칸 동기화 + 이벤트 바인딩 (1회만)
   const bindCustom = (id, key) => {
@@ -9099,6 +9324,22 @@ function buildImagePromptImageMode() {
   }
 
   const { charDesc, petDesc, productDesc, nPerson, nPet, nProd } = _imgBuildAvatarDescriptions();
+
+  // 나의 애완동물 씬: 사람 + 동물 prompt 강화
+  if (S.scene === 'life_pet') {
+    const petEn = _resolvePetTypeEn();
+    return `Four-panel grid (2x2) of warm pet portrait photos. Same person across all 4 panels (${charDesc || 'the person'}) with their pet ${petEn}. Each panel shows the same person and same pet in different poses and situations: hugging, walking, playing, resting together. Natural happy expressions, soft pastel tones, cozy atmosphere, lifestyle pet photography. Person's face must match the reference photo exactly across all panels. The pet remains the same animal in all 4 panels. ${sc.style}`;
+  }
+
+  // 미래의 내 여친/남친 씬: 아바타 + 랜덤 파트너 커플 prompt
+  if (S.scene === 'life_couple') {
+    const partnerGender = _resolveCouplePartnerGender();
+    const race = _resolveCoupleRaceEn();
+    const height = _resolveCoupleHeightEn();
+    const body = _resolveCoupleBodyEn();
+    const partnerDesc = `${race} ${partnerGender} with ${height} and ${body}, attractive ideal partner`;
+    return `Four-panel grid (2x2) of romantic couple photos. Same couple across all 4 panels: (1) ${charDesc || 'the person'} matching the reference photo exactly, AND (2) ${partnerDesc} (this partner remains identical across all 4 panels). Different romantic situations in each panel: holding hands, hugging, sharing a meal, walking together. Soft warm lighting, K-drama aesthetic, intimate genuine moments, dreamy bokeh. The partner appearance must be IDENTICAL in all 4 panels. ${sc.style}`;
+  }
   const subjectLock = _imgBuildSubjectLock(nPerson, nPet, nProd);
 
   // 컷별 앵글 + 설명 며지
@@ -9164,6 +9405,11 @@ async function buildImagePromptImageModeForApi() {
   // SNS 프로필 씬: 씬 상세 무시, 테두리 + 참조 이미지 전용 prompt
   if (S.scene === 'life_sns') {
     return buildSnsProfilePrompt();
+  }
+
+  // 나의 애완동물 / 커플 씬: 동기 빌드로 위임
+  if (S.scene === 'life_pet' || S.scene === 'life_couple') {
+    return buildImagePromptImageMode();
   }
 
   const fullLib = (typeof loadAvatarLib === 'function') ? loadAvatarLib() : [];
@@ -9343,6 +9589,24 @@ async function buildImagePromptOneCutImageModeForApi(cutIdx) {
   // SNS 프로필 씬: 씬 상세 무시, 1컷 테두리 + 참조 이미지 전용 prompt
   if (S.scene === 'life_sns') {
     return buildSnsProfilePrompt(cutIdx);
+  }
+  
+  // 나의 애완동물 1컷: 사람 + 동물 단독 prompt
+  if (S.scene === 'life_pet') {
+    const petEn = _resolvePetTypeEn();
+    const personDesc = (S.avatars || []).filter(av => (av.category || 'person') === 'person').map(av => av.gender || 'person').join(', ') || 'a person';
+    return `Single warm pet portrait photo. ${personDesc} with their pet ${petEn}, natural happy expression, soft pastel tones, cozy atmosphere, lifestyle pet photography. Person face matches reference photo exactly. ${sc.style || ''}`;
+  }
+  
+  // 커플 1컷: 아바타 + 랜덤 파트너 단독 prompt
+  if (S.scene === 'life_couple') {
+    const partnerGender = _resolveCouplePartnerGender();
+    const race = _resolveCoupleRaceEn();
+    const height = _resolveCoupleHeightEn();
+    const body = _resolveCoupleBodyEn();
+    const partnerDesc = `${race} ${partnerGender} with ${height} and ${body}, attractive ideal partner`;
+    const personDesc = (S.avatars || []).filter(av => (av.category || 'person') === 'person').map(av => av.gender || 'person').join(', ') || 'a person';
+    return `Single romantic couple photo. ${personDesc} matching reference photo, AND ${partnerDesc}. Soft warm lighting, K-drama aesthetic, intimate genuine moment, dreamy bokeh. ${sc.style || ''}`;
   }
   let charDesc = '';
   let petDesc = '';
