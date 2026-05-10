@@ -10029,7 +10029,7 @@ TIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.
 ENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}
 CAMERA ANGLES: ${angleDesc}.${extra ? '\nADDITIONAL: ' + extra + '.' : ''}
 WARDROBE: All characters wear clothing appropriate for ${S.season} weather and ${loc}. Outfits should match the season, weather, and environment naturally.
-All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildNewsImageOverlayTokens()}`.trim();
+All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildNewsImageOverlayTokens({perPanel:true})}`.trim();
 }
 
 // async 버전 — 실제 API 전송용 (한글 → 영어 번역)
@@ -10162,7 +10162,7 @@ TIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.
 ENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}
 CAMERA ANGLES: ${angleDesc}.${extraEn ? '\nADDITIONAL: ' + extraEn + '.' : ''}
 WARDROBE: All characters wear clothing appropriate for ${S.season} weather and ${locEn}. Outfits should match the season, weather, and environment naturally.
-All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildNewsImageOverlayTokens()}`.trim();
+All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildNewsImageOverlayTokens({perPanel:true})}`.trim();
 }
 
 function updatePromptPreview() {
@@ -11119,32 +11119,43 @@ const KLING_NEG_ANIME = `additional character, extra character, new character en
 
 // 뉴스 씬 — 이미지 생성용 오버레이 토큰 (헤드라인 자막 / 방송사 워터마크 / BREAKING NEWS 띠)
 // GPT-image-2 등 이미지 모델이 이미지 안 텍스트/오버레이를 명확히 그리도록 매우 강한 토큰
-function _buildNewsImageOverlayTokens() {
+// opts.perPanel: true면 4컷 그리드의 각 패널마다 독립적으로 그리도록 명시 (4컷 빌더용)
+//                false/undefined면 단일 프레임 (1컷 빌더용)
+function _buildNewsImageOverlayTokens(opts) {
   if (S.scene !== 'news_anchor' && S.scene !== 'news_reporter') return '';
   const isAnchor = S.scene === 'news_anchor';
   const headline = (S.newsHeadline || '').trim();
   const channel  = (S.newsChannel  || '').trim();
+  const perPanel = !!(opts && opts.perPanel);
+  // 4컷 모드면 "각 패널 안에" / 1컷 모드면 "프레임 안에"
+  const where = perPanel ? 'inside EACH of the 4 panels independently (rendered separately within every panel, not spanning across panels)' : 'across the frame';
+  const cornerWhere = perPanel ? 'in the top-left corner of EACH panel independently (appears separately in every one of the 4 panels)' : 'in the top-left corner of the frame';
+  const topWhere    = perPanel ? 'across the very top edge of EACH of the 4 panels independently (a separate red banner inside every panel, never spanning the full grid width)' : 'across the very top of the frame';
+  const bottomWhere = perPanel ? 'across the bottom edge of EACH of the 4 panels independently (a separate lower-third banner inside every panel, never spanning the full grid width)' : 'across the bottom of the frame';
   const tokens = [];
 
   // BREAKING NEWS 띠 (앵커 전용, 가장 위)
   if (isAnchor && S.newsBreaking) {
-    tokens.push('A bright red horizontal banner across the very top of the frame with bold large white sans-serif text "BREAKING NEWS" clearly readable, broadcast news graphic style');
+    tokens.push(`A bright red horizontal banner ${topWhere} with bold large white sans-serif text "BREAKING NEWS" clearly readable, broadcast news graphic style`);
   }
 
   // 헤드라인 lower-third 자막 (필수, 한국어 그대로)
   if (headline) {
-    // 한국어 자막은 dark blue gradient lower-third 그래픽으로
     const safe = headline.replace(/"/g, "'");
-    tokens.push(`A photorealistic broadcast TV news lower-third banner across the bottom of the frame, dark navy blue gradient background, bold white Korean text reading exactly "${safe}", crisp readable broadcast typography, professional news graphic`);
+    tokens.push(`A photorealistic broadcast TV news lower-third banner ${bottomWhere}, dark navy blue gradient background, bold white Korean text reading exactly "${safe}", crisp readable broadcast typography, professional news graphic`);
   }
 
   // 방송사 워터마크 (좌상단)
   if (channel) {
     const safe = channel.replace(/"/g, "'");
-    tokens.push(`Top-left corner of the frame: small semi-transparent white channel logo text reading "${safe}", broadcast watermark style, slightly translucent overlay`);
+    tokens.push(`Small semi-transparent white channel logo text reading "${safe}" placed ${cornerWhere}, broadcast watermark style, slightly translucent overlay`);
   }
 
-  return tokens.length ? '\nNEWS BROADCAST OVERLAYS (must be rendered as on-screen graphics): ' + tokens.join('. ') + '.' : '';
+  if (!tokens.length) return '';
+  const header = perPanel
+    ? '\nNEWS BROADCAST OVERLAYS (CRITICAL: render these graphics SEPARATELY inside EACH of the 4 panels — never span them across multiple panels, never make them grid-wide; treat each panel as its own independent broadcast frame): '
+    : '\nNEWS BROADCAST OVERLAYS (must be rendered as on-screen graphics): ';
+  return header + tokens.join('. ') + '.';
 }
 
 // 뉴스 씬 영상 프롬프트 빌더 (news_anchor / news_reporter)
