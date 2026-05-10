@@ -8914,24 +8914,27 @@ function _buildRefImageRoleToken(scope) {
   const active = segs.querySelector('.seg.active');
   if (!active) return '';
   const role = active.getAttribute('data-refrole') || '';
+  // 공통: image_urls 안에는 아바타 캐릭터 시트(앞쪽)와 사용자가 업로드한 참고 이미지(마지막)가 함께 들어감
+  // 모델이 아바타 시트를 카드/배경으로 잘못 박는 것을 방지하기 위해 "LAST image" 라고 명시
+  const SOURCE_HINT = 'IMPORTANT: The "reference image" mentioned below refers SPECIFICALLY to the LAST image in the provided image_urls (the user-uploaded reference photo, NOT the avatar/character reference sheet). The avatar/character reference is for likeness only and MUST NOT be used as the source of the visual element described below.';
   if (role === 'bg') {
-    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): The provided reference image MUST be used as the BACKGROUND of the scene. The entire backdrop visible behind all subjects MUST come from the reference image. Do NOT place subjects in any other environment.';
+    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): ' + SOURCE_HINT + ' The user-uploaded reference image (the LAST one in image_urls) MUST be used as the BACKGROUND of the scene. The entire backdrop visible behind all subjects MUST come from this reference image. Do NOT place subjects in any other environment. Do NOT use the avatar reference for the background.';
   }
   if (role === 'phone') {
-    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): A smartphone MUST be prominently visible in the scene (held in hand, on a table, or being looked at), and the reference image MUST be displayed as the screen content of that smartphone. The phone screen must clearly show the reference image, sharp and readable.';
+    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): ' + SOURCE_HINT + ' A smartphone MUST be prominently visible in the scene (held in hand, on a table, or being looked at), and the user-uploaded reference image (the LAST one in image_urls) MUST be displayed as the screen content of that smartphone. The phone screen must clearly show this reference image, sharp and readable. Do NOT use the avatar reference for the phone screen.';
   }
   if (role === 'tv') {
-    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): A television screen MUST be prominently visible in the scene (wall-mounted, on a stand, or in the background), and the reference image MUST be displayed as the screen content of that TV. The TV screen must clearly show the reference image as if it is being broadcast.';
+    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): ' + SOURCE_HINT + ' A television screen MUST be prominently visible in the scene (wall-mounted, on a stand, or in the background), and the user-uploaded reference image (the LAST one in image_urls) MUST be displayed as the screen content of that TV. The TV screen must clearly show this reference image as if it is being broadcast. Do NOT use the avatar reference for the TV screen.';
   }
   if (role === 'news_card') {
-    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): A small rectangular broadcast TV news graphic card MUST be placed beside the main subject (in the upper-right or upper-left corner area of the frame). The reference image MUST be displayed as the photo content inside this news graphic card. The card has a clean modern broadcast TV news design with a thin colored border. The main subject (such as a news anchor or reporter) remains the primary focus on the opposite side of the frame.';
+    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): ' + SOURCE_HINT + ' LAYOUT: The frame is split into two zones — LEFT HALF (approximately 40-45% of the frame width) contains a LARGE broadcast TV news graphic card, RIGHT HALF (approximately 55-60% of the frame width) shows the main subject (news anchor or reporter). NEWS CARD: The user-uploaded reference image (the LAST one in image_urls) MUST be displayed as the LARGE photo content filling most of the news graphic card on the left side. The card occupies a substantial portion of the left side of the frame (roughly half the frame height as well), with a clean modern broadcast TV news design — thin colored border, slight inner shadow, optional small caption strip at the bottom of the card. SUBJECT: The main subject (anchor/reporter) is positioned on the right side of the frame, framed in medium shot, looking toward the camera. Do NOT use the avatar reference image as the news card content. Do NOT shrink the news card to a small corner — it should be visually prominent on the LEFT.';
   }
   if (role === 'custom') {
     const inputId = scope === 'img' ? 'imgContinueRefRoleCustomInput' : 'vidContinueRefRoleCustomInput';
     const txt = (document.getElementById(inputId)?.value || '').trim();
     if (!txt) return '';
     const safe = txt.replace(/`/g, "'");
-    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): ' + safe;
+    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): ' + SOURCE_HINT + ' ' + safe;
   }
   return '';
 }
@@ -8953,7 +8956,7 @@ function _buildAvRefImageRoleToken() {
     return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): A television screen MUST be prominently visible in the scene, and the reference image MUST be displayed as the screen content of that TV.';
   }
   if (role === 'news_card') {
-    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): A small rectangular broadcast TV news graphic card MUST be placed beside the main subject (in the upper-right or upper-left corner area of the frame). The reference image MUST be displayed as the photo content inside this news graphic card. Clean modern broadcast TV news design.';
+    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): LAYOUT: The frame is split — LEFT HALF (40-45% width) contains a LARGE broadcast TV news graphic card with the reference image as its photo content, RIGHT HALF (55-60% width) shows the main subject. The news card is visually prominent on the left, NOT a small corner element. Clean modern broadcast TV news design with thin colored border.';
   }
   if (role === 'custom') {
     const txt = (document.getElementById('avRefImgRoleCustomInput')?.value || '').trim();
