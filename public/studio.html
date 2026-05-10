@@ -2248,6 +2248,55 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
             <div class="seg" id="newsMicOffSeg" onclick="setNewsMic(false)">마이크 없음</div>
           </div>
         </div>
+
+        <!-- ════ 기상캐스터(news_weather) 전용 필드 ════ -->
+        <div class="field" id="newsWeatherCondField" style="display:none">
+          <label>오늘 날씨 <span style="font-size:9px;color:var(--coral);font-weight:600">(필수)</span></label>
+          <div class="segs" style="flex-wrap:wrap">
+            <div class="seg" id="newsWcond_clear"         onclick="setNewsWeatherCondition('clear')">맑음</div>
+            <div class="seg" id="newsWcond_partly_cloudy" onclick="setNewsWeatherCondition('partly_cloudy')">구름 많음</div>
+            <div class="seg" id="newsWcond_cloudy"        onclick="setNewsWeatherCondition('cloudy')">흐림</div>
+            <div class="seg" id="newsWcond_rain"          onclick="setNewsWeatherCondition('rain')">비</div>
+            <div class="seg" id="newsWcond_heavy_rain"    onclick="setNewsWeatherCondition('heavy_rain')">폭우</div>
+            <div class="seg" id="newsWcond_snow"          onclick="setNewsWeatherCondition('snow')">눈</div>
+            <div class="seg" id="newsWcond_heavy_snow"    onclick="setNewsWeatherCondition('heavy_snow')">폭설</div>
+            <div class="seg" id="newsWcond_typhoon"       onclick="setNewsWeatherCondition('typhoon')">태풍</div>
+            <div class="seg" id="newsWcond_dust"          onclick="setNewsWeatherCondition('dust')">황사</div>
+            <div class="seg" id="newsWcond_fine_dust"     onclick="setNewsWeatherCondition('fine_dust')">미세먼지</div>
+            <div class="seg" id="newsWcond_cold_wave"     onclick="setNewsWeatherCondition('cold_wave')">한파</div>
+            <div class="seg" id="newsWcond_heat_wave"     onclick="setNewsWeatherCondition('heat_wave')">폭염</div>
+          </div>
+        </div>
+
+        <div class="field" id="newsWeatherTempField" style="display:none">
+          <label>현재 기온 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span></label>
+          <input id="newsWeatherTempInput" type="text" maxlength="20" oninput="S.newsWeatherTemp=this.value" placeholder="예: -3°C, 영하 3도, 18도" style="width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:8px 10px;color:var(--ink);font-size:12px">
+          <input id="newsWeatherFeelTempInput" type="text" maxlength="20" oninput="S.newsWeatherFeelTemp=this.value" placeholder="체감 기온 (선택, 예: 체감 -8°C)" style="width:100%;margin-top:6px;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:8px 10px;color:var(--ink);font-size:12px">
+        </div>
+
+        <div class="field" id="newsWeatherInfoField" style="display:none">
+          <label>추가 표시 정보 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택, 다중)</span></label>
+          <div class="segs" style="flex-wrap:wrap">
+            <div class="seg" id="newsWinfo_weekly"    onclick="toggleNewsWeatherInfo('weekly')">주간예보 7일</div>
+            <div class="seg" id="newsWinfo_rain_prob" onclick="toggleNewsWeatherInfo('rain_prob')">강수 확률</div>
+            <div class="seg" id="newsWinfo_fine_dust" onclick="toggleNewsWeatherInfo('fine_dust')">미세먼지 지수</div>
+          </div>
+        </div>
+
+        <div class="field" id="newsWeatherRegionField" style="display:none">
+          <label>지역명 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span></label>
+          <input id="newsWeatherRegionInput" type="text" maxlength="20" oninput="S.newsWeatherRegion=this.value" placeholder="예: 서울·경기, 전국, 영남권" style="width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:8px 10px;color:var(--ink);font-size:12px">
+        </div>
+
+        <div class="field" id="newsWeatherAlertField" style="display:none">
+          <label>기상특보 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span></label>
+          <div class="segs">
+            <div class="seg" id="newsWalertOffSeg" onclick="setNewsWeatherAlert(false)">일반 예보</div>
+            <div class="seg" id="newsWalertOnSeg"  onclick="setNewsWeatherAlert(true)">기상특보</div>
+          </div>
+          <div style="font-size:9px;color:var(--ink3);margin-top:3px">기상특보 선택 시 한파특보·폭우특보 등 빨간 띠가 추가됩니다</div>
+        </div>
+        <!-- /기상캐스터 -->
       </div>
       <!-- /newsInline -->
 
@@ -3528,6 +3577,7 @@ const SCENES = {
   interview:  {name:'인터뷰',     group:'content',    vidStyle:'natural documentary',                    style:'professional documentary lighting, natural setting, focused conversation, talking-head style', angles:['Bust Shot','Medium Close-up (MCU)','Dirty Single','Over-the-Shoulder (OTS)'], bgImage:'/images/scenes/interview.png'},
   news_anchor: {name:'뉴스룸 앵커',  group:'news',       vidStyle:'broadcast newsroom',           style:'professional TV news studio with anchor desk and large screen display behind, formal newsroom lighting, broadcast camera quality, network news aesthetic, photorealistic 4K live broadcast feed', angles:['Bust Shot','Medium Close-up (MCU)','Eye-Level Shot','Wide Shot'], bgImage:'/images/scenes/news_anchor.png'},
   news_reporter: {name:'현장 기자',  group:'news',       vidStyle:'on-location field report',     style:'on-location news report with handheld broadcast camera feel, reporter holding microphone, real outdoor environment, broadcast journalism aesthetic, photorealistic documentary realism', angles:['Medium Close-up (MCU)','Bust Shot','Wide Shot','Over-the-Shoulder (OTS)'], bgImage:'/images/scenes/news_reporter.png'},
+  news_weather: {name:'기상캐스터',  group:'news',       vidStyle:'weather forecast studio',      style:'professional TV weather forecast studio with large weather map display behind, chroma key weather map showing Korea peninsula with temperature numbers and weather icons, forecast presenter standing pose pointing at map, broadcast camera quality, clean weather news aesthetic, photorealistic 4K broadcast feed', angles:['Bust Shot','Medium Shot','Wide Shot','Eye-Level Shot'], bgImage:'/images/scenes/news_weather.png'},
   livestream: {name:'생방송',     group:'content',    vidStyle:'ultra-realistic live broadcast', style:'photorealistic ultra-sharp 4K live broadcast feed, professional broadcast camera quality, raw documentary realism, no stylization, true-to-life skin tones, telephoto sharp focus, real broadcast lighting, on-air news quality, hyperrealistic detail, BBC documentary aesthetic', angles:['Medium Shot','Bust Shot','Wide Shot','Eye-Level Shot'], bgImage:'/images/scenes/livestream.png'},
 };
 
@@ -4611,6 +4661,14 @@ const S = {
   newsTone: 'calm',           // 'urgent' | 'calm' | 'disaster' | 'protest' | 'weather' (reporter 전용)
   newsMicVisible: true,       // 마이크 표시 (reporter 전용)
 
+  // 기상캐스터 씬 전용 (news_weather)
+  newsWeatherCondition: '',   // clear/cloudy/partly_cloudy/rain/heavy_rain/snow/heavy_snow/typhoon/dust/fine_dust/cold_wave/heat_wave
+  newsWeatherTemp: '',        // 사용자 입력 그대로 (예: -3°C, 영하 3도)
+  newsWeatherFeelTemp: '',    // 체감 기온
+  newsWeatherInfo: [],        // ['weekly','rain_prob','fine_dust'] 중 선택
+  newsWeatherRegion: '',      // 지역명 (예: 서울·경기)
+  newsWeatherAlert: false,    // 기상특보
+
 
   // 컷별 출연 아바타 (영상 생성용 elements 매핑)
   cutAvatars: [[],[],[],[]],  // [[{id, name, imgUrl}, ...], ...]
@@ -5386,6 +5444,12 @@ function validateStep(step) {
       const _hasNewsLoc = (S.newsLocation && S.newsLocation !== 'custom') || (S.newsLocation === 'custom' && _newsCustom) || (!S.newsLocation && _newsCustom);
       if (!_hasNewsLoc) missing.push('뉴스 장소');
       // 아바타 모드일 때만 출연 아바타 필수 (성별 모드면 자동 생성 가능)
+      if (S.newsAnchorMode === 'avatar' && !S.avatars.length) missing.push('등장 아바타');
+      if (S.angles.filter(Boolean).length < 4) missing.push('카메라 앵글 4개');
+    } else if (S.scene === 'news_weather') {
+      // 영상 모드 — 기상캐스터: 헤드라인 + 오늘 날씨 필수 (장소는 스튜디오 고정이라 검증 안 함)
+      if (!(S.newsHeadline || '').trim()) missing.push('헤드라인');
+      if (!S.newsWeatherCondition) missing.push('오늘 날씨');
       if (S.newsAnchorMode === 'avatar' && !S.avatars.length) missing.push('등장 아바타');
       if (S.angles.filter(Boolean).length < 4) missing.push('카메라 앵글 4개');
     } else {
@@ -8330,6 +8394,7 @@ function renderScenes() {
     {key:'livestream', name:'생방송'},
     {key:'news_anchor', name:'뉴스룸 앵커'},
     {key:'news_reporter', name:'현장 기자'},
+    {key:'news_weather', name:'기상캐스터'},
     {key:'mv',         name:'뮤직비디오'},
   ];
   // 카테고리 영문 라벨 (스크린샷 스타일)
@@ -8339,7 +8404,7 @@ function renderScenes() {
     commercial:'COMMERCIAL', vlog:'VLOG', flashback:'FLASHBACK', heaven:'HEAVEN', confession:'CONFESSION',
     horror:'HORROR', foodie:'FOODIE', travel:'TRAVEL', fitness:'FITNESS',
     interview:'INTERVIEW', livestream:'LIVESTREAM',
-    news_anchor:'NEWSROOM', news_reporter:'FIELD REPORT',
+    news_anchor:'NEWSROOM', news_reporter:'FIELD REPORT', news_weather:'WEATHER',
   };
 
   // 카테고리 색상 (씬 분위기에 맞춰)
@@ -8349,7 +8414,7 @@ function renderScenes() {
     commercial:'#fbbf24', vlog:'#22d3ee', flashback:'#a5b4fc', heaven:'#fef9c3', confession:'#fb7185',
     horror:'#dc2626', foodie:'#facc15', travel:'#5eead4', fitness:'#a3e635',
     interview:'#7dd3fc',
-    news_anchor:'#dc2626', news_reporter:'#f97316',
+    news_anchor:'#dc2626', news_reporter:'#f97316', news_weather:'#0ea5e9',
   };
   // 활성 카테고리 이불 초기화 (기본: drama)
   if (typeof S.activeVidCategory === 'undefined') S.activeVidCategory = 'drama';
@@ -8418,7 +8483,7 @@ const NEWS_LOCATIONS_REPORTER = [
 ];
 
 function _isNewsScene() {
-  return S.scene === 'news_anchor' || S.scene === 'news_reporter';
+  return S.scene === 'news_anchor' || S.scene === 'news_reporter' || S.scene === 'news_weather';
 }
 
 function updateVidNewsFields() {
@@ -8437,20 +8502,37 @@ function updateVidNewsFields() {
 
   const isAnchor = S.scene === 'news_anchor';
   const isReporter = S.scene === 'news_reporter';
+  const isWeather = S.scene === 'news_weather';
 
   // 라벨 변경
   const aLbl = document.getElementById('newsAnchorLabel');
-  if (aLbl) aLbl.textContent = isAnchor ? '앵커 구성' : '기자 구성';
+  if (aLbl) aLbl.textContent = isAnchor ? '앵커 구성' : (isReporter ? '기자 구성' : '진행자 구성');
   const lLbl = document.getElementById('newsLocLabel');
-  if (lLbl) lLbl.textContent = isAnchor ? '장소 (스튜디오)' : '현장 장소';
+  if (lLbl) lLbl.textContent = isAnchor ? '장소 (스튜디오)' : (isReporter ? '현장 장소' : '장소 (스튜디오)');
 
-  // 앵커/기자별 필드 표시
+  // 씬별 필드 표시
   const breaking = document.getElementById('newsBreakingField');
   const tone     = document.getElementById('newsToneField');
   const mic      = document.getElementById('newsMicField');
   if (breaking) breaking.style.display = isAnchor ? '' : 'none';
   if (tone)     tone.style.display     = isReporter ? '' : 'none';
   if (mic)      mic.style.display      = isReporter ? '' : 'none';
+
+  // 기상캐스터 전용 필드 표시
+  const wCond = document.getElementById('newsWeatherCondField');
+  const wTemp = document.getElementById('newsWeatherTempField');
+  const wInfo = document.getElementById('newsWeatherInfoField');
+  const wRegion = document.getElementById('newsWeatherRegionField');
+  const wAlert = document.getElementById('newsWeatherAlertField');
+  if (wCond)   wCond.style.display   = isWeather ? '' : 'none';
+  if (wTemp)   wTemp.style.display   = isWeather ? '' : 'none';
+  if (wInfo)   wInfo.style.display   = isWeather ? '' : 'none';
+  if (wRegion) wRegion.style.display = isWeather ? '' : 'none';
+  if (wAlert)  wAlert.style.display  = isWeather ? '' : 'none';
+
+  // 기상캐스터: 장소 필드는 숨김 (스튜디오 고정)
+  const locField = document.getElementById('newsLocLabel') ? document.getElementById('newsLocLabel').closest('.field') : null;
+  if (locField) locField.style.display = isWeather ? 'none' : '';
 
   // 입력값 복원
   const headEl = document.getElementById('newsHeadlineInput');
@@ -8459,6 +8541,14 @@ function updateVidNewsFields() {
   if (chEl) chEl.value = S.newsChannel || '';
   const customEl = document.getElementById('newsLocCustomInput');
   if (customEl) customEl.value = S.newsLocationCustom || '';
+
+  // 기상캐스터 입력값 복원
+  const wTempEl = document.getElementById('newsWeatherTempInput');
+  if (wTempEl) wTempEl.value = S.newsWeatherTemp || '';
+  const wFeelEl = document.getElementById('newsWeatherFeelTempInput');
+  if (wFeelEl) wFeelEl.value = S.newsWeatherFeelTemp || '';
+  const wRegionEl = document.getElementById('newsWeatherRegionInput');
+  if (wRegionEl) wRegionEl.value = S.newsWeatherRegion || '';
 
   // 모드 segs active
   _setSegActive('newsModeGenderSeg', S.newsAnchorMode === 'gender');
@@ -8470,7 +8560,7 @@ function updateVidNewsFields() {
   _setSegActive('newsGenderWomanSeg', S.newsAnchorGender === 'woman');
   _setSegActive('newsGenderManSeg',   S.newsAnchorGender === 'man');
 
-  // 속보
+  // 속보 (앵커)
   _setSegActive('newsBreakingOffSeg', !S.newsBreaking);
   _setSegActive('newsBreakingOnSeg',   !!S.newsBreaking);
 
@@ -8483,8 +8573,18 @@ function updateVidNewsFields() {
   _setSegActive('newsMicOnSeg',  !!S.newsMicVisible);
   _setSegActive('newsMicOffSeg', !S.newsMicVisible);
 
-  // 장소 프리셋 렌더
-  renderNewsLocSegs();
+  // 기상캐스터: 날씨 condition / 표시 정보 / 기상특보 segs active
+  ['clear','partly_cloudy','cloudy','rain','heavy_rain','snow','heavy_snow','typhoon','dust','fine_dust','cold_wave','heat_wave'].forEach(c => {
+    _setSegActive('newsWcond_' + c, S.newsWeatherCondition === c);
+  });
+  ['weekly','rain_prob','fine_dust'].forEach(k => {
+    _setSegActive('newsWinfo_' + k, Array.isArray(S.newsWeatherInfo) && S.newsWeatherInfo.includes(k));
+  });
+  _setSegActive('newsWalertOffSeg', !S.newsWeatherAlert);
+  _setSegActive('newsWalertOnSeg',   !!S.newsWeatherAlert);
+
+  // 장소 프리셋 렌더 (앵커/기자만 — 기상캐스터는 위에서 숨김)
+  if (!isWeather) renderNewsLocSegs();
 }
 
 function _setSegActive(id, active) {
@@ -8509,6 +8609,27 @@ function renderNewsLocSegs() {
 function selectNewsLocation(key) {
   S.newsLocation = key;
   renderNewsLocSegs();
+}
+
+function setNewsWeatherCondition(c) {
+  S.newsWeatherCondition = c;
+  ['clear','partly_cloudy','cloudy','rain','heavy_rain','snow','heavy_snow','typhoon','dust','fine_dust','cold_wave','heat_wave'].forEach(x => {
+    _setSegActive('newsWcond_' + x, c === x);
+  });
+}
+
+function toggleNewsWeatherInfo(k) {
+  if (!Array.isArray(S.newsWeatherInfo)) S.newsWeatherInfo = [];
+  const idx = S.newsWeatherInfo.indexOf(k);
+  if (idx >= 0) S.newsWeatherInfo.splice(idx, 1);
+  else S.newsWeatherInfo.push(k);
+  _setSegActive('newsWinfo_' + k, S.newsWeatherInfo.includes(k));
+}
+
+function setNewsWeatherAlert(v) {
+  S.newsWeatherAlert = !!v;
+  _setSegActive('newsWalertOffSeg', !v);
+  _setSegActive('newsWalertOnSeg',   !!v);
 }
 
 function setNewsAnchorMode(mode) {
@@ -11122,8 +11243,9 @@ const KLING_NEG_ANIME = `additional character, extra character, new character en
 // opts.perPanel: true면 4컷 그리드의 각 패널마다 독립적으로 그리도록 명시 (4컷 빌더용)
 //                false/undefined면 단일 프레임 (1컷 빌더용)
 function _buildNewsImageOverlayTokens(opts) {
-  if (S.scene !== 'news_anchor' && S.scene !== 'news_reporter') return '';
+  if (S.scene !== 'news_anchor' && S.scene !== 'news_reporter' && S.scene !== 'news_weather') return '';
   const isAnchor = S.scene === 'news_anchor';
+  const isWeather = S.scene === 'news_weather';
   const headline = (S.newsHeadline || '').trim();
   const channel  = (S.newsChannel  || '').trim();
   const perPanel = !!(opts && opts.perPanel);
@@ -11134,9 +11256,43 @@ function _buildNewsImageOverlayTokens(opts) {
   const bottomWhere = perPanel ? 'across the bottom edge of EACH of the 4 panels independently (a separate lower-third banner inside every panel, never spanning the full grid width)' : 'across the bottom of the frame';
   const tokens = [];
 
-  // BREAKING NEWS 띠 (앵커 전용, 가장 위)
+  // BREAKING NEWS 띠 (앵커 전용)
   if (isAnchor && S.newsBreaking) {
     tokens.push(`A bright red horizontal banner ${topWhere} with bold large white sans-serif text "BREAKING NEWS" clearly readable, broadcast news graphic style`);
+  }
+  // 기상특보 띠 (기상캐스터 전용)
+  if (isWeather && S.newsWeatherAlert) {
+    tokens.push(`A bright red horizontal banner ${topWhere} with bold large white Korean text "기상특보" clearly readable, broadcast weather warning graphic style`);
+  }
+
+  // 기상캐스터: 기온 + 표시 정보
+  if (isWeather) {
+    const temp = (S.newsWeatherTemp || '').trim();
+    const feelTemp = (S.newsWeatherFeelTemp || '').trim();
+    const region = (S.newsWeatherRegion || '').trim();
+    const info = Array.isArray(S.newsWeatherInfo) ? S.newsWeatherInfo : [];
+
+    if (temp) {
+      const safe = temp.replace(/"/g, "'");
+      const feelSafe = feelTemp.replace(/"/g, "'");
+      const tempPart = feelTemp
+        ? `large bold temperature number "${safe}" with smaller text "${feelSafe}" below`
+        : `large bold temperature number "${safe}"`;
+      tokens.push(`Weather forecast graphic showing ${tempPart}, professional TV weather broadcast style, ${perPanel ? 'rendered inside EACH panel separately' : 'rendered prominently in frame'}`);
+    }
+    if (region) {
+      const safe = region.replace(/"/g, "'");
+      tokens.push(`Region label text "${safe}" displayed near the top-right area of the weather graphic`);
+    }
+    if (info.includes('weekly')) {
+      tokens.push(`A 7-day weekly forecast strip at the bottom showing 7 small panels with day labels (월 화 수 목 금 토 일) and small weather icons and temperature numbers, broadcast weather graphic`);
+    }
+    if (info.includes('rain_prob')) {
+      tokens.push(`Rain probability percentage badge with umbrella icon, e.g. "강수확률 70%", broadcast weather graphic`);
+    }
+    if (info.includes('fine_dust')) {
+      tokens.push(`Fine dust index badge with color-coded level (좋음/보통/나쁨/매우나쁨), e.g. "미세먼지 나쁨", broadcast weather graphic`);
+    }
   }
 
   // 헤드라인 lower-third 자막 (필수, 한국어 그대로)
@@ -11163,30 +11319,35 @@ function _buildNewsImageOverlayTokens(opts) {
 function _buildNewsVidPrompt(i, sc, cam, charLock) {
   const isAnchor = S.scene === 'news_anchor';
   const isReporter = S.scene === 'news_reporter';
+  const isWeather = S.scene === 'news_weather';
 
-  // 장소 영문 변환
-  const list = isAnchor ? NEWS_LOCATIONS_ANCHOR : NEWS_LOCATIONS_REPORTER;
+  // 장소 영문 변환 (앵커/기자만)
   let locEn = '';
-  const presetKey = S.newsLocation || (isAnchor ? 'newsroom' : 'incident');
-  const preset = list.find(x => x.key === presetKey);
-  if (preset && preset.en && preset.en !== '__CUSTOM__') locEn = preset.en;
-  const customLoc = (S.newsLocationCustom || '').trim();
-  if (presetKey === 'custom' && customLoc) locEn = customLoc;
+  if (!isWeather) {
+    const list = isAnchor ? NEWS_LOCATIONS_ANCHOR : NEWS_LOCATIONS_REPORTER;
+    const presetKey = S.newsLocation || (isAnchor ? 'newsroom' : 'incident');
+    const preset = list.find(x => x.key === presetKey);
+    if (preset && preset.en && preset.en !== '__CUSTOM__') locEn = preset.en;
+    const customLoc = (S.newsLocationCustom || '').trim();
+    if (presetKey === 'custom' && customLoc) locEn = customLoc;
+  }
 
-  // 앵커/기자 인물 묘사
+  // 인물 묘사
   let subject;
   if (S.newsAnchorMode === 'avatar' && Array.isArray(S.cutAvatars) && (S.cutAvatars[i] || []).length > 0) {
-    // 아바타 모드 — 출연 아바타가 앵커/기자 역할
     const av = S.cutAvatars[i][0];
     subject = isAnchor
       ? `@Element1 (${av.name}) as professional Korean news anchor in tailored suit, hands on anchor desk, looking directly at camera`
-      : `@Element1 (${av.name}) as on-location Korean reporter${S.newsMicVisible ? ' holding a broadcast microphone' : ''}, professional reporter attire`;
+      : isReporter
+        ? `@Element1 (${av.name}) as on-location Korean reporter${S.newsMicVisible ? ' holding a broadcast microphone' : ''}, professional reporter attire`
+        : `@Element1 (${av.name}) as professional Korean weather forecast presenter standing in front of large weather map, gesturing toward the map, professional friendly smile`;
   } else {
-    // 성별 모드 (기본)
     const g = S.newsAnchorGender || 'woman';
     subject = isAnchor
       ? `Professional Korean ${g === 'woman' ? 'female' : 'male'} news anchor in tailored suit, hands on anchor desk, looking directly at camera`
-      : `Korean ${g === 'woman' ? 'female' : 'male'} on-location reporter${S.newsMicVisible ? ' holding a broadcast microphone' : ''}, professional reporter attire`;
+      : isReporter
+        ? `Korean ${g === 'woman' ? 'female' : 'male'} on-location reporter${S.newsMicVisible ? ' holding a broadcast microphone' : ''}, professional reporter attire`
+        : `Professional Korean ${g === 'woman' ? 'female' : 'male'} weather forecast presenter standing in front of large weather map display, gesturing toward the map, professional friendly smile, broadcast TV weather show host attire`;
   }
 
   // 분위기 (기자 전용)
@@ -11202,6 +11363,26 @@ function _buildNewsVidPrompt(i, sc, cam, charLock) {
     toneKw = tones[S.newsTone] || tones.calm;
   }
 
+  // 기상캐스터 — 날씨 condition 영문 키워드
+  let weatherKw = '';
+  if (isWeather) {
+    const conds = {
+      clear: 'sunny clear weather, bright blue sky icons on the map',
+      partly_cloudy: 'partly cloudy weather, mixed sun and cloud icons on the map',
+      cloudy: 'overcast cloudy weather, cloud icons on the map',
+      rain: 'rainy weather, rain droplet icons on the map',
+      heavy_rain: 'heavy rainfall, dark stormy rain icons on the map, rain warning graphics',
+      snow: 'snowfall weather, snowflake icons on the map',
+      heavy_snow: 'heavy snowfall blizzard, snow warning graphics, dense snowflake icons',
+      typhoon: 'typhoon weather, swirling typhoon icon on the map, red warning graphics',
+      dust: 'yellow dust haze weather, brown dust haze icons on the map',
+      fine_dust: 'fine dust pollution, gray haze, fine dust warning graphics on the map',
+      cold_wave: 'cold wave warning, deep blue cold weather graphics, snowflakes and freezing icons',
+      heat_wave: 'heat wave warning, red hot weather graphics, sun and thermometer icons',
+    };
+    weatherKw = conds[S.newsWeatherCondition] || '';
+  }
+
   // 헤드라인 자막 (한국어)
   const headline = (S.newsHeadline || '').trim();
   const channel  = (S.newsChannel  || '').trim();
@@ -11211,7 +11392,10 @@ function _buildNewsVidPrompt(i, sc, cam, charLock) {
   if (locEn) p += `Location: ${locEn}. `;
   p += `${subject}. `;
   if (toneKw) p += `${toneKw}. `;
+  if (weatherKw) p += `${weatherKw}. `;
   if (isAnchor && S.newsBreaking) p += `Top red banner reads "BREAKING NEWS" in white bold text. `;
+  if (isWeather && S.newsWeatherAlert) p += `Top red banner reads "기상특보" in white bold Korean text. `;
+  if (isWeather && (S.newsWeatherTemp || '').trim()) p += `Large temperature graphic on screen showing "${(S.newsWeatherTemp).trim().replace(/"/g, "'")}". `;
   if (headline) p += `On-screen Korean lower-third caption: \"${headline}\". `;
   if (channel)  p += `Top-left channel watermark text: \"${channel}\". `;
   p += `Camera: ${cam}. ${charLock}`;
