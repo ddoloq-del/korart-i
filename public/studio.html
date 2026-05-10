@@ -4954,8 +4954,9 @@ async function continueWithLockedTraits() {
     return;
   }
 
-  // 4) 그리드 등록 안내 박스 갱신 (씬 상세 영역에 표시)
+  // 4) 그리드 등록 안내 박스 갱신 + 모델/모드 제약 재검증
   if (typeof _updateContinueGridNotice === 'function') _updateContinueGridNotice();
+  if (typeof _enforceRefImageRestrictions === 'function') _enforceRefImageRestrictions();
 
   // 5) 씬 상세 단계로 이동
   // 영상 모드: step 3 / 이미지 모드: step 2
@@ -4985,6 +4986,7 @@ function clearContinueGrid() {
   S.continueGridDataUrl = null;
   S.continueGridPubUrl = null;
   if (typeof _updateContinueGridNotice === 'function') _updateContinueGridNotice();
+  if (typeof _enforceRefImageRestrictions === 'function') _enforceRefImageRestrictions();
   if (typeof toast === 'function') toast('이전 4컷 그리드를 제거했습니다');
 }
 
@@ -5289,6 +5291,7 @@ function goStep(n) {
     if (typeof updateImgQualityHint === 'function') updateImgQualityHint();
     // AI 옵션 채우기 (IMG_MODELS 기반)
     if (typeof renderImgAiOptions === 'function') renderImgAiOptions();
+    if (typeof _refreshImgModeOptions === 'function') _refreshImgModeOptions();
     // 모드 select 동기화 + 힌트/버튼 라벨 갱신
     const mSel = document.getElementById('imgModeSel');
     if (mSel) mSel.value = S.imgMode || 'normal';
@@ -6887,6 +6890,7 @@ function uploadContinueRef(event) {
     S.continueRefPubUrl = null;
     _setRefRoleAreaVisible('img', true);
     _setRefRoleAreaVisible('vid', true);
+    if (typeof _enforceRefImageRestrictions === 'function') _enforceRefImageRestrictions();
     const preview = document.getElementById('continueRefPreview');
     if (preview) {
       preview.innerHTML = `<img src="${S.continueRefDataUrl}" style="width:100%;height:100%;object-fit:cover">`;
@@ -6905,6 +6909,7 @@ function clearContinueRef() {
   S.continueRefPubUrl = null;
   _setRefRoleAreaVisible('img', false);
   _setRefRoleAreaVisible('vid', false);
+  if (typeof _enforceRefImageRestrictions === 'function') _enforceRefImageRestrictions();
   const preview = document.getElementById('continueRefPreview');
   if (preview) {
     preview.innerHTML = '';
@@ -10825,14 +10830,88 @@ function renderImgAiOptions() {
   const sel = document.getElementById('imgAiSel');
   if (!sel || typeof IMG_MODELS === 'undefined') return;
   const cur = S.imgAiKey || '';
+  const restricted = (typeof _isRefImageActive === 'function') ? _isRefImageActive() : false;
   const opts = ['<option value="">AI 선택</option>'];
   IMG_MODELS.forEach((m, idx) => {
     const key = m.value + '|' + (m.quality || '');
     const sl = (cur === key) ? 'selected' : '';
     const tag = m.recommended ? ' [추천]' : '';
-    opts.push('<option value="' + key + '" ' + sl + '>' + m.label + tag + '</option>');
+    // 참고 이미지/그리드 활성 시 GPT Low 비활성화
+    const isLow = (m.value || '').includes('gpt-image') && (m.quality || '') === 'low';
+    const dis = (restricted && isLow) ? ' disabled' : '';
+    const noteSuffix = (restricted && isLow) ? ' 🚫 (참고 이미지 사용 시 불가)' : '';
+    opts.push('<option value="' + key + '" ' + sl + dis + '>' + m.label + tag + noteSuffix + '</option>');
   });
   sel.innerHTML = opts.join('');
+}
+
+// ============================================
+// 참고 이미지 또는 4컷 그리드 활성화 시 GPT Low / 스케치 비활성화
+// ============================================
+// 참고 이미지(continueRef) 또는 다음 4컷 그리드(continueGrid) 중 하나라도 있는지
+function _isRefImageActive() {
+  return !!(S.continueRefDataUrl || S.continueRefPubUrl || S.continueGridPubUrl);
+}
+
+// GPT Low 모델인지 판단
+function _isGptLowModel(m) {
+  if (!m) return false;
+  return (m.value || '').includes('gpt-image') && (m.quality || '') === 'low';
+}
+
+// 참고 이미지 활성 시 모델/모드 제약 적용
+// - GPT Low 선택 중이면 Medium으로 자동 전환
+// - 스케치 모드면 normal로 자동 전환
+// - 옵션을 비활성화 처리 (재렌더)
+function _enforceRefImageRestrictions() {
+  if (!_isRefImageActive()) {
+    // 제약 해제 — 옵션 재활성화만 하고 모드 강제 전환은 안 함
+    if (typeof renderImgAiOptions === 'function') renderImgAiOptions();
+    _refreshImgModeOptions();
+    return;
+  }
+
+  // 1) 현재 선택된 모델이 GPT Low면 Med로 강제 전환
+  const cur = getSelectedImgAi();
+  if (_isGptLowModel(cur)) {
+    const medKey = 'openai/gpt-image-2/edit|medium';
+    S.imgAiKey = medKey;
+    const aiSel = document.getElementById('imgAiSel');
+    if (aiSel) aiSel.value = medKey;
+    if (typeof onImgAiChange === 'function') onImgAiChange();
+    if (typeof toast === 'function') toast('참고 이미지/그리드 사용 시 GPT Low는 사용 불가 → GPT Medium으로 변경');
+  }
+
+  // 2) 스케치 모드면 normal로 강제 전환
+  if (S.imgMode === 'sketch') {
+    S.imgMode = 'normal';
+    const modeSel = document.getElementById('imgModeSel');
+    if (modeSel) modeSel.value = 'normal';
+    if (typeof onImgModeChange === 'function') onImgModeChange();
+    if (typeof toast === 'function') toast('참고 이미지/그리드 사용 시 스케치 모드는 사용 불가 → 일반 생성으로 변경');
+  }
+
+  // 3) 드롭다운 옵션 비활성화 (재렌더로 disabled 반영)
+  if (typeof renderImgAiOptions === 'function') renderImgAiOptions();
+  _refreshImgModeOptions();
+}
+
+// 모드 select 옵션 비활성화/활성화 갱신
+function _refreshImgModeOptions() {
+  const sel = document.getElementById('imgModeSel');
+  if (!sel) return;
+  const restricted = _isRefImageActive();
+  Array.from(sel.options).forEach(opt => {
+    if (opt.value === 'sketch') {
+      opt.disabled = restricted;
+      // 라벨 갱신
+      if (restricted && !opt.textContent.includes('🚫')) {
+        opt.textContent = '스케치 모드 (참고 이미지 사용 시 불가) 🚫';
+      } else if (!restricted) {
+        opt.textContent = '스케치 → 업그레이드 (GPT) [추천]';
+      }
+    }
+  });
 }
 
 // 카드별 IMG_MODELS에서 객체 가져오기
