@@ -1314,6 +1314,8 @@ html[data-current-mode="image"] .korart-subnav-item[data-mode="image"],
 body[data-current-mode="image"] .korart-subnav-item[data-mode="image"] { color: #1a1a1a; border-color: #6366f1; }
 html[data-current-mode="video"] .korart-subnav-item[data-mode="video"],
 body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: #1a1a1a; border-color: #6366f1; }
+html[data-current-mode="webtoon"] .korart-subnav-item[data-mode="webtoon"],
+body[data-current-mode="webtoon"] .korart-subnav-item[data-mode="webtoon"] { color: #1a1a1a; border-color: #6366f1; }
 @media (max-width: 768px) {
   .korart-gnb-inner { padding: 0 16px; height: 56px; }
   .korart-gnb-left { gap: 0; }
@@ -1881,6 +1883,7 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
     <a class="korart-subnav-item" href="/community.html">홈</a>
     <a class="korart-subnav-item" href="/studio.html?mode=video" data-mode="video">영상 생성</a>
     <a class="korart-subnav-item" href="/studio.html?mode=image" data-mode="image">이미지 생성</a>
+    <a class="korart-subnav-item" href="/webtoon-prototype.html" data-mode="webtoon" style="position:relative">AI 웹툰<span style="position:absolute;top:14px;right:-22px;background:#ef4444;color:#fff;font-size:9px;padding:1px 5px;font-weight:800;letter-spacing:0.04em;border-radius:0">BETA</span></a>
     <a class="korart-subnav-item" href="/mypage.html">내 자료/거래내역</a>
     <a class="korart-subnav-item" href="/subscription.html">구독</a>
     <a class="korart-subnav-item" href="/qa.html">Q&amp;A</a>
@@ -15818,4 +15821,10 @@ function resetMerge() {
     if (profile) {
       if (profile.display_name) document.getElementById("acctName").textContent = profile.display_name;
       document.getElementById("acctNickDisplay").textContent = profile.nickname || "-";
-      if (profile.birthdate) 
+      if (profile.birthdate) document.getElementById("acctBirthdate").textContent = profile.birthdate;
+    }
+  }
+})();
+</script>
+</body>
+</html>
