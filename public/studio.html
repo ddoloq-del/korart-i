@@ -11865,20 +11865,14 @@ function _buildNewsVidPrompt(i, sc, cam, charLock) {
   const headline = (S.newsHeadline || '').trim();
   const channel  = (S.newsChannel  || '').trim();
 
-  // 골격 — vidStyle 우선, 없으면 style 사용 (영상 길이 절약)
+  // 골격 — image_to_video이므로 이미지에 이미 그려진 요소(인물·자막·워터마크·배너 등)는 영상 prompt에 안 넣음
+  // 영상 prompt에는 motion/빛/카메라에 영향 주는 요소만 남김
   const newsSceneStyle = (sc && (sc.vidStyle || sc.style)) || '';
-  let p = `${newsSceneStyle}. `;
-  if (locEn) p += `Location: ${locEn}. `;
-  p += `${subject}. `;
-  if (toneKw) p += `${toneKw}. `;
-  if (reporterCtx) p += `${reporterCtx}. `;
-  if (weatherKw) p += `${weatherKw}. `;
-  if (isAnchor && S.newsBreaking) p += `Top red banner reads "BREAKING NEWS" in white bold text. `;
-  if (isWeather && S.newsWeatherAlert) p += `Top red banner reads "기상특보" in white bold Korean text. `;
-  if (isWeather && (S.newsWeatherTemp || '').trim()) p += `Large temperature graphic on screen showing "${(S.newsWeatherTemp).trim().replace(/"/g, "'")}". `;
-  if (headline) p += `On-screen Korean lower-third caption: \"${headline}\". `;
-  if (channel)  p += `Top-left channel watermark text: \"${channel}\". `;
-  p += `Camera: ${cam}. ${charLock}`;
+  let p = `${newsSceneStyle}.`;
+  if (toneKw) p += ` ${toneKw}.`;             // 현장 기자 분위기 (motion에 영향)
+  if (reporterCtx) p += ` ${reporterCtx}.`;   // 계절·시간·날씨 (빛 변화)
+  if (weatherKw) p += ` ${weatherKw}.`;       // 기상캐스터 날씨 효과 (motion)
+  p += ` Camera: ${cam}. ${charLock}`;
 
   // 컷별 설명 (감정은 generateVideo의 emotionMap에서 처리 — 중복 방지)
   const cutDesc = (S.cutDescriptions && S.cutDescriptions[i] || '').trim();
