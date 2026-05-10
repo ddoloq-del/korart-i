@@ -8561,18 +8561,20 @@ function updateVidNewsFields() {
   const isReporter = S.scene === 'news_reporter';
   const isWeather = S.scene === 'news_weather';
 
-  // 현장 기자(news_reporter)일 때만 stdLeft 보이되 계절/시간대/날씨만 노출
-  // 그 외 뉴스 씬(앵커/기상캐스터)은 stdLeft 통째로 숨김 (스튜디오 환경이라 외부 환경 입력 불필요)
+  // 뉴스 씬에서도 stdLeft 영역(특히 참고 이미지)을 활용 — 씬별로 부분 노출
+  if (stdLeft) stdLeft.style.display = '';
   if (isReporter) {
-    if (stdLeft) stdLeft.style.display = '';
-    // 표시할 필드: 계절/시간대/날씨
-    // 숨길 필드: 장소 유형/행인/참고 이미지
-    ['vidStdLocationField','vidStdPasserbyField','continueRefField'].forEach(id => {
+    // 현장 기자: 계절/시간대/날씨 + 참고 이미지 표시 / 장소 유형·행인 숨김
+    ['vidStdLocationField','vidStdPasserbyField'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.style.display = 'none';
     });
   } else {
-    if (stdLeft) stdLeft.style.display = 'none';
+    // 앵커/기상캐스터: 참고 이미지만 표시 / 계절/시간/날씨/장소/행인 모두 숨김 (스튜디오 환경)
+    ['vidStdSeasonField','vidStdTimeField','vidStdWeatherField','vidStdLocationField','vidStdPasserbyField'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
   }
 
   // 라벨 변경
