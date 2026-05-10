@@ -5083,6 +5083,9 @@ function loadQuadFromFile(event) {
       const dlBar = document.getElementById('quadDownloadBar');
       if (dlBar) dlBar.style.display = '';
 
+      // '다음 4컷 만들기' 바 표시 갱신 (불러오기로 4컷 등록됐으므로)
+      if (typeof _updateContinue4cutBarVisibility === 'function') _updateContinue4cutBarVisibility();
+
       log('ok', `4컷 불러오기 완료 (${W}×${H} → 4분할)`);
       toast('📂 4컷 이미지를 불러왔습니다');
     };
