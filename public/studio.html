@@ -10029,7 +10029,7 @@ TIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.
 ENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}
 CAMERA ANGLES: ${angleDesc}.${extra ? '\nADDITIONAL: ' + extra + '.' : ''}
 WARDROBE: All characters wear clothing appropriate for ${S.season} weather and ${loc}. Outfits should match the season, weather, and environment naturally.
-All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}`.trim();
+All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildNewsImageOverlayTokens()}`.trim();
 }
 
 // async 버전 — 실제 API 전송용 (한글 → 영어 번역)
@@ -10162,7 +10162,7 @@ TIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.
 ENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}
 CAMERA ANGLES: ${angleDesc}.${extraEn ? '\nADDITIONAL: ' + extraEn + '.' : ''}
 WARDROBE: All characters wear clothing appropriate for ${S.season} weather and ${locEn}. Outfits should match the season, weather, and environment naturally.
-All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}`.trim();
+All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildNewsImageOverlayTokens()}`.trim();
 }
 
 function updatePromptPreview() {
@@ -10817,7 +10817,7 @@ function buildOneCutPrompt(i) {
   const angle = (S.angles && S.angles[i]) || '';
   const cutDesc = (S.cutDescriptions && S.cutDescriptions[i]) || '';
   const extra = document.getElementById('extraPrompt')?.value.trim() || '';
-  return `Create a single Korean drama scene image, cinematic photo, no panels.\n${charDesc ? 'CHARACTERS: ' + charDesc + '.\n' : ''}VISUAL STYLE: ${sc.style}.\nTIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.\nENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}\nCAMERA ANGLE: ${angle}${cutDesc ? ' (' + cutDesc + ')' : ''}.${extra ? '\nEXTRA: ' + extra : ''}`;
+  return `Create a single Korean drama scene image, cinematic photo, no panels.\n${charDesc ? 'CHARACTERS: ' + charDesc + '.\n' : ''}VISUAL STYLE: ${sc.style}.\nTIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.\nENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}\nCAMERA ANGLE: ${angle}${cutDesc ? ' (' + cutDesc + ')' : ''}.${extra ? '\nEXTRA: ' + extra : ''}${_buildNewsImageOverlayTokens()}`;
 }
 
 // API용 (한글 -> 영문 번역) — buildImagePromptForApi 패턴
@@ -11117,7 +11117,37 @@ const KLING_NEG_LIVE = `celebrity, famous person, real actor, public figure, rec
 // 애니 모드용 네거티브 프롬프트 (추가 캐릭터 등장 차단 위주)
 const KLING_NEG_ANIME = `additional character, extra character, new character entering, uninvited character, background character interacting, third character, unexpected animated figure, extra animated character, unintended character appearance, same character twice, cloned character, back-facing figure, second figure in background, character seen from behind, background silhouette, blurry, low quality, distorted, deformed, extra limbs, cloned faces, mismatched features, location change, changing background`;
 
-// 뉴스 씬 전용 영상 프롬프트 빌더 (news_anchor / news_reporter)
+// 뉴스 씬 — 이미지 생성용 오버레이 토큰 (헤드라인 자막 / 방송사 워터마크 / BREAKING NEWS 띠)
+// GPT-image-2 등 이미지 모델이 이미지 안 텍스트/오버레이를 명확히 그리도록 매우 강한 토큰
+function _buildNewsImageOverlayTokens() {
+  if (S.scene !== 'news_anchor' && S.scene !== 'news_reporter') return '';
+  const isAnchor = S.scene === 'news_anchor';
+  const headline = (S.newsHeadline || '').trim();
+  const channel  = (S.newsChannel  || '').trim();
+  const tokens = [];
+
+  // BREAKING NEWS 띠 (앵커 전용, 가장 위)
+  if (isAnchor && S.newsBreaking) {
+    tokens.push('A bright red horizontal banner across the very top of the frame with bold large white sans-serif text "BREAKING NEWS" clearly readable, broadcast news graphic style');
+  }
+
+  // 헤드라인 lower-third 자막 (필수, 한국어 그대로)
+  if (headline) {
+    // 한국어 자막은 dark blue gradient lower-third 그래픽으로
+    const safe = headline.replace(/"/g, "'");
+    tokens.push(`A photorealistic broadcast TV news lower-third banner across the bottom of the frame, dark navy blue gradient background, bold white Korean text reading exactly "${safe}", crisp readable broadcast typography, professional news graphic`);
+  }
+
+  // 방송사 워터마크 (좌상단)
+  if (channel) {
+    const safe = channel.replace(/"/g, "'");
+    tokens.push(`Top-left corner of the frame: small semi-transparent white channel logo text reading "${safe}", broadcast watermark style, slightly translucent overlay`);
+  }
+
+  return tokens.length ? '\nNEWS BROADCAST OVERLAYS (must be rendered as on-screen graphics): ' + tokens.join('. ') + '.' : '';
+}
+
+// 뉴스 씬 영상 프롬프트 빌더 (news_anchor / news_reporter)
 // 510자 cap 준수. 헤드라인은 한국어 그대로 자막 토큰으로 삽입 (Veo3가 짧은 한글 자막을 비교적 잘 그림)
 function _buildNewsVidPrompt(i, sc, cam, charLock) {
   const isAnchor = S.scene === 'news_anchor';
