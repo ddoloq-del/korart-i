@@ -2302,6 +2302,96 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
       </div>
 
     </div>
+
+    <!-- ════════ 뉴스 씬 전용 UI (news_anchor / news_reporter) — grid 전체 폭 ════════ -->
+    <div id="newsFields" style="display:none;grid-column:1 / -1;border-top:1px solid var(--line);padding-top:16px;margin-top:8px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="font-size:14px;font-weight:800;color:var(--pink);letter-spacing:.5px">뉴스 설정</div>
+        <div style="font-size:10px;color:var(--ink3)">방송 화면처럼 헤드라인·방송사·구성을 직접 지정합니다</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <!-- 좌측 -->
+        <div>
+          <!-- 헤드라인 -->
+          <div class="field">
+            <label>헤드라인 <span style="font-size:9px;color:var(--coral);font-weight:600">(필수)</span></label>
+            <input id="newsHeadlineInput" type="text" maxlength="60" oninput="S.newsHeadline=this.value" placeholder="예: 내일부터 전국 비, 출근길 우산 챙기세요" style="width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:8px 10px;color:var(--ink);font-size:12px">
+            <div style="font-size:9px;color:var(--ink3);margin-top:3px">화면 하단 자막에 노출됩니다 (최대 60자)</div>
+          </div>
+
+          <!-- 방송사 -->
+          <div class="field">
+            <label>방송사명 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span></label>
+            <input id="newsChannelInput" type="text" maxlength="20" oninput="S.newsChannel=this.value" placeholder="예: KBN 9시 뉴스" style="width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:8px 10px;color:var(--ink);font-size:12px">
+            <div style="font-size:9px;color:var(--ink3);margin-top:3px">화면 좌상단 워터마크로 노출됩니다</div>
+          </div>
+
+          <!-- 앵커/기자 구성 -->
+          <div class="field">
+            <label id="newsAnchorLabel">앵커 구성</label>
+            <div class="segs">
+              <div class="seg" id="newsModeGenderSeg" onclick="setNewsAnchorMode('gender')">성별로 자동</div>
+              <div class="seg" id="newsModeAvatarSeg" onclick="setNewsAnchorMode('avatar')">내 아바타 사용</div>
+            </div>
+            <!-- 성별 선택 (gender 모드일 때만) -->
+            <div id="newsGenderRow" style="margin-top:8px">
+              <div class="segs">
+                <div class="seg" id="newsGenderWomanSeg" onclick="setNewsAnchorGender('woman')">여자</div>
+                <div class="seg" id="newsGenderManSeg" onclick="setNewsAnchorGender('man')">남자</div>
+              </div>
+            </div>
+            <!-- 아바타 모드 안내 -->
+            <div id="newsAvatarHint" style="display:none;margin-top:8px;font-size:10px;color:var(--ink3)">
+              위 "카메라 앵글 + 컷별 설명" 영역에서 아바타를 출연 시키세요. 출연 아바타가 앵커/기자로 등장합니다.
+            </div>
+          </div>
+        </div>
+
+        <!-- 우측 -->
+        <div>
+          <!-- 장소 -->
+          <div class="field">
+            <label id="newsLocLabel">장소</label>
+            <div class="segs" id="newsLocSegs" style="flex-wrap:wrap"><!-- 동적 렌더링 --></div>
+            <input id="newsLocCustomInput" oninput="S.newsLocationCustom=this.value" placeholder="직접 입력 (예: 광화문 광장, 사고 현장 정문)" style="display:none;margin-top:6px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:6px 8px;color:var(--ink);font-size:12px">
+          </div>
+
+          <!-- 앵커 전용: 속보 -->
+          <div class="field" id="newsBreakingField">
+            <label>속보 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span></label>
+            <div class="segs">
+              <div class="seg" id="newsBreakingOffSeg" onclick="setNewsBreaking(false)">일반 보도</div>
+              <div class="seg" id="newsBreakingOnSeg" onclick="setNewsBreaking(true)">BREAKING NEWS</div>
+            </div>
+            <div style="font-size:9px;color:var(--ink3);margin-top:3px">속보 선택 시 화면 상단에 빨간 BREAKING NEWS 띠가 추가됩니다</div>
+          </div>
+
+          <!-- 기자 전용: 분위기 -->
+          <div class="field" id="newsToneField" style="display:none">
+            <label>현장 분위기</label>
+            <div class="segs" style="flex-wrap:wrap">
+              <div class="seg" id="newsTone_urgent"   onclick="setNewsTone('urgent')">긴급/속보</div>
+              <div class="seg" id="newsTone_calm"     onclick="setNewsTone('calm')">차분한 보도</div>
+              <div class="seg" id="newsTone_disaster" onclick="setNewsTone('disaster')">재난</div>
+              <div class="seg" id="newsTone_protest"  onclick="setNewsTone('protest')">정치 시위</div>
+              <div class="seg" id="newsTone_weather"  onclick="setNewsTone('weather')">날씨</div>
+            </div>
+          </div>
+
+          <!-- 기자 전용: 마이크 표시 -->
+          <div class="field" id="newsMicField" style="display:none">
+            <label>마이크 표시</label>
+            <div class="segs">
+              <div class="seg" id="newsMicOnSeg"  onclick="setNewsMic(true)">마이크 든 모습</div>
+              <div class="seg" id="newsMicOffSeg" onclick="setNewsMic(false)">마이크 없음</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /newsFields -->
+
     </div><!-- /videoModeForm (grid end) -->
 
     </div><!-- /sceneStepB -->
@@ -3455,6 +3545,8 @@ const SCENES = {
   travel:     {name:'풍경',       group:'lifestyle',  bgImage:'/images/scenes/travel.jpg',      vidStyle:'breathtaking golden',              style:'breathtaking scenic landscape, vast natural beauty, golden hour lighting, cinematic travel aesthetic', angles:['Wide Shot','Establishing Shot','Drone Shot','Bird\'s Eye View']},
   fitness:    {name:'운동',       group:'lifestyle',  vidStyle:'energetic athletic',                style:'energetic dynamic motion, sweat-drenched intensity, sharp athletic focus, gym aesthetic', angles:['Low Angle','Full Shot (FS)','Extreme Close-up (ECU)','Tracking Shot'], bgImage:'/images/scenes/fitness.png'},
   interview:  {name:'인터뷰',     group:'content',    vidStyle:'natural documentary',                    style:'professional documentary lighting, natural setting, focused conversation, talking-head style', angles:['Bust Shot','Medium Close-up (MCU)','Dirty Single','Over-the-Shoulder (OTS)'], bgImage:'/images/scenes/interview.png'},
+  news_anchor: {name:'뉴스룸 앵커',  group:'news',       vidStyle:'broadcast newsroom',           style:'professional TV news studio with anchor desk and large screen display behind, formal newsroom lighting, broadcast camera quality, network news aesthetic, photorealistic 4K live broadcast feed', angles:['Bust Shot','Medium Close-up (MCU)','Eye-Level Shot','Wide Shot'], bgImage:'/images/scenes/news_anchor.png'},
+  news_reporter: {name:'현장 기자',  group:'news',       vidStyle:'on-location field report',     style:'on-location news report with handheld broadcast camera feel, reporter holding microphone, real outdoor environment, broadcast journalism aesthetic, photorealistic documentary realism', angles:['Medium Close-up (MCU)','Bust Shot','Wide Shot','Over-the-Shoulder (OTS)'], bgImage:'/images/scenes/news_reporter.png'},
   livestream: {name:'생방송',     group:'content',    vidStyle:'ultra-realistic live broadcast', style:'photorealistic ultra-sharp 4K live broadcast feed, professional broadcast camera quality, raw documentary realism, no stylization, true-to-life skin tones, telephoto sharp focus, real broadcast lighting, on-air news quality, hyperrealistic detail, BBC documentary aesthetic', angles:['Medium Shot','Bust Shot','Wide Shot','Eye-Level Shot'], bgImage:'/images/scenes/livestream.png'},
 };
 
@@ -3469,6 +3561,7 @@ const SCENE_GROUPS = {
   drama:      { ko: '드라마',       en: 'DRAMA' },
   thriller:   { ko: '스릴러',     en: 'THRILLER' },
   content:    { ko: '콘텐츠',     en: 'CONTENT' },
+  news:       { ko: '뉴스',        en: 'NEWS' },
   lifestyle:  { ko: '라이프스타일', en: 'LIFESTYLE' },
   commercial: { ko: '광고',        en: 'COMMERCIAL' },
 };
@@ -4525,6 +4618,18 @@ const S = {
   // 각 컷별 감정 (드롭다운 선택: angry/shouting/calm/sad/funny/excited/...)
   cutEmotions: ['','','',''],
   cutSingleAction: ['','','',''],  // 단일 모드(아바타 0~1명) 행동 입력
+
+  // 뉴스 씬 전용 입력 (news_anchor / news_reporter)
+  newsHeadline: '',           // 화면 하단 자막 헤드라인 (한국어)
+  newsChannel: '',            // 방송사명 (예: KBN 9시 뉴스)
+  newsAnchorMode: 'gender',   // 'gender' | 'avatar'
+  newsAnchorGender: 'woman',  // 'woman' | 'man' (anchor mode === 'gender')
+  newsLocation: '',           // 장소 preset key
+  newsLocationCustom: '',     // 직접 입력 장소
+  newsBreaking: false,        // 속보 여부 (anchor 전용)
+  newsTone: 'calm',           // 'urgent' | 'calm' | 'disaster' | 'protest' | 'weather' (reporter 전용)
+  newsMicVisible: true,       // 마이크 표시 (reporter 전용)
+
 
   // 컷별 출연 아바타 (영상 생성용 elements 매핑)
   cutAvatars: [[],[],[],[]],  // [[{id, name, imgUrl}, ...], ...]
@@ -8232,6 +8337,8 @@ function renderScenes() {
     {key:'dance',      name:'댄스'},
     {key:'interview',  name:'인터뷰'},
     {key:'livestream', name:'생방송'},
+    {key:'news_anchor', name:'뉴스룸 앵커'},
+    {key:'news_reporter', name:'현장 기자'},
     {key:'mv',         name:'뮤직비디오'},
   ];
   // 카테고리 영문 라벨 (스크린샷 스타일)
@@ -8241,6 +8348,7 @@ function renderScenes() {
     commercial:'COMMERCIAL', vlog:'VLOG', flashback:'FLASHBACK', heaven:'HEAVEN', confession:'CONFESSION',
     horror:'HORROR', foodie:'FOODIE', travel:'TRAVEL', fitness:'FITNESS',
     interview:'INTERVIEW', livestream:'LIVESTREAM',
+    news_anchor:'NEWSROOM', news_reporter:'FIELD REPORT',
   };
 
   // 카테고리 색상 (씬 분위기에 맞춰)
@@ -8250,6 +8358,7 @@ function renderScenes() {
     commercial:'#fbbf24', vlog:'#22d3ee', flashback:'#a5b4fc', heaven:'#fef9c3', confession:'#fb7185',
     horror:'#dc2626', foodie:'#facc15', travel:'#5eead4', fitness:'#a3e635',
     interview:'#7dd3fc',
+    news_anchor:'#dc2626', news_reporter:'#f97316',
   };
   // 활성 카테고리 이불 초기화 (기본: drama)
   if (typeof S.activeVidCategory === 'undefined') S.activeVidCategory = 'drama';
@@ -8295,6 +8404,144 @@ function selectVidCategory(catKey) {
   renderScenes();
 }
 
+// ════════════════════════════════════════════════════════════
+//  뉴스 씬 전용 (news_anchor / news_reporter)
+// ════════════════════════════════════════════════════════════
+
+// 뉴스 장소 프리셋 (앵커: 스튜디오 셋 / 기자: 현장)
+const NEWS_LOCATIONS_ANCHOR = [
+  {key:'newsroom',     ko:'뉴스룸',         en:'main TV news studio with anchor desk and large screen display behind'},
+  {key:'custom',       ko:'직접 입력',      en:'__CUSTOM__'},
+];
+const NEWS_LOCATIONS_REPORTER = [
+  {key:'incident',     ko:'사건 현장',      en:'crime or incident scene with police tape and emergency vehicles in background'},
+  {key:'national_assembly', ko:'국회 앞',  en:'in front of the South Korean National Assembly building'},
+  {key:'gwanghwamun',  ko:'광화문 광장',    en:'Gwanghwamun Square in Seoul with crowd in background'},
+  {key:'disaster',     ko:'재해 현장',      en:'disaster site with debris and emergency response in background'},
+  {key:'court',        ko:'법원 앞',        en:'in front of a Korean courthouse with reporters gathered'},
+  {key:'hospital',     ko:'병원 입구',      en:'at hospital entrance with ambulance in background'},
+  {key:'subway',       ko:'지하철역',       en:'inside or in front of a Korean subway station'},
+  {key:'airport',      ko:'공항',           en:'at the international airport terminal'},
+  {key:'market',       ko:'시장 골목',      en:'in a traditional Korean market alley with vendors and shoppers'},
+  {key:'custom',       ko:'직접 입력',      en:'__CUSTOM__'},
+];
+
+function _isNewsScene() {
+  return S.scene === 'news_anchor' || S.scene === 'news_reporter';
+}
+
+function updateVidNewsFields() {
+  const wrap = document.getElementById('newsFields');
+  if (!wrap) return;
+  if (!_isNewsScene()) { wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+
+  const isAnchor = S.scene === 'news_anchor';
+  const isReporter = S.scene === 'news_reporter';
+
+  // 라벨 변경
+  const aLbl = document.getElementById('newsAnchorLabel');
+  if (aLbl) aLbl.textContent = isAnchor ? '앵커 구성' : '기자 구성';
+  const lLbl = document.getElementById('newsLocLabel');
+  if (lLbl) lLbl.textContent = isAnchor ? '장소 (스튜디오)' : '현장 장소';
+
+  // 앵커/기자별 필드 표시
+  const breaking = document.getElementById('newsBreakingField');
+  const tone     = document.getElementById('newsToneField');
+  const mic      = document.getElementById('newsMicField');
+  if (breaking) breaking.style.display = isAnchor ? '' : 'none';
+  if (tone)     tone.style.display     = isReporter ? '' : 'none';
+  if (mic)      mic.style.display      = isReporter ? '' : 'none';
+
+  // 입력값 복원
+  const headEl = document.getElementById('newsHeadlineInput');
+  if (headEl) headEl.value = S.newsHeadline || '';
+  const chEl = document.getElementById('newsChannelInput');
+  if (chEl) chEl.value = S.newsChannel || '';
+  const customEl = document.getElementById('newsLocCustomInput');
+  if (customEl) customEl.value = S.newsLocationCustom || '';
+
+  // 모드 segs active
+  _setSegActive('newsModeGenderSeg', S.newsAnchorMode === 'gender');
+  _setSegActive('newsModeAvatarSeg', S.newsAnchorMode === 'avatar');
+  document.getElementById('newsGenderRow').style.display = (S.newsAnchorMode === 'gender') ? '' : 'none';
+  document.getElementById('newsAvatarHint').style.display = (S.newsAnchorMode === 'avatar') ? '' : 'none';
+
+  // 성별 segs active
+  _setSegActive('newsGenderWomanSeg', S.newsAnchorGender === 'woman');
+  _setSegActive('newsGenderManSeg',   S.newsAnchorGender === 'man');
+
+  // 속보
+  _setSegActive('newsBreakingOffSeg', !S.newsBreaking);
+  _setSegActive('newsBreakingOnSeg',   !!S.newsBreaking);
+
+  // 기자 분위기
+  ['urgent','calm','disaster','protest','weather'].forEach(t => {
+    _setSegActive('newsTone_' + t, S.newsTone === t);
+  });
+
+  // 마이크
+  _setSegActive('newsMicOnSeg',  !!S.newsMicVisible);
+  _setSegActive('newsMicOffSeg', !S.newsMicVisible);
+
+  // 장소 프리셋 렌더
+  renderNewsLocSegs();
+}
+
+function _setSegActive(id, active) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('active', !!active);
+}
+
+function renderNewsLocSegs() {
+  const wrap = document.getElementById('newsLocSegs');
+  if (!wrap) return;
+  const list = (S.scene === 'news_anchor') ? NEWS_LOCATIONS_ANCHOR : NEWS_LOCATIONS_REPORTER;
+  wrap.innerHTML = list.map(item => {
+    const active = S.newsLocation === item.key;
+    return `<div class="seg${active ? ' active' : ''}" onclick="selectNewsLocation('${item.key}')">${item.ko}</div>`;
+  }).join('');
+  // 직접입력 input 표시 토글
+  const customInp = document.getElementById('newsLocCustomInput');
+  if (customInp) customInp.style.display = (S.newsLocation === 'custom') ? '' : 'none';
+}
+
+function selectNewsLocation(key) {
+  S.newsLocation = key;
+  renderNewsLocSegs();
+}
+
+function setNewsAnchorMode(mode) {
+  S.newsAnchorMode = mode;
+  updateVidNewsFields();
+}
+
+function setNewsAnchorGender(g) {
+  S.newsAnchorGender = g;
+  _setSegActive('newsGenderWomanSeg', g === 'woman');
+  _setSegActive('newsGenderManSeg',   g === 'man');
+}
+
+function setNewsBreaking(v) {
+  S.newsBreaking = !!v;
+  _setSegActive('newsBreakingOffSeg', !v);
+  _setSegActive('newsBreakingOnSeg',   !!v);
+}
+
+function setNewsTone(t) {
+  S.newsTone = t;
+  ['urgent','calm','disaster','protest','weather'].forEach(x => {
+    _setSegActive('newsTone_' + x, t === x);
+  });
+}
+
+function setNewsMic(v) {
+  S.newsMicVisible = !!v;
+  _setSegActive('newsMicOnSeg',  !!v);
+  _setSegActive('newsMicOffSeg', !v);
+}
+
 function selScene(key, el) {
   document.querySelectorAll('.scene-card').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
@@ -8333,6 +8580,7 @@ function selScene(key, el) {
   }
   renderAngleSlots();
   updatePromptPreview();
+  if (typeof updateVidNewsFields === 'function') updateVidNewsFields();
   // 씀 선택 시 자동으로 4단계(씀 상세)로 이동 — 검증 우회 (goStep 직접)
   setTimeout(() => {
     if (typeof goStep === 'function') goStep(3);
@@ -10870,6 +11118,75 @@ const KLING_NEG_LIVE = `celebrity, famous person, real actor, public figure, rec
 // 애니 모드용 네거티브 프롬프트 (추가 캐릭터 등장 차단 위주)
 const KLING_NEG_ANIME = `additional character, extra character, new character entering, uninvited character, background character interacting, third character, unexpected animated figure, extra animated character, unintended character appearance, same character twice, cloned character, back-facing figure, second figure in background, character seen from behind, background silhouette, blurry, low quality, distorted, deformed, extra limbs, cloned faces, mismatched features, location change, changing background`;
 
+// 뉴스 씬 전용 영상 프롬프트 빌더 (news_anchor / news_reporter)
+// 510자 cap 준수. 헤드라인은 한국어 그대로 자막 토큰으로 삽입 (Veo3가 짧은 한글 자막을 비교적 잘 그림)
+function _buildNewsVidPrompt(i, sc, cam, charLock) {
+  const isAnchor = S.scene === 'news_anchor';
+  const isReporter = S.scene === 'news_reporter';
+
+  // 장소 영문 변환
+  const list = isAnchor ? NEWS_LOCATIONS_ANCHOR : NEWS_LOCATIONS_REPORTER;
+  let locEn = '';
+  const presetKey = S.newsLocation || (isAnchor ? 'newsroom' : 'incident');
+  const preset = list.find(x => x.key === presetKey);
+  if (preset && preset.en && preset.en !== '__CUSTOM__') locEn = preset.en;
+  const customLoc = (S.newsLocationCustom || '').trim();
+  if (presetKey === 'custom' && customLoc) locEn = customLoc;
+
+  // 앵커/기자 인물 묘사
+  let subject;
+  if (S.newsAnchorMode === 'avatar' && Array.isArray(S.cutAvatars) && (S.cutAvatars[i] || []).length > 0) {
+    // 아바타 모드 — 출연 아바타가 앵커/기자 역할
+    const av = S.cutAvatars[i][0];
+    subject = isAnchor
+      ? `@Element1 (${av.name}) as professional Korean news anchor in tailored suit, hands on anchor desk, looking directly at camera`
+      : `@Element1 (${av.name}) as on-location Korean reporter${S.newsMicVisible ? ' holding a broadcast microphone' : ''}, professional reporter attire`;
+  } else {
+    // 성별 모드 (기본)
+    const g = S.newsAnchorGender || 'woman';
+    subject = isAnchor
+      ? `Professional Korean ${g === 'woman' ? 'female' : 'male'} news anchor in tailored suit, hands on anchor desk, looking directly at camera`
+      : `Korean ${g === 'woman' ? 'female' : 'male'} on-location reporter${S.newsMicVisible ? ' holding a broadcast microphone' : ''}, professional reporter attire`;
+  }
+
+  // 분위기 (기자 전용)
+  let toneKw = '';
+  if (isReporter) {
+    const tones = {
+      urgent:   'urgent breaking news atmosphere, tense alertness',
+      calm:     'calm composed reporting tone',
+      disaster: 'disaster scene reporting, somber serious tone',
+      protest:  'political protest scene with banners and crowd',
+      weather:  'weather report on location, visible weather conditions',
+    };
+    toneKw = tones[S.newsTone] || tones.calm;
+  }
+
+  // 헤드라인 자막 (한국어)
+  const headline = (S.newsHeadline || '').trim();
+  const channel  = (S.newsChannel  || '').trim();
+
+  // 골격
+  let p = `${sc.style}. `;
+  if (locEn) p += `Location: ${locEn}. `;
+  p += `${subject}. `;
+  if (toneKw) p += `${toneKw}. `;
+  if (isAnchor && S.newsBreaking) p += `Top red banner reads "BREAKING NEWS" in white bold text. `;
+  if (headline) p += `On-screen Korean lower-third caption: \"${headline}\". `;
+  if (channel)  p += `Top-left channel watermark text: \"${channel}\". `;
+  p += `Camera: ${cam}. ${charLock}`;
+
+  // 컷별 설명/감정 (있으면)
+  const cutDesc = (S.cutDescriptions && S.cutDescriptions[i] || '').trim();
+  if (cutDesc) p += ` ${cutDesc}.`;
+  const emotion = (S.cutEmotions && S.cutEmotions[i] || '').trim();
+  if (emotion) p += ` Emotion: ${emotion}.`;
+
+  // 510자 안전 캡
+  if (p.length > 510) p = p.slice(0, 507) + '...';
+  return p;
+}
+
 function buildVidPrompt(i) {
   // 영상 프롬프트 — 510자 cap (Kling API 한계 절대 준수)
   //
@@ -10930,6 +11247,11 @@ function buildVidPrompt(i) {
 
   // 영상 스타일 키워드 (축약버전 — 다른 애니 섞임 방지)
   const styleKw = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : '';
+
+  // ── 뉴스 씬 전용 빌드 (news_anchor / news_reporter) ──
+  if (S.scene === 'news_anchor' || S.scene === 'news_reporter') {
+    return _buildNewsVidPrompt(i, sc, cam, charLock);
+  }
 
   // 골격 조립
   let p = `Korean drama. ${eraKw}. ${sceneStyle}.`;
