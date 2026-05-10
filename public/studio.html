@@ -13403,15 +13403,59 @@ async function callFalImageWithRef(key, model, prompt, size, refImageUrls) {
     );
   }
 
+  // 사용자 참고이미지의 역할 토큰을 prompt 헤드에 별도로 강조
+  // (모델 attention은 prompt 앞부분에 강하므로, 뉴스카드/배경/TV 등 시각적 지시를 앞에 둠)
+  let visualEmphasis = '';
+  if (hasUserRef) {
+    const userRefIdx = publicUrls.indexOf(S.continueRefPubUrl) + 1;
+    const segs = document.querySelector(`[data-refrole-segs="img"]`) || document.querySelector(`[data-refrole-segs="vid"]`);
+    const active = segs?.querySelector('.seg.active');
+    const role = active?.getAttribute('data-refrole') || '';
+    if (role === 'news_card') {
+      visualEmphasis = `
+
+CRITICAL VISUAL LAYOUT INSTRUCTION (MUST be followed in the output):
+The output is a 2x2 grid of 4 panels. In EVERY ONE of the 4 panels:
+- LEFT HALF of the panel (about 40-45% of panel width): a LARGE rectangular broadcast TV news graphic card. This card MUST contain the EXACT photo content from Image ${userRefIdx} [USER-UPLOADED REFERENCE PHOTO] — copy that photo into the card as-is. The card has a thin colored border (red or blue) and modern broadcast TV news design. Do NOT replace the photo with the avatar's face or anything else. Do NOT shrink the card.
+- RIGHT HALF of the panel (about 55-60% of panel width): the news anchor/reporter (using the avatar reference for likeness), framed in medium shot, looking at the camera or slightly toward the news card on the left.
+This LEFT-news-card / RIGHT-anchor layout MUST be applied to ALL 4 panels of the grid (with different camera angles for the anchor across the 4 panels, but the card stays in the same position).`;
+    } else if (role === 'bg') {
+      visualEmphasis = `
+
+CRITICAL VISUAL LAYOUT INSTRUCTION (MUST be followed in the output):
+The output is a 2x2 grid of 4 panels. In EVERY ONE of the 4 panels, the entire background MUST come from Image ${userRefIdx} [USER-UPLOADED REFERENCE PHOTO]. Use that photo as the literal backdrop behind the subject. Do NOT use a generic studio or invented background.`;
+    } else if (role === 'tv') {
+      visualEmphasis = `
+
+CRITICAL VISUAL LAYOUT INSTRUCTION (MUST be followed in the output):
+The output is a 2x2 grid of 4 panels. In EVERY ONE of the 4 panels, a television screen MUST be prominently visible (mounted on wall, on stand, or in background), and the EXACT photo from Image ${userRefIdx} [USER-UPLOADED REFERENCE PHOTO] MUST be displayed on that TV screen. The TV must be large enough that the photo is clearly readable.`;
+    } else if (role === 'phone') {
+      visualEmphasis = `
+
+CRITICAL VISUAL LAYOUT INSTRUCTION (MUST be followed in the output):
+The output is a 2x2 grid of 4 panels. In EVERY ONE of the 4 panels, a smartphone MUST be prominently visible (held in hand, on table, or being looked at), and the EXACT photo from Image ${userRefIdx} [USER-UPLOADED REFERENCE PHOTO] MUST be displayed on that smartphone screen, sharp and clearly readable.`;
+    }
+  }
+
   const editPrompt = `REFERENCE IMAGES:
 ${imageLabels}
 
-${instructionParts.join('\n')}
+${instructionParts.join('\n')}${visualEmphasis}
 
 ${prompt}`;
 
-  log('info', `GPT Image 2 Edit 레퍼런스 생성 (아바타 ${publicUrls.length}명, ${w}x${h})`);
-  publicUrls.forEach((u, i) => log('info', `  Image${i+1}: ${u.slice(0, 70)}`));
+  log('info', `GPT Image 2 Edit 레퍼런스 생성 (총 ${publicUrls.length}장: 아바타 ${avatarCount}, 사용자 참고 ${hasUserRef ? 1 : 0}, 그리드 ${hasGrid ? 1 : 0}, ${w}x${h})`);
+  publicUrls.forEach((u, i) => {
+    const tag = (i < avatarCount) ? '[AVATAR]' : (u === S.continueRefPubUrl) ? '[USER-REF]' : (u === S.continueGridPubUrl) ? '[GRID]' : '[?]';
+    log('info', `  Image${i+1} ${tag}: ${u.slice(0, 70)}`);
+  });
+  // 디버그: 콘솔에 실제 보내지는 prompt 전체 출력 (F12 console에서 확인)
+  if (typeof console !== 'undefined') {
+    console.log('%c[korart-i] callFalImageWithRef — full editPrompt:', 'color:#5eead4;font-weight:bold');
+    console.log(editPrompt);
+    console.log('%c[korart-i] image_urls:', 'color:#5eead4;font-weight:bold');
+    console.log(publicUrls);
+  }
 
   // 모델 endpoint 결정 — 사용자가 IMG_MODELS에서 선택한 모델 사용
   const sel = document.getElementById('imgModel');
