@@ -2182,7 +2182,77 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
     <div id="videoModeForm" style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
 
     <!-- 좌측 -->
-    <div>
+    <div id="vidLeftCol">
+
+      <!-- ════════ 뉴스 씬 전용 인라인 입력 (news_anchor / news_reporter) ════════ -->
+      <div id="newsInline" style="display:none">
+        <div class="field">
+          <label>헤드라인 <span style="font-size:9px;color:var(--coral);font-weight:600">(필수)</span></label>
+          <input id="newsHeadlineInput" type="text" maxlength="60" oninput="S.newsHeadline=this.value" placeholder="예: 내일부터 전국 비, 출근길 우산 챙기세요" style="width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:8px 10px;color:var(--ink);font-size:12px">
+          <div style="font-size:9px;color:var(--ink3);margin-top:3px">화면 하단 자막에 노출됩니다 (최대 60자)</div>
+        </div>
+
+        <div class="field">
+          <label>방송사명 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span></label>
+          <input id="newsChannelInput" type="text" maxlength="20" oninput="S.newsChannel=this.value" placeholder="예: KBN 9시 뉴스" style="width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:8px 10px;color:var(--ink);font-size:12px">
+          <div style="font-size:9px;color:var(--ink3);margin-top:3px">화면 좌상단 워터마크로 노출됩니다</div>
+        </div>
+
+        <div class="field">
+          <label id="newsAnchorLabel">앵커 구성</label>
+          <div class="segs">
+            <div class="seg" id="newsModeGenderSeg" onclick="setNewsAnchorMode('gender')">성별로 자동</div>
+            <div class="seg" id="newsModeAvatarSeg" onclick="setNewsAnchorMode('avatar')">내 아바타 사용</div>
+          </div>
+          <div id="newsGenderRow" style="margin-top:8px">
+            <div class="segs">
+              <div class="seg" id="newsGenderWomanSeg" onclick="setNewsAnchorGender('woman')">여자</div>
+              <div class="seg" id="newsGenderManSeg" onclick="setNewsAnchorGender('man')">남자</div>
+            </div>
+          </div>
+          <div id="newsAvatarHint" style="display:none;margin-top:8px;font-size:10px;color:var(--ink3)">
+            아바타를 출연시키면 그 아바타가 앵커/기자로 등장합니다 (우측 "카메라 앵글 + 컷별 설명" 영역에서 컷별로 출연 지정)
+          </div>
+        </div>
+
+        <div class="field">
+          <label id="newsLocLabel">장소</label>
+          <div class="segs" id="newsLocSegs" style="flex-wrap:wrap"><!-- 동적 렌더링 --></div>
+          <input id="newsLocCustomInput" oninput="S.newsLocationCustom=this.value" placeholder="직접 입력 (예: 광화문 광장, 사고 현장 정문)" style="display:none;margin-top:6px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:6px 8px;color:var(--ink);font-size:12px">
+        </div>
+
+        <div class="field" id="newsBreakingField">
+          <label>속보 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span></label>
+          <div class="segs">
+            <div class="seg" id="newsBreakingOffSeg" onclick="setNewsBreaking(false)">일반 보도</div>
+            <div class="seg" id="newsBreakingOnSeg" onclick="setNewsBreaking(true)">BREAKING NEWS</div>
+          </div>
+          <div style="font-size:9px;color:var(--ink3);margin-top:3px">속보 선택 시 화면 상단에 빨간 BREAKING NEWS 띠가 추가됩니다</div>
+        </div>
+
+        <div class="field" id="newsToneField" style="display:none">
+          <label>현장 분위기</label>
+          <div class="segs" style="flex-wrap:wrap">
+            <div class="seg" id="newsTone_urgent"   onclick="setNewsTone('urgent')">긴급/속보</div>
+            <div class="seg" id="newsTone_calm"     onclick="setNewsTone('calm')">차분한 보도</div>
+            <div class="seg" id="newsTone_disaster" onclick="setNewsTone('disaster')">재난</div>
+            <div class="seg" id="newsTone_protest"  onclick="setNewsTone('protest')">정치 시위</div>
+            <div class="seg" id="newsTone_weather"  onclick="setNewsTone('weather')">날씨</div>
+          </div>
+        </div>
+
+        <div class="field" id="newsMicField" style="display:none">
+          <label>마이크 표시</label>
+          <div class="segs">
+            <div class="seg" id="newsMicOnSeg"  onclick="setNewsMic(true)">마이크 든 모습</div>
+            <div class="seg" id="newsMicOffSeg" onclick="setNewsMic(false)">마이크 없음</div>
+          </div>
+        </div>
+      </div>
+      <!-- /newsInline -->
+
+      <!-- ════════ 일반 영상 모드 좌측 필드 (뉴스 씬일 땐 #vidStandardLeft 통째로 숨김) ════════ -->
+      <div id="vidStandardLeft">
       <!-- 계절 -->
       <div class="field">
         <label>계절</label>
@@ -2264,6 +2334,7 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
           </div>
         </div>
       </div>
+      </div><!-- /vidStandardLeft -->
     </div>
 
     <!-- 우측 -->
@@ -2302,96 +2373,6 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
       </div>
 
     </div>
-
-    <!-- ════════ 뉴스 씬 전용 UI (news_anchor / news_reporter) — grid 전체 폭 ════════ -->
-    <div id="newsFields" style="display:none;grid-column:1 / -1;border-top:1px solid var(--line);padding-top:16px;margin-top:8px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <div style="font-size:14px;font-weight:800;color:var(--pink);letter-spacing:.5px">뉴스 설정</div>
-        <div style="font-size:10px;color:var(--ink3)">방송 화면처럼 헤드라인·방송사·구성을 직접 지정합니다</div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
-        <!-- 좌측 -->
-        <div>
-          <!-- 헤드라인 -->
-          <div class="field">
-            <label>헤드라인 <span style="font-size:9px;color:var(--coral);font-weight:600">(필수)</span></label>
-            <input id="newsHeadlineInput" type="text" maxlength="60" oninput="S.newsHeadline=this.value" placeholder="예: 내일부터 전국 비, 출근길 우산 챙기세요" style="width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:8px 10px;color:var(--ink);font-size:12px">
-            <div style="font-size:9px;color:var(--ink3);margin-top:3px">화면 하단 자막에 노출됩니다 (최대 60자)</div>
-          </div>
-
-          <!-- 방송사 -->
-          <div class="field">
-            <label>방송사명 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span></label>
-            <input id="newsChannelInput" type="text" maxlength="20" oninput="S.newsChannel=this.value" placeholder="예: KBN 9시 뉴스" style="width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:8px 10px;color:var(--ink);font-size:12px">
-            <div style="font-size:9px;color:var(--ink3);margin-top:3px">화면 좌상단 워터마크로 노출됩니다</div>
-          </div>
-
-          <!-- 앵커/기자 구성 -->
-          <div class="field">
-            <label id="newsAnchorLabel">앵커 구성</label>
-            <div class="segs">
-              <div class="seg" id="newsModeGenderSeg" onclick="setNewsAnchorMode('gender')">성별로 자동</div>
-              <div class="seg" id="newsModeAvatarSeg" onclick="setNewsAnchorMode('avatar')">내 아바타 사용</div>
-            </div>
-            <!-- 성별 선택 (gender 모드일 때만) -->
-            <div id="newsGenderRow" style="margin-top:8px">
-              <div class="segs">
-                <div class="seg" id="newsGenderWomanSeg" onclick="setNewsAnchorGender('woman')">여자</div>
-                <div class="seg" id="newsGenderManSeg" onclick="setNewsAnchorGender('man')">남자</div>
-              </div>
-            </div>
-            <!-- 아바타 모드 안내 -->
-            <div id="newsAvatarHint" style="display:none;margin-top:8px;font-size:10px;color:var(--ink3)">
-              위 "카메라 앵글 + 컷별 설명" 영역에서 아바타를 출연 시키세요. 출연 아바타가 앵커/기자로 등장합니다.
-            </div>
-          </div>
-        </div>
-
-        <!-- 우측 -->
-        <div>
-          <!-- 장소 -->
-          <div class="field">
-            <label id="newsLocLabel">장소</label>
-            <div class="segs" id="newsLocSegs" style="flex-wrap:wrap"><!-- 동적 렌더링 --></div>
-            <input id="newsLocCustomInput" oninput="S.newsLocationCustom=this.value" placeholder="직접 입력 (예: 광화문 광장, 사고 현장 정문)" style="display:none;margin-top:6px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:6px 8px;color:var(--ink);font-size:12px">
-          </div>
-
-          <!-- 앵커 전용: 속보 -->
-          <div class="field" id="newsBreakingField">
-            <label>속보 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span></label>
-            <div class="segs">
-              <div class="seg" id="newsBreakingOffSeg" onclick="setNewsBreaking(false)">일반 보도</div>
-              <div class="seg" id="newsBreakingOnSeg" onclick="setNewsBreaking(true)">BREAKING NEWS</div>
-            </div>
-            <div style="font-size:9px;color:var(--ink3);margin-top:3px">속보 선택 시 화면 상단에 빨간 BREAKING NEWS 띠가 추가됩니다</div>
-          </div>
-
-          <!-- 기자 전용: 분위기 -->
-          <div class="field" id="newsToneField" style="display:none">
-            <label>현장 분위기</label>
-            <div class="segs" style="flex-wrap:wrap">
-              <div class="seg" id="newsTone_urgent"   onclick="setNewsTone('urgent')">긴급/속보</div>
-              <div class="seg" id="newsTone_calm"     onclick="setNewsTone('calm')">차분한 보도</div>
-              <div class="seg" id="newsTone_disaster" onclick="setNewsTone('disaster')">재난</div>
-              <div class="seg" id="newsTone_protest"  onclick="setNewsTone('protest')">정치 시위</div>
-              <div class="seg" id="newsTone_weather"  onclick="setNewsTone('weather')">날씨</div>
-            </div>
-          </div>
-
-          <!-- 기자 전용: 마이크 표시 -->
-          <div class="field" id="newsMicField" style="display:none">
-            <label>마이크 표시</label>
-            <div class="segs">
-              <div class="seg" id="newsMicOnSeg"  onclick="setNewsMic(true)">마이크 든 모습</div>
-              <div class="seg" id="newsMicOffSeg" onclick="setNewsMic(false)">마이크 없음</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- /newsFields -->
-
     </div><!-- /videoModeForm (grid end) -->
 
     </div><!-- /sceneStepB -->
@@ -8431,10 +8412,18 @@ function _isNewsScene() {
 }
 
 function updateVidNewsFields() {
-  const wrap = document.getElementById('newsFields');
-  if (!wrap) return;
-  if (!_isNewsScene()) { wrap.style.display = 'none'; return; }
-  wrap.style.display = '';
+  const inline = document.getElementById('newsInline');
+  const stdLeft = document.getElementById('vidStandardLeft');
+
+  if (!_isNewsScene()) {
+    if (inline)  inline.style.display  = 'none';
+    if (stdLeft) stdLeft.style.display = '';
+    return;
+  }
+
+  // 뉴스 씬: 인라인 영역 표시 + 기존 좌측 표준 필드(계절/시간대/날씨/장소유형/행인/참고이미지) 숨김
+  if (inline)  inline.style.display  = '';
+  if (stdLeft) stdLeft.style.display = 'none';
 
   const isAnchor = S.scene === 'news_anchor';
   const isReporter = S.scene === 'news_reporter';
