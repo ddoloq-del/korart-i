@@ -5378,6 +5378,16 @@ function validateStep(step) {
       if (!S.aspectRatio) missing.push('이미지 비율');
       if (!S.avatars.length) missing.push('등장 아바타');
       // 무드/장소/변주는 비어있어도 통과 — 씬 자체 style만으로도 4컷 생성 가능
+    } else if (S.scene === 'news_anchor' || S.scene === 'news_reporter') {
+      // 영상 모드 — 뉴스 씬: 뉴스 전용 항목만 검증 (계절/시간대/날씨/일반 장소는 사용 안 함)
+      if (!(S.newsHeadline || '').trim()) missing.push('헤드라인');
+      // 뉴스 장소 — 프리셋 선택 또는 직접 입력값이 있으면 통과
+      const _newsCustom = (S.newsLocationCustom || '').trim();
+      const _hasNewsLoc = (S.newsLocation && S.newsLocation !== 'custom') || (S.newsLocation === 'custom' && _newsCustom) || (!S.newsLocation && _newsCustom);
+      if (!_hasNewsLoc) missing.push('뉴스 장소');
+      // 아바타 모드일 때만 출연 아바타 필수 (성별 모드면 자동 생성 가능)
+      if (S.newsAnchorMode === 'avatar' && !S.avatars.length) missing.push('등장 아바타');
+      if (S.angles.filter(Boolean).length < 4) missing.push('카메라 앵글 4개');
     } else {
       // 영상 모드: 출연 아바타 + 계절/시간/날씨/장소/앵글
       if (!S.avatars.length) missing.push('등장 아바타');
