@@ -11880,11 +11880,9 @@ function _buildNewsVidPrompt(i, sc, cam, charLock) {
   if (channel)  p += `Top-left channel watermark text: \"${channel}\". `;
   p += `Camera: ${cam}. ${charLock}`;
 
-  // 컷별 설명/감정 (있으면)
+  // 컷별 설명 (감정은 generateVideo의 emotionMap에서 처리 — 중복 방지)
   const cutDesc = (S.cutDescriptions && S.cutDescriptions[i] || '').trim();
   if (cutDesc) p += ` ${cutDesc}.`;
-  const emotion = (S.cutEmotions && S.cutEmotions[i] || '').trim();
-  if (emotion) p += ` Emotion: ${emotion}.`;
 
   // 510자 안전 캡
   if (p.length > 510) p = p.slice(0, 507) + '...';
@@ -11968,9 +11966,8 @@ function buildVidPrompt(i) {
   const cutDesc = (S.cutDescriptions && S.cutDescriptions[i] || '').trim();
   if (cutDesc) p += ` ${cutDesc}.`;
 
-  // 컷별 감정
-  const emotion = (S.cutEmotions && S.cutEmotions[i] || '').trim();
-  if (emotion) p += ` Emotion: ${emotion}.`;
+  // 컷별 감정 — generateVideo의 emotionMap에서 처리 (영문 키워드로 추가됨)
+  // 여기서는 추가 안 함 (중복 방지)
 
   // 510자 안전 캡 — Kling API 한계 절대 준수
   if (p.length > 510) p = p.slice(0, 507) + '...';
