@@ -13311,26 +13311,42 @@ async function callFalImageWithRef(key, model, prompt, size, refImageUrls) {
 
   // GPT Image 2 Edit: image_urls 배열 + 프롬프트에 Image1/Image2 레이블 명시
   const chars = S.avatars.filter(av => av.imgUrl);
+  const avatarCount = chars.length;
+  const hasUserRef = !!(S.continueRefPubUrl) && publicUrls.includes(S.continueRefPubUrl);
+  const hasGrid = !!(S.continueGridPubUrl) && publicUrls.includes(S.continueGridPubUrl);
 
-  // 아바타 이름/extra 한글 → 영어 번역
-  const labelLines = await Promise.all(publicUrls.map(async (_, i) => {
-    const av = chars[i];
-    if (!av) return `Image ${i+1}: character reference`;
-    const nameEn = await translateKoToEn(av.name);
-    const extraEn = av.extra ? await translateKoToEn(av.extra) : '';
-    const hairEn = av.hair ? await translateKoToEn(av.hair) : '';
-    const parts = [];
-    if (av.gender) parts.push(av.gender);
-    if (av.age)    parts.push(av.age);
-    if (av.body)   parts.push(av.body.split(',')[0]);
-    if (av.height) parts.push(av.height);
-    if (av.look)   parts.push(av.look.split(',')[0]);
-    if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
-    else if (hairEn) parts.push(hairEn);
-    if (av.skin)   parts.push(av.skin);
-    if (extraEn)   parts.push(extraEn);
-    const desc = parts.length ? ` (${parts.join(', ')})` : '';
-    return `Image ${i+1}: ${nameEn}${desc}`;
+  // 각 이미지가 무엇인지 정확히 라벨링
+  // 순서: [아바타 캐릭터 시트들..., 사용자 참고이미지(있으면), 4컷 그리드(있으면)]
+  const labelLines = await Promise.all(publicUrls.map(async (publicUrl, i) => {
+    // 아바타 슬롯
+    if (i < avatarCount) {
+      const av = chars[i];
+      if (!av) return `Image ${i+1} [CHARACTER REFERENCE SHEET]: character reference`;
+      const nameEn = await translateKoToEn(av.name);
+      const extraEn = av.extra ? await translateKoToEn(av.extra) : '';
+      const hairEn = av.hair ? await translateKoToEn(av.hair) : '';
+      const parts = [];
+      if (av.gender) parts.push(av.gender);
+      if (av.age)    parts.push(av.age);
+      if (av.body)   parts.push(av.body.split(',')[0]);
+      if (av.height) parts.push(av.height);
+      if (av.look)   parts.push(av.look.split(',')[0]);
+      if (av.sceneHair && av.sceneHair.trim()) parts.push(av.sceneHair.trim());
+      else if (hairEn) parts.push(hairEn);
+      if (av.skin)   parts.push(av.skin);
+      if (extraEn)   parts.push(extraEn);
+      const desc = parts.length ? ` (${parts.join(', ')})` : '';
+      return `Image ${i+1} [CHARACTER REFERENCE SHEET]: ${nameEn}${desc} — 6-panel reference sheet for character likeness only`;
+    }
+    // 사용자 업로드 참고 이미지
+    if (hasUserRef && publicUrl === S.continueRefPubUrl) {
+      return `Image ${i+1} [USER-UPLOADED REFERENCE PHOTO]: a single regular photo provided by the user as visual reference for the scene (NOT a character sheet, NOT for face likeness)`;
+    }
+    // 이전 4컷 그리드
+    if (hasGrid && publicUrl === S.continueGridPubUrl) {
+      return `Image ${i+1} [PREVIOUS 4-PANEL GRID]: a 2x2 grid of 4 previously generated panels (used for visual continuation, wardrobe/hair/background consistency)`;
+    }
+    return `Image ${i+1}: reference`;
   }));
   const imageLabels = labelLines.join('\n');
 
@@ -13348,25 +13364,49 @@ async function callFalImageWithRef(key, model, prompt, size, refImageUrls) {
   }
   const editSize = { width: w, height: h };
 
+  // 이미지 종류별 instructions 동적 구성
+  let instructionParts = ['IMPORTANT INSTRUCTIONS:'];
+
+  if (avatarCount > 0) {
+    instructionParts.push(
+      '',
+      'FOR CHARACTER REFERENCE SHEETS (Image 1' + (avatarCount > 1 ? ' through ' + avatarCount : '') + '):',
+      'Each character reference sheet is a 6-panel image (3 columns x 2 rows) showing the SAME character from 6 angles:',
+      '- Top: front neutral / 3/4 left / 3/4 right',
+      '- Bottom: front smiling / pure side profile / slight upward angle',
+      '- Use ALL 6 angles to understand the character\'s full 3D facial structure.',
+      '- Preserve from each character sheet: face, eyes, glasses, earrings, and other facial accessories EXACTLY across all panels.',
+      '- DO NOT preserve clothing/outfit or hairstyle from the character sheet (the sheet uses neutral studio wear). The scene description below dictates wardrobe and hair.',
+      '- The face must stay IDENTICAL across every camera angle in the new generated image.'
+    );
+  }
+
+  if (hasUserRef) {
+    const userRefIdx = publicUrls.indexOf(S.continueRefPubUrl) + 1;
+    instructionParts.push(
+      '',
+      `FOR USER-UPLOADED REFERENCE PHOTO (Image ${userRefIdx}):`,
+      '- This is NOT a character reference. Do NOT extract or modify any face from this image.',
+      '- This image is for visual context only — its specific role (background, phone screen, TV screen, news card photo, etc.) is described in the scene prompt below.',
+      '- Use this image EXACTLY as instructed in the REFERENCE IMAGE ROLE section of the scene prompt.'
+    );
+  }
+
+  if (hasGrid) {
+    const gridIdx = publicUrls.indexOf(S.continueGridPubUrl) + 1;
+    instructionParts.push(
+      '',
+      `FOR PREVIOUS 4-PANEL GRID (Image ${gridIdx}):`,
+      '- This is a 2x2 grid of 4 previously generated panels — used for visual continuation.',
+      '- Maintain consistency with this grid as instructed in the CONTINUATION FROM REFERENCE GRID section of the scene prompt below.',
+      '- Do NOT replicate the grid layout itself (the new output is a fresh new 4-panel grid). Match wardrobe, hair, person, lighting, and/or background per the lock instructions.'
+    );
+  }
+
   const editPrompt = `REFERENCE IMAGES:
 ${imageLabels}
 
-ABOUT THE REFERENCE IMAGES:
-Each reference image is a CHARACTER REFERENCE SHEET — a single image divided into 6 panels (3 columns x 2 rows) showing the SAME character from 6 different angles and expressions:
-- Top-left: front view, neutral
-- Top-middle: 3/4 view from left
-- Top-right: 3/4 view from right
-- Bottom-left: front view, smiling
-- Bottom-middle: pure side profile (left)
-- Bottom-right: slight upward angle
-
-Use ALL 6 angles in the reference sheet to understand the character's full 3D facial structure. When generating new panels at any camera angle, the face MUST stay consistent with the angles shown in the reference sheet.
-
-IMPORTANT INSTRUCTIONS:
-- Preserve from each reference: face, eyes, glasses, earrings, and any other facial accessories EXACTLY as shown across ALL 6 reference angles.
-- DO NOT preserve the clothing/outfit OR hairstyle from the reference (the reference sheet uses neutral studio wear and a default hairstyle). The hairstyle described in the scene below takes priority over the reference.
-- Replace clothing with outfits appropriate for the scene's season, weather, and location described below.
-- The face, eyes, and accessories must look IDENTICAL to the reference in EVERY panel of the new generated image, regardless of camera angle. The hairstyle and clothing follow the scene description, NOT the reference.
+${instructionParts.join('\n')}
 
 ${prompt}`;
 
