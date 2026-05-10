@@ -2156,6 +2156,17 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
                 <input type="file" id="imgContinueRefUpload" accept="image/*" style="display:none" onchange="uploadContinueRef(event)">
               </div>
             </div>
+            <!-- 부가설명 — 이 이미지의 역할 (버튼 4개 + 개인설정 input) -->
+            <div id="imgContinueRefRoleArea" style="margin-top:10px;display:none">
+              <div style="font-size:10px;color:var(--ink3);margin-bottom:5px">이 이미지의 역할 <span style="font-size:9px">(선택)</span></div>
+              <div class="segs" style="flex-wrap:wrap" data-refrole-segs="img">
+                <div class="seg" data-refrole="bg"     onclick="setRefImgRole('img','bg')">배경</div>
+                <div class="seg" data-refrole="phone"  onclick="setRefImgRole('img','phone')">핸드폰 속 화면</div>
+                <div class="seg" data-refrole="tv"     onclick="setRefImgRole('img','tv')">TV 속 화면</div>
+                <div class="seg" data-refrole="custom" onclick="setRefImgRole('img','custom')">개인 설정</div>
+              </div>
+              <input id="imgContinueRefRoleCustomInput" type="text" maxlength="80" placeholder="이 참고 이미지의 역할을 직접 입력하세요" style="display:none;margin-top:6px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:8px 10px;color:var(--ink);font-size:12px">
+            </div>
           </div>
         </div>
 
@@ -2381,6 +2392,17 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
             <div style="font-size:9px;color:var(--ink3);line-height:1.4">이전에 다운로드한 <strong>4컷 그리드</strong> 또는 <strong>단일 컷</strong> 이미지를 올려주세요.</div>
             <input type="file" id="continueRefUpload" accept="image/*" style="display:none" onchange="uploadContinueRef(event)">
           </div>
+        </div>
+        <!-- 부가설명 — 이 이미지의 역할 (영상 모드에서도 입력은 받음, 영상 빌더엔 안 들어가고 1컷 이미지 빌더에만 반영) -->
+        <div id="vidContinueRefRoleArea" style="margin-top:10px;display:none">
+          <div style="font-size:10px;color:var(--ink3);margin-bottom:5px">이 이미지의 역할 <span style="font-size:9px">(선택)</span></div>
+          <div class="segs" style="flex-wrap:wrap" data-refrole-segs="vid">
+            <div class="seg" data-refrole="bg"     onclick="setRefImgRole('vid','bg')">배경</div>
+            <div class="seg" data-refrole="phone"  onclick="setRefImgRole('vid','phone')">핸드폰 속 화면</div>
+            <div class="seg" data-refrole="tv"     onclick="setRefImgRole('vid','tv')">TV 속 화면</div>
+            <div class="seg" data-refrole="custom" onclick="setRefImgRole('vid','custom')">개인 설정</div>
+          </div>
+          <input id="vidContinueRefRoleCustomInput" type="text" maxlength="80" placeholder="이 참고 이미지의 역할을 직접 입력하세요" style="display:none;margin-top:6px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:8px 10px;color:var(--ink);font-size:12px">
         </div>
       </div>
       </div><!-- /vidStandardLeft -->
@@ -2636,6 +2658,17 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
       </div>
       <input type="hidden" id="avRefImgUrl" value="">
       <div style="font-size:9px;color:var(--ink3);margin-top:6px">JPG/PNG/WEBP · 최대 5MB</div>
+      <!-- 부가설명 — 이 이미지의 역할 -->
+      <div id="avRefImgRoleArea" style="margin-top:10px;display:none">
+        <div style="font-size:10px;color:var(--ink3);margin-bottom:5px">이 이미지의 역할 <span style="font-size:9px">(선택)</span></div>
+        <div class="segs" style="flex-wrap:wrap" data-refrole-segs="av">
+          <div class="seg" data-refrole="bg"     onclick="setRefImgRole('av','bg')">배경</div>
+          <div class="seg" data-refrole="phone"  onclick="setRefImgRole('av','phone')">핸드폰 속 화면</div>
+          <div class="seg" data-refrole="tv"     onclick="setRefImgRole('av','tv')">TV 속 화면</div>
+          <div class="seg" data-refrole="custom" onclick="setRefImgRole('av','custom')">개인 설정</div>
+        </div>
+        <input id="avRefImgRoleCustomInput" type="text" maxlength="80" placeholder="이 참고 이미지의 역할을 직접 입력하세요" style="display:none;margin-top:6px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:8px 10px;color:var(--ink);font-size:12px">
+      </div>
     </div>
 
     <!-- ============= 사람 카테고리 입력 폼 ============= -->
@@ -6097,6 +6130,7 @@ function setAvatarRefImagePreview(url) {
   const clearBtn = document.getElementById('avRefImgClearBtn');
   const imgEl = document.getElementById('avRefImgEl');
   const urlInput = document.getElementById('avRefImgUrl');
+  _setRefRoleAreaVisible('av', !!url);
   if (url) {
     imgEl.src = url;
     preview.style.display = 'block';
@@ -6466,7 +6500,7 @@ CRITICAL requirements:
 - Sharp focus, high detail, photorealistic
 - No humans visible
 
-Pet description: ${charDesc}.${_refGuidance}`;
+Pet description: ${charDesc}.${_refGuidance}${_buildAvRefImageRoleToken()}`;
   } else if (_isProduct) {
     // 제품 프롬프트 빌드
     const productCat      = document.getElementById('avProductCat')?.value      || 'product';
@@ -6492,7 +6526,7 @@ Pet description: ${charDesc}.${_refGuidance}`;
       ? `\n- The brand text or logo \"${productLogo}\" must be clearly visible and consistent across all panels`
       : '';
 
-    prompt = `Create a single product reference sheet image showing the SAME product in a strict 3x2 grid layout (3 columns, 2 rows) with NO dividing lines, NO borders, NO gaps between panels — clean adjacent edges only. Plain neutral light gray studio background, professional product photography lighting.\n\nTop row (left to right):\n1. Front view, straight-on angle\n2. Three-quarter view from the LEFT\n3. Three-quarter view from the RIGHT\n\nBottom row (left to right):\n4. Back view\n5. Top-down view (from above)\n6. Detail close-up showing texture and material\n\nCRITICAL requirements:\n- Exact same product, same color, same material, same proportions in ALL 6 panels${logoLine}\n- Studio product photography, soft diffused lighting, clean shadows\n- Photorealistic, sharp focus, high detail\n- No humans, no hands holding the product\n- Centered composition with empty negative space around the product\n\nProduct description: ${charDesc}.${_refGuidance}`;
+    prompt = `Create a single product reference sheet image showing the SAME product in a strict 3x2 grid layout (3 columns, 2 rows) with NO dividing lines, NO borders, NO gaps between panels — clean adjacent edges only. Plain neutral light gray studio background, professional product photography lighting.\n\nTop row (left to right):\n1. Front view, straight-on angle\n2. Three-quarter view from the LEFT\n3. Three-quarter view from the RIGHT\n\nBottom row (left to right):\n4. Back view\n5. Top-down view (from above)\n6. Detail close-up showing texture and material\n\nCRITICAL requirements:\n- Exact same product, same color, same material, same proportions in ALL 6 panels${logoLine}\n- Studio product photography, soft diffused lighting, clean shadows\n- Photorealistic, sharp focus, high detail\n- No humans, no hands holding the product\n- Centered composition with empty negative space around the product\n\nProduct description: ${charDesc}.${_refGuidance}${_buildAvRefImageRoleToken()}`;
   } else {
     // 사람 프롬프트 빌드 (기존)
     const charParts = [`a ${gender}`];
@@ -6529,7 +6563,7 @@ CRITICAL requirements:
 - Sharp focus on face, high detail
 - Korean drama character
 
-Character: ${charDesc}.${randomNote}${_refGuidance}`;
+Character: ${charDesc}.${randomNote}${_refGuidance}${_buildAvRefImageRoleToken()}`;
   }
 
   const btn = document.getElementById('avGenImgBtn');
@@ -6646,6 +6680,8 @@ function uploadContinueRef(event) {
   reader.onload = (e) => {
     S.continueRefDataUrl = e.target.result;
     S.continueRefPubUrl = null;
+    _setRefRoleAreaVisible('img', true);
+    _setRefRoleAreaVisible('vid', true);
     const preview = document.getElementById('continueRefPreview');
     if (preview) {
       preview.innerHTML = `<img src="${S.continueRefDataUrl}" style="width:100%;height:100%;object-fit:cover">`;
@@ -6662,6 +6698,8 @@ function uploadContinueRef(event) {
 function clearContinueRef() {
   S.continueRefDataUrl = null;
   S.continueRefPubUrl = null;
+  _setRefRoleAreaVisible('img', false);
+  _setRefRoleAreaVisible('vid', false);
   const preview = document.getElementById('continueRefPreview');
   if (preview) {
     preview.innerHTML = '';
@@ -8639,6 +8677,102 @@ function selectNewsLocation(key) {
   renderNewsLocSegs();
 }
 
+// ============================================
+// 참고 이미지 역할(부가설명) — DOM only, S 저장 X
+// scope: 'img' (이미지모드) / 'vid' (영상모드) / 'av' (아바타)
+// ============================================
+function setRefImgRole(scope, role) {
+  // 같은 active 다시 클릭하면 해제
+  const segs = document.querySelector(`[data-refrole-segs="${scope}"]`);
+  if (!segs) return;
+  const cur = segs.querySelector('.seg.active');
+  const tgt = segs.querySelector(`[data-refrole="${role}"]`);
+  if (!tgt) return;
+  if (cur === tgt) {
+    tgt.classList.remove('active');
+    _toggleRefRoleCustom(scope, false);
+    return;
+  }
+  segs.querySelectorAll('.seg').forEach(s => s.classList.remove('active'));
+  tgt.classList.add('active');
+  _toggleRefRoleCustom(scope, role === 'custom');
+}
+
+function _toggleRefRoleCustom(scope, show) {
+  const inputId = scope === 'img' ? 'imgContinueRefRoleCustomInput'
+                : scope === 'vid' ? 'vidContinueRefRoleCustomInput'
+                : 'avRefImgRoleCustomInput';
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  input.style.display = show ? '' : 'none';
+  if (!show) input.value = '';
+  if (show) setTimeout(() => input.focus(), 50);
+}
+
+// 참고 이미지 영역(role-area) 표시/숨김 — 이미지가 있을 때만 보임
+// uploadContinueRef / clearContinueRef / uploadAvatarRefImage / clearAvatarRefImage 에서 호출
+function _setRefRoleAreaVisible(scope, visible) {
+  const areaId = scope === 'img' ? 'imgContinueRefRoleArea'
+               : scope === 'vid' ? 'vidContinueRefRoleArea'
+               : 'avRefImgRoleArea';
+  const area = document.getElementById(areaId);
+  if (!area) return;
+  area.style.display = visible ? '' : 'none';
+  if (!visible) {
+    // 이미지 제거 시 active + custom input 초기화
+    const segs = document.querySelector(`[data-refrole-segs="${scope}"]`);
+    if (segs) segs.querySelectorAll('.seg').forEach(s => s.classList.remove('active'));
+    _toggleRefRoleCustom(scope, false);
+  }
+}
+
+// 참고 이미지 역할 영문 토큰 — 이미지 빌더에 주입용 (영상 빌더는 호출 안 함)
+// scope: 'img' | 'vid' (이미지 모드/영상 모드의 4컷·1컷 빌더에서 모두 호출)
+// av(아바타)는 아바타 생성 함수에서 별도 처리
+function _buildRefImageRoleToken(scope) {
+  const segsId = scope === 'img' ? 'img' : 'vid';
+  const segs = document.querySelector(`[data-refrole-segs="${segsId}"]`);
+  if (!segs) return '';
+  const active = segs.querySelector('.seg.active');
+  if (!active) return '';
+  const role = active.getAttribute('data-refrole') || '';
+  if (role === 'bg') {
+    return ' Reference image usage: use the reference image as the background of the scene.';
+  }
+  if (role === 'phone') {
+    return ' Reference image usage: display the reference image as the screen content inside a smartphone shown in the scene.';
+  }
+  if (role === 'tv') {
+    return ' Reference image usage: display the reference image as the screen content inside a TV shown in the scene.';
+  }
+  if (role === 'custom') {
+    const inputId = scope === 'img' ? 'imgContinueRefRoleCustomInput' : 'vidContinueRefRoleCustomInput';
+    const txt = (document.getElementById(inputId)?.value || '').trim();
+    if (!txt) return '';
+    const safe = txt.replace(/`/g, "'");
+    return ' Reference image usage: ' + safe;
+  }
+  return '';
+}
+
+// 아바타 참고 이미지 역할 영문 토큰
+function _buildAvRefImageRoleToken() {
+  const segs = document.querySelector('[data-refrole-segs="av"]');
+  if (!segs) return '';
+  const active = segs.querySelector('.seg.active');
+  if (!active) return '';
+  const role = active.getAttribute('data-refrole') || '';
+  if (role === 'bg')    return ' Reference image usage: use the reference image as the background of the scene.';
+  if (role === 'phone') return ' Reference image usage: display the reference image as the screen content inside a smartphone shown in the scene.';
+  if (role === 'tv')    return ' Reference image usage: display the reference image as the screen content inside a TV shown in the scene.';
+  if (role === 'custom') {
+    const txt = (document.getElementById('avRefImgRoleCustomInput')?.value || '').trim();
+    if (!txt) return '';
+    return ' Reference image usage: ' + txt.replace(/`/g, "'");
+  }
+  return '';
+}
+
 function setNewsWeatherCondition(c) {
   S.newsWeatherCondition = c;
   ['clear','partly_cloudy','cloudy','rain','heavy_rain','snow','heavy_snow','typhoon','dust','fine_dust','cold_wave','heat_wave'].forEach(x => {
@@ -9808,7 +9942,7 @@ TIME PERIOD: ${eraKeyword}.
 ${variations ? '4-PANEL VARIATIONS: ' + variations + '.' : '4-PANEL VARIATIONS: natural variety of best shots, slight subtle variations.'}
 ${cutDescs ? 'CUT DETAILS: ' + cutDescs + '.' : ''}
 ${extra ? 'ADDITIONAL: ' + extra + '.' : ''}
-All 4 panels share consistent subjects and core concept. High-quality professional photography.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}`.trim();
+All 4 panels share consistent subjects and core concept. High-quality professional photography.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildRefImageRoleToken('img')}`.trim();
 }
 
 // 이미지 모드 프롬프트 빌더 (async — API용, 한글 번역 포함)
@@ -9991,7 +10125,7 @@ TIME PERIOD: ${eraKeyword}.
 ${variations ? '4-PANEL VARIATIONS: ' + variations + '.' : '4-PANEL VARIATIONS: natural variety of best shots, slight subtle variations.'}
 ${cutDescs ? 'CUT DETAILS: ' + cutDescs + '.' : ''}
 ${extraEn ? 'ADDITIONAL: ' + extraEn + '.' : ''}
-All 4 panels share consistent subjects and core concept. High-quality professional photography.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}`.trim();
+All 4 panels share consistent subjects and core concept. High-quality professional photography.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildRefImageRoleToken('img')}`.trim();
 }
 
 // 이미지 모드 1컷 프롬프트 빌더 — 단일 패널으로 생성
@@ -10076,7 +10210,7 @@ ${moodKeywords ? 'MOOD: ' + moodKeywords + '.' : ''}
 ${locEn ? 'LOCATION: ' + locEn + '.' : ''}
 TIME PERIOD: ${eraKeyword}.
 ${extraEn ? 'ADDITIONAL: ' + extraEn + '.' : ''}
-High-quality professional photography. Single frame only — do NOT split into multiple panels or grid.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}`.trim();
+High-quality professional photography. Single frame only — do NOT split into multiple panels or grid.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildRefImageRoleToken('img')}`.trim();
 }
 
 // ────────────────────────────────────────────────────────────
@@ -10178,7 +10312,7 @@ TIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.
 ENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}
 CAMERA ANGLES: ${angleDesc}.${extra ? '\nADDITIONAL: ' + extra + '.' : ''}
 WARDROBE: All characters wear clothing appropriate for ${S.season} weather and ${loc}. Outfits should match the season, weather, and environment naturally.
-All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildNewsImageOverlayTokens({perPanel:true})}`.trim();
+All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildNewsImageOverlayTokens({perPanel:true})}${_buildRefImageRoleToken('vid')}`.trim();
 }
 
 // async 버전 — 실제 API 전송용 (한글 → 영어 번역)
@@ -10311,7 +10445,7 @@ TIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.
 ENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}
 CAMERA ANGLES: ${angleDesc}.${extraEn ? '\nADDITIONAL: ' + extraEn + '.' : ''}
 WARDROBE: All characters wear clothing appropriate for ${S.season} weather and ${locEn}. Outfits should match the season, weather, and environment naturally.
-All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildNewsImageOverlayTokens({perPanel:true})}`.trim();
+All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildNewsImageOverlayTokens({perPanel:true})}${_buildRefImageRoleToken('vid')}`.trim();
 }
 
 function updatePromptPreview() {
@@ -10966,7 +11100,7 @@ function buildOneCutPrompt(i) {
   const angle = (S.angles && S.angles[i]) || '';
   const cutDesc = (S.cutDescriptions && S.cutDescriptions[i]) || '';
   const extra = document.getElementById('extraPrompt')?.value.trim() || '';
-  return `Create a single Korean drama scene image, cinematic photo, no panels.\n${charDesc ? 'CHARACTERS: ' + charDesc + '.\n' : ''}VISUAL STYLE: ${sc.style}.\nTIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.\nENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}\nCAMERA ANGLE: ${angle}${cutDesc ? ' (' + cutDesc + ')' : ''}.${extra ? '\nEXTRA: ' + extra : ''}${_buildNewsImageOverlayTokens()}`;
+  return `Create a single Korean drama scene image, cinematic photo, no panels.\n${charDesc ? 'CHARACTERS: ' + charDesc + '.\n' : ''}VISUAL STYLE: ${sc.style}.\nTIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.\nENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}\nCAMERA ANGLE: ${angle}${cutDesc ? ' (' + cutDesc + ')' : ''}.${extra ? '\nEXTRA: ' + extra : ''}${_buildNewsImageOverlayTokens()}${_buildRefImageRoleToken('vid')}`;
 }
 
 // API용 (한글 -> 영문 번역) — buildImagePromptForApi 패턴
