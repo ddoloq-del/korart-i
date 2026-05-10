@@ -2303,7 +2303,7 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
       <!-- ════════ 일반 영상 모드 좌측 필드 (뉴스 씬일 땐 #vidStandardLeft 통째로 숨김) ════════ -->
       <div id="vidStandardLeft">
       <!-- 계절 -->
-      <div class="field">
+      <div class="field" id="vidStdSeasonField">
         <label>계절</label>
         <div class="segs">
           <div class="seg" onclick="selOpt(this,'season','spring')">봄</div>
@@ -2314,7 +2314,7 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
       </div>
 
       <!-- 시간대 -->
-      <div class="field">
+      <div class="field" id="vidStdTimeField">
         <label>시간대</label>
         <div class="segs">
           <div class="seg" onclick="selOpt(this,'timeofday','before dawn, 3-5am')">새벽</div>
@@ -2327,7 +2327,7 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
       </div>
 
       <!-- 날씨 -->
-      <div class="field">
+      <div class="field" id="vidStdWeatherField">
         <label>날씨</label>
         <div class="segs">
           <div class="seg" onclick="selOpt(this,'weather','clear sky')">맑음</div>
@@ -2343,7 +2343,7 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
       </div>
 
       <!-- 장소 -->
-      <div class="field">
+      <div class="field" id="vidStdLocationField">
         <label>장소 유형</label>
         <div class="segs" id="locationSegs" style="flex-wrap:wrap"><!-- 동적 렌더링 --></div>
 
@@ -2357,7 +2357,7 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
       </div>
 
       <!-- 행인 (선택) -->
-      <div class="field">
+      <div class="field" id="vidStdPasserbyField">
         <label>행인 <span style="font-size:9px;color:var(--ink3);font-weight:400">(선택)</span></label>
         <div class="segs">
           <div class="seg" onclick="selPasserby(this,'a few passersby')">소수</div>
@@ -5436,14 +5436,23 @@ function validateStep(step) {
       if (!S.aspectRatio) missing.push('이미지 비율');
       if (!S.avatars.length) missing.push('등장 아바타');
       // 무드/장소/변주는 비어있어도 통과 — 씬 자체 style만으로도 4컷 생성 가능
-    } else if (S.scene === 'news_anchor' || S.scene === 'news_reporter') {
-      // 영상 모드 — 뉴스 씬: 뉴스 전용 항목만 검증 (계절/시간대/날씨/일반 장소는 사용 안 함)
+    } else if (S.scene === 'news_anchor') {
+      // 영상 모드 — 뉴스룸 앵커: 스튜디오 고정이라 계절/시간/날씨 사용 안 함
       if (!(S.newsHeadline || '').trim()) missing.push('헤드라인');
-      // 뉴스 장소 — 프리셋 선택 또는 직접 입력값이 있으면 통과
       const _newsCustom = (S.newsLocationCustom || '').trim();
       const _hasNewsLoc = (S.newsLocation && S.newsLocation !== 'custom') || (S.newsLocation === 'custom' && _newsCustom) || (!S.newsLocation && _newsCustom);
       if (!_hasNewsLoc) missing.push('뉴스 장소');
-      // 아바타 모드일 때만 출연 아바타 필수 (성별 모드면 자동 생성 가능)
+      if (S.newsAnchorMode === 'avatar' && !S.avatars.length) missing.push('등장 아바타');
+      if (S.angles.filter(Boolean).length < 4) missing.push('카메라 앵글 4개');
+    } else if (S.scene === 'news_reporter') {
+      // 영상 모드 — 현장 기자: 야외 환경이라 계절/시간/날씨 필수
+      if (!(S.newsHeadline || '').trim()) missing.push('헤드라인');
+      const _newsCustom = (S.newsLocationCustom || '').trim();
+      const _hasNewsLoc = (S.newsLocation && S.newsLocation !== 'custom') || (S.newsLocation === 'custom' && _newsCustom) || (!S.newsLocation && _newsCustom);
+      if (!_hasNewsLoc) missing.push('뉴스 장소');
+      if (!S.season)    missing.push('계절');
+      if (!S.timeofday) missing.push('시간대');
+      if (!S.weather)   missing.push('날씨');
       if (S.newsAnchorMode === 'avatar' && !S.avatars.length) missing.push('등장 아바타');
       if (S.angles.filter(Boolean).length < 4) missing.push('카메라 앵글 4개');
     } else if (S.scene === 'news_weather') {
@@ -8490,19 +8499,38 @@ function updateVidNewsFields() {
   const inline = document.getElementById('newsInline');
   const stdLeft = document.getElementById('vidStandardLeft');
 
+  // stdLeft 안 6개 필드 모두 일단 보이도록 복원 (다른 씬에서 숨겨졌을 수 있음)
+  ['vidStdSeasonField','vidStdTimeField','vidStdWeatherField','vidStdLocationField','vidStdPasserbyField','continueRefField'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = '';
+  });
+
   if (!_isNewsScene()) {
     if (inline)  inline.style.display  = 'none';
     if (stdLeft) stdLeft.style.display = '';
     return;
   }
 
-  // 뉴스 씬: 인라인 영역 표시 + 기존 좌측 표준 필드(계절/시간대/날씨/장소유형/행인/참고이미지) 숨김
-  if (inline)  inline.style.display  = '';
-  if (stdLeft) stdLeft.style.display = 'none';
+  // 뉴스 씬: 인라인 영역 표시
+  if (inline) inline.style.display = '';
 
   const isAnchor = S.scene === 'news_anchor';
   const isReporter = S.scene === 'news_reporter';
   const isWeather = S.scene === 'news_weather';
+
+  // 현장 기자(news_reporter)일 때만 stdLeft 보이되 계절/시간대/날씨만 노출
+  // 그 외 뉴스 씬(앵커/기상캐스터)은 stdLeft 통째로 숨김 (스튜디오 환경이라 외부 환경 입력 불필요)
+  if (isReporter) {
+    if (stdLeft) stdLeft.style.display = '';
+    // 표시할 필드: 계절/시간대/날씨
+    // 숨길 필드: 장소 유형/행인/참고 이미지
+    ['vidStdLocationField','vidStdPasserbyField','continueRefField'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+  } else {
+    if (stdLeft) stdLeft.style.display = 'none';
+  }
 
   // 라벨 변경
   const aLbl = document.getElementById('newsAnchorLabel');
@@ -11363,6 +11391,13 @@ function _buildNewsVidPrompt(i, sc, cam, charLock) {
     toneKw = tones[S.newsTone] || tones.calm;
   }
 
+  // 현장 기자 환경 정보 — 야외 보도라 계절/시간대/날씨 반영
+  let reporterCtx = '';
+  if (isReporter) {
+    const parts = [S.season, S.timeofday, S.weather].filter(Boolean);
+    if (parts.length) reporterCtx = parts.join(', ');
+  }
+
   // 기상캐스터 — 날씨 condition 영문 키워드
   let weatherKw = '';
   if (isWeather) {
@@ -11392,6 +11427,7 @@ function _buildNewsVidPrompt(i, sc, cam, charLock) {
   if (locEn) p += `Location: ${locEn}. `;
   p += `${subject}. `;
   if (toneKw) p += `${toneKw}. `;
+  if (reporterCtx) p += `${reporterCtx}. `;
   if (weatherKw) p += `${weatherKw}. `;
   if (isAnchor && S.newsBreaking) p += `Top red banner reads "BREAKING NEWS" in white bold text. `;
   if (isWeather && S.newsWeatherAlert) p += `Top red banner reads "기상특보" in white bold Korean text. `;
