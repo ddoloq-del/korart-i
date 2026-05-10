@@ -2139,6 +2139,18 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
             <div style="font-size:10px;color:var(--ink3);margin-top:6px">선택한 변주 + 개인 설정이 조합되어 4컷에 적용됩니다.</div>
           </div>
 
+          <!-- 이전 4컷 그리드 등록 안내 (다음 4컷 이어 만들기로 들어왔을 때만 표시) -->
+          <div id="continueGridNotice_img" class="field" style="display:none;background:rgba(94,234,212,.06);border:1px solid var(--teal);padding:10px 12px;border-radius:0;margin-bottom:14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <label style="margin:0;color:var(--teal);font-weight:700;font-size:11px;letter-spacing:.04em;text-transform:uppercase">이전 4컷 그리드 등록됨</label>
+              <button class="btn btn-sm btn-ghost" onclick="clearContinueGrid()">제거</button>
+            </div>
+            <div style="display:flex;gap:8px;align-items:flex-start">
+              <div id="continueGridPreview_img" style="width:120px;aspect-ratio:1/1;background:var(--bg3);border:1px solid var(--line);overflow:hidden;flex-shrink:0"></div>
+              <div style="flex:1;font-size:10px;color:var(--ink3);line-height:1.5">선택한 잠금 항목(의상·헤어·배경 등)을 유지하면서 새 4컷이 생성됩니다.<br>참고 이미지는 별도로 업로드 가능합니다.</div>
+            </div>
+          </div>
+
           <!-- 참고 이미지 -->
           <div class="field" id="imgContinueRefField" style="margin-bottom:14px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
@@ -2314,6 +2326,17 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
 
       <!-- ════════ 일반 영상 모드 좌측 필드 (뉴스 씬일 땐 #vidStandardLeft 통째로 숨김) ════════ -->
       <div id="vidStandardLeft">
+      <!-- 이전 4컷 그리드 등록 안내 (다음 4컷 이어 만들기로 들어왔을 때만 표시) -->
+      <div id="continueGridNotice_vid" class="field" style="display:none;background:rgba(94,234,212,.06);border:1px solid var(--teal);padding:10px 12px;border-radius:0">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <label style="margin:0;color:var(--teal);font-weight:700;font-size:11px;letter-spacing:.04em;text-transform:uppercase">이전 4컷 그리드 등록됨</label>
+          <button class="btn btn-sm btn-ghost" onclick="clearContinueGrid()">제거</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-start">
+          <div id="continueGridPreview_vid" style="width:120px;aspect-ratio:1/1;background:var(--bg3);border:1px solid var(--line);overflow:hidden;flex-shrink:0"></div>
+          <div style="flex:1;font-size:10px;color:var(--ink3);line-height:1.5">선택한 잠금 항목(의상·헤어·배경 등)을 유지하면서 새 4컷이 생성됩니다.<br>참고 이미지는 별도로 업로드 가능합니다.</div>
+        </div>
+      </div>
       <!-- 계절 -->
       <div class="field" id="vidStdSeasonField">
         <label>계절</label>
@@ -4741,6 +4764,8 @@ const S = {
 
   // 다음 4컷 이어 만들기 — 통일성 잠금
   continueLocks: { wardrobe: true, hair: true, bg: true, identity: true, expression: false, lighting: true },
+  continueGridDataUrl: null, // 이전 4컷 그리드 dataURL (참고이미지와 별개)
+  continueGridPubUrl: null,  // 이전 4컷 그리드 fal storage CDN URL
 
   sessionImgCost: 0,
   sessionVidCost: 0,
@@ -4832,8 +4857,8 @@ function toggleContinueLock(key) {
 
 // 체크된 항목들을 영문 토큰으로 변환 (이미지 빌더에 주입)
 function _buildContinueLockToken() {
-  // 다음 4컷 모드가 아닐 때 (continueRefPubUrl 없으면) 빈 토큰
-  if (!S.continueRefPubUrl) return '';
+  // 다음 4컷 모드가 아닐 때 (continueGridPubUrl 없으면) 빈 토큰
+  if (!S.continueGridPubUrl) return '';
   if (!S.continueLocks) return '';
   const L = S.continueLocks;
 
@@ -4855,7 +4880,7 @@ function _buildContinueLockToken() {
   if (!L.lighting)   freeParts.push('feel free to use different lighting');
   if (!L.expression) freeParts.push('vary the facial expressions naturally across the 4 panels');
 
-  let token = '\n\nCONTINUATION FROM REFERENCE GRID (CRITICAL — MUST be followed exactly): The provided reference image is a 2x2 grid of 4 previous panels. The new 4 panels MUST continue from these.';
+  let token = '\n\nCONTINUATION FROM REFERENCE GRID (CRITICAL — MUST be followed exactly): The LAST image in image_urls is a 2x2 grid of 4 previously generated panels. The new 4 panels MUST continue from these.';
   if (lockedParts.length) {
     token += ' MAINTAIN: ' + lockedParts.join('; ') + '.';
   }
@@ -4918,35 +4943,19 @@ async function continueWithLockedTraits() {
     });
   }
 
-  // 3) fal storage 업로드
+  // 3) fal storage 업로드 — continueGridPubUrl에 저장 (참고이미지 슬롯과 별개)
   try {
     const blob = dataURLtoBlob(gridDataUrl);
     const pubUrl = await uploadToFalStorage(null, blob, 'continue_grid.png');
-    S.continueRefDataUrl = gridDataUrl;
-    S.continueRefPubUrl = pubUrl;
+    S.continueGridDataUrl = gridDataUrl;
+    S.continueGridPubUrl = pubUrl;
   } catch (e) {
-    toast('참고 이미지 업로드 실패: ' + e.message);
+    toast('이전 4컷 그리드 업로드 실패: ' + e.message);
     return;
   }
 
-  // 4) 참고 이미지 영역 UI 갱신 (이미 업로드돼 보이도록)
-  const previews = ['imgContinueRefPreview', 'continueRefPreview'];
-  previews.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.innerHTML = `<img src="${S.continueRefDataUrl}" style="width:100%;height:100%;object-fit:cover">`;
-      el.style.border = '1px solid var(--teal)';
-    }
-  });
-  ['imgContinueRefClearBtn', 'continueRefClearBtn'].forEach(id => {
-    const btn = document.getElementById(id);
-    if (btn) btn.style.display = '';
-  });
-  // role-area는 자동 노출하지 않음 — '다음 4컷' 모드에서는 lock 토큰이 우선
-  if (typeof _setRefRoleAreaVisible === 'function') {
-    _setRefRoleAreaVisible('img', false);
-    _setRefRoleAreaVisible('vid', false);
-  }
+  // 4) 그리드 등록 안내 박스 갱신 (씬 상세 영역에 표시)
+  if (typeof _updateContinueGridNotice === 'function') _updateContinueGridNotice();
 
   // 5) 씬 상세 단계로 이동
   // 영상 모드: step 3 / 이미지 모드: step 2
@@ -4955,6 +4964,28 @@ async function continueWithLockedTraits() {
     goStep(targetStep);
   }
   toast('✓ 참고 이미지 등록 완료. 씬 상세에서 새 설정 후 생성하세요');
+}
+
+// 그리드 등록 안내 박스 갱신 — continueGridPubUrl 있을 때 표시
+function _updateContinueGridNotice() {
+  const hasGrid = !!(S && S.continueGridPubUrl && S.continueGridDataUrl);
+  ['vid', 'img'].forEach(scope => {
+    const notice = document.getElementById('continueGridNotice_' + scope);
+    const preview = document.getElementById('continueGridPreview_' + scope);
+    if (!notice) return;
+    notice.style.display = hasGrid ? '' : 'none';
+    if (hasGrid && preview) {
+      preview.innerHTML = `<img src="${S.continueGridDataUrl}" style="width:100%;height:100%;object-fit:cover">`;
+    }
+  });
+}
+
+// 그리드 제거
+function clearContinueGrid() {
+  S.continueGridDataUrl = null;
+  S.continueGridPubUrl = null;
+  if (typeof _updateContinueGridNotice === 'function') _updateContinueGridNotice();
+  if (typeof toast === 'function') toast('이전 4컷 그리드를 제거했습니다');
 }
 
 // continue4cutBar 표시/숨김 — 4컷이 다 만들어졌을 때 노출
@@ -5208,6 +5239,7 @@ function updateVidCost() {}
 // 이미지 모드 (4단계) — logical step (0-3) → 실제 panel 매핑
 // 0 → panel0 (아바타), 1 → panel1+stepA, 2 → panel1+stepB, 3 → panel2 (4컷)
 function goStep(n) {
+  if (typeof _updateContinueGridNotice === 'function') _updateContinueGridNotice();
   // 이미지 모드: 단계 범위 차단 (안전장치)
   if (_IS_IMG_MODE && n >= 4) {
     toast('이미지 모드는 4컷까지만');
@@ -8916,7 +8948,7 @@ function _buildRefImageRoleToken(scope) {
   const role = active.getAttribute('data-refrole') || '';
   // 공통: image_urls 안에는 아바타 캐릭터 시트(앞쪽)와 사용자가 업로드한 참고 이미지(마지막)가 함께 들어감
   // 모델이 아바타 시트를 카드/배경으로 잘못 박는 것을 방지하기 위해 "LAST image" 라고 명시
-  const SOURCE_HINT = 'IMPORTANT: The "reference image" mentioned below refers SPECIFICALLY to the LAST image in the provided image_urls (the user-uploaded reference photo, NOT the avatar/character reference sheet). The avatar/character reference is for likeness only and MUST NOT be used as the source of the visual element described below.';
+  const SOURCE_HINT = 'IMPORTANT: image_urls may contain multiple images: avatar/character reference sheets (for likeness only), an optional user-uploaded reference photo, and an optional previous 4-panel grid (for continuation). The "reference image" mentioned below refers SPECIFICALLY to the user-uploaded reference photo. Do NOT use the avatar/character sheet or the 4-panel grid as the source of the visual element described below.';
   if (role === 'bg') {
     return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): ' + SOURCE_HINT + ' The user-uploaded reference image (the LAST one in image_urls) MUST be used as the BACKGROUND of the scene. The entire backdrop visible behind all subjects MUST come from this reference image. Do NOT place subjects in any other environment. Do NOT use the avatar reference for the background.';
   }
@@ -10912,6 +10944,7 @@ async function generateSketchLow() {
   if (S.continueRefDataUrl && S.continueRefPubUrl) {
     refImgs.push(S.continueRefPubUrl);
   }
+  if (S.continueGridPubUrl) refImgs.push(S.continueGridPubUrl);
   const useRef = refImgs.length > 0;
 
   document.getElementById('quad').innerHTML = `
@@ -11012,6 +11045,7 @@ async function upgradeSketch(targetQuality) {
   // 아바타 레퍼런스 + 스케치 결과 url 둘 다 image_urls에 포함
   const refImgs = S.avatars.filter(av => av.imgUrl).map(av => av.imgUrl);
   if (S.continueRefDataUrl && S.continueRefPubUrl) refImgs.push(S.continueRefPubUrl);
+  if (S.continueGridPubUrl) refImgs.push(S.continueGridPubUrl);
   refImgs.push(S.sketchPubUrl);  // 스케치 결과를 마지막 input으로
 
   // 디버그: 실제 url 종류 확인
@@ -11176,6 +11210,7 @@ async function generateOneCut() {
         S.continueRefPubUrl = await uploadToFalStorage(null, blob, 'continue_ref.jpg');
       }
       refImgs.push(S.continueRefPubUrl);
+      if (S.continueGridPubUrl) refImgs.push(S.continueGridPubUrl);
     } catch (e) { log('warn', '참고 이미지 업로드 실패: ' + e.message); }
   }
   const useRef = refImgs.length > 0;
@@ -11378,6 +11413,7 @@ async function generateImage() {
       log('warn', '이전 컷 레퍼런스 업로드 실패 — 아바타만 사용: ' + e.message);
     }
   }
+  if (S.continueGridPubUrl) refImgs.push(S.continueGridPubUrl);
   const useRef = refImgs.length > 0;
 
   document.getElementById('quad').innerHTML = `
