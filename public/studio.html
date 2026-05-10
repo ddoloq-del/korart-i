@@ -3622,6 +3622,7 @@ const SCENES = {
 
 // 영상 모드 카테고리 그룹 정의 (탭 UI용)
 const SCENE_GROUPS = {
+  all:        { ko: '전체',        en: 'ALL' },
   drama:      { ko: '드라마',       en: 'DRAMA' },
   thriller:   { ko: '스릴러',     en: 'THRILLER' },
   content:    { ko: '콘텐츠',     en: 'CONTENT' },
@@ -3632,6 +3633,7 @@ const SCENE_GROUPS = {
 
 // 이미지 모드 카테고리 그룹 정의 (탭 UI용)
 const IMAGE_SCENE_GROUPS = {
+  all:       { ko: '전체', en: 'ALL' },
   editorial: { ko: '화보' },
   job:       { ko: '직업 체험' },
   lifestyle: { ko: '라이프스타일' },
@@ -7761,7 +7763,7 @@ function selectEra(key) {
 
 function ensureImageModeState() {
   if (!_IS_IMG_MODE) return;
-  if (typeof S.imgActiveCategory === 'undefined') S.imgActiveCategory = 'editorial';
+  if (typeof S.imgActiveCategory === 'undefined') S.imgActiveCategory = 'all';
   if (typeof S.imgMood === 'undefined')           S.imgMood = '';
   if (typeof S.imgMoodCustom === 'undefined')     S.imgMoodCustom = '';
   if (typeof S.imgLocation === 'undefined')       S.imgLocation = '';
@@ -7821,7 +7823,7 @@ function renderImageScenes() {
 
   // 포토카드 그리드 (현재 선택된 카테고리만 표시) — 영상 모드 scene-card 디자인 그대로 사용
   const cards = Object.entries(SCENES_IMAGE)
-    .filter(([k, sc]) => sc.group === S.imgActiveCategory)
+    .filter(([k, sc]) => S.imgActiveCategory === 'all' ? true : sc.group === S.imgActiveCategory)
     .map(([key, sc]) => {
       const isActive = S.scene === key;
       // 짧은 스타일 한 줄 (style 키워드 앞 3개)
@@ -8464,7 +8466,7 @@ function renderScenes() {
     news_anchor:'#dc2626', news_reporter:'#f97316', news_weather:'#0ea5e9',
   };
   // 활성 카테고리 이불 초기화 (기본: drama)
-  if (typeof S.activeVidCategory === 'undefined') S.activeVidCategory = 'drama';
+  if (typeof S.activeVidCategory === 'undefined') S.activeVidCategory = 'all';
   // 카테고리 탭 HTML 생성
   const tabsHtml = `
     <div id="vidCatTabs" style="grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line)">
@@ -8481,7 +8483,10 @@ function renderScenes() {
 
   const customs = loadSceneLib();
   // 현재 카테고리에 속하는 씬만 필터
-  const filteredDefaults = defaults.filter(s => (SCENES[s.key] && SCENES[s.key].group) === S.activeVidCategory);
+  // 'all' 카테고리: 모든 씬 통과 / 그 외: group 일치만 필터
+  const filteredDefaults = S.activeVidCategory === 'all'
+    ? defaults.filter(s => SCENES[s.key])
+    : defaults.filter(s => (SCENES[s.key] && SCENES[s.key].group) === S.activeVidCategory);
   let html = tabsHtml + filteredDefaults.map(s => {
     const sc = SCENES[s.key] || {};
     const vidStyle = sc.vidStyle || '';
