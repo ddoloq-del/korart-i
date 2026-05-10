@@ -11865,8 +11865,9 @@ function _buildNewsVidPrompt(i, sc, cam, charLock) {
   const headline = (S.newsHeadline || '').trim();
   const channel  = (S.newsChannel  || '').trim();
 
-  // 골격
-  let p = `${sc.style}. `;
+  // 골격 — vidStyle 우선, 없으면 style 사용 (영상 길이 절약)
+  const newsSceneStyle = (sc && (sc.vidStyle || sc.style)) || '';
+  let p = `${newsSceneStyle}. `;
   if (locEn) p += `Location: ${locEn}. `;
   p += `${subject}. `;
   if (toneKw) p += `${toneKw}. `;
