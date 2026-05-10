@@ -2160,10 +2160,11 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
             <div id="imgContinueRefRoleArea" style="margin-top:10px;display:none">
               <div style="font-size:10px;color:var(--ink3);margin-bottom:5px">이 이미지의 역할 <span style="font-size:9px">(선택)</span></div>
               <div class="segs" style="flex-wrap:wrap" data-refrole-segs="img">
-                <div class="seg" data-refrole="bg"     onclick="setRefImgRole('img','bg')">배경</div>
-                <div class="seg" data-refrole="phone"  onclick="setRefImgRole('img','phone')">핸드폰 속 화면</div>
-                <div class="seg" data-refrole="tv"     onclick="setRefImgRole('img','tv')">TV 속 화면</div>
-                <div class="seg" data-refrole="custom" onclick="setRefImgRole('img','custom')">개인 설정</div>
+                <div class="seg" data-refrole="bg"        onclick="setRefImgRole('img','bg')">배경</div>
+                <div class="seg" data-refrole="phone"     onclick="setRefImgRole('img','phone')">핸드폰 속 화면</div>
+                <div class="seg" data-refrole="tv"        onclick="setRefImgRole('img','tv')">TV 속 화면</div>
+                <div class="seg" data-refrole="news_card" onclick="setRefImgRole('img','news_card')">뉴스 카드</div>
+                <div class="seg" data-refrole="custom"    onclick="setRefImgRole('img','custom')">개인 설정</div>
               </div>
               <input id="imgContinueRefRoleCustomInput" type="text" maxlength="80" placeholder="이 참고 이미지의 역할을 직접 입력하세요" style="display:none;margin-top:6px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:8px 10px;color:var(--ink);font-size:12px">
             </div>
@@ -2397,10 +2398,11 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
         <div id="vidContinueRefRoleArea" style="margin-top:10px;display:none">
           <div style="font-size:10px;color:var(--ink3);margin-bottom:5px">이 이미지의 역할 <span style="font-size:9px">(선택)</span></div>
           <div class="segs" style="flex-wrap:wrap" data-refrole-segs="vid">
-            <div class="seg" data-refrole="bg"     onclick="setRefImgRole('vid','bg')">배경</div>
-            <div class="seg" data-refrole="phone"  onclick="setRefImgRole('vid','phone')">핸드폰 속 화면</div>
-            <div class="seg" data-refrole="tv"     onclick="setRefImgRole('vid','tv')">TV 속 화면</div>
-            <div class="seg" data-refrole="custom" onclick="setRefImgRole('vid','custom')">개인 설정</div>
+            <div class="seg" data-refrole="bg"        onclick="setRefImgRole('vid','bg')">배경</div>
+            <div class="seg" data-refrole="phone"     onclick="setRefImgRole('vid','phone')">핸드폰 속 화면</div>
+            <div class="seg" data-refrole="tv"        onclick="setRefImgRole('vid','tv')">TV 속 화면</div>
+            <div class="seg" data-refrole="news_card" onclick="setRefImgRole('vid','news_card')">뉴스 카드</div>
+            <div class="seg" data-refrole="custom"    onclick="setRefImgRole('vid','custom')">개인 설정</div>
           </div>
           <input id="vidContinueRefRoleCustomInput" type="text" maxlength="80" placeholder="이 참고 이미지의 역할을 직접 입력하세요" style="display:none;margin-top:6px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:8px 10px;color:var(--ink);font-size:12px">
         </div>
@@ -2662,10 +2664,11 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
       <div id="avRefImgRoleArea" style="margin-top:10px;display:none">
         <div style="font-size:10px;color:var(--ink3);margin-bottom:5px">이 이미지의 역할 <span style="font-size:9px">(선택)</span></div>
         <div class="segs" style="flex-wrap:wrap" data-refrole-segs="av">
-          <div class="seg" data-refrole="bg"     onclick="setRefImgRole('av','bg')">배경</div>
-          <div class="seg" data-refrole="phone"  onclick="setRefImgRole('av','phone')">핸드폰 속 화면</div>
-          <div class="seg" data-refrole="tv"     onclick="setRefImgRole('av','tv')">TV 속 화면</div>
-          <div class="seg" data-refrole="custom" onclick="setRefImgRole('av','custom')">개인 설정</div>
+          <div class="seg" data-refrole="bg"        onclick="setRefImgRole('av','bg')">배경</div>
+          <div class="seg" data-refrole="phone"     onclick="setRefImgRole('av','phone')">핸드폰 속 화면</div>
+          <div class="seg" data-refrole="tv"        onclick="setRefImgRole('av','tv')">TV 속 화면</div>
+          <div class="seg" data-refrole="news_card" onclick="setRefImgRole('av','news_card')">뉴스 카드</div>
+          <div class="seg" data-refrole="custom"    onclick="setRefImgRole('av','custom')">개인 설정</div>
         </div>
         <input id="avRefImgRoleCustomInput" type="text" maxlength="80" placeholder="이 참고 이미지의 역할을 직접 입력하세요" style="display:none;margin-top:6px;width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:0;padding:8px 10px;color:var(--ink);font-size:12px">
       </div>
@@ -8744,20 +8747,23 @@ function _buildRefImageRoleToken(scope) {
   if (!active) return '';
   const role = active.getAttribute('data-refrole') || '';
   if (role === 'bg') {
-    return ' Reference image usage: use the reference image as the background of the scene.';
+    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): The provided reference image MUST be used as the BACKGROUND of the scene. The entire backdrop visible behind all subjects MUST come from the reference image. Do NOT place subjects in any other environment.';
   }
   if (role === 'phone') {
-    return ' Reference image usage: display the reference image as the screen content inside a smartphone shown in the scene.';
+    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): A smartphone MUST be prominently visible in the scene (held in hand, on a table, or being looked at), and the reference image MUST be displayed as the screen content of that smartphone. The phone screen must clearly show the reference image, sharp and readable.';
   }
   if (role === 'tv') {
-    return ' Reference image usage: display the reference image as the screen content inside a TV shown in the scene.';
+    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): A television screen MUST be prominently visible in the scene (wall-mounted, on a stand, or in the background), and the reference image MUST be displayed as the screen content of that TV. The TV screen must clearly show the reference image as if it is being broadcast.';
+  }
+  if (role === 'news_card') {
+    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): A small rectangular broadcast TV news graphic card MUST be placed beside the main subject (in the upper-right or upper-left corner area of the frame). The reference image MUST be displayed as the photo content inside this news graphic card. The card has a clean modern broadcast TV news design with a thin colored border. The main subject (such as a news anchor or reporter) remains the primary focus on the opposite side of the frame.';
   }
   if (role === 'custom') {
     const inputId = scope === 'img' ? 'imgContinueRefRoleCustomInput' : 'vidContinueRefRoleCustomInput';
     const txt = (document.getElementById(inputId)?.value || '').trim();
     if (!txt) return '';
     const safe = txt.replace(/`/g, "'");
-    return ' Reference image usage: ' + safe;
+    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): ' + safe;
   }
   return '';
 }
@@ -8769,13 +8775,22 @@ function _buildAvRefImageRoleToken() {
   const active = segs.querySelector('.seg.active');
   if (!active) return '';
   const role = active.getAttribute('data-refrole') || '';
-  if (role === 'bg')    return ' Reference image usage: use the reference image as the background of the scene.';
-  if (role === 'phone') return ' Reference image usage: display the reference image as the screen content inside a smartphone shown in the scene.';
-  if (role === 'tv')    return ' Reference image usage: display the reference image as the screen content inside a TV shown in the scene.';
+  if (role === 'bg') {
+    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): The provided reference image MUST be used as the BACKGROUND of the scene. The entire backdrop visible behind all subjects MUST come from the reference image.';
+  }
+  if (role === 'phone') {
+    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): A smartphone MUST be prominently visible in the scene, and the reference image MUST be displayed as the screen content of that smartphone, sharp and clearly readable.';
+  }
+  if (role === 'tv') {
+    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): A television screen MUST be prominently visible in the scene, and the reference image MUST be displayed as the screen content of that TV.';
+  }
+  if (role === 'news_card') {
+    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): A small rectangular broadcast TV news graphic card MUST be placed beside the main subject (in the upper-right or upper-left corner area of the frame). The reference image MUST be displayed as the photo content inside this news graphic card. Clean modern broadcast TV news design.';
+  }
   if (role === 'custom') {
     const txt = (document.getElementById('avRefImgRoleCustomInput')?.value || '').trim();
     if (!txt) return '';
-    return ' Reference image usage: ' + txt.replace(/`/g, "'");
+    return '\n\nREFERENCE IMAGE ROLE (CRITICAL — MUST be followed exactly): ' + txt.replace(/`/g, "'");
   }
   return '';
 }
