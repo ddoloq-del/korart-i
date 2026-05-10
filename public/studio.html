@@ -12826,48 +12826,47 @@ async function generateCutVideo(i) {
           if (!spk || spk === '') {
             log('info', `${elTag} 대사 입력되었으나 화자 미선택 — prompt에서 제외`);
           } else {
-            // 화자별 표현 — 아바타 나이 정보 포함 (음성 일관성 도움)
-            // - woman/man: '라고 30대 여자가 말한 뒤 입을 다문다'
-            // - narrator: 'Female narrator (in her 30s) voice-over: "..."'
-            // - av.age 없으면 나이 부분 빼고 기본 형식
+            // 화자별 표현 — 한국어 + 영문 voice 태그 하이브리드 (Kling 립싱크 + 음성 매핑)
+            // - woman/man: '"..."라고 말한 뒤, 입을 다문다 (30s female voice)'
+            // - narrator: 영문 유지 ('Female narrator (in her 30s) voice-over: "..."')
             //
             // av.age 형식: 'in their 20s'/'in their 30s'/'teenager, around 15...'/'elderly, in their 80s'
             const _avAge = (av.age || '').toString();
-            let _ageKo = '';  // 한국어용 (예: '30대')
-            let _ageEn = '';  // 영문 narrator용 (예: 'in her 30s' / 'in his 30s')
+            let _voiceAge = '';  // 영문 voice 태그용 나이 (예: '30s' / 'teens' / 'young' / '')
+            let _narAge = '';    // narrator용 영문 (예: 'in her 30s' / 'in his teens')
             if (_avAge.includes('teenager')) {
-              _ageKo = '10대';
-              _ageEn = (spk === 'narrator-woman') ? 'in her teens' : 'in his teens';
+              _voiceAge = 'teens';
+              _narAge = (spk === 'narrator-woman') ? 'in her teens' : 'in his teens';
             } else if (_avAge.includes('elderly')) {
-              _ageKo = '80대';
-              _ageEn = (spk === 'narrator-woman') ? 'in her 80s' : 'in his 80s';
+              _voiceAge = '80s';
+              _narAge = (spk === 'narrator-woman') ? 'in her 80s' : 'in his 80s';
             } else if (_avAge.includes('child')) {
-              _ageKo = '어린';   // '어린 여자/남자' (어린이는 narrator 안 어울림)
-              _ageEn = (spk === 'narrator-woman') ? 'young' : 'young';
+              _voiceAge = 'young';
+              _narAge = 'young';
             } else if (_avAge.includes('baby')) {
-              // 아기는 화자 부적절 — 나이 정보 없이
-              _ageKo = '';
-              _ageEn = '';
+              // 아기는 화자 부적절 — 나이 생략
+              _voiceAge = '';
+              _narAge = '';
             } else {
               const _m = _avAge.match(/(\d+)/);
               if (_m) {
-                _ageKo = _m[1] + '대';
-                _ageEn = (spk === 'narrator-woman') ? `in her ${_m[1]}s` : `in his ${_m[1]}s`;
+                _voiceAge = _m[1] + 's';
+                _narAge = (spk === 'narrator-woman') ? `in her ${_m[1]}s` : `in his ${_m[1]}s`;
               }
             }
 
             let lineToken;
             if (spk === 'woman') {
-              const _agePart = _ageKo ? `${_ageKo} ` : '';
-              lineToken = `"${inp.line.trim()}"라고 ${_agePart}여자가 말한 뒤 입을 다문다`;
+              const _voiceTag = _voiceAge ? ` (${_voiceAge} female voice)` : ` (female voice)`;
+              lineToken = `"${inp.line.trim()}"라고 말한 뒤, 입을 다문다${_voiceTag}`;
             } else if (spk === 'man') {
-              const _agePart = _ageKo ? `${_ageKo} ` : '';
-              lineToken = `"${inp.line.trim()}"라고 ${_agePart}남자가 말한 뒤 입을 다문다`;
+              const _voiceTag = _voiceAge ? ` (${_voiceAge} male voice)` : ` (male voice)`;
+              lineToken = `"${inp.line.trim()}"라고 말한 뒤, 입을 다문다${_voiceTag}`;
             } else if (spk === 'narrator-woman') {
-              const _agePart = _ageEn ? ` (${_ageEn})` : '';
+              const _agePart = _narAge ? ` (${_narAge})` : '';
               lineToken = `Female narrator${_agePart} voice-over: "${inp.line.trim()}" then a brief silent pause`;
             } else if (spk === 'narrator-man') {
-              const _agePart = _ageEn ? ` (${_ageEn})` : '';
+              const _agePart = _narAge ? ` (${_narAge})` : '';
               lineToken = `Male narrator${_agePart} voice-over: "${inp.line.trim()}" then a brief silent pause`;
             } else {
               lineToken = `"${inp.line.trim()}"라고 말한 뒤 입을 다문다`;
