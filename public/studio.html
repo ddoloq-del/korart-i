@@ -2517,6 +2517,25 @@ body[data-current-mode="video"] .korart-subnav-item[data-mode="video"] { color: 
         <button class="btn btn-sm" onclick="downloadGrid()" title="원본 4컷 통합 이미지 저장">4컷 그리드 전체 저장</button>
       </div>
 
+      <!-- 다음 4컷 만들기 — 통일성 잠금 -->
+      <div id="continue4cutBar" style="display:none;margin-top:14px;padding:12px 14px;background:rgba(94,234,212,.06);border:1px solid var(--teal);border-radius:0">
+        <div style="font-size:11px;color:var(--teal);font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px">다음 4컷 이어 만들기</div>
+        <div style="font-size:10px;color:var(--ink3);margin-bottom:10px;line-height:1.5">현재 4컷을 참고로 통일성을 유지하면서 새 4컷을 만듭니다. 잠글 항목을 선택하세요.</div>
+        <div id="continueLockSegs" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+          <div class="seg active" data-cl="wardrobe"  onclick="toggleContinueLock('wardrobe')">의상</div>
+          <div class="seg active" data-cl="hair"      onclick="toggleContinueLock('hair')">헤어</div>
+          <div class="seg active" data-cl="bg"        onclick="toggleContinueLock('bg')">배경</div>
+          <div class="seg active" data-cl="identity"  onclick="toggleContinueLock('identity')">인물</div>
+          <div class="seg"        data-cl="expression" onclick="toggleContinueLock('expression')">표정</div>
+          <div class="seg active" data-cl="lighting"  onclick="toggleContinueLock('lighting')">조명</div>
+        </div>
+        <div style="font-size:9px;color:var(--ink3);margin-bottom:10px;line-height:1.5">
+          · 잠금 항목: 새 4컷에 그대로 유지<br>
+          · 해제 항목: 씬 상세에서 새로 설정한 값 사용 (별도 설정 안 하면 자유롭게 변경)
+        </div>
+        <button class="btn btn-sm" onclick="continueWithLockedTraits()" style="width:100%;background:var(--teal);color:#000;border-color:var(--teal);font-weight:700">+ 다음 4컷 만들기</button>
+      </div>
+
       <!-- 모드 토글 (일반 / 스케치->업그레이드) -->
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;padding:8px 10px;background:rgba(255,107,157,.06);border:1px solid var(--pink);border-radius:0">
         <label style="font-size:9px;color:var(--pink);font-weight:700;letter-spacing:.05em;text-transform:uppercase">모드</label>
@@ -4720,6 +4739,9 @@ const S = {
   continueRefDataUrl: null,  // 메모리용 dataURL
   continueRefPubUrl: null,   // fal storage 업로드 후 CDN URL
 
+  // 다음 4컷 이어 만들기 — 통일성 잠금
+  continueLocks: { wardrobe: true, hair: true, bg: true, identity: true, expression: false, lighting: true },
+
   sessionImgCost: 0,
   sessionVidCost: 0,
 };
@@ -4797,6 +4819,152 @@ function downloadAvatarImage() {
 }
 
 // 4컷 그리드 통합 이미지 저장
+// ============================================
+// 다음 4컷 이어 만들기 — 통일성 잠금
+// ============================================
+function toggleContinueLock(key) {
+  if (!S.continueLocks) S.continueLocks = { wardrobe: true, hair: true, bg: true, identity: true, expression: false, lighting: true };
+  S.continueLocks[key] = !S.continueLocks[key];
+  // UI active 토글
+  const seg = document.querySelector(`#continueLockSegs [data-cl="${key}"]`);
+  if (seg) seg.classList.toggle('active', !!S.continueLocks[key]);
+}
+
+// 체크된 항목들을 영문 토큰으로 변환 (이미지 빌더에 주입)
+function _buildContinueLockToken() {
+  // 다음 4컷 모드가 아닐 때 (continueRefPubUrl 없으면) 빈 토큰
+  if (!S.continueRefPubUrl) return '';
+  if (!S.continueLocks) return '';
+  const L = S.continueLocks;
+
+  // 잠긴 항목들 — 그대로 유지
+  const lockedParts = [];
+  if (L.identity)   lockedParts.push('the SAME person with identical face, body type, and identifying features');
+  if (L.wardrobe)   lockedParts.push('the EXACT same outfit, clothing items, colors, and accessories');
+  if (L.hair)       lockedParts.push('the EXACT same hairstyle, hair color, hair length, and parting');
+  if (L.bg)         lockedParts.push('the EXACT same background, location, and environment');
+  if (L.lighting)   lockedParts.push('the SAME lighting setup, color grading, and overall mood');
+  if (L.expression) lockedParts.push('similar facial expression and emotional tone');
+
+  // 해제된 항목들 — 자유 (사용자가 씬 상세에서 새로 정함)
+  const freeParts = [];
+  if (!L.identity)   freeParts.push('feel free to use a DIFFERENT person');
+  if (!L.wardrobe)   freeParts.push('feel free to change the wardrobe and accessories');
+  if (!L.hair)       freeParts.push('feel free to change the hairstyle');
+  if (!L.bg)         freeParts.push('the background should change to match the new scene settings (do NOT copy the reference background)');
+  if (!L.lighting)   freeParts.push('feel free to use different lighting');
+  if (!L.expression) freeParts.push('vary the facial expressions naturally across the 4 panels');
+
+  let token = '\n\nCONTINUATION FROM REFERENCE GRID (CRITICAL — MUST be followed exactly): The provided reference image is a 2x2 grid of 4 previous panels. The new 4 panels MUST continue from these.';
+  if (lockedParts.length) {
+    token += ' MAINTAIN: ' + lockedParts.join('; ') + '.';
+  }
+  if (freeParts.length) {
+    token += ' CHANGE: ' + freeParts.join('; ') + '.';
+  }
+  token += ' Generate fresh new 4 panels with new camera angles and compositions while strictly following the MAINTAIN rules.';
+  return token;
+}
+
+// '다음 4컷 만들기' 버튼 — 4컷 그리드 합성 + 업로드 + 씬 상세 단계로 이동
+async function continueWithLockedTraits() {
+  if (!S.cutDataUrls || !S.cutDataUrls.some(u => !!u)) {
+    toast('먼저 4컷을 생성해주세요');
+    return;
+  }
+  // 1) 4컷이 다 있는지 확인
+  const validCuts = S.cutDataUrls.filter(u => !!u);
+  if (validCuts.length < 4) {
+    toast('4컷이 모두 생성되어야 이어서 만들 수 있습니다');
+    return;
+  }
+  // 2) 그리드 PNG 합성 (downloadGrid 로직 재활용 — 단, 다운로드 X, dataURL만 추출)
+  toast('현재 4컷을 참고 이미지로 등록 중...');
+  let gridDataUrl;
+  if (S.gridDataUrl) {
+    // 이미 합성된 그리드가 있으면 그대로 사용
+    gridDataUrl = S.gridDataUrl;
+  } else {
+    // 4컷 합성
+    gridDataUrl = await new Promise((resolve, reject) => {
+      const firstImg = new Image();
+      firstImg.onload = () => {
+        const cellW = firstImg.naturalWidth;
+        const cellH = firstImg.naturalHeight;
+        const W = cellW * 2;
+        const H = cellH * 2;
+        const c = document.createElement('canvas');
+        c.width = W; c.height = H;
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, W, H);
+        let loaded = 0;
+        S.cutDataUrls.forEach((url, i) => {
+          if (!url) { loaded++; if (loaded === 4) resolve(c.toDataURL('image/png')); return; }
+          const img = new Image();
+          img.onload = () => {
+            const x = (i % 2) * cellW;
+            const y = Math.floor(i / 2) * cellH;
+            ctx.drawImage(img, x, y, cellW, cellH);
+            loaded++;
+            if (loaded === 4) resolve(c.toDataURL('image/png'));
+          };
+          img.onerror = () => { loaded++; if (loaded === 4) resolve(c.toDataURL('image/png')); };
+          img.src = url;
+        });
+      };
+      firstImg.onerror = reject;
+      firstImg.src = S.cutDataUrls.find(u => !!u);
+    });
+  }
+
+  // 3) fal storage 업로드
+  try {
+    const blob = dataURLtoBlob(gridDataUrl);
+    const pubUrl = await uploadToFalStorage(null, blob, 'continue_grid.png');
+    S.continueRefDataUrl = gridDataUrl;
+    S.continueRefPubUrl = pubUrl;
+  } catch (e) {
+    toast('참고 이미지 업로드 실패: ' + e.message);
+    return;
+  }
+
+  // 4) 참고 이미지 영역 UI 갱신 (이미 업로드돼 보이도록)
+  const previews = ['imgContinueRefPreview', 'continueRefPreview'];
+  previews.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.innerHTML = `<img src="${S.continueRefDataUrl}" style="width:100%;height:100%;object-fit:cover">`;
+      el.style.border = '1px solid var(--teal)';
+    }
+  });
+  ['imgContinueRefClearBtn', 'continueRefClearBtn'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.style.display = '';
+  });
+  // role-area는 자동 노출하지 않음 — '다음 4컷' 모드에서는 lock 토큰이 우선
+  if (typeof _setRefRoleAreaVisible === 'function') {
+    _setRefRoleAreaVisible('img', false);
+    _setRefRoleAreaVisible('vid', false);
+  }
+
+  // 5) 씬 상세 단계로 이동
+  // 영상 모드: step 3 / 이미지 모드: step 2
+  const targetStep = (typeof _IS_IMG_MODE !== 'undefined' && _IS_IMG_MODE) ? 2 : 3;
+  if (typeof goStep === 'function') {
+    goStep(targetStep);
+  }
+  toast('✓ 참고 이미지 등록 완료. 씬 상세에서 새 설정 후 생성하세요');
+}
+
+// continue4cutBar 표시/숨김 — 4컷이 다 만들어졌을 때 노출
+function _updateContinue4cutBarVisibility() {
+  const bar = document.getElementById('continue4cutBar');
+  if (!bar) return;
+  const hasAll4 = (S && S.cutDataUrls) ? S.cutDataUrls.filter(u => !!u).length === 4 : false;
+  bar.style.display = hasAll4 ? '' : 'none';
+}
+
 function downloadGrid() {
   if (S.gridDataUrl) {
     downloadImage(S.gridDataUrl, `korart_grid_${Date.now()}.png`);
@@ -9964,7 +10132,7 @@ TIME PERIOD: ${eraKeyword}.
 ${variations ? '4-PANEL VARIATIONS: ' + variations + '.' : '4-PANEL VARIATIONS: natural variety of best shots, slight subtle variations.'}
 ${cutDescs ? 'CUT DETAILS: ' + cutDescs + '.' : ''}
 ${extra ? 'ADDITIONAL: ' + extra + '.' : ''}
-All 4 panels share consistent subjects and core concept. High-quality professional photography.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildRefImageRoleToken('img')}`.trim();
+All 4 panels share consistent subjects and core concept. High-quality professional photography.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildRefImageRoleToken('img')}${_buildContinueLockToken()}`.trim();
 }
 
 // 이미지 모드 프롬프트 빌더 (async — API용, 한글 번역 포함)
@@ -10147,7 +10315,7 @@ TIME PERIOD: ${eraKeyword}.
 ${variations ? '4-PANEL VARIATIONS: ' + variations + '.' : '4-PANEL VARIATIONS: natural variety of best shots, slight subtle variations.'}
 ${cutDescs ? 'CUT DETAILS: ' + cutDescs + '.' : ''}
 ${extraEn ? 'ADDITIONAL: ' + extraEn + '.' : ''}
-All 4 panels share consistent subjects and core concept. High-quality professional photography.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildRefImageRoleToken('img')}`.trim();
+All 4 panels share consistent subjects and core concept. High-quality professional photography.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildRefImageRoleToken('img')}${_buildContinueLockToken()}`.trim();
 }
 
 // 이미지 모드 1컷 프롬프트 빌더 — 단일 패널으로 생성
@@ -10232,7 +10400,7 @@ ${moodKeywords ? 'MOOD: ' + moodKeywords + '.' : ''}
 ${locEn ? 'LOCATION: ' + locEn + '.' : ''}
 TIME PERIOD: ${eraKeyword}.
 ${extraEn ? 'ADDITIONAL: ' + extraEn + '.' : ''}
-High-quality professional photography. Single frame only — do NOT split into multiple panels or grid.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildRefImageRoleToken('img')}`.trim();
+High-quality professional photography. Single frame only — do NOT split into multiple panels or grid.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildRefImageRoleToken('img')}${_buildContinueLockToken()}`.trim();
 }
 
 // ────────────────────────────────────────────────────────────
@@ -10334,7 +10502,7 @@ TIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.
 ENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}
 CAMERA ANGLES: ${angleDesc}.${extra ? '\nADDITIONAL: ' + extra + '.' : ''}
 WARDROBE: All characters wear clothing appropriate for ${S.season} weather and ${loc}. Outfits should match the season, weather, and environment naturally.
-All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildNewsImageOverlayTokens({perPanel:true})}${_buildRefImageRoleToken('vid')}`.trim();
+All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildNewsImageOverlayTokens({perPanel:true})}${_buildRefImageRoleToken('vid')}${_buildContinueLockToken()}`.trim();
 }
 
 // async 버전 — 실제 API 전송용 (한글 → 영어 번역)
@@ -10467,7 +10635,7 @@ TIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.
 ENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}
 CAMERA ANGLES: ${angleDesc}.${extraEn ? '\nADDITIONAL: ' + extraEn + '.' : ''}
 WARDROBE: All characters wear clothing appropriate for ${S.season} weather and ${locEn}. Outfits should match the season, weather, and environment naturally.
-All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildNewsImageOverlayTokens({perPanel:true})}${_buildRefImageRoleToken('vid')}`.trim();
+All 4 panels share identical subjects, lighting, and location. Same moment, different angles. Korean drama cinematic photography, professional film quality.${(function(){const k = (typeof _getVidStyleKeyword === 'function') ? _getVidStyleKeyword() : ''; return k ? '\nART STYLE: ' + k + '.' : '';})()}${_buildNewsImageOverlayTokens({perPanel:true})}${_buildRefImageRoleToken('vid')}${_buildContinueLockToken()}`.trim();
 }
 
 function updatePromptPreview() {
@@ -10939,6 +11107,7 @@ async function _displayQuadFromUrl(url) {
 
   const dlBar = document.getElementById('quadDownloadBar');
   if (dlBar) dlBar.style.display = 'block';
+      if (typeof _updateContinue4cutBarVisibility === 'function') _updateContinue4cutBarVisibility();
   const wrap = document.getElementById('cutCtrlWrap');
   if (wrap) wrap.style.display = 'block';
   const goBtn = document.getElementById('goVidBtn');
@@ -11122,7 +11291,7 @@ function buildOneCutPrompt(i) {
   const angle = (S.angles && S.angles[i]) || '';
   const cutDesc = (S.cutDescriptions && S.cutDescriptions[i]) || '';
   const extra = document.getElementById('extraPrompt')?.value.trim() || '';
-  return `Create a single Korean drama scene image, cinematic photo, no panels.\n${charDesc ? 'CHARACTERS: ' + charDesc + '.\n' : ''}VISUAL STYLE: ${sc.style}.\nTIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.\nENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}\nCAMERA ANGLE: ${angle}${cutDesc ? ' (' + cutDesc + ')' : ''}.${extra ? '\nEXTRA: ' + extra : ''}${_buildNewsImageOverlayTokens()}${_buildRefImageRoleToken('vid')}`;
+  return `Create a single Korean drama scene image, cinematic photo, no panels.\n${charDesc ? 'CHARACTERS: ' + charDesc + '.\n' : ''}VISUAL STYLE: ${sc.style}.\nTIME PERIOD: ${ERA_KEYWORDS[S.era] || ERA_KEYWORDS.modern}.\nENVIRONMENT: ${bgDesc}.${personDesc ? '\nPEOPLE: ' + personDesc + '.' : ''}\nCAMERA ANGLE: ${angle}${cutDesc ? ' (' + cutDesc + ')' : ''}.${extra ? '\nEXTRA: ' + extra : ''}${_buildNewsImageOverlayTokens()}${_buildRefImageRoleToken('vid')}${_buildContinueLockToken()}`;
 }
 
 // API용 (한글 -> 영문 번역) — buildImagePromptForApi 패턴
