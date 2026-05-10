@@ -11294,7 +11294,7 @@ function renderQuad() {
     const i = (typeof _oneCutIdx === 'number') ? _oneCutIdx : 0;
     const url = S.cutDataUrls[i];
     quad.style.gridTemplateColumns = '1fr';
-    quad.style.aspectRatio = (S.aspectRatio === '9:16') ? '9/16' : (S.aspectRatio === '1:1' ? '1/1' : '16/9');
+    quad.style.aspectRatio = (typeof getQuadCssAspect === 'function') ? getQuadCssAspect() : '16/9';
     quad.innerHTML = `
       <div class="qcell" style="${!S.cutApproval[i] ? 'opacity:.4' : ''}">
         ${url ? `<img src="${url}">` : '<div style="background:transparent;width:100%;height:100%"></div>'}
@@ -11309,7 +11309,7 @@ function renderQuad() {
 
   // 4컷 모드 (기본): 4개 셀 그리드
   quad.style.gridTemplateColumns = '1fr 1fr';
-  quad.style.aspectRatio = '16/9';
+  quad.style.aspectRatio = (typeof getQuadCssAspect === 'function') ? getQuadCssAspect() : '16/9';
   quad.innerHTML = S.cutDataUrls.map((url, i) => `
     <div class="qcell" style="${!S.cutApproval[i] ? 'opacity:.4' : ''}">
       ${url ? `<img src="${url}">` : '<div style="background:transparent;width:100%;height:100%"></div>'}
