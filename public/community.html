@@ -625,10 +625,8 @@ img.card-avatar{width:24px;height:24px;border-radius:50%;object-fit:cover;displa
     </div>
     <div class="modal-body">
       <div class="reward-banner">
-        <div class="reward-icon"><i data-lucide="gift" class="icon-md"></i></div>
         <div class="reward-text">
-          하루 게시 한도: 이미지 <strong>5개</strong> · 영상 <strong>5개</strong>.<br>
-          <span style="color:var(--ink-dimmer)">클라우드(내 자료)에 저장된 작품만 게시할 수 있습니다.</span>
+          클라우드(내 자료)에 저장된 작품만 게시할 수 있습니다.
         </div>
       </div>
       <div class="modal-tabs">
@@ -1253,23 +1251,10 @@ loadSupabase(initAuth);
 /* 트렌딩 그리드 + 게시 로직
    카드 컴셉 보존: { id, type, title, user, likes, views, tag, img, aspect, createdAt }
    aspect: '16:9' | '1:1' | '9:16'
-   게시 localStorage 'korart_published'
-   하루 게시 한도: 이미지 5개, 영상 5개 (rate limit) */
+   게시 localStorage 'korart_published' */
 
-const DAILY_LIMIT = 5;  // 이미지/영상 각각 하루 5개
 function getTodayKey() {
   const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-function getTodayPublishCount(type) {
-  try {
-    const list = JSON.parse(localStorage.getItem('korart_published') || '[]');
-    const today = getTodayKey();
-    return list.filter(p => p.type === type && getDateKey(p.createdAt) === today).length;
-  } catch (e) { return 0; }
-}
-function getDateKey(ts) {
-  const d = new Date(ts || 0);
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
@@ -1341,7 +1326,7 @@ function renderGrid() {
       <div class="empty-state">
         <div class="empty-icon"><i data-lucide="image-off" class="icon-lg"></i></div>
         <h4 class="empty-title">아직 게시된 작품이 없어요</h4>
-        <p class="empty-desc">첫 번째 작품을 공유해보세요.<br>하루 이미지 5개, 영상 5개까지 게시할 수 있어요.</p>
+        <p class="empty-desc">첫 번째 작품을 공유해보세요.</p>
         <button class="empty-btn" onclick="openPublishModal()"><i data-lucide="plus" class="icon-sm"></i>클라우드 자료 게시</button>
       </div>`;
     document.getElementById('pagination').style.display = 'none';
@@ -1355,7 +1340,7 @@ function renderGrid() {
   const pageList = paginate(list, currentPage);
   grid.innerHTML = pageList.map(item => {
     const isCover = item.aspect === '16:9';
-    const isVideo = item.type === 'video';
+    const isVideo = item.type === 'video' || item.type === 'merged_video';
     const isMine = currentUser && item.ownerId === currentUser.id;
     const canDelete = isMine || isAdmin();
     // 영상은 <video>, 이미지는 <img>
@@ -1566,20 +1551,12 @@ async function loadAssets() {
 function updateFooter() {
   const info = document.getElementById('modalFooterInfo');
   const btn = document.getElementById('modalPublish');
-  const todayCount = getTodayPublishCount(currentAssetType);
-  const remaining = DAILY_LIMIT - todayCount;
-  // 오늘 한도 초과
-  if (remaining <= 0) {
-    info.innerHTML = `⚠️ 오늘 ${currentAssetType === 'image' ? '이미지' : '영상'} 게시 한도(${DAILY_LIMIT}개)에 도달했어요`;
-    btn.disabled = true;
-    return;
-  }
   if (!selectedAsset) {
-    info.innerHTML = `작품을 선택하세요 <span style="color:var(--ink-dimmer);font-size:11px">(오늘 ${remaining}/${DAILY_LIMIT}개 가능)</span>`;
+    info.textContent = '작품을 선택하세요';
     btn.disabled = true;
     return;
   }
-  info.innerHTML = `게시 가능 <strong>${remaining}/${DAILY_LIMIT}</strong> (${currentAssetType === 'image' ? '이미지' : '영상'})`;
+  info.textContent = (currentAssetType === 'image' ? '이미지' : '영상') + ' 작품을 게시합니다';
   btn.disabled = false;
 }
 
@@ -1587,12 +1564,6 @@ document.getElementById('modalPublish').addEventListener('click', async () => {
   if (!selectedAsset) return;
   if (!currentUser) {
     alert('게시하려면 로그인이 필요해요.');
-    return;
-  }
-  // 하루 한도 체크 (서버 기준)
-  const todayCount = await getTodayServerPublishCount(selectedAsset.type);
-  if (todayCount >= DAILY_LIMIT) {
-    alert(`오늘 ${selectedAsset.type === 'image' ? '이미지' : '영상'} 게시 한도(${DAILY_LIMIT}개)에 도달했습니다. 내일 다시 시도해주세요.`);
     return;
   }
   const title = document.getElementById('pubTitle').value.trim();
@@ -1665,8 +1636,6 @@ document.getElementById('modalPublish').addEventListener('click', async () => {
     renderGrid();
     closePublishModal();
 
-    const remaining = DAILY_LIMIT - todayCount - 1;
-    alert(`게시 완료! 오늘 ${remaining}/${DAILY_LIMIT}개 남았습니다.`);
   } catch (e) {
     alert('게시 실패: ' + e.message);
   } finally {
@@ -1675,23 +1644,6 @@ document.getElementById('modalPublish').addEventListener('click', async () => {
   }
 });
 
-// 서버 기준 오늘 게시 개수 (community_posts 테이블 기준)
-async function getTodayServerPublishCount(type) {
-  if (!sb || !currentUser) return 0;
-  try {
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-    const { count, error } = await sb
-      .from('community_posts')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', currentUser.id)
-      .eq('type', type)
-      .eq('is_deleted', false)
-      .gte('created_at', startOfDay.toISOString());
-    if (error) return 0;
-    return count || 0;
-  } catch (e) { return 0; }
-}
 
 // Supabase에서 모든 게시물 로드 (전체 공유)
 async function loadCommunityPosts() {
@@ -1868,7 +1820,7 @@ async function openLightbox(postId) {
 
   // 미디어 렌더
   const mediaEl = document.getElementById('lbMedia');
-  if (post.type === 'video') {
+  if (post.type === 'video' || post.type === 'merged_video') {
     mediaEl.innerHTML = `<video src="${post.img}" controls autoplay loop playsinline></video>`;
   } else {
     mediaEl.innerHTML = `<img src="${post.img}" alt="${escapeText(post.title)}">`;
