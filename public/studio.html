@@ -3635,26 +3635,26 @@ function getAccessToken() {
 const SCENES = {
   // style: 이미지 프롬프트 (4컷 생성 시) — 풍부한 키워드로 분위기 명확히
   // vidStyle: 영상 프롬프트 (5초 영상 생성 시) — 510자 cap 안에서 동작하도록 핵심만
-  romance:    {name:'로맨스',     group:'drama',      bgImage:'/images/scenes/romance.jpg',     vidStyle:'warm bokeh romantic',          style:'warm golden hour lighting, romantic atmosphere, soft bokeh, shallow depth of field, Korean drama aesthetic', angles:['Two Shot','Medium Close-up (MCU)','Shallow Depth of Field close-up','Eye-Level Shot']},
-  tension:    {name:'긴장',       group:'thriller',   vidStyle:'cold high contrast',                style:'high contrast dramatic shadows, intense cold tones, sharp cinematic focus', angles:['Over-the-Shoulder (OTS)','Extreme Close-up (ECU)','Dutch Angle','Point of View (POV)'], bgImage:'/images/scenes/tension.png'},
-  breakup:    {name:'이별',       group:'drama',      bgImage:'/images/scenes/breakup.jpg',     vidStyle:'rainy blue-gray',                style:'melancholic rainy atmosphere, blue-gray tones, emotional soft lighting', angles:['Wide Shot','Medium Close-up (MCU)','Close-up (CU)','Rack Focus']},
-  climax:     {name:'감정 절정',  group:'drama',      vidStyle:'dramatic emotional',            style:'extreme emotional expression, dramatic lighting, high contrast tears', angles:['Extreme Close-up (ECU)','Close-up (CU)','Low Angle','Zoom-in'], bgImage:'/images/scenes/climax.jpg'},
-  suspense:   {name:'서스펜스',   group:'thriller',   vidStyle:'dark noir',                    style:'dark ominous atmosphere, heavy shadows, noir desaturated tones', angles:['Dutch Angle','Point of View (POV)','Extreme Close-up (ECU)','Low Angle'], bgImage:'/images/scenes/suspense.jpg'},
-  mellow:     {name:'막장',       group:'drama',      vidStyle:'vivid theatrical',                  style:'melodramatic exaggerated emotion, theatrical lighting, vivid colors', angles:['Two Shot','Close-up (CU)','Low Angle','Zoom-in'], bgImage:'/images/scenes/mellow.jpg'},
-  action:     {name:'액션',       group:'thriller',   vidStyle:'sharp motion blur',                style:'dynamic motion blur, high contrast, sharp cinematic action, dramatic angles', angles:['Low Angle','Wide Shot','Extreme Close-up (ECU)','Dolly Zoom'], bgImage:'/images/scenes/action.jpg'},
-  slice:      {name:'일상',       group:'content',    vidStyle:'natural candid',                       style:'natural candid daily life, soft comfortable lighting', angles:['Full Shot (FS)','Medium Close-up (MCU)','Two Shot','Eye-Level Shot'], bgImage:'/images/scenes/daily.jpg'},
-  commercial: {name:'광고',       group:'commercial', vidStyle:'bright premium',              style:'clean bright commercial lighting, vibrant product focus, polished cinematic style, premium aesthetic', angles:['Macro Shot','Medium Close-up (MCU)','Establishing Shot','Rack Focus'], bgImage:'/images/scenes/commercial.png'},
+  romance:    {name:'로맨스',     group:'drama',      bgImage:'/images/scenes/romance.jpg',     vidStyle:'warm bokeh romantic',          style:'warm golden hour lighting, romantic atmosphere, soft bokeh, shallow depth of field, Korean drama aesthetic', angles:['Two Shot','Medium Close-up','Shallow Depth of Field close-up','Eye-Level Shot']},
+  tension:    {name:'긴장',       group:'thriller',   vidStyle:'cold high contrast',                style:'high contrast dramatic shadows, intense cold tones, sharp cinematic focus', angles:['Over-the-Shoulder','Extreme Close-up','Dutch Angle','Point of View'], bgImage:'/images/scenes/tension.png'},
+  breakup:    {name:'이별',       group:'drama',      bgImage:'/images/scenes/breakup.jpg',     vidStyle:'rainy blue-gray',                style:'melancholic rainy atmosphere, blue-gray tones, emotional soft lighting', angles:['Wide Shot','Medium Close-up','Close-up','Rack Focus']},
+  climax:     {name:'감정 절정',  group:'drama',      vidStyle:'dramatic emotional',            style:'extreme emotional expression, dramatic lighting, high contrast tears', angles:['Extreme Close-up','Close-up','Low Angle','Zoom-in'], bgImage:'/images/scenes/climax.jpg'},
+  suspense:   {name:'서스펜스',   group:'thriller',   vidStyle:'dark noir',                    style:'dark ominous atmosphere, heavy shadows, noir desaturated tones', angles:['Dutch Angle','Point of View','Extreme Close-up','Low Angle'], bgImage:'/images/scenes/suspense.jpg'},
+  mellow:     {name:'막장',       group:'drama',      vidStyle:'vivid theatrical',                  style:'melodramatic exaggerated emotion, theatrical lighting, vivid colors', angles:['Two Shot','Close-up','Low Angle','Zoom-in'], bgImage:'/images/scenes/mellow.jpg'},
+  action:     {name:'액션',       group:'thriller',   vidStyle:'sharp motion blur',                style:'dynamic motion blur, high contrast, sharp cinematic action, dramatic angles', angles:['Low Angle','Wide Shot','Extreme Close-up','Dolly Zoom'], bgImage:'/images/scenes/action.jpg'},
+  slice:      {name:'일상',       group:'content',    vidStyle:'natural candid',                       style:'natural candid daily life, soft comfortable lighting', angles:['Full Shot','Medium Close-up','Two Shot','Eye-Level Shot'], bgImage:'/images/scenes/daily.jpg'},
+  commercial: {name:'광고',       group:'commercial', vidStyle:'bright premium',              style:'clean bright commercial lighting, vibrant product focus, polished cinematic style, premium aesthetic', angles:['Macro Shot','Medium Close-up','Establishing Shot','Rack Focus'], bgImage:'/images/scenes/commercial.png'},
   vlog:       {name:'개인방송',   group:'content',    vidStyle:'casual warm',                      style:'casual selfie-style lighting, warm friendly tone, intimate handheld feel, vlog aesthetic', angles:['Selfie Shot','Vlog Handheld','Webcam Frame','Eye-Level Shot'], bgImage:'/images/scenes/vlog.png'},
-  flashback:  {name:'회상',       group:'drama',      vidStyle:'nostalgic dreamy',                style:'nostalgic warm fading tones, soft dreamy haze, vintage film grain, soft focus', angles:['Shallow Depth of Field','Wide Shot','Medium Close-up (MCU)','Slow Motion'], bgImage:'/images/scenes/flashback.jpg'},
-  heaven:     {name:'천국',       group:'lifestyle',  vidStyle:'ethereal glow',              style:'ethereal heavenly atmosphere, blinding bright white light, soft hazy glow, divine god rays, dreamy mist, overexposed highlights, cinematic celestial aesthetic, holy diffused lighting', angles:['Wide Shot','Low Angle','Medium Close-up (MCU)','Rack Focus'], bgImage:'/images/scenes/heaven.jpg'},
-  confession: {name:'고백',       group:'drama',      vidStyle:'intimate golden',            style:'intimate soft lighting, intense emotional warmth, trembling intensity, golden glow', angles:['Extreme Close-up (ECU)','Close-up (CU)','Two Shot','Eye-Level Shot'], bgImage:'/images/scenes/confession.jpg'},
-  horror:     {name:'공포',       group:'thriller',   vidStyle:'dark eerie',             style:'dark unsettling atmosphere, deep shadows, eerie cold tones, suspenseful framing', angles:['Dutch Angle','Extreme Close-up (ECU)','Point of View (POV)','Worm\'s Eye View'], bgImage:'/images/scenes/horror.png'},
-  foodie:     {name:'먹방',       group:'content',    vidStyle:'appetizing ASMR',                        style:'appetizing food close-up lighting, warm tasty colors, mouth-watering visual, ASMR-friendly framing', angles:['Top-down Desk Shot','Macro Shot','Selfie Shot','Extreme Close-up (ECU)'], bgImage:'/images/scenes/foodie.png'},
+  flashback:  {name:'회상',       group:'drama',      vidStyle:'nostalgic dreamy',                style:'nostalgic warm fading tones, soft dreamy haze, vintage film grain, soft focus', angles:['Shallow Depth of Field','Wide Shot','Medium Close-up','Slow Motion'], bgImage:'/images/scenes/flashback.jpg'},
+  heaven:     {name:'천국',       group:'lifestyle',  vidStyle:'ethereal glow',              style:'ethereal heavenly atmosphere, blinding bright white light, soft hazy glow, divine god rays, dreamy mist, overexposed highlights, cinematic celestial aesthetic, holy diffused lighting', angles:['Wide Shot','Low Angle','Medium Close-up','Rack Focus'], bgImage:'/images/scenes/heaven.jpg'},
+  confession: {name:'고백',       group:'drama',      vidStyle:'intimate golden',            style:'intimate soft lighting, intense emotional warmth, trembling intensity, golden glow', angles:['Extreme Close-up','Close-up','Two Shot','Eye-Level Shot'], bgImage:'/images/scenes/confession.jpg'},
+  horror:     {name:'공포',       group:'thriller',   vidStyle:'dark eerie',             style:'dark unsettling atmosphere, deep shadows, eerie cold tones, suspenseful framing', angles:['Dutch Angle','Extreme Close-up','Point of View','Worm\'s Eye View'], bgImage:'/images/scenes/horror.png'},
+  foodie:     {name:'먹방',       group:'content',    vidStyle:'appetizing ASMR',                        style:'appetizing food close-up lighting, warm tasty colors, mouth-watering visual, ASMR-friendly framing', angles:['Top-down Desk Shot','Macro Shot','Selfie Shot','Extreme Close-up'], bgImage:'/images/scenes/foodie.png'},
   travel:     {name:'풍경',       group:'lifestyle',  bgImage:'/images/scenes/travel.jpg',      vidStyle:'breathtaking golden',              style:'breathtaking scenic landscape, vast natural beauty, golden hour lighting, cinematic travel aesthetic', angles:['Wide Shot','Establishing Shot','Drone Shot','Bird\'s Eye View']},
-  fitness:    {name:'운동',       group:'lifestyle',  vidStyle:'energetic athletic',                style:'energetic dynamic motion, sweat-drenched intensity, sharp athletic focus, gym aesthetic', angles:['Low Angle','Full Shot (FS)','Extreme Close-up (ECU)','Tracking Shot'], bgImage:'/images/scenes/fitness.png'},
-  interview:  {name:'인터뷰',     group:'content',    vidStyle:'natural documentary',                    style:'professional documentary lighting, natural setting, focused conversation, talking-head style', angles:['Bust Shot','Medium Close-up (MCU)','Dirty Single','Over-the-Shoulder (OTS)'], bgImage:'/images/scenes/interview.png'},
-  news_anchor: {name:'뉴스룸 앵커',  group:'news',       vidStyle:'broadcast newsroom',           style:'professional TV news studio with anchor desk and large screen display behind, formal newsroom lighting, broadcast camera quality, network news aesthetic, photorealistic 4K live broadcast feed', angles:['Bust Shot','Medium Close-up (MCU)','Eye-Level Shot','Wide Shot'], bgImage:'/images/scenes/news_anchor.png'},
-  news_reporter: {name:'현장 기자',  group:'news',       vidStyle:'on-location field report',     style:'on-location news report with handheld broadcast camera feel, reporter holding microphone, real outdoor environment, broadcast journalism aesthetic, photorealistic documentary realism', angles:['Medium Close-up (MCU)','Bust Shot','Wide Shot','Over-the-Shoulder (OTS)'], bgImage:'/images/scenes/news_reporter.png'},
+  fitness:    {name:'운동',       group:'lifestyle',  vidStyle:'energetic athletic',                style:'energetic dynamic motion, sweat-drenched intensity, sharp athletic focus, gym aesthetic', angles:['Low Angle','Full Shot','Extreme Close-up','Tracking Shot'], bgImage:'/images/scenes/fitness.png'},
+  interview:  {name:'인터뷰',     group:'content',    vidStyle:'natural documentary',                    style:'professional documentary lighting, natural setting, focused conversation, talking-head style', angles:['Bust Shot','Medium Close-up','Dirty Single','Over-the-Shoulder'], bgImage:'/images/scenes/interview.png'},
+  news_anchor: {name:'뉴스룸 앵커',  group:'news',       vidStyle:'broadcast newsroom',           style:'professional TV news studio with anchor desk and large screen display behind, formal newsroom lighting, broadcast camera quality, network news aesthetic, photorealistic 4K live broadcast feed', angles:['Bust Shot','Medium Close-up','Eye-Level Shot','Wide Shot'], bgImage:'/images/scenes/news_anchor.png'},
+  news_reporter: {name:'현장 기자',  group:'news',       vidStyle:'on-location field report',     style:'on-location news report with handheld broadcast camera feel, reporter holding microphone, real outdoor environment, broadcast journalism aesthetic, photorealistic documentary realism', angles:['Medium Close-up','Bust Shot','Wide Shot','Over-the-Shoulder'], bgImage:'/images/scenes/news_reporter.png'},
   news_weather: {name:'기상캐스터',  group:'news',       vidStyle:'weather forecast studio',      style:'professional TV weather forecast studio with large weather map display behind, chroma key weather map showing Korea peninsula with temperature numbers and weather icons, forecast presenter standing pose pointing at map, broadcast camera quality, clean weather news aesthetic, photorealistic 4K broadcast feed', angles:['Bust Shot','Medium Shot','Wide Shot','Eye-Level Shot'], bgImage:'/images/scenes/news_weather.png'},
   livestream: {name:'생방송',     group:'content',    vidStyle:'ultra-realistic live broadcast', style:'photorealistic ultra-sharp 4K live broadcast feed, professional broadcast camera quality, raw documentary realism, no stylization, true-to-life skin tones, telephoto sharp focus, real broadcast lighting, on-air news quality, hyperrealistic detail, BBC documentary aesthetic', angles:['Medium Shot','Bust Shot','Wide Shot','Eye-Level Shot'], bgImage:'/images/scenes/livestream.png'},
 };
@@ -3720,17 +3720,17 @@ const SCENES_IMAGE = {
 
 // 이미지 모드 화보용 앵글 12개 — 영상 모드의 ANGLE_DESCRIPTIONS 리소스 재사용
 const IMAGE_ANGLES = [
-  'Full Shot (FS)',
+  'Full Shot',
   'Cowboy Shot',
   'Medium Shot',
   'Bust Shot',
-  'Close-up (CU)',
-  'Extreme Close-up (ECU)',
+  'Close-up',
+  'Extreme Close-up',
   'Eye-Level Shot',
   'Low Angle',
   'High Angle',
   'Dutch Angle',
-  'Over-the-Shoulder (OTS)',
+  'Over-the-Shoulder',
   'Shallow Depth of Field',
 ];
 
@@ -3806,9 +3806,9 @@ const JOB_THEMES = {
     location: 'hospital',
     cuts: [
       { angle: 'Medium Shot',     desc: '환자를 진단하는 작면, 청진기로 진료 중인 진지한 표정' },
-      { angle: 'Close-up (CU)',   desc: '의료 차트를 자세히 검토하는 집중한 작면' },
+      { angle: 'Close-up',   desc: '의료 차트를 자세히 검토하는 집중한 작면' },
       { angle: 'Cowboy Shot',     desc: '흰 의사 가운을 입고 청진기를 목에 걸고 정면을 응시하는 자신감 있는 제스처' },
-      { angle: 'Full Shot (FS)',  desc: '수술복과 수술모를 입고 수술실로 들어가는 작면' },
+      { angle: 'Full Shot',  desc: '수술복과 수술모를 입고 수술실로 들어가는 작면' },
     ]
   },
   job_lawyer: {
@@ -3824,9 +3824,9 @@ const JOB_THEMES = {
     location: 'kitchen',
     cuts: [
       { angle: 'Medium Shot',     desc: '서브 키친에서 불과 연기 속에서 요리하는 역동적인 제스처' },
-      { angle: 'Close-up (CU)',   desc: '요리를 정교하게 플레이팅하는 손끝 클로즈업' },
+      { angle: 'Close-up',   desc: '요리를 정교하게 플레이팅하는 손끝 클로즈업' },
       { angle: 'Cowboy Shot',     desc: '셐프 유니폼과 앞치를 입고 팔짝 낀 정면 자세' },
-      { angle: 'Full Shot (FS)',  desc: '완성된 요리를 들고 손님에게 서빙하는 전신 작면' },
+      { angle: 'Full Shot',  desc: '완성된 요리를 들고 손님에게 서빙하는 전신 작면' },
     ]
   },
   job_flight: {
@@ -3834,8 +3834,8 @@ const JOB_THEMES = {
     cuts: [
       { angle: 'Cowboy Shot',     desc: '항공사 유니폼과 모자를 입고 이름표를 달고 정면을 응시하는 친절한 미소' },
       { angle: 'Medium Shot',     desc: '기내 통로에서 승객에게 안내하는 업무 중인 자세' },
-      { angle: 'Close-up (CU)',   desc: '유니폼 어깨 장식과 리본 세부 클로즈업' },
-      { angle: 'Full Shot (FS)',  desc: '공항 터미널에서 캐리어를 끌고 걸어가는 전신 작면' },
+      { angle: 'Close-up',   desc: '유니폼 어깨 장식과 리본 세부 클로즈업' },
+      { angle: 'Full Shot',  desc: '공항 터미널에서 캐리어를 끌고 걸어가는 전신 작면' },
     ]
   },
 };
@@ -4431,22 +4431,22 @@ function renderLocationOptions() {
 }
 const ANGLE_DESCRIPTIONS = {
   'Single Shot':            { ko: '인물 1인 단독 샷', use: '한 사람의 행동·표정에만 집중시키고 싶을 때' },
-  'Close-up (CU)':          { ko: '얼굴 전체 강조, 감정 표현', use: '인물의 감정 변화를 극적으로 표현할 때' },
-  'Medium Close-up (MCU)':  { ko: '가슴 윗부분까지, 표준 대화 샷', use: '대화 장면에서 가장 자연스러운 기본 샷' },
+  'Close-up':          { ko: '얼굴 전체 강조, 감정 표현', use: '인물의 감정 변화를 극적으로 표현할 때' },
+  'Medium Close-up':  { ko: '가슴 윗부분까지, 표준 대화 샷', use: '대화 장면에서 가장 자연스러운 기본 샷' },
   'Bust Shot':              { ko: '가슴선까지, 안정적인 대화 샷', use: '진지한 대화나 인터뷰 느낌이 필요할 때' },
   'Dirty Single':           { ko: '상대 어깨 살짝 걸친 싱글 샷', use: '대화의 긴장감과 현장감을 살릴 때' },
-  'Over-the-Shoulder (OTS)':{ ko: '상대 어깨 너머로 보는 시선', use: '두 인물 간의 대화 흐름을 보여줄 때' },
+  'Over-the-Shoulder':{ ko: '상대 어깨 너머로 보는 시선', use: '두 인물 간의 대화 흐름을 보여줄 때' },
   'Low Angle':              { ko: '아래에서 위로, 카리스마·키 강조', use: '인물의 권위·위압감을 표현할 때' },
   'Two Shot':               { ko: '한 화면에 두 인물 등장', use: '관계성·로맨스·라이벌 구도를 보여줄 때' },
   'Shallow Depth of Field': { ko: '배경 흐림/아웃포커싱', use: '주인공만 또렷하게 강조하고 싶을 때' },
   'Slow Motion':            { ko: 'K-드라마 멜로 슬로우 모션', use: '감정의 결정적 순간을 강조할 때' },
   'Eye-Level Shot':         { ko: '눈높이와 맞춘 안정적 시선', use: '관객과 인물의 동등한 시선이 필요할 때' },
-  'Full Shot (FS)':         { ko: '인물 전신, 패션·장소 강조', use: '의상·장소·신체 동작을 보여줄 때' },
+  'Full Shot':         { ko: '인물 전신, 패션·장소 강조', use: '의상·장소·신체 동작을 보여줄 때' },
   'Establishing Shot':      { ko: '전체 배경, 분위기 조성', use: '씬의 시작에 장소·시간을 알릴 때' },
   'Wide Shot':              { ko: '넓은 시야, 인물+환경', use: '인물과 주변 상황을 한꺼번에 보여줄 때' },
-  'Extreme Close-up (ECU)': { ko: '눈동자·손떨림 등 초밀착', use: '심리적 긴장·디테일을 극대화할 때' },
+  'Extreme Close-up': { ko: '눈동자·손떨림 등 초밀착', use: '심리적 긴장·디테일을 극대화할 때' },
   'Dutch Angle':            { ko: '화면 기울이기, 불안·혼란', use: '심리적 동요·반전 직전을 표현할 때' },
-  'Point of View (POV)':    { ko: '인물의 1인칭 시점', use: '관객을 인물 입장에 몰입시킬 때' },
+  'Point of View':    { ko: '인물의 1인칭 시점', use: '관객을 인물 입장에 몰입시킬 때' },
   'Zoom-in':                { ko: '인물에게 빠르게 다가가는 연출', use: '충격·깨달음의 순간을 표현할 때' },
   'Cowboy Shot':            { ko: '허벅지 중간까지 잡는 샷', use: '서 있는 인물의 당당함이나 액션 준비 자세를 보여줄 때' },
   'High Angle':             { ko: '위에서 아래로 내려다보는 샷', use: '인물을 작고 약하게 보이게 하거나 위축된 심리 표현 시' },
@@ -4460,7 +4460,7 @@ const ANGLE_DESCRIPTIONS = {
   'Tracking Shot':          { ko: '인물·물체를 따라가며 촬영', use: '운동·달리기·역동적 움직임을 자연스럽게 담을 때' },
   'Crane Shot':             { ko: '크레인으로 부드럽게 상승/하강 이동', use: '댄스·뮤직비디오·웅장한 전환에 시각적 임팩트를 줄 때' },
   'Medium Shot':            { ko: '허리 위 화면, 표정과 의상 동시에', use: '화보의 기본 샷, 표정과 상의 의상을 함께 보여줄 때' },
-  'Over-the-Shoulder (OTS)':{ ko: '어깨 너머 시점으로 보는 구도', use: '인물과 배경의 관계감, 손짓/액세서리 강조' },
+  'Over-the-Shoulder':{ ko: '어깨 너머 시점으로 보는 구도', use: '인물과 배경의 관계감, 손짓/액세서리 강조' },
   'Selfie Shot':            { ko: '셀카 각도, 아래에서 위로 찍은 느낌', use: 'V로그·셀카·개인방송 잡담에 자연스러운 느낌' },
   'Webcam Frame':           { ko: '웹캠 정면, 근거리 아이컨택', use: '스트리머 화면, 실시간 방송 큐와 채팅 느낌' },
   'Vlog Handheld':          { ko: '핸드헬드 V로그 샷, 약간의 흔들림이 있는 자연 구도', use: 'V로그·일상 공유 영상의 자연스러운 현장감' },
@@ -4470,22 +4470,22 @@ const ANGLE_DESCRIPTIONS = {
 
 const ANGLE_IMG_KEYS = {
   'Single Shot': 'single-shot',
-  'Close-up (CU)': 'close-up',
-  'Medium Close-up (MCU)': 'mcu',
+  'Close-up': 'close-up',
+  'Medium Close-up': 'mcu',
   'Bust Shot': 'bust-shot',
   'Dirty Single': 'dirty-single',
-  'Over-the-Shoulder (OTS)': 'ots',
+  'Over-the-Shoulder': 'ots',
   'Low Angle': 'low-angle',
   'Two Shot': 'two-shot',
   'Shallow Depth of Field': 'shallow-dof',
   'Slow Motion': 'slow-motion',
   'Eye-Level Shot': 'eye-level',
-  'Full Shot (FS)': 'full-shot',
+  'Full Shot': 'full-shot',
   'Establishing Shot': 'establishing-shot',
   'Wide Shot': 'wide-shot',
-  'Extreme Close-up (ECU)': 'ecu',
+  'Extreme Close-up': 'ecu',
   'Dutch Angle': 'dutch-angle',
-  'Point of View (POV)': 'pov',
+  'Point of View': 'pov',
   'Zoom-in': 'zoom-in',
   'Cowboy Shot': '',
   'High Angle': '',
@@ -4526,11 +4526,11 @@ const ANGLE_IMAGES = {
 const ANGLE_CATS = [
   {cat:'대화 & 인물 집중', items:[
     {label:'Single Shot',           tip:'인물 1인 단독 샷'},
-    {label:'Close-up (CU)',         tip:'얼굴 전체 강조, 감정 표현'},
-    {label:'Medium Close-up (MCU)', tip:'가슴 윗부분까지, 표준 대화 샷'},
+    {label:'Close-up',         tip:'얼굴 전체 강조, 감정 표현'},
+    {label:'Medium Close-up', tip:'가슴 윗부분까지, 표준 대화 샷'},
     {label:'Bust Shot',             tip:'가슴선까지, 안정적인 대화 샷'},
     {label:'Dirty Single',          tip:'상대방 어깨 살짝 걸친 싱글 샷, 현장감 극대화'},
-    {label:'Over-the-Shoulder (OTS)',tip:'상대방 어깨 너머로 보는 시선'},
+    {label:'Over-the-Shoulder',tip:'상대방 어깨 너머로 보는 시선'},
   ]},
   {cat:'로맨틱 & 감성 연출', items:[
     {label:'Low Angle',                    tip:'아래에서 위로, 카리스마·키 강조'},
@@ -4540,14 +4540,14 @@ const ANGLE_CATS = [
     {label:'Eye-Level Shot',               tip:'눈높이와 맞춘 안정적인 시선'},
   ]},
   {cat:'배경 & 상황 설명', items:[
-    {label:'Full Shot (FS)',        tip:'인물 전신, 패션·장소 강조'},
+    {label:'Full Shot',        tip:'인물 전신, 패션·장소 강조'},
     {label:'Establishing Shot',     tip:'전체 배경, 야경·건물 외경, 분위기 조성'},
     {label:'Wide Shot',             tip:'넓은 시야, 인물과 주변 환경 동시 노출'},
   ]},
   {cat:'긴장감 & 반전 (스릴러)', items:[
-    {label:'Extreme Close-up (ECU)',tip:'눈동자·손떨림 등 특정 부위 초밀착'},
+    {label:'Extreme Close-up',tip:'눈동자·손떨림 등 특정 부위 초밀착'},
     {label:'Dutch Angle',           tip:'화면 기울이기, 불안·심리적 혼란'},
-    {label:'Point of View (POV)',   tip:'인물의 1인칭 시점'},
+    {label:'Point of View',   tip:'인물의 1인칭 시점'},
     {label:'Zoom-in',               tip:'인물에게 순식간에 다가가는 연출, 충격·깨달음'},
   ]},
   {cat:'인물 & 심리 (확장)', items:[
@@ -11901,7 +11901,7 @@ function buildVidPrompt(i) {
   //   + ". "(2)
   //   + ctx 한글+장소영문(27)    ex) "봄, 황혼, 맑음, Han River park"
   //   + ". Camera: "(10)
-  //   + angle(21)                ex) "Medium Close-up (MCU)"
+  //   + angle(21)                ex) "Medium Close-up"
   //   + ". "(2)
   //   + charLock 원본형식(~155)  ex) "EXACTLY 4 original fictional characters (A and B and C and D),
   //                                   fictional characters only. Faces MUST match reference photos exactly."
@@ -11929,7 +11929,7 @@ function buildVidPrompt(i) {
   const charCount = cutAvatars.length;
 
   // 캐릭터 일관성 락 — 원본 형식 (이름·인원수 자동, 강한 명시)
-  const charNames = cutAvatars.map(av => av.name).join(' and ') || 'no one';
+  const charNames = cutAvatars.map(av => av.name).join(', ') || 'no one';
   const charLock = charCount > 0
     ? `EXACTLY ${charCount} original fictional character${charCount>1?'s':''} (${charNames}), fictional characters only. Faces MUST match reference photos exactly.`
     : 'No people, no characters visible.';
@@ -12729,20 +12729,20 @@ async function generateCutVideo(i) {
 
   // 감정 영어 지시문 매핑
   const emotionMap = {
-    angry: 'angry expression, furrowed brow, intense gaze',
-    shouting: 'shouting loudly, mouth wide open, intense emotion',
-    sad: 'sad expression, downcast eyes, melancholic mood',
-    crying: 'crying with tears, emotional breakdown',
-    calm: 'calm peaceful expression, serene mood',
-    happy: 'happy smiling expression, joyful mood',
-    excited: 'excited energetic expression, bright eyes, enthusiastic',
-    funny: 'comedic playful expression, light-hearted mood',
-    surprised: 'surprised expression, wide eyes, shocked',
-    scared: 'fearful expression, tense, anxious mood',
-    shy: 'shy bashful expression, blushing, timid',
-    longing: 'longing wistful expression, yearning gaze',
-    serious: 'serious focused expression, contemplative',
-    romantic: 'romantic tender expression, loving gaze',
+    angry: 'angry, furrowed brow',
+    shouting: 'shouting, mouth wide',
+    sad: 'sad, downcast eyes',
+    crying: 'crying, tearful',
+    calm: 'calm, serene',
+    happy: 'happy, smiling',
+    excited: 'excited, bright eyes',
+    funny: 'playful, light-hearted',
+    surprised: 'surprised, wide eyes',
+    scared: 'fearful, anxious',
+    shy: 'shy, blushing',
+    longing: 'longing, yearning gaze',
+    serious: 'serious, focused',
+    romantic: 'romantic, tender gaze',
   };
 
   // Kling v3 15초 체크
@@ -12831,16 +12831,22 @@ async function generateCutVideo(i) {
           if (!spk || spk === '') {
             log('info', `${elTag} 대사 입력되었으나 화자 미선택 — prompt에서 제외`);
           } else {
-            const isNar = (spk === 'narrator-woman' || spk === 'narrator-man');
-            // 화자 명시 — 성별 태그 삽입으로 대사 매핑 도움
-            let voiceTag = '';
-            if (spk === 'woman') voiceTag = ' (female voice)';
-            else if (spk === 'man') voiceTag = ' (male voice)';
-            // 대사 끝에 "입을 다물고 표정을 유지" 명시 — 대사가 중간에 위치하도록 유도
-            const endingPhrase = isNar
-              ? ', 이후 잠시 침묵이 이어진다'
-              : ', 이후 입을 다물고 표정을 유지한다';
-            parts.push(`"${inp.line.trim()}"라고 말한 뒤${endingPhrase}${voiceTag}`);
+            // 화자별 표현
+            // - woman/man: 한국어 단축형 ('라고 여자가 말한 뒤 입을 다문다')
+            // - narrator: 영문 유지 (모델 인식률 위해)
+            let lineToken;
+            if (spk === 'woman') {
+              lineToken = `"${inp.line.trim()}"라고 여자가 말한 뒤 입을 다문다`;
+            } else if (spk === 'man') {
+              lineToken = `"${inp.line.trim()}"라고 남자가 말한 뒤 입을 다문다`;
+            } else if (spk === 'narrator-woman') {
+              lineToken = `Female narrator voice-over: "${inp.line.trim()}" then a brief silent pause`;
+            } else if (spk === 'narrator-man') {
+              lineToken = `Male narrator voice-over: "${inp.line.trim()}" then a brief silent pause`;
+            } else {
+              lineToken = `"${inp.line.trim()}"라고 말한 뒤 입을 다문다`;
+            }
+            parts.push(lineToken);
           }
         }
         if (inp.emotion && emotionMap[inp.emotion]) {
@@ -12863,6 +12869,13 @@ async function generateCutVideo(i) {
     if (_cutAvs.length > 0) {
       const elTags = _cutAvs.map((_, j) => `@Element${j+1}`).join(' ');
       finalPrompt += ` ${elTags} in scene.`;
+    }
+
+    // 디버그: 영상 prompt 콘솔 출력 (F12 console에서 확인)
+    if (typeof console !== 'undefined') {
+      console.log('%c[korart-i] 영상 finalPrompt:', 'color:#5eead4;font-weight:bold');
+      console.log(finalPrompt);
+      console.log('%c[korart-i] finalPrompt 길이: ' + finalPrompt.length + '자', 'color:#5eead4;font-weight:bold');
     }
 
     // 510자 초과 시 생성 중단 + 팝업 안내
